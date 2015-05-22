@@ -1,0 +1,237 @@
+## widget-imp.api
+#
+
+# Compiled by:
+#     src/lib/x-kit/widget/xkit-widget.sublib
+
+
+stipulate
+    include package   threadkit;				# threadkit			is from   src/lib/src/lib/thread-kit/src/core-thread-kit/threadkit.pkg
+    #
+#   package ap  =  client_to_atom;				# client_to_atom		is from   src/lib/x-kit/xclient/src/iccc/client-to-atom.pkg
+#   package au  =  authentication;				# authentication		is from   src/lib/x-kit/xclient/src/stuff/authentication.pkg
+#   package cpm =  cs_pixmap;					# cs_pixmap			is from   src/lib/x-kit/xclient/src/window/cs-pixmap.pkg
+#   package cpt =  cs_pixmat;					# cs_pixmat			is from   src/lib/x-kit/xclient/src/window/cs-pixmat.pkg
+#   package dy  =  display;					# display			is from   src/lib/x-kit/xclient/src/wire/display.pkg
+#   package xet =  xevent_types;				# xevent_types			is from   src/lib/x-kit/xclient/src/wire/xevent-types.pkg
+#   package w2x =  windowsystem_to_xserver;			# windowsystem_to_xserver	is from   src/lib/x-kit/xclient/src/window/windowsystem-to-xserver.pkg
+#   package fil =  file__premicrothread;			# file__premicrothread		is from   src/lib/std/src/posix/file--premicrothread.pkg
+#   package fti =  font_index;					# font_index			is from	  src/lib/x-kit/xclient/src/window/font-index.pkg
+#   package r2k =  xevent_router_to_keymap;			# xevent_router_to_keymap	is from   src/lib/x-kit/xclient/src/window/xevent-router-to-keymap.pkg
+#   package mtx =  rw_matrix;					# rw_matrix			is from   src/lib/std/src/rw-matrix.pkg
+#   package rgb =  rgb;						# rgb				is from   src/lib/x-kit/xclient/src/color/rgb.pkg
+#   package rop =  ro_pixmap;					# ro_pixmap			is from   src/lib/x-kit/xclient/src/window/ro-pixmap.pkg
+#   package rw  =  root_window;					# root_window			is from   src/lib/x-kit/widget/lib/root-window.pkg
+#   package rwv =  rw_vector;					# rw_vector			is from   src/lib/std/src/rw-vector.pkg
+#   package sep =  client_to_selection;				# client_to_selection		is from   src/lib/x-kit/xclient/src/window/client-to-selection.pkg
+#   package shp =  shade;					# shade				is from   src/lib/x-kit/widget/lib/shade.pkg
+#   package sj  =  socket_junk;					# socket_junk			is from   src/lib/internet/socket-junk.pkg
+#   package x2s =  xclient_to_sequencer;			# xclient_to_sequencer		is from   src/lib/x-kit/xclient/src/wire/xclient-to-sequencer.pkg
+#   package tr  =  logger;					# logger			is from   src/lib/src/lib/thread-kit/src/lib/logger.pkg
+#   package tsr =  thread_scheduler_is_running;			# thread_scheduler_is_running	is from   src/lib/src/lib/thread-kit/src/core-thread-kit/thread-scheduler-is-running.pkg
+#   package u1  =  one_byte_unt;				# one_byte_unt			is from   src/lib/std/one-byte-unt.pkg
+#   package v1u =  vector_of_one_byte_unts;			# vector_of_one_byte_unts	is from   src/lib/std/src/vector-of-one-byte-unts.pkg
+#   package v2w =  value_to_wire;				# value_to_wire			is from   src/lib/x-kit/xclient/src/wire/value-to-wire.pkg
+#   package wg  =  widget;					# widget			is from   src/lib/x-kit/widget/old/basic/widget.pkg
+#   package wi  =  window;					# window			is from   src/lib/x-kit/xclient/src/window/window.pkg
+#   package wme =  window_map_event_sink;			# window_map_event_sink		is from   src/lib/x-kit/xclient/src/window/window-map-event-sink.pkg
+#   package wpp =  client_to_window_watcher;			# client_to_window_watcher	is from   src/lib/x-kit/xclient/src/window/client-to-window-watcher.pkg
+#   package wy  =  widget_style;				# widget_style			is from   src/lib/x-kit/widget/lib/widget-style.pkg
+#   package e2s =  xevent_to_string;				# xevent_to_string		is from   src/lib/x-kit/xclient/src/to-string/xevent-to-string.pkg
+#   package xc  =  xclient;					# xclient			is from   src/lib/x-kit/xclient/xclient.pkg
+#   package xj  =  xsession_junk;				# xsession_junk			is from   src/lib/x-kit/xclient/src/window/xsession-junk.pkg
+#   package xt  =  xtypes;					# xtypes			is from   src/lib/x-kit/xclient/src/wire/xtypes.pkg
+#   package xtr =  xlogger;					# xlogger			is from   src/lib/x-kit/xclient/src/stuff/xlogger.pkg
+
+    package gtg =  guiboss_to_guishim;				# guiboss_to_guishim		is from   src/lib/x-kit/widget/theme/guiboss-to-guishim.pkg
+
+    package gd  =  gui_displaylist;				# gui_displaylist		is from   src/lib/x-kit/widget/theme/gui-displaylist.pkg
+
+    package pp  =  standard_prettyprint_mill;			# standard_prettyprint_mill	is from   src/lib/prettyprint/big/src/standard-prettyprint-mill.pkg
+    package r8  =  rgb8;					# rgb8				is from   src/lib/x-kit/xclient/src/color/rgb8.pkg
+    #
+    package g2p =  gadget_to_pixmap;				# gadget_to_pixmap		is from   src/lib/x-kit/widget/theme/gadget-to-pixmap.pkg
+    package g2d =  geometry2d;					# geometry2d			is from   src/lib/std/2d/geometry2d.pkg
+    package evt =  gui_event_types;				# gui_event_types		is from   src/lib/x-kit/widget/gui/gui-event-types.pkg
+    package gts =  gui_event_to_string;				# gui_event_to_string		is from   src/lib/x-kit/widget/gui/gui-event-to-string.pkg
+
+    package gt  =  guiboss_types;				# guiboss_types			is from   src/lib/x-kit/widget/gui/guiboss-types.pkg
+    package wt  =  widget_theme;				# widget_theme			is from   src/lib/x-kit/widget/theme/widget/widget-theme.pkg
+    package wit =  widget_imp_types;				# widget_imp_types		is from   src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp-types.pkg
+
+    package iuw =  issue_unique_widget_id;			# issue_unique_widget_id	is from   src/lib/x-kit/widget/gui/issue-unique-widget-id.pkg
+
+
+    #
+    tracefile   =  "widget-unit-test.trace.log";
+
+    nb = log::note_on_stderr;					# log				is from   src/lib/std/src/log.pkg
+herein
+
+    # This api is implemented in:
+    #
+    #     src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp.pkg
+    #
+    api Widget_Imp {
+	#
+	Widget			= wit::Widget;
+	Startup_Fn		= wit::Startup_Fn;
+	Shutdown_Fn		= wit::Shutdown_Fn;
+
+	Initialize_Gadget_Fn_Arg= wit::Initialize_Gadget_Fn_Arg;
+	Redraw_Request_Fn_Arg	= wit::Redraw_Request_Fn_Arg;
+	Mouse_Click_Fn_Arg	= wit::Mouse_Click_Fn_Arg;
+	Mouse_Drag_Fn_Arg	= wit::Mouse_Drag_Fn_Arg;
+	Mouse_Transit_Fn_Arg	= wit::Mouse_Transit_Fn_Arg;
+	Key_Event_Fn_Arg	= wit::Key_Event_Fn_Arg;
+
+	Initialize_Gadget_Fn	= wit::Initialize_Gadget_Fn;
+	Redraw_Request_Fn	= wit::Redraw_Request_Fn;
+	Mouse_Click_Fn		= wit::Mouse_Click_Fn;
+	Mouse_Drag_Fn		= wit::Mouse_Drag_Fn;
+	Mouse_Transit_Fn	= wit::Mouse_Transit_Fn;
+	Key_Event_Fn		= wit::Key_Event_Fn;
+	Widget_Option	       == wit::Widget_Option;
+	Widget_Arg		= wit::Widget_Arg;
+
+	make_widget_start_fn
+	    :
+	    wit::Widget_Arg
+	    ->
+	    gt::Widget_Start_Fn
+	    ;
+
+	pprint_widget_arg:	pp::Prettyprint_Mill -> wit::Widget_Arg -> Void;
+    };
+
+
+end;
+
+
+
+################################################
+#
+# Note[1]:
+# The intention here is that most code can simply use 'string'.
+#
+# For plain-ascii keystrokes, 'string' will have string::length 1.
+#
+# For special keys, 'string' will be "<F1>" or such.
+# This coding is done in
+#
+#     src/lib/x-kit/xclient/src/window/keysym-to-ascii.pkg
+#
+# so consult it for ground truth, but the basic set is:
+#
+#     "<Clear>"
+#     "<Pause>"
+#     "<ScrollLock>"
+#     "<F1>"
+#     "<F2>"
+#     "<F3>"
+#     "<F4>"
+#     "<F5>"
+#     "<F6>"
+#     "<F7>"
+#     "<F8>"
+#     "<F9>"
+#     "<F10>"
+#     "<F11>"
+#     "<F12>"
+#     "<F13>"
+#     "<F14>"
+#     "<F15>"
+#     "<F16>"
+#     "<F17>"
+#     "<F18>"
+#     "<F19>"
+#     "<F20>"
+#     "<F21>"
+#     "<F22>"
+#     "<F23>"
+#     "<F24>"
+#     "<F25>"
+#     "<F26>"
+#     "<F27>"
+#     "<F28>"
+#     "<F29>"
+#     "<F30>"
+#     "<F31>"
+#     "<F32>"
+#     "<F33>"
+#     "<F34>"
+#     "<F35>"
+#     "<LeftShift>"
+#     "<RightShift>"
+#     "<LeftCtrl>"
+#     "<RightCtrl>"
+#     "<CapsLock>"
+#     "<LeftMeta>"
+#     "<RightMeta>"
+#     "<LeftAlt>"
+#     "<RightAlt>"
+#     "<Cmd>"
+#     "<Home>"
+#     "<Left>"
+#     "<Up>"
+#     "<Right>"
+#     "<Down>"
+#     "<PageUp>"
+#     "<PageDown>"
+#     "<End>"
+#     "<Select>"
+#     "<PrintScr>"
+#     "<Execute>"
+#     "<Insert>"
+#     "<Undo>"
+#     "<Redo>"
+#     "<Menu>"
+#     "<Find>"
+#     "<Cancel>"
+#     "<Help>"
+#     "<Break>"
+#     "<NumLock>"
+#
+# As a convenience for (most) code, a few special keys
+# are mapped to single ascii characters:
+#
+#    0uxFF80 => "\x20";	# KP_Space => " " 	("KP_"=="Keypad_" here.)
+#    0ux00AD => "\x2D";	# hyphen => "-" 
+#    0uxFF08 => "\x08";	# Backspace => BS 
+#    0uxFF09 => "\x09";	# Tab => HT 
+#    0uxFF0A => "\x0A";	# Linefeed => LF 
+#    0uxFF0D => "\x0D";	# Return => CR 
+#    0uxFF1B => "\x1B";	# Escape => ESC 
+#    0uxFFFF => "\x7F";	# Delete => DEL 
+#    0uxFF8D => "\x0D";	# KP_Enter => CR 
+#    0uxFFAA => "*";	# KP_Multiply => "*" 
+#    0uxFFAB => "+";	# KP_Add => "+" 
+#    0uxFFAD => "-";	# KP_Subtract => "-" 
+#    0uxFFAF => "/";	# KP_Divide => "/" 
+#    0uxFFB1 => "1";	# KP_1 => "1" 
+#    0uxFFB2 => "2";	# KP_2 => "2" 
+#    0uxFFB3 => "3";	# KP_3 => "3" 
+#    0uxFFB4 => "4";	# KP_4 => "4" 
+#    0uxFFB5 => "5";	# KP_5 => "5" 
+#    0uxFFB6 => "6";	# KP_6 => "6" 
+#    0uxFFB7 => "7";	# KP_7 => "7" 
+#    0uxFFB8 => "8";	# KP_8 => "8" 
+#    0uxFFB9 => "9";	# KP_9 => "9" 
+#    0uxFFBD => "=";	# KP_Equal => "=" 
+#
+# The expectation here is that most programs don't need or
+# want to distinguish between (say) Ctrl-H and <Backspace>.
+#
+# Those programs which do need to so distinguish should
+# disambiguate by examining the 'keysym' field for the
+# key event, for example by comparing
+#
+#     package evt = gui_event_types;
+#     ...
+#     event.keysym ->  evt::KEYSYM k;
+#     ...
+#     if (k == evt:;k::backspace)
+#         ...
+#     else
+#         ...
+#     fi;

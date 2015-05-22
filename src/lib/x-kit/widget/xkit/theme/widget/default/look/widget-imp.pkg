@@ -1,0 +1,1216 @@
+# widget-imp.pkg
+#
+# For background see comments at top of
+#     src/lib/x-kit/widget/gui/guiboss-imp.pkg
+#
+# For more general background see the comments and diagrams in
+#
+#     src/lib/x-kit/xclient/src/window/xclient-ximps.pkg
+#
+#
+# Application programmers do not interface directly with widget_imp
+# itself unless they are implementing custom widgets; instead they
+# interface with various concrete widgets built on top of widget_imp
+# such as:
+#     
+#     src/lib/x-kit/widget/leaf/arrowbutton.pkg
+#     src/lib/x-kit/widget/leaf/button.pkg
+#     src/lib/x-kit/widget/leaf/diamondbutton.pkg
+#     src/lib/x-kit/widget/leaf/roundbutton.pkg
+#
+# widget_imp builds on top of the fundamental widget-support
+# infrastructure layer provided by
+#
+#     src/lib/x-kit/widget/gui/guiboss-imp.pkg
+#     src/lib/x-kit/widget/gui/guiboss-types.pkg
+#     src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+#
+# The primary design goal here is to achieve good separation
+# of concerns between the app and guibosss worlds.
+#
+# In particular:
+#
+#  o  The guiboss  world shouldn't know or care about any
+#     of the state information managed by widgets or the
+#     communication interfaces between those widgets and
+#     the application logic at large.
+#
+#  o  The individual widgets like arrowbutton should know
+#     as little as possible about the mechanics of event
+#     delivery, gui impnet startup and shutdown etc etc.
+
+# Compiled by:
+#     src/lib/x-kit/widget/xkit-widget.sublib
+
+
+stipulate
+    include package   threadkit;				# threadkit			is from   src/lib/src/lib/thread-kit/src/core-thread-kit/threadkit.pkg
+    #
+#   package ap  =  client_to_atom;				# client_to_atom		is from   src/lib/x-kit/xclient/src/iccc/client-to-atom.pkg
+#   package au  =  authentication;				# authentication		is from   src/lib/x-kit/xclient/src/stuff/authentication.pkg
+#   package cpm =  cs_pixmap;					# cs_pixmap			is from   src/lib/x-kit/xclient/src/window/cs-pixmap.pkg
+#   package cpt =  cs_pixmat;					# cs_pixmat			is from   src/lib/x-kit/xclient/src/window/cs-pixmat.pkg
+#   package dy  =  display;					# display			is from   src/lib/x-kit/xclient/src/wire/display.pkg
+#   package xet =  xevent_types;				# xevent_types			is from   src/lib/x-kit/xclient/src/wire/xevent-types.pkg
+#   package w2x =  windowsystem_to_xserver;			# windowsystem_to_xserver	is from   src/lib/x-kit/xclient/src/window/windowsystem-to-xserver.pkg
+#   package fil =  file__premicrothread;			# file__premicrothread		is from   src/lib/std/src/posix/file--premicrothread.pkg
+#   package fti =  font_index;					# font_index			is from	  src/lib/x-kit/xclient/src/window/font-index.pkg
+#   package r2k =  xevent_router_to_keymap;			# xevent_router_to_keymap	is from   src/lib/x-kit/xclient/src/window/xevent-router-to-keymap.pkg
+#   package mtx =  rw_matrix;					# rw_matrix			is from   src/lib/std/src/rw-matrix.pkg
+#   package rgb =  rgb;						# rgb				is from   src/lib/x-kit/xclient/src/color/rgb.pkg
+#   package rop =  ro_pixmap;					# ro_pixmap			is from   src/lib/x-kit/xclient/src/window/ro-pixmap.pkg
+#   package rw  =  root_window;					# root_window			is from   src/lib/x-kit/widget/lib/root-window.pkg
+#   package rwv =  rw_vector;					# rw_vector			is from   src/lib/std/src/rw-vector.pkg
+#   package sep =  client_to_selection;				# client_to_selection		is from   src/lib/x-kit/xclient/src/window/client-to-selection.pkg
+#   package shp =  shade;					# shade				is from   src/lib/x-kit/widget/lib/shade.pkg
+#   package sj  =  socket_junk;					# socket_junk			is from   src/lib/internet/socket-junk.pkg
+#   package x2s =  xclient_to_sequencer;			# xclient_to_sequencer		is from   src/lib/x-kit/xclient/src/wire/xclient-to-sequencer.pkg
+#   package tr  =  logger;					# logger			is from   src/lib/src/lib/thread-kit/src/lib/logger.pkg
+#   package tsr =  thread_scheduler_is_running;			# thread_scheduler_is_running	is from   src/lib/src/lib/thread-kit/src/core-thread-kit/thread-scheduler-is-running.pkg
+#   package u1  =  one_byte_unt;				# one_byte_unt			is from   src/lib/std/one-byte-unt.pkg
+#   package v1u =  vector_of_one_byte_unts;			# vector_of_one_byte_unts	is from   src/lib/std/src/vector-of-one-byte-unts.pkg
+#   package v2w =  value_to_wire;				# value_to_wire			is from   src/lib/x-kit/xclient/src/wire/value-to-wire.pkg
+#   package wg  =  widget;					# widget			is from   src/lib/x-kit/widget/old/basic/widget.pkg
+#   package wi  =  window;					# window			is from   src/lib/x-kit/xclient/src/window/window.pkg
+#   package wme =  window_map_event_sink;			# window_map_event_sink		is from   src/lib/x-kit/xclient/src/window/window-map-event-sink.pkg
+#   package wpp =  client_to_window_watcher;			# client_to_window_watcher	is from   src/lib/x-kit/xclient/src/window/client-to-window-watcher.pkg
+#   package wy  =  widget_style;				# widget_style			is from   src/lib/x-kit/widget/lib/widget-style.pkg
+#   package e2s =  xevent_to_string;				# xevent_to_string		is from   src/lib/x-kit/xclient/src/to-string/xevent-to-string.pkg
+#   package xc  =  xclient;					# xclient			is from   src/lib/x-kit/xclient/xclient.pkg
+#   package xj  =  xsession_junk;				# xsession_junk			is from   src/lib/x-kit/xclient/src/window/xsession-junk.pkg
+#   package xt  =  xtypes;					# xtypes			is from   src/lib/x-kit/xclient/src/wire/xtypes.pkg
+#   package xtr =  xlogger;					# xlogger			is from   src/lib/x-kit/xclient/src/stuff/xlogger.pkg
+
+    package gtg =  guiboss_to_guishim;				# guiboss_to_guishim		is from   src/lib/x-kit/widget/theme/guiboss-to-guishim.pkg
+
+    package gd  =  gui_displaylist;				# gui_displaylist		is from   src/lib/x-kit/widget/theme/gui-displaylist.pkg
+
+    package pp  =  standard_prettyprint_mill;			# standard_prettyprint_mill	is from   src/lib/prettyprint/big/src/standard-prettyprint-mill.pkg
+    package r8  =  rgb8;					# rgb8				is from   src/lib/x-kit/xclient/src/color/rgb8.pkg
+    #
+    package g2d =  geometry2d;					# geometry2d			is from   src/lib/std/2d/geometry2d.pkg
+    package g2j =  geometry2d_junk;				# geometry2d_junk		is from   src/lib/std/2d/geometry2d-junk.pkg
+
+    package evt =  gui_event_types;				# gui_event_types		is from   src/lib/x-kit/widget/gui/gui-event-types.pkg
+    package gts =  gui_event_to_string;				# gui_event_to_string		is from   src/lib/x-kit/widget/gui/gui-event-to-string.pkg
+
+    package gt  =  guiboss_types;				# guiboss_types			is from   src/lib/x-kit/widget/gui/guiboss-types.pkg
+    package wt  =  widget_theme;				# widget_theme			is from   src/lib/x-kit/widget/theme/widget/widget-theme.pkg
+
+    package iuw =  issue_unique_widget_id;			# issue_unique_widget_id	is from   src/lib/x-kit/widget/gui/issue-unique-widget-id.pkg
+    package g2p =  gadget_to_pixmap;				# gadget_to_pixmap		is from   src/lib/x-kit/widget/theme/gadget-to-pixmap.pkg
+
+    #
+    tracefile   =  "widget-unit-test.trace.log";
+
+    nb = log::note_on_stderr;					# log				is from   src/lib/std/src/log.pkg
+herein
+
+    # This package is referenced in:
+    #
+    #
+    package   widget_imp
+    :         Widget_Imp										# Widget_Imp		is from   src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp.api
+    {
+	include package   widget_imp_types;								# widget_imp_types		is from   src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp-types.pkg
+
+
+# 	pprint_widget_arg:	pp::Prettyprint_Mill -> Widget_Arg -> Void;
+# 
+
+
+	Runstate =  {											# These values will be statically globally visible throughout the code body for the imp.
+		      to:				Replyqueue,					# The name makes   foo::pass_something(imp) to {. ... }   syntax read well.
+		      id:				iuw::Id,
+		      doc:				String,	
+		      #
+		      startup_fn:			Startup_Fn,					# 
+		      shutdown_fn:			Shutdown_Fn,					# 
+		      #
+		      initialize_gadget_fn:		Initialize_Gadget_Fn,
+		      redraw_request_fn:		Redraw_Request_Fn,
+		      #
+		      mouse_click_fn:			Mouse_Click_Fn,
+		      #
+		      mouse_drag_fn:			Mouse_Drag_Fn,
+		      mouse_transit_fn:			Mouse_Transit_Fn,
+		      #
+		      key_event_fn:			Key_Event_Fn,
+		      #
+		      wants_keystrokes:			Bool,
+		      wants_mouseclicks:		Bool,
+													# These five provide generic widget connectivity with the guiboss world.
+		      widget_to_guiboss:		gt::Widget_To_Guiboss,				# 
+
+		      widget_callbacks:			List( Null_Or(Widget) -> Void ),		# In shut_down_widget_imp' () we use these to inform guiboss that our widget ports are no longer valid. DO WE ACTUALLY NEED THIS?  XXX QUERO FIXME
+		      shutdown_oneshot:			Oneshot_Maildrop ( Void )
+		    };
+ 
+	Mailq    = Mailqueue( Runstate -> Void );
+ 
+	fun default_startup_fn
+	      {
+		id:				iuw::Id,						# Unique id.
+		doc:				String,
+		widget_to_guiboss:		gt::Widget_To_Guiboss,
+		do:				(Void -> Void) -> Void					# Used by widget subthreads to execute code in main widget microthread.
+	      }
+	    =
+	    ();	
+
+	fun default_shutdown_fn ()
+	    =
+	    ();	
+
+	fun default_initialize_gadget_fn
+	      {
+		id:				iuw::Id,						# Unique id.
+		doc:				String,
+		site:				g2d::Box,						# Window rectangle in which to draw.
+		widget_to_guiboss:		gt::Widget_To_Guiboss,
+		theme:				wt::Widget_Theme,
+		pass_font:			List(String) -> Replyqueue
+							     -> (evt::Font -> Void) -> Void,		# Nonblocking version of next, for use in imps.
+		 get_font:			List(String) ->	 evt::Font,				# Accepts a list of font names which are tried in order.
+	        make_rw_pixmap:			g2d::Size -> g2p::Gadget_To_Rw_Pixmap,
+		#
+		do:				(Void -> Void) -> Void,					# Used by widget subthreads to execute code in main widget microthread.
+		to:				Replyqueue						# Used to call 'pass_*' methods in other imps.
+	      }
+	    =
+	    {
+	    };	
+
+	fun default_redraw_request_fn
+	      {
+		id:				iuw::Id,						# Unique id.
+		doc:				String,
+		frame_number:			Int,							# 1,2,3,... Purely for convenience of widget-imp, guiboss-imp makes no use of this.
+		frame_indent_hint:		gt::Frame_Indent_Hint,
+		site:				g2d::Box,						# Window rectangle in which to draw.
+		popup_nesting_depth:		Int,							# 0 for gadgets on basewindow, 1 for gadgets on popup on basewindow, 2 for gadgets on popup on popup, etc.
+		#
+		duration_in_seconds:		Float,							# If state has changed widget-imp should call redraw_gadget() before this time is up. Also useful for motionblur.
+		widget_to_guiboss:		gt::Widget_To_Guiboss,
+		gadget_mode:			gt::Gadget_Mode,
+		#
+		theme:				wt::Widget_Theme,
+		do:				(Void -> Void) -> Void,					# Used by widget subthreads to execute code in main widget microthread.
+		to:				Replyqueue						# Used to call 'pass_*' methods in other imps.
+	      }
+	    =
+	    {
+	    };	
+
+	fun default_mouse_click_fn
+	      {
+		id:				iuw::Id,						# Unique id.
+		doc:				String,
+		event:				gt::Mousebutton_Event,					# MOUSEBUTTON_PRESS or MOUSEBUTTON_RELEASE.
+		button:				evt::Mousebutton,
+		point:				g2d::Point,
+		widget_layout_hint:		gt::Widget_Layout_Hint,
+		frame_indent_hint:		gt::Frame_Indent_Hint,
+	        site:				g2d::Box,						# Widget's assigned area in window coordinates.
+		modifier_keys_state:	        evt::Modifier_Keys_State,				# State of the modifier keys (shift, ctrl...).
+		mousebuttons_state:		evt::Mousebuttons_State,				# State of mouse buttons as a bool record.
+		widget_to_guiboss:		gt::Widget_To_Guiboss,
+		theme:				wt::Widget_Theme,
+		do:				(Void -> Void) -> Void,					# Used by widget subthreads to execute code in main widget microthread.
+		to:				Replyqueue						# Used to call 'pass_*' methods in other imps.
+	      }
+	    =
+	    ();	
+
+	fun default_mouse_drag_fn
+	      {
+		id:				iuw::Id,						# Unique id.
+		doc:				String,
+		event_point:			g2d::Point,
+		start_point:			g2d::Point,
+		last_point:			g2d::Point,
+		widget_layout_hint:		gt::Widget_Layout_Hint,
+		frame_indent_hint:		gt::Frame_Indent_Hint,
+	        site:				g2d::Box,						# Widget's assigned area in window coordinates.
+		phase:				gt::Drag_Phase,	
+		button:				evt::Mousebutton,
+		modifier_keys_state:	        evt::Modifier_Keys_State,				# State of the modifier keys (shift, ctrl...).
+		mousebuttons_state:		evt::Mousebuttons_State,				# State of mouse buttons as a bool record.
+		widget_to_guiboss:		gt::Widget_To_Guiboss,
+		theme:				wt::Widget_Theme,
+		do:				(Void -> Void) -> Void,					# Used by widget subthreads to execute code in main widget microthread.
+		to:				Replyqueue						# Used to call 'pass_*' methods in other imps.
+	      }
+	    =
+	    ();	
+
+	fun default_mouse_transit_fn									# Note that buttons are always all up in a mouse motion -- otherwise it is a mouse-drag event.
+	      {
+		id:				iuw::Id,						# Unique id.
+		doc:				String,
+		event_point:			g2d::Point,
+		widget_layout_hint:		gt::Widget_Layout_Hint,
+		frame_indent_hint:		gt::Frame_Indent_Hint,
+	        site:				g2d::Box,						# Widget's assigned area in window coordinates.
+		transit:			gt::Gadget_Transit,					# Mouse is entering (CAME) or leaving (LEFT) widget, or moving (MOVE) across it.
+		modifier_keys_state:	        evt::Modifier_Keys_State,				# State of the modifier keys (shift, ctrl...).
+		widget_to_guiboss:		gt::Widget_To_Guiboss,
+		theme:				wt::Widget_Theme,
+		do:				(Void -> Void) -> Void,					# Used by widget subthreads to execute code in main widget microthread.
+		to:				Replyqueue						# Used to call 'pass_*' methods in other imps.
+	      }
+	    =
+	    ();	
+
+	fun default_key_event_fn
+	      {
+		id:				iuw::Id,						# Unique id.
+		doc:				String,
+		key_event:			gt::Key_Event,						# KEY_PRESS or KEY_RELEASE.
+		keycode:			evt::Keycode,						# Keycode of the depressed key.
+		keysym:				evt::Keysym,						# Keysym  of the depressed key.
+		string:				String,							# Ascii  for the depressed key.
+		char:				Char,							# First char of 'string' ('\0' if string-length != 1).
+		event_point:			g2d::Point,
+		widget_layout_hint:		gt::Widget_Layout_Hint,
+		frame_indent_hint:		gt::Frame_Indent_Hint,
+	        site:				g2d::Box,						# Widget's assigned area in window coordinates.
+		modifier_keys_state:	        evt::Modifier_Keys_State,				# State of the modifier keys (shift, ctrl...).
+		mousebuttons_state:		evt::Mousebuttons_State,				# State of mouse buttons as a bool record.
+		widget_to_guiboss:		gt::Widget_To_Guiboss,
+		theme:				wt::Widget_Theme,
+		do:				(Void -> Void) -> Void,					# Used by widget subthreads to execute code in main widget microthread.
+		to:				Replyqueue						# Used to call 'pass_*' methods in other imps.
+	      }
+	    =
+	    ();	
+
+
+	fun shut_down_widget_imp (r: Runstate)
+	    =
+	    {
+		apply   {. #callback  NULL; }   r.widget_callbacks;					# Tell guiboss that our widget port is no longer valid.
+		#
+		put_in_oneshot (r.shutdown_oneshot, ());						# Pass our state back to guiboss to allow later impnet restart without state loss.
+		#											# The point here is that we could build and return a new closure locking in updated state if we wished.
+		thread_exit { success => TRUE };							# Will not return.	
+	    };
+
+	fun run (
+		  mailq:			Mailq,							# 
+		  #
+		  runstate as
+		  {											# These values will be statically globally visible throughout the code body for the imp.
+		    to:				Replyqueue,						# The name makes   foo::pass_something(imp) to {. ... }   syntax read well.
+		    id:				iuw::Id,
+		    doc:			String,
+		    #
+		    startup_fn:			Startup_Fn,						# 
+		    shutdown_fn:		Shutdown_Fn,						# 
+		    #
+		    initialize_gadget_fn:	Initialize_Gadget_Fn,
+		    redraw_request_fn:		Redraw_Request_Fn,
+		    #
+		    mouse_click_fn:		Mouse_Click_Fn,
+		    #
+		    mouse_drag_fn:		Mouse_Drag_Fn,
+		    mouse_transit_fn:		Mouse_Transit_Fn,
+		    #
+		    key_event_fn:		Key_Event_Fn,
+		    #
+		    wants_keystrokes:		Bool,
+		    wants_mouseclicks:		Bool,
+													# These five provide generic widget connectivity with the guiboss world.
+		    widget_to_guiboss:		gt::Widget_To_Guiboss,					# 
+
+ 		    widget_callbacks:		List( Null_Or(Widget) -> Void ),			# In shut_down_widget_imp' () we use these to inform guiboss that our ports are no longer valid.
+		    shutdown_oneshot:		Oneshot_Maildrop( Void )
+		  }
+		)
+	    =
+	    {
+		loop ();
+	    }
+	    where
+		fun loop ()										# Outer loop for the imp.
+		    =
+		    {   do_one_mailop' to [
+			    #
+			    (take_from_mailqueue' mailq ==>  do_plea)
+			];
+
+			loop ();
+		    }	
+		    where
+			fun do_plea thunk
+			    =
+			    thunk runstate;
+
+			fun shut_down_widget_imp' ()
+			    =
+			    shut_down_widget_imp  runstate;
+		    end;
+	    end;	
+
+	fun startup												# Root fn of imp microthread.
+	      { id:				iuw::Id,
+		doc:				String,
+		reply_oneshot:			Oneshot_Maildrop( gt::Widget_Exports ),
+		#
+		widget_callbacks:		List( Null_Or(Widget) -> Void ),				# We use these to pass our ports to app code.
+		widget_control_callbacks,
+
+		startup_fn:			Startup_Fn,							# 
+		shutdown_fn:			Shutdown_Fn,							# 
+		#
+		initialize_gadget_fn:		Initialize_Gadget_Fn,
+		redraw_request_fn:		Redraw_Request_Fn,
+		#
+		mouse_click_fn:			Mouse_Click_Fn,
+		#
+		mouse_drag_fn:			Mouse_Drag_Fn,
+		mouse_transit_fn:		Mouse_Transit_Fn,
+		#
+		key_event_fn:			Key_Event_Fn,
+		#
+		wants_keystrokes:		Bool,
+		wants_mouseclicks:		Bool,
+
+		pixels_high_min:		Int,
+		pixels_wide_min:		Int,
+		#
+		pixels_high_cut:		Float,
+		pixels_wide_cut:		Float,
+
+		frame_indent_hint:		gt::Frame_Indent_Hint,
+														# These five provide generic widget connectivity with the guiboss world.
+		widget_to_guiboss:		gt::Widget_To_Guiboss,						# 
+		run_gun':			Run_Gun,
+		shutdown_oneshot:		Oneshot_Maildrop( Void )
+	      }
+	      ()												# Note currying.
+	    =
+	    {
+		widget			= { id, do_something, pass_something, do };
+
+		guiboss_to_gadget	= { id,
+					    doc,
+					    #
+					    wants_keystrokes,
+					    wants_mouseclicks,
+					    #
+					    initialize_gadget,
+					    redraw_gadget_request,
+					    #
+					    note_key_event,
+					    #
+					    note_mousebutton_event,
+					    #
+					    note_mouse_drag_event,
+					    note_mouse_transit,
+					    #
+					    wakeup,
+					    die
+					  };
+
+		guiboss_to_widget	= { id,
+					    doc,
+					    g => guiboss_to_gadget,
+					    get_widget_layout_hint,						# This call is required to be O(1) and non-blocking, so guiboss_imp/widgetspace_imp can use it to quickly and reliably harvest initial widget layout hints.
+					    get_frame_indent_hint,						# This call is required to be O(1) and non-blocking, so guiboss_imp/widgetspace_imp can use it to quickly and reliably harvest frame indentation values.
+					    do_something,
+					    pass_something
+					  };
+
+		exports			= { guiboss_to_widget
+					  };
+
+		widget_to_guiboss.note_widget_layout_hint
+		  {
+		    id,
+		    widget_layout_hint =>  get_widget_layout_hint ()
+		  };
+
+		put_in_oneshot (reply_oneshot, exports);							# Return value from widget_start_fn().
+
+
+		apply   {. #callback  (THE widget);		}   widget_callbacks;				# Pass our widget port to everyone who asked for it.
+		apply   {. #callback  guiboss_to_widget;	}   widget_control_callbacks;			# Pass our port to everyone who asked for it.
+
+		block_until_mailop_fires  run_gun';								# Wait for the starting gun.
+
+		widget_to_guiboss' = widget_to_guiboss;								# Construct a version of widget_to_guiboss that updates our widget_layout_hint refcell when widget_to_guiboss.note_widget_layout_hint is called.
+		widget_to_guiboss
+		    =
+		    { id =>  widget_to_guiboss'.id,
+		      g  =>  widget_to_guiboss'.g,
+		      note_widget_layout_hint => hooked_note_widget_layout_hint
+		    }
+		    where
+# XXX QUERO FIXME Should we be hooking this here or waiting for guiboss to ship it back to us and noting it then?
+			fun hooked_note_widget_layout_hint
+			      {
+				id:			iuw::Id,
+				widget_layout_hint:	gt::Widget_Layout_Hint
+			      }
+			    =
+			    {   set_widget_layout_hint  widget_layout_hint;					# Update our private cache of current widget_layout_hint value.
+				#
+				widget_to_guiboss'.note_widget_layout_hint  { id, widget_layout_hint };		# Tell guiboss-imp about new value of widget_layout_hint.
+			    };
+		    end;
+
+		startup_fn											# Let application-specific code handle startup however it likes.
+		  {												# 
+		    id,
+		    doc,
+		    widget_to_guiboss,
+		    do
+		  };
+
+		run (mailq, {		 									# Will not return.
+			      to,
+			      id,
+			      doc,	
+
+			      startup_fn,									# 
+			      shutdown_fn,									# 
+			      #
+			      initialize_gadget_fn,
+			      redraw_request_fn,
+			      #
+			      mouse_click_fn,
+			      #
+			      mouse_drag_fn,
+			      mouse_transit_fn,
+			      #
+			      key_event_fn,
+			      #
+			      wants_keystrokes,
+			      wants_mouseclicks,
+														# These provide generic widget connectivity with the guiboss world.
+			      widget_to_guiboss,								# 
+			      widget_callbacks,									# In shut_down_widget_imp' () we use these to inform guiboss code that our ports are no longer valid.
+
+			      shutdown_oneshot
+			    }
+		    );
+	    }
+	    where
+		mailq	=  make_mailqueue (get_current_microthread()):  Mailq;
+		to	=  make_replyqueue();	
+
+		stipulate
+		    widget_layout_hint
+			=
+			REF   { pixels_high_min,
+				pixels_wide_min,
+				#
+				pixels_high_cut,
+				pixels_wide_cut
+			      };
+		herein
+		    fun get_widget_layout_hint () =   *widget_layout_hint;
+		    fun set_widget_layout_hint lh =    widget_layout_hint := lh;
+		end;
+
+		stipulate
+		    ref_frame_indent_hint
+			=
+			REF   frame_indent_hint;
+		herein
+		    fun get_frame_indent_hint () =   *ref_frame_indent_hint;
+		    fun set_frame_indent_hint ih =    ref_frame_indent_hint := ih;				# Currently unused; retained because we'll probably eventually support dynamic changes here parallel to layout hints.
+		end;
+
+
+		fun do (thunk: Void -> Void)										# PUBLIC.
+		    =	
+		    put_in_mailqueue  (mailq,
+			#
+			\\ ({ widget_to_guiboss, ... }: Runstate)
+			    =
+			    thunk ()
+		    );
+ 
+ 
+		#######################################################################
+		# guiboss_to_gadget fns:
+
+		fun initialize_gadget										# 
+		      {
+			site:			g2d::Box,							# Window rectangle in which to draw.
+			theme:			wt::Widget_Theme,
+			 get_font:		List(String) ->  evt::Font,					# Accepts a list of font names which are tried in order; returns font 'ascent' and 'descent' in pixels -- sum them to get  font height.
+			pass_font:		List(String) -> Replyqueue					#
+							     -> (evt::Font -> Void)				#
+							     -> Void,						# Nonblocking version of next, for use in imps.
+			make_rw_pixmap:		g2d::Size -> g2p::Gadget_To_Rw_Pixmap
+		      }
+		    =
+		    put_in_mailqueue  (mailq,
+			#
+			\\ ({ id, widget_to_guiboss, ... }: Runstate)
+			    =
+			    {
+				initialize_gadget_fn								# Let application-specific code handle background setup
+				  {
+				    id,
+				    doc,
+				    site,
+				    #
+				    widget_to_guiboss,
+				    theme,
+				     get_font,
+				    pass_font,
+				    make_rw_pixmap,
+				    do,
+				    to
+				  };
+			    }
+		    );
+
+		fun redraw_gadget_request									# We get this call at the start of every frame from   src/lib/x-kit/widget/gui/guiboss-imp.pkg
+		      {
+			frame_number:		Int,								# 1,2,3,... Purely for convenience of widget, guiboss-imp makes no use of this.
+			site:			g2d::Box,							# Window rectangle in which to draw.
+			duration_in_seconds:	Float,								# If state has changed look-imp should call redraw_gadget() before this time is up. Also useful for motionblur.
+			gadget_mode:		gt::Gadget_Mode,						# is_active/has_keyboard_focus/has_mouse_focus flags.
+			theme:			wt::Widget_Theme,
+			popup_nesting_depth:	Int								# 0 for gadgets on basewindow, 1 for gadgets on popup on basewindow, 2 for gadgets on popup on popup, etc.
+		      }
+		    =
+		    put_in_mailqueue  (mailq,
+			#
+			\\ ({ id, widget_to_guiboss, ... }: Runstate)
+			    =
+			    {
+				redraw_request_fn								# Let application-specific code handle please-redraw-yourself however it likes.
+				  {
+				    id,
+				    doc,
+				    frame_number,
+				    frame_indent_hint  => get_frame_indent_hint (),
+				    site,
+				    duration_in_seconds,
+				    popup_nesting_depth,
+				    #
+				    widget_to_guiboss,
+				    gadget_mode,
+				    theme,
+				    do,
+				    to
+				  };
+			    }
+		    );
+
+		fun wakeup											# These calls are scheduled via gadget_to_guiboss.wake_me.
+		      {
+			frame_number:		Int,								# 1,2,3,... Purely for convenience of widget, guiboss-imp makes no use of this.
+			site:			g2d::Box,							# Window rectangle in which to draw.
+			duration_in_seconds:	Float,								# If state has changed look-imp should call redraw_gadget() before this time is up. Also useful for motionblur.
+			gadget_mode:		gt::Gadget_Mode,						# is_active/has_keyboard_focus/has_mouse_focus flags.
+			wakeup_fn:		gt::Wakeup_Arg -> Void
+		      }
+		    =
+		    put_in_mailqueue  (mailq,
+			#
+			\\ ({ id, widget_to_guiboss, ... }: Runstate)
+			    =
+			    wakeup_fn { frame_number, site, duration_in_seconds, gadget_mode }
+		    );
+
+		fun die ()
+		    =
+		    put_in_mailqueue  (mailq,
+			#
+			\\ (r: Runstate)
+			    =
+			    shut_down_widget_imp r
+		    );
+		    
+
+		fun note_mouse_transit										# Note that buttons are always all up in a mouse-transit event -- otherwise it is a mouse-drag event.
+		      {
+			transit:			gt::Gadget_Transit,					# Mouse is entering (CAME) or leaving (LEFT) widget, or moving (MOVE) across it.
+			modifier_keys_state:	        evt::Modifier_Keys_State,				# State of the modifier keys (shift, ctrl...).
+			event_point:			g2d::Point,
+			site:				g2d::Box,						# Widget's assigned area in window coordinates.
+			theme:				wt::Widget_Theme
+		      }				# Note  keyboard keypress at 'point'.
+		    =				#	^							# 'point'  ise the click point the window's coordinate system.
+		    {				#	Keyboard key just pressed down.				#
+			put_in_mailqueue  (mailq,
+			    #
+			    \\ ({ id, widget_to_guiboss, ... }: Runstate)
+				=
+				mouse_transit_fn
+				  {
+				    id,
+				    doc,
+				    event_point,
+				    widget_layout_hint => get_widget_layout_hint (),
+				    frame_indent_hint  => get_frame_indent_hint (),
+				    site,
+				    transit,
+				    modifier_keys_state,
+				    widget_to_guiboss,
+				    theme,
+				    do,
+				    to
+				  }
+			);
+
+			();
+		    };
+
+		fun note_mouse_drag_event
+                      {
+			phase:				gt::Drag_Phase,						# LAUNCH/MOTION/FINISH.
+			button:				evt::Mousebutton,
+			modifier_keys_state:	        evt::Modifier_Keys_State,				# State of the modifier keys (shift, ctrl...).
+			mousebuttons_state:		evt::Mousebuttons_State,				# State of mouse buttons as a bool record.
+			event_point:			g2d::Point,
+			start_point:			g2d::Point,
+			last_point:			g2d::Point,
+			site:				g2d::Box,						# Widget's assigned area in window coordinates.
+			theme:				wt::Widget_Theme
+		      }				# Note  keyboard keypress at 'point'.
+		    =				#	^							# 'point'  ise the click point the window's coordinate system.
+		    {				#	Keyboard key just pressed down.				#
+			put_in_mailqueue  (mailq,
+			    #
+			    \\ ({ id, widget_to_guiboss, ... }: Runstate)
+				=
+				mouse_drag_fn
+				  {
+				    id,
+				    doc,
+				    event_point,
+				    start_point,
+				    last_point,
+				    widget_layout_hint => get_widget_layout_hint (),
+				    frame_indent_hint  => get_frame_indent_hint (),
+				    site,
+				    phase,
+				    button,
+				    modifier_keys_state,
+				    mousebuttons_state,
+				    widget_to_guiboss,
+				    theme,
+				    do,
+				    to
+				  }
+			);
+
+			();
+		    };
+
+		fun note_key_event
+                      {
+			key_event:			gt::Key_Event,						# KEY_PRESS or KEY_RELEASE.
+			keycode:			evt::Keycode,						# Keycode of the depressed key.
+			keysym:				evt::Keysym,						# Keysym  of the depressed key.
+			string:				String,							# Ascii  for the depressed key.
+			modifier_keys_state:	        evt::Modifier_Keys_State,				# State of the modifier keys (shift, ctrl...).
+			mousebuttons_state:		evt::Mousebuttons_State,				# State of mouse buttons as a bool record.
+			event_point:			g2d::Point,
+			site:				g2d::Box,						# Widget's assigned area in window coordinates.
+			theme:				wt::Widget_Theme
+		      }				# Note  keyboard keypress at 'point'.
+		    =				#	^							# 'point'  ise the click point the window's coordinate system.
+		    {				#	Keyboard key just pressed down.				#
+			char = (string::length string == 1)
+				?? string::get(string, 0)
+				:: '\0';
+
+			put_in_mailqueue  (mailq,
+			    #
+			    \\ ({ widget_to_guiboss, ... }: Runstate)
+				=
+				key_event_fn
+				  {
+				    id,
+				    doc,
+				    key_event,
+				    keycode,
+				    keysym,
+				    string,
+				    char,
+				    event_point,
+				    widget_layout_hint => get_widget_layout_hint (),
+				    frame_indent_hint  => get_frame_indent_hint (),
+				    site,
+				    modifier_keys_state,
+				    mousebuttons_state,
+				    widget_to_guiboss,
+				    theme,
+				    do,
+				    to
+				  }
+			);
+		    };
+
+		fun note_mousebutton_event
+		      {
+			mousebutton_event:	gt::Mousebutton_Event,						# MOUSEBUTTON_PRESS or MOUSEBUTTON_RELEASE.
+			mouse_button:		evt::Mousebutton,
+			modifier_keys_state:	evt::Modifier_Keys_State,					# State of the modifier keys (shift, ctrl...).
+			mousebuttons_state:	evt::Mousebuttons_State,					# State of mouse buttons as a bool record.
+			event_point:		g2d::Point,
+			site:			g2d::Box,							# Widget's assigned area in window coordinates.
+			theme:			wt::Widget_Theme
+		      }			# Note mousebutton click at 'point'.
+		    =				#	^							# 'point' is the click point in the window's coordinate system.
+		    {				#	Mouse button just clicked down.				#
+			put_in_mailqueue  (mailq,
+			    #
+			    \\ ({ widget_to_guiboss, ... }: Runstate)
+				=
+				mouse_click_fn
+				  {
+				    id,
+				    doc,
+				    event  => mousebutton_event,
+				    button => mouse_button,
+				    point  => event_point,
+				    widget_layout_hint => get_widget_layout_hint (),
+				    frame_indent_hint  => get_frame_indent_hint (),
+				    site,
+				    modifier_keys_state,							# State of the modifier keys (shift, ctrl...).
+	   	                    mousebuttons_state,								# State of mouse buttons as a bool record.
+				    widget_to_guiboss,
+				    theme,
+				    do,
+				    to
+				  }
+			);
+		    };
+
+
+
+		#######################################################################
+		# guiboss_to_widget fns:
+
+
+		fun do_something (i: Int)										# PUBLIC.
+		    =	
+		    put_in_mailqueue  (mailq,
+			#
+			\\ ({ widget_to_guiboss, ... }: Runstate)
+			    =
+			    ()
+		    );
+ 
+ 
+		fun pass_something  (replyqueue: Replyqueue)  (reply_handler: Int -> Void)				# PUBLIC.
+		    =
+		    {   reply_oneshot =  make_oneshot_maildrop():  Oneshot_Maildrop( Int );
+			#
+			put_in_mailqueue  (mailq,
+			    #
+			    \\ (_: Runstate)
+				=
+				put_in_oneshot (reply_oneshot, 0)
+			);
+ 
+			put_in_replyqueue (replyqueue, (get_from_oneshot' reply_oneshot) ==> reply_handler);
+		    };
+ 
+#		fun pass_draw_done_flag  (replyqueue: Replyqueue)  (reply_handler: Void -> Void)			# PUBLIC.
+#		    =
+#		    {   reply_oneshot =  make_oneshot_maildrop():  Oneshot_Maildrop( Void );
+#			#
+#			put_in_mailqueue  (mailq,
+#			    #
+#			    \\ (_: Runstate)
+#				=
+#				put_in_oneshot (reply_oneshot, ())
+#			);
+# 
+#			put_in_replyqueue (replyqueue, (get_from_oneshot' reply_oneshot) ==> reply_handler);
+#		    };
+	    end;
+
+
+	fun process_options
+	    ( options: List(Widget_Option),
+	      #
+	      {	name,
+		id,
+		doc,
+		#
+		widget_callbacks,
+		widget_control_callbacks,
+		#
+		startup_fn,
+		shutdown_fn,
+		#
+		initialize_gadget_fn,
+		redraw_request_fn,
+		#
+		mouse_click_fn,
+		#
+		mouse_drag_fn,
+		mouse_transit_fn,
+		#
+		key_event_fn,
+		#
+		wants_keystrokes,
+		wants_mouseclicks,
+
+		pixels_high_min,
+		pixels_wide_min,
+		#
+		pixels_high_cut,
+		pixels_wide_cut,
+		#
+		frame_indent_hint
+	      }
+	    )
+	    =
+	    {   my_name				=  REF name;
+		my_id				=  REF id;
+		my_doc				=  REF doc;
+		#
+		my_widget_callbacks		=  REF  widget_callbacks;
+		my_widget_control_callbacks	=  REF widget_control_callbacks;
+		#
+		my_startup_fn			=  REF startup_fn; 
+		my_shutdown_fn			=  REF shutdown_fn; 
+		#
+		my_initialize_gadget_fn		=  REF initialize_gadget_fn; 
+		my_redraw_request_fn		=  REF redraw_request_fn; 
+		#
+		my_mouse_click_fn		=  REF mouse_click_fn; 
+		#
+		my_mouse_drag_fn		=  REF mouse_drag_fn; 
+		my_mouse_transit_fn		=  REF mouse_transit_fn; 
+		#
+		my_key_event_fn			=  REF key_event_fn; 
+		#
+		my_wants_keystrokes		=  REF wants_keystrokes;
+		my_wants_mouseclicks		=  REF wants_mouseclicks; 
+		#
+		my_pixels_high_min		=  REF pixels_high_min;
+		my_pixels_wide_min		=  REF pixels_wide_min;
+		#
+		my_pixels_high_cut		=  REF pixels_high_cut;
+		my_pixels_wide_cut		=  REF pixels_wide_cut;
+		#
+		my_frame_indent_hint		=  REF frame_indent_hint;
+		#
+		apply  do_option  options
+		where
+		    fun do_option (MICROTHREAD_NAME       	 n) =>   my_name			:=  n;
+			do_option (ID     	          	 i) =>   my_id                  	:=  i;
+			do_option (DOC     	          	 i) =>   my_doc                  	:=  i;
+			#
+			do_option (WIDGET_CALLBACK 		 c) =>   my_widget_callbacks		:=  c ! *my_widget_callbacks;
+			do_option (WIDGET_CONTROL_CALLBACK	 c) =>   my_widget_control_callbacks	:=  c ! *my_widget_control_callbacks;
+			#
+			do_option (STARTUP_FN             	fn) =>   my_startup_fn			:=  fn;
+			do_option (SHUTDOWN_FN            	fn) =>   my_shutdown_fn			:=  fn;
+			#
+			do_option (INITIALIZE_GADGET_FN   	fn) =>   my_initialize_gadget_fn	:=  fn;
+			do_option (REDRAW_REQUEST_FN		fn) =>   my_redraw_request_fn		:=  fn;
+			#
+			do_option (MOUSE_CLICK_FN         	fn) => {  my_mouse_click_fn		:=  fn;		my_wants_mouseclicks := TRUE;	 };
+			#
+			do_option (MOUSE_DRAG_FN          	fn) => {  my_mouse_drag_fn		:=  fn;						 };
+			do_option (MOUSE_TRANSIT_FN       	fn) => {  my_mouse_transit_fn		:=  fn;						 };
+			#
+			do_option (KEY_EVENT_FN           	fn) => {  my_key_event_fn		:=  fn;		my_wants_keystrokes  := TRUE;	 };
+			#
+			do_option (PIXELS_HIGH_MIN        	 i) =>    my_pixels_high_min		:=  i;
+			do_option (PIXELS_WIDE_MIN        	 i) =>    my_pixels_wide_min		:=  i;
+			#
+			do_option (PIXELS_HIGH_CUT        	 f) =>    my_pixels_high_cut		:=  f;
+			do_option (PIXELS_WIDE_CUT        	 f) =>    my_pixels_wide_cut		:=  f;
+			#
+			do_option (FRAME_INDENT_HINT        	 f) =>    my_frame_indent_hint		:=  f;
+		    end;
+		end;
+
+		{ name			    =>  *my_name,
+		  id			    =>  *my_id,
+		  doc			    =>  *my_doc,
+		  #
+		  widget_callbacks	    =>  *my_widget_callbacks,
+		  widget_control_callbacks  =>  *my_widget_control_callbacks,
+		  #
+		  startup_fn	   	    =>  *my_startup_fn,
+		  shutdown_fn	   	    =>  *my_shutdown_fn,
+		  #
+		  initialize_gadget_fn	    =>  *my_initialize_gadget_fn,
+		  redraw_request_fn	    =>  *my_redraw_request_fn,
+		  #
+		  mouse_click_fn	    =>  *my_mouse_click_fn,
+		  #
+		  mouse_drag_fn		    =>  *my_mouse_drag_fn,
+		  mouse_transit_fn	    =>  *my_mouse_transit_fn,
+		  #
+		  key_event_fn		    =>  *my_key_event_fn,
+		  #
+		  wants_keystrokes	    =>  *my_wants_keystrokes,
+		  wants_mouseclicks	    =>  *my_wants_mouseclicks,
+		  #
+		  pixels_high_min	    =>  *my_pixels_high_min,
+		  pixels_wide_min	    =>  *my_pixels_wide_min,
+		  #
+		  pixels_high_cut	    =>  *my_pixels_high_cut,
+		  pixels_wide_cut	    =>  *my_pixels_wide_cut,
+		  #
+		  frame_indent_hint	    =>  *my_frame_indent_hint
+		};
+	    };
+
+
+	fun make_widget_start_fn  (widget_options:  List(Widget_Option))					# PUBLIC, exported to app clients.
+	    =
+	    # Here we have a critical linkage in the GUI
+	    # code factorization design.
+	    #
+	    # make_widget_start_fn is called by the
+	    # various client-level widgets like
+	    #
+	    #    src/lib/x-kit/widget/leaf/button.pkg
+	    #    src/lib/x-kit/widget/leaf/roundbutton.pkg
+	    #    src/lib/x-kit/widget/leaf/diamondbutton.pkg
+	    #    src/lib/x-kit/widget/leaf/arrowbutton.pkg
+	    #
+	    # The resulting widget_start_fn values
+	    # then get stored in
+	    #
+	    #    guiboss_types::Widget::WIDGET									# guiboss_types				is from   src/lib/x-kit/widget/gui/guiboss-types.pkg
+	    #
+	    # nodes and eventually called by									# guiboss_imp				is from   src/lib/x-kit/widget/gui/guiboss-imp.pkg
+	    #													# translate_guiplan_to_guipane		is from   src/lib/x-kit/widget/gui/translate-guiplan-to-guipane.pkg
+	    #    guiplan_to_guipane
+	    #
+	    # to actually start the widgets running.
+	    #
+	    # We do not use our usual Imports/Exports driven
+	    # imp startup protocol here because we want
+	    # guiboss_imp to do the actual widget-imp but we
+	    # do now want guiboss_imp to know anything about
+	    # the state types of widgets (to avoid an explosion
+	    # of cases in guiboss_imp, one per widget).
+	    #
+	    {
+	        (process_options
+		  ( widget_options,
+		    { name			=>  "widget",
+		      id			=>  iuw::id_zero,
+		      doc			=>  "<widget>",							# This should always get overridden by specific widgets (subclasses, essentially), since their value can be more specific and informative.
+		      #
+		      widget_callbacks		=>  [],
+		      widget_control_callbacks	=>  [],
+		      #
+		      startup_fn		=>  default_startup_fn,
+		      shutdown_fn		=>  default_shutdown_fn,
+		      #
+		      initialize_gadget_fn	=>  default_initialize_gadget_fn,
+		      redraw_request_fn		=>  default_redraw_request_fn,
+		      #
+		      mouse_click_fn		=>  default_mouse_click_fn,
+		      #
+		      mouse_drag_fn		=>  default_mouse_drag_fn,
+		      mouse_transit_fn		=>  default_mouse_transit_fn,
+		      #
+		      key_event_fn		=>  default_key_event_fn,
+		      #
+		      wants_keystrokes		=>  FALSE,
+		      wants_mouseclicks		=>  FALSE,
+		      #
+		      pixels_high_min		=>  gt::default_widget_layout_hint.pixels_high_min,
+		      pixels_wide_min		=>  gt::default_widget_layout_hint.pixels_wide_min,
+		      #
+		      pixels_high_cut		=>  gt::default_widget_layout_hint.pixels_high_cut,
+		      pixels_wide_cut		=>  gt::default_widget_layout_hint.pixels_wide_cut,
+		      #
+		      frame_indent_hint		=>  gt::default_frame_indent_hint
+		    }
+		) )
+		    ->
+		    { name,
+		      id,
+		      doc,
+		      #
+		      widget_callbacks,
+		      widget_control_callbacks,
+		      #
+		      startup_fn,
+		      shutdown_fn,
+		      #
+		      initialize_gadget_fn,
+		      redraw_request_fn,
+		      #
+		      mouse_click_fn,
+		      #
+		      mouse_drag_fn,
+		      mouse_transit_fn,
+		      #
+		      key_event_fn,
+		      #
+		      wants_keystrokes,
+		      wants_mouseclicks,
+		      #
+		      pixels_high_min,
+		      pixels_wide_min,
+		      #
+		      pixels_high_cut,
+		      pixels_wide_cut,
+		      #
+		      frame_indent_hint
+		    };
+
+		id  =	if (iuw::id_to_int(id) == 0)	iuw::issue_unique_id();						# Allocate unique imp id.
+			else				id;
+			fi;
+
+
+		fun widget_start_fn											# This fn will get called by   paused_gui__to__guipane()  in   src/lib/x-kit/widget/gui/guiboss-imp.pkg
+		    {													#
+		      widget_to_guiboss:	gt::Widget_To_Guiboss,							# 
+		      run_gun':			Run_Gun,
+		      shutdown_oneshot:		Oneshot_Maildrop( Void )
+		    }
+		    : gt::Widget_Exports
+		    =
+		    {	reply_oneshot =  make_oneshot_maildrop ():	Oneshot_Maildrop( gt::Widget_Exports );
+			#
+			xlogger::make_thread
+			    name
+			    (startup  { id,										# Note that startup() is curried.
+					doc,
+					reply_oneshot,
+					#
+					widget_callbacks,
+					widget_control_callbacks,
+
+					startup_fn,									# Pass in widget-specific args. 
+					shutdown_fn,									# Save state for possible widget restart.
+					#
+					initialize_gadget_fn,
+					redraw_request_fn,
+					#
+					mouse_click_fn,
+					#
+					mouse_drag_fn,
+					mouse_transit_fn,
+					#
+					key_event_fn,
+					#
+					wants_keystrokes,
+					wants_mouseclicks,
+					#
+					pixels_high_min,
+					pixels_wide_min,
+					#
+					pixels_high_cut,
+					pixels_wide_cut,
+					#
+					frame_indent_hint,
+															# These five args pass in the ports etc that guiboss-imp gave us.
+					widget_to_guiboss,								# 
+					run_gun',
+					shutdown_oneshot
+				      }
+			    );
+
+			(get_from_oneshot  reply_oneshot);								# Return gt::Widget_Exports to guiboss-imp.
+
+		    };
+
+		gt::WIDGET_START_FN  widget_start_fn;									# The value-added is that we've locked in the values of *_fn etc, and guiboss-imp can be agnostic about their types.
+	    };
+
+
+	fun pprint_widget_arg												# PUBLIC.
+	      (pp:		pp::Prettyprint_Mill)
+	      (widget_arg:	Widget_Arg)
+	    =
+	    {
+		widget_arg
+		  ->
+		  ( options:		List(Widget_Option)
+		  );
+
+		pp.box {.
+		    pp.txt " [";
+		    pp::seqx {. pp.txt ", "; }
+			     pprint_option
+			     options
+			     ;	
+		    pp.txt " ]";
+		    pp.txt " )";
+		};
+	    }
+	    where
+		fun pprint_option option
+		    =
+		    case option
+			#
+			MICROTHREAD_NAME name		=>  {  pp.lit (sprintf "MICROTHREAD_NAME \"%s\"" name);		};
+			ID		 id		=>  {  pp.lit (sprintf "ID %d" (iuw::id_to_int id)        );	};
+			DOC		 docstring	=>  {  pp.lit (sprintf "DOC \"%s\"" docstring		  );	};
+			#
+			WIDGET_CONTROL_CALLBACK _	=>  {  pp.lit          "WIDGET_CONTROL_CALLBACK (callback)";	};
+			WIDGET_CALLBACK _		=>  {  pp.lit          "WIDGET_CALLBACK (callback)";		};
+			#
+			STARTUP_FN	_		=>  {  pp.lit          "STARTUP_FN _";				};
+			SHUTDOWN_FN	_		=>  {  pp.lit          "SHUTDOWN_FN _";				};
+			#
+			INITIALIZE_GADGET_FN	_	=>  {  pp.lit          "INITIALIZE_GADGET_FN _";		};
+			REDRAW_REQUEST_FN _		=>  {  pp.lit          "REDRAW_REQUEST_FN _";			};
+			#
+			MOUSE_CLICK_FN	_		=>  {  pp.lit          "MOUSE_CLICK_FN _";			};
+			#
+			MOUSE_DRAG_FN _			=>  {  pp.lit          "MOUSE_DRAG_FN _";			};
+			MOUSE_TRANSIT_FN _		=>  {  pp.lit          "MOUSE_TRANSIT_FN _";			};
+			#
+			KEY_EVENT_FN	_		=>  {  pp.lit          "KEY_EVENT_FN _";			};
+			#
+			PIXELS_HIGH_MIN	i		=>  {  pp.lit (sprintf "PIXELS_HIGH_MIN %d" i);			};
+			PIXELS_WIDE_MIN	i		=>  {  pp.lit (sprintf "PIXELS_WIDE_MIN %d" i);			};
+			#
+			PIXELS_HIGH_CUT	f		=>  {  pp.lit (sprintf "PIXELS_HIGH_CUT %f" f);			};
+			PIXELS_WIDE_CUT	f		=>  {  pp.lit (sprintf "PIXELS_WIDE_CUT %g" f);			};
+			#
+			FRAME_INDENT_HINT h		=>  {  pp.lit (sprintf "FRAME_INDENT_HINT { pixels_for_top_of_frame => %d, pixels_for_bottom_of_frame => %d, pixels_for_left_of_frame => %d, pixels_for_right_of_frame => %d }"
+										h.pixels_for_top_of_frame
+										h.pixels_for_bottom_of_frame
+										h.pixels_for_left_of_frame
+										h.pixels_for_right_of_frame
+								      );
+							    };
+		    esac;
+	    end;
+    };
+
+end;
+
+
+
+
+##########################################################################
+#   The following is support for outline-minor-mode in emacs.		 #
+#  ^C @ ^T hides all Text. (Leaves all headings.)			 #
+#  ^C @ ^A shows All of file.						 #
+#  ^C @ ^Q Quickfolds entire file. (Leaves only top-level headings.)	 #
+#  ^C @ ^I shows Immediate children of node.				 #
+#  ^C @ ^S Shows all of a node.						 #
+#  ^C @ ^D hiDes all of a node.						 #
+#  ^HFoutline-mode gives more details.					 #
+#  (Or do ^HI and read emacs:outline mode.)				 #
+#									 #
+# Local variables:							 #
+# mode: outline-minor							 #
+# outline-regexp: "[{ \t]*\\(fun \\)"			 		 #
+# End:									 #
+##########################################################################
+
+
+## Original code by Jeff Prothero Copyright (c) 2014-2014,
+## released per terms of SMLNJ-COPYRIGHT.

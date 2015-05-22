@@ -5,7 +5,7 @@
 # Draw_Op is intended to be the cross-platform-portable
 # subset of windowsystem_to_xserver::x::Op									# windowsystem_to_xserver	is from   src/lib/x-kit/xclient/src/window/windowsystem-to-xserver.pkg
 #
-# The intent is that guiboss_to_windowsystem should define a
+# The intent is that guiboss_to_guishim should define a
 # rendering model which is highly compatible with X
 # (Mythryl's prime target) but able to be supported
 # with reasonable effort on other platforms.
@@ -23,10 +23,10 @@ herein
 
     package gui_displaylist {
 	#
-	Draw_Text =   TO_LEFT_OF_POINT
-		  |  TO_RIGHT_OF_POINT										# Default.
-		  |  CENTERED_ON_POINT
-		  ;
+	Put_Text =   TO_LEFT_OF_POINT
+		 |  TO_RIGHT_OF_POINT										# Default.
+		 |  CENTERED_ON_POINT
+		 ;
 
 	Draw_Op
 	  = POINTS	   	List( g2d::Point )								# Unaffected by LINE_THICKNESS; use 360 degree FILLED_ARCS for fat points.
@@ -42,20 +42,20 @@ herein
 	  | TEXT	   	(g2d::Point, String)	
 	  #
 	  | IMAGE	   	{ from_box:	Null_Or( g2d::Box ),						# Take this subrectangle (default: all)
-			   	  from:	mtx::Rw_Matrix( r8::Rgb8 ),						# from this pixel array
+			   	  from:		mtx::Rw_Matrix( r8::Rgb8 ),					# from this pixel array
 			   	  to_point:	g2d::Point							# and write it to this point in window.
 			   	}
 	  | COPY_BOX	   	{ to_point:	g2d::Point,							# So terminal widgets can scroll text up, etc. Contents of screen area in given box are copied to given point.
 			   	  from_box:	g2d::Box
 			   	}
-	  | COPY_FROM_RW_PIXMAP { from_id:	Id,								# 'from_id' should be guiboss_to_rw_pixmap.id for some gws::Guiboss_To_Rw_Pixmap value obtained via guiboss_to_windowsystem.make_rw_pixmap.
+	  | COPY_FROM_RW_PIXMAP { from_id:	Id,								# 'from_id' should be guiboss_to_rw_pixmap.id for some gtg::Guiboss_To_Rw_Pixmap value obtained via guiboss_to_guishim.make_rw_pixmap.
 				  to_point:	g2d::Point,
 				  from_box:	g2d::Box
 				}
 	  #
 	  | COLOR          (r64::Rgb,	  List(Draw_Op))
 	  | LINE_THICKNESS (Int,	  List(Draw_Op))							# Affects lines and arcs.  A thickness of zero draws the fastest, thinnest lines supported by host.  Use thickness 1 for pretty lines and joints.
-	  | DRAW_TEXT	   (Draw_Text,	  List(Draw_Op))
+	  | PUT_TEXT	   (Put_Text,	  List(Draw_Op))
 	  | CLIP_TO	   (g2d::Box,	  List(Draw_Op))
 	  | FONT	   (List(String), List(Draw_Op))							# X fontnames like "fixed" or "-misc-fixed-medium-r-semicondensed--13-120-75-75-c-60-iso8859-1" -- see Note[1] or (eg) /usr/share/fonts/X11/misc/fonts.alias
 	  #													# TEXTs will be drawn in first font in FONT list which is found on X server. The best fonts are optional, hence the list: put best-first, most-common last.
@@ -129,10 +129,10 @@ herein
 		    do_op (COPY_BOX	         a) =>  do_copybox a;
 		    do_op (COPY_FROM_RW_PIXMAP   a) =>  do_copy_from_rw_pixmap a;
 		    #
-		    do_op (FONT           (_, ops)) =>                 (do_ops (ops, []));
-		    do_op (COLOR          (_, ops)) =>                 (do_ops (ops, []));
+		    do_op (FONT		  (_, ops)) =>                 (do_ops (ops, []));
+		    do_op (COLOR	  (_, ops)) =>                 (do_ops (ops, []));
 		    do_op (LINE_THICKNESS (_, ops)) =>                 (do_ops (ops, []));
-		    do_op (DRAW_TEXT      (_, ops)) =>                 (do_ops (ops, []));
+		    do_op (PUT_TEXT	  (_, ops)) =>                 (do_ops (ops, []));
 		    do_op (CLIP_TO      (box, ops)) =>  (do_box box) @ (do_ops (ops, []));
 		end;
 	    end;
@@ -148,34 +148,34 @@ herein
 	      (pp: pp::Prettyprint_Mill)
 	      (gd: Gui_Displaylist)
 	    =
-	    pp::list pp do_op "" gd
+	    pp::listx pp do_op "" gd
 	    where
 		fun point_to_string { row, col } = sprintf "{ row => %d, col => %d }" row col;
 		fun  line_to_string  (p1, p2)     = sprintf "(%s, %s)" (point_to_string p1) (point_to_string p2);
 		fun   box_to_string  { row, col, high, wide }  = sprintf "{ row => %d, col => %d, high => %d, wide => %d }" row col high wide;
-		fun   arc_to_string  { row, col, high, wide, start_angle, stop_angle }  = sprintf "{ row => %d, col => %d, high => %d, wide => %d, start_angle => %f, stop_angle => %f }" row col high wide start_angle stop_angle;
+		fun   arc_to_string  { row, col, high, wide, start_angle, fill_angle }  = sprintf "{ row => %d, col => %d, high => %d, wide => %d, start_angle => %f, fill_angle => %f }" row col high wide start_angle fill_angle;
 
-		fun do_op (POINTS                p) =>  pp::list pp (\\ pt = pp.lit (point_to_string pt))  "POINTS"         p;
-		    do_op (PATH                  p) =>  pp::list pp (\\ pt = pp.lit (point_to_string pt))  "PATH"           p;
-		    do_op (POLYGON               p) =>  pp::list pp (\\ pt = pp.lit (point_to_string pt))  "POLYGON"        p;
-		    do_op (FILLED_POLYGON        p) =>  pp::list pp (\\ pt = pp.lit (point_to_string pt))  "FILLED_POLYGON" p;
+		fun do_op (POINTS                p) =>  pp::listx pp (\\ pt = pp.lit (point_to_string pt))  "POINTS"         p;
+		    do_op (PATH                  p) =>  pp::listx pp (\\ pt = pp.lit (point_to_string pt))  "PATH"           p;
+		    do_op (POLYGON               p) =>  pp::listx pp (\\ pt = pp.lit (point_to_string pt))  "POLYGON"        p;
+		    do_op (FILLED_POLYGON        p) =>  pp::listx pp (\\ pt = pp.lit (point_to_string pt))  "FILLED_POLYGON" p;
 		    #
-		    do_op (LINES                 l) =>  pp::list pp (\\ pt = pp.lit (line_to_string pt))   "LINES"          l;
-		    do_op (BOXES                 b) =>  pp::list pp (\\ pt = pp.lit ( box_to_string pt))   "BOXES"          b;
-		    do_op (FILLED_BOXES          b) =>  pp::list pp (\\ pt = pp.lit ( box_to_string pt))   "FILLED_BOXES"   b;
-		    do_op (ARCS                  a) =>  pp::list pp (\\ pt = pp.lit ( arc_to_string pt))   "ARCS"           a;
-		    do_op (FILLED_ARCS           a) =>  pp::list pp (\\ pt = pp.lit ( arc_to_string pt))   "FILLED_ARCS"    a;
+		    do_op (LINES                 l) =>  pp::listx pp (\\ pt = pp.lit (line_to_string pt))   "LINES"          l;
+		    do_op (BOXES                 b) =>  pp::listx pp (\\ pt = pp.lit ( box_to_string pt))   "BOXES"          b;
+		    do_op (FILLED_BOXES          b) =>  pp::listx pp (\\ pt = pp.lit ( box_to_string pt))   "FILLED_BOXES"   b;
+		    do_op (ARCS                  a) =>  pp::listx pp (\\ pt = pp.lit ( arc_to_string pt))   "ARCS"           a;
+		    do_op (FILLED_ARCS           a) =>  pp::listx pp (\\ pt = pp.lit ( arc_to_string pt))   "FILLED_ARCS"    a;
 		    #
 		    do_op (TEXT             (p, t)) =>  pp.lit (sprintf "(TEXT (%s,\"%s\"))" (point_to_string p) t);
 		    do_op (IMAGE	         a) =>  pp.lit "<IMAGE>";
 		    do_op (COPY_BOX              r) =>  pp.lit (sprintf "(COPY_BOX { to_point => %s, from_box => %s }" (point_to_string r.to_point) (box_to_string r.from_box));
 		    do_op (COPY_FROM_RW_PIXMAP   r) =>  pp.lit (sprintf "(COPY_FROM_RW_PIXMAP { to_point => %s, from_box => %s, from_id }" (point_to_string r.to_point) (box_to_string r.from_box));
 		    #
-		    do_op (FONT           (_, ops)) =>  pp::list pp do_op  "FONT"           ops;
-		    do_op (COLOR          (_, ops)) =>  pp::list pp do_op  "COLOR"          ops;
-		    do_op (LINE_THICKNESS (_, ops)) =>  pp::list pp do_op  "LINE_THICKNESS" ops;
-		    do_op (DRAW_TEXT      (_, ops)) =>  pp::list pp do_op  "DRAW_TEXT"      ops;
-		    do_op (CLIP_TO      (box, ops)) =>  pp::list pp do_op  "CLIP_TO"        ops;
+		    do_op (FONT		  (_, ops)) =>  pp::listx pp do_op  "FONT"           ops;
+		    do_op (COLOR	  (_, ops)) =>  pp::listx pp do_op  "COLOR"          ops;
+		    do_op (LINE_THICKNESS (_, ops)) =>  pp::listx pp do_op  "LINE_THICKNESS" ops;
+		    do_op (PUT_TEXT	  (_, ops)) =>  pp::listx pp do_op  "PUT_TEXT"       ops;
+		    do_op (CLIP_TO      (box, ops)) =>  pp::listx pp do_op  "CLIP_TO"        ops;
 		end;
 	    end;
 

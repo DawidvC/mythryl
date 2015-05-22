@@ -1365,8 +1365,7 @@ result;
 
 	    fun decode_list_extensions_reply msg
 		=
-		{ err => xgripe::impossible "unimplemented"		# XXX SUCKO FIXME
-		};
+		get_string_list (msg, 32, get_int8 (msg, 1));
 
 	    fun decode_list_fonts_reply msg
 		=

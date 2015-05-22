@@ -39,7 +39,7 @@ herein
                 (String -> Void)
               );
 
-	fun make_scrollable_string_editor  root_window  (arg as { foreground, background, initial_string, min_length } )
+	fun make_scrollable_string_editor  root_window  (arg as { foreground, background, initial_string, min_length } )			# Invoked only in (unmaintained) package   src/lib/x-kit/demo/tactic-tree/src/manager-g.pkg
 	    =
 	    {   screen	    =  wg::screen_of  root_window;
 		#
@@ -89,9 +89,9 @@ herein
 
 		fun layout (size as { wide, high } )
 		    =
-		    {   my { col_preference,       ... } = cbnds ();
-			my { col_preference=>ldim, ... } = lbnds ();
-			my { col_preference=>rdim, ... } = rbnds ();
+		    {   (cbnds ()) -> { col_preference,       ... };
+			(lbnds ()) -> { col_preference=>ldim, ... };
+			(rbnds ()) -> { col_preference=>rdim, ... };
 
 			lx = wg::preferred_length  ldim;
 			rx = wg::preferred_length  rdim;

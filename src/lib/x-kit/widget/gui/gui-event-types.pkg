@@ -172,6 +172,33 @@ herein
                | KEYSYM  Int
                ;
 
+	package k {				# Some keysym constants for the convenient of client code.
+	    keypad_space    =  0xFF80;		# Keypad space key.
+	    backspace       =  0xFF08;		# <Backspace> key.
+	    tab		    =  0xFF09;		# <Tab> key.
+	    linefeed	    =  0xFF0A;		# <Linefeed> key.
+	    return	    =  0xFF0D;		# <Return> key.
+	    esc		    =  0xFF1B;		# <Esc> key.
+	    delete	    =  0xFFFF;		# <Delete> key.
+	    keypad_enter    =  0xFF8D;		# Keypad <Enter> key.
+	    keypad_multiply =  0xFFAA;		# Keypad "*" key.
+	    keypad_add	    =  0xFFAB;		# Keypad "+" key.
+	    keypad_subtract =  0xFFAD;		# Keypad "-" key.
+	    keypad_divide   =  0xFFAF;		# Keypad "/" key.
+	    keypad_1	    =  0xFFB1;		# Keypad "1" key.
+	    keypad_2	    =  0xFFB2;		# Keypad "2" key.
+	    keypad_3	    =  0xFFB3;		# Keypad "3" key.
+	    keypad_4	    =  0xFFB4;		# Keypad "4" key.
+	    keypad_5	    =  0xFFB5;		# Keypad "5" key.
+	    keypad_6	    =  0xFFB6;		# Keypad "6" key.
+	    keypad_7	    =  0xFFB7;		# Keypad "7" key.
+	    keypad_8	    =  0xFFB8;		# Keypad "8" key.
+	    keypad_9	    =  0xFFB9;		# Keypad "9" key.
+	    keypad_equal    =  0xFFBD;		# Keypad "=" key.
+	};
+
+
+
 	Keycode = KEYCODE  Int;
 
 	any_key = (KEYCODE 0);
@@ -295,7 +322,7 @@ herein
 	Modifier_Keys_State
 	  =
 	  { shift_key_was_down:		Bool,
-	    shiftlock_key_was_down:	Bool,		# Should we say 'set' instead of 'down'?
+	    shiftlock_key_was_down:	Bool,			# Should we say 'set' instead of 'down'?
 	    control_key_was_down:	Bool,
 	    mod1_key_was_down:		Bool,
 	    mod2_key_was_down:		Bool,
@@ -303,7 +330,20 @@ herein
 	    mod4_key_was_down:		Bool,
 	    mod5_key_was_down:		Bool
 	  };
-
+								# On Linux/Posix run xmodmap to show current modifiers, output looks like:
+								#
+								#    shift       Shift_L (0x32),  Shift_R (0x3e)
+								#    lock        Caps_Lock (0x42)
+								#    control     Control_L (0x25),  Control_R (0x69)
+								#    mod1        Alt_L (0x40),  Alt_R (0x6c),  Meta_L (0xcd)
+								#    mod2        Num_Lock (0x4d)
+								#    mod3
+								#    mod4        Super_L (0x85),  Super_R (0x86),  Super_L (0xce),  Hyper_L (0xcf)
+								#    mod5        ISO_Level3_Shift (0x5c),  Mode_switch (0xcb)
+								#    
+								# The Super_L and Super_R keysyms correspond to the Win keys on your keyboard.
+								# More info available at:
+								#    http://www.emacswiki.org/emacs/MetaKeyProblems
 	no_modifier_keys_were_down
 	  =
 	  { shift_key_was_down	    =>	FALSE,
@@ -328,6 +368,15 @@ herein
 	no_mouse_buttons_were_down
 	  =
 	  { mousebutton_1_was_down   =>	FALSE,
+	    mousebutton_2_was_down   =>	FALSE,
+	    mousebutton_3_was_down   =>	FALSE,
+	    mousebutton_4_was_down   =>	FALSE,
+	    mousebutton_5_was_down   =>	FALSE
+	  };
+
+	only_mouse_button_1_was_down
+	  =
+	  { mousebutton_1_was_down   =>	TRUE,
 	    mousebutton_2_was_down   =>	FALSE,
 	    mousebutton_3_was_down   =>	FALSE,
 	    mousebutton_4_was_down   =>	FALSE,
@@ -949,7 +998,7 @@ herein
 		  =
 		  { exposed_window_id:  Window_Id,				# The exposed window. 
 		    boxes:              List( g2d::Box ),			# The exposed rectangle.  The list is
-										# so  that multiple events can be packed. 
+										# so  that multiple events can be widget. 
 		    count:              Int					# Number of subsequent expose events.
 		  };
 

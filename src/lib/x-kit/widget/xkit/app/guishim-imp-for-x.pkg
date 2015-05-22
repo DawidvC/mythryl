@@ -1,0 +1,1541 @@
+## guishim-imp-for-x.pkg
+#
+# windowsystem implements the boundary between the
+# portable and windowsystem-specific parts of the system:
+# Higher-level bits like guiboss_imp are intended to		# guiboss_imp			is from   src/lib/x-kit/widget/gui/guiboss-imp.pkg
+# be platform-agnostic, whereas lower-level stuff like
+# xserver_ximp are platform-specific.				# xserver_ximp			is from   src/lib/x-kit/xclient/src/window/xserver-ximp.pkg
+#
+# guishim_imp_for_x should probably be in a library which
+# hides all the x-specific stuff, so that higher
+# levels of the system cannot accidentally wind
+# up calling x-specific stuff.  We don't yet do that. 	XXX SUCKO FIXME
+
+# Compiled by:
+#     src/lib/x-kit/widget/xkit-widget.sublib
+
+
+stipulate
+    include package   threadkit;				# threadkit			is from   src/lib/src/lib/thread-kit/src/core-thread-kit/threadkit.pkg
+    #
+    package ap  =  client_to_atom;				# client_to_atom		is from   src/lib/x-kit/xclient/src/iccc/client-to-atom.pkg
+    package au  =  authentication;				# authentication		is from   src/lib/x-kit/xclient/src/stuff/authentication.pkg
+    package gtg =  guiboss_to_guishim;				# guiboss_to_guishim		is from   src/lib/x-kit/widget/theme/guiboss-to-guishim.pkg
+#   package cpm =  cs_pixmap;					# cs_pixmap			is from   src/lib/x-kit/xclient/src/window/cs-pixmap.pkg
+    package cpt =  cs_pixmat;					# cs_pixmat			is from   src/lib/x-kit/xclient/src/window/cs-pixmat.pkg
+    package dy  =  display;					# display			is from   src/lib/x-kit/xclient/src/wire/display.pkg
+    package exa =  exercise_x_appwindow;			# exercise_x_appwindow		is from   src/lib/x-kit/widget/xkit/app/exercise-x-appwindow.pkg
+    package w2x =  windowsystem_to_xserver;			# windowsystem_to_xserver	is from   src/lib/x-kit/xclient/src/window/windowsystem-to-xserver.pkg
+    package fb  =  font_base;					# font_base			is from   src/lib/x-kit/xclient/src/window/font-base.pkg
+#   package fil =  file__premicrothread;			# file__premicrothread		is from   src/lib/std/src/posix/file--premicrothread.pkg
+    package fti =  font_index;					# font_index			is from	  src/lib/x-kit/xclient/src/window/font-index.pkg
+    package gd  =  gui_displaylist;				# gui_displaylist		is from   src/lib/x-kit/widget/theme/gui-displaylist.pkg
+    package g2p =  gadget_to_pixmap;				# gadget_to_pixmap		is from   src/lib/x-kit/widget/theme/gadget-to-pixmap.pkg
+    package k2k =  keycode_to_keysym;				# keycode_to_keysym		is from   src/lib/x-kit/xclient/src/window/keycode-to-keysym.pkg
+    package r2k =  xevent_router_to_keymap;			# xevent_router_to_keymap	is from   src/lib/x-kit/xclient/src/window/xevent-router-to-keymap.pkg
+    package mtx =  rw_matrix;					# rw_matrix			is from   src/lib/std/src/rw-matrix.pkg
+    package rwp =  rw_pixmap;					# rw_pixmap			is from   src/lib/x-kit/xclient/src/window/rw-pixmap.pkg
+    package pen =  pen;						# pen				is from   src/lib/x-kit/xclient/src/window/pen.pkg
+    package r8  =  rgb8;					# rgb8				is from   src/lib/x-kit/xclient/src/color/rgb8.pkg
+    package r64 =  rgb;						# rgb				is from   src/lib/x-kit/xclient/src/color/rgb.pkg
+    package rop =  ro_pixmap;					# ro_pixmap			is from   src/lib/x-kit/xclient/src/window/ro-pixmap.pkg
+    package rw  =  root_window;					# root_window			is from   src/lib/x-kit/widget/lib/root-window.pkg
+#   package rwv =  rw_vector;					# rw_vector			is from   src/lib/std/src/rw-vector.pkg
+    package a2r =  windowsystem_to_xevent_router;		# windowsystem_to_xevent_router	is from   src/lib/x-kit/xclient/src/window/windowsystem-to-xevent-router.pkg
+    package sep =  client_to_selection;				# client_to_selection		is from   src/lib/x-kit/xclient/src/window/client-to-selection.pkg
+    package shp =  shade;					# shade				is from   src/lib/x-kit/widget/lib/shade.pkg
+    package sj  =  socket_junk;					# socket_junk			is from   src/lib/internet/socket-junk.pkg
+    package x2s =  xclient_to_sequencer;			# xclient_to_sequencer		is from   src/lib/x-kit/xclient/src/wire/xclient-to-sequencer.pkg
+#   package tr  =  logger;					# logger			is from   src/lib/src/lib/thread-kit/src/lib/logger.pkg
+#   package tsr =  thread_scheduler_is_running;			# thread_scheduler_is_running	is from   src/lib/src/lib/thread-kit/src/core-thread-kit/thread-scheduler-is-running.pkg
+#   package u1  =  one_byte_unt;				# one_byte_unt			is from   src/lib/std/one-byte-unt.pkg
+#   package v1u =  vector_of_one_byte_unts;			# vector_of_one_byte_unts	is from   src/lib/std/src/vector-of-one-byte-unts.pkg
+    package v2w =  value_to_wire;				# value_to_wire			is from   src/lib/x-kit/xclient/src/wire/value-to-wire.pkg
+    package w2v =  wire_to_value;				# wire_to_value			is from   src/lib/x-kit/xclient/src/wire/wire-to-value.pkg
+#   package wg  =  widget;					# widget			is from   src/lib/x-kit/widget/old/basic/widget.pkg
+    package wi  =  window;					# window			is from   src/lib/x-kit/xclient/src/window/window.pkg
+    package wme =  window_map_event_sink;			# window_map_event_sink		is from   src/lib/x-kit/xclient/src/window/window-map-event-sink.pkg
+    package wpp =  client_to_window_watcher;			# client_to_window_watcher	is from   src/lib/x-kit/xclient/src/window/client-to-window-watcher.pkg
+    package wy  =  widget_style;				# widget_style			is from   src/lib/x-kit/widget/lib/widget-style.pkg
+#   package xc  =  xclient;					# xclient			is from   src/lib/x-kit/xclient/xclient.pkg
+    package g2d =  geometry2d;					# geometry2d			is from   src/lib/std/2d/geometry2d.pkg
+    package xj  =  xsession_junk;				# xsession_junk			is from   src/lib/x-kit/xclient/src/window/xsession-junk.pkg
+#   package xtr =  xlogger;					# xlogger			is from   src/lib/x-kit/xclient/src/stuff/xlogger.pkg
+    package im  =  int_red_black_map;				# int_red_black_map		is from   src/lib/src/int-red-black-map.pkg
+    package pp  =  standard_prettyprint_mill;			# standard_prettyprint_mill	is from   src/lib/prettyprint/big/src/standard-prettyprint-mill.pkg
+    package agx =  app_to_guishim_xspecific;			# app_to_guishim_xspecific	is from   src/lib/x-kit/widget/theme/app-to-guishim-xspecific.pkg
+
+    package xet =  xevent_types;				# xevent_types			is from   src/lib/x-kit/xclient/src/wire/xevent-types.pkg
+    package e2s =  xevent_to_string;				# xevent_to_string		is from   src/lib/x-kit/xclient/src/to-string/xevent-to-string.pkg
+    package xt  =  xtypes;					# xtypes			is from   src/lib/x-kit/xclient/src/wire/xtypes.pkg
+    #
+    # The above three are the X-specific versions of the
+    # below two platform-independent packages.  X events
+    # come to us from the X server in xet:: encoding.  We	# For the big dataflow diagram see   src/lib/x-kit/xclient/src/window/xclient-ximps.pkg
+    # translate them to evt:: encoding and forward them to
+    # guiboss_imp, which forwards them to appropriate imps.	# guiboss_imp			is from   src/lib/x-kit/widget/gui/guiboss-imp.pkg
+    #
+    package evt =  gui_event_types;				# gui_event_types		is from   src/lib/x-kit/widget/gui/gui-event-types.pkg
+    package gts =  gui_event_to_string;				# gui_event_to_string		is from   src/lib/x-kit/widget/gui/gui-event-to-string.pkg
+    #
+    # This one translates from the X to Gui versions:
+    package x2g =  xevent_to_gui_event;				# xevent_to_gui_event		is from   src/lib/x-kit/widget/xkit/app/xevent-to-gui-event.pkg
+    package g2x =  gui_event_to_xevent;				# gui_event_to_xevent		is from   src/lib/x-kit/widget/xkit/app/gui-event-to-xevent.pkg
+
+    nb = log::note_on_stderr;					# log				is from   src/lib/std/src/log.pkg
+
+dummy1 = k2k::translate_keycode_to_keysym;
+
+    tracefile   =  "widget-unit-test.trace.log";
+herein
+
+    package guishim_imp_for_x
+#   :       Guishim_Imp													# Guishim_Imp			is from   src/lib/x-kit/widget/theme/guishim-imp.api
+    {															# Dropped above line 2015-02-19 to allow addition of X-specific stuff. We should write an explicit superset API when things settle down.
+	include package   guiboss_to_guishim;										# guiboss_to_guishim		is from   src/lib/x-kit/widget/theme/guiboss-to-guishim.pkg
+	#
+	Imports = {													# Ports we use, provided by other imps.
+		    int_sink: Int -> Void
+		  };
+
+	Exports	= {													# Ports we provide for use by other imps.
+		    guiboss_to_guishim:		Guiboss_To_Guishim,
+		    app_to_guishim_xspecific:	agx::App_To_Guishim_Xspecific
+		  };
+
+	Windowsystem_Egg =  Void -> (Exports,   (Imports, Run_Gun, End_Gun) -> Void);
+
+	Offscreen_Rgb_Buffer_Info
+	  =
+	  { id:		Id,												# This is the gui-level id.
+	    rw_pixmap:	xj::Rw_Pixmap											# X-level pixmap description, including X-level id.
+	  };
+
+	Appwindow_State													# Holds all nonephemeral mutable state maintained by shape.
+	  =
+	  { id:			Id,
+	    state:		Ref( Windowsystem_Needs ),
+	    rw_pixmaps:		Ref (im::Map( xj::Rw_Pixmap ))								# We'll use this to track all currently-existing Xserver-side Rw_Pixmaps. These are created in
+	  };														# response to guiboss requests and used as backing store for windows and scrollable subwindows.
+
+	Me_Slot = Mailslot( { imports:			Imports,
+			      me:			Appwindow_State,
+			      options:			List(Windowsystem_Option),
+			      run_gun':			Run_Gun,
+			      end_gun':			End_Gun,							# Used by widget subthreads to exit when main widget microthread exits.
+# XXX SUCKO FIXME This should probably change to Null_Or(Oneshot_Maildrop(Void))
+# -- the return value was for Paused_Gui which is now gone.
+#			      shutdown_oneshot:		Null_Or(Oneshot_Maildrop(gtg::Windowsystem_Arg)),		# When end_gun fires we save our state in this and exit.
+			      shutdown_oneshot:		Null_Or(Oneshot_Maildrop(Void)),				# When end_gun fires shutdown is signalled via this.
+			      change_callbacks:		Ref(List(Windowsystem_Needs -> Void)),
+			      guishim_callbacks:	List(Guiboss_To_Guishim -> Void)
+			    }
+			  );
+
+
+
+	Runstate = {													# These values will be statically globally visible throughout the code body for the imp.
+		    me:				Appwindow_State,							# State which is preserved across imp shutdown/restart cycles.
+		    options:			List(Windowsystem_Option),
+		    imports:			Imports,								# Imps to which we send requests.
+		    to:				Replyqueue,								# The name makes   foo::pass_something(imp) to {. ... }   syntax read well.
+		    end_gun':			End_Gun,								# Used by widget subthreads to exit when main widget microthread exits.								# We shut down the microthread when this fires.
+#		    shutdown_oneshot:		Null_Or(Oneshot_Maildrop(gtg::Windowsystem_Arg)),			# When end_gun fires we save our state in this and exit.
+		    shutdown_oneshot:		Null_Or(Oneshot_Maildrop(Void)),					# When end_gun fires shutdown is signalled via this.
+		    change_callbacks:		Ref(List(Windowsystem_Needs -> Void)),					#
+		    fire_end_gun:		Void -> Void,
+		    root_window:		rw::Root_Window,
+		    key_mapping:		Ref (Null_Or( k2k::Key_Mapping ) )
+		   };
+
+	Appwindow_Q    = Mailqueue( Runstate -> Void );
+	#
+
+
+	fun start_xsession ()												# Private. Called only from startup().
+	    =
+	    {
+		(au::get_xdisplay_string_and_xauthentication  NULL)
+		    ->
+		    ( display_name:     String,										# Typically from $DISPLAY environment variable.
+		      xauthentication:  Null_Or(xt::Xauthentication)							# Typically from ~/.Xauthority
+		    );
+
+		(make_run_gun ()) ->   { run_gun', fire_run_gun };
+		(make_end_gun ()) ->   { end_gun', fire_end_gun };
+
+		root_window = 	rw::make_root_window  { display_name,
+							xauthentication,
+							run_gun',
+							end_gun'
+						      };
+
+		fire_run_gun ();
+
+		( end_gun':		mailop::End_Gun,
+		  fire_end_gun:		Void -> Void,
+		  root_window:		rw::Root_Window
+		);
+	    };
+
+	fun create_x_window												# Private
+	    (
+	      site:			g2d::Window_Site,
+	      background_pixel:		r8::Rgb8,
+	      border_pixel:		r8::Rgb8,
+	      root_window:		rw::Root_Window,
+	      guievent_sink:		(a2r::Envelope_Route, evt::x::Event) -> Void,
+	      key_mapping:		k2k::Key_Mapping	
+
+	    )
+	    =
+	    {
+		root_window ->  	  { id:					Id,
+					    #
+					    screen:				xj::Screen,
+					    #
+					    make_shade:				rgb::Rgb -> shp::Shades,
+					    make_tile:				String -> rop::Ro_Pixmap,
+					    #
+					    style:				wy::Widget_Style,
+					    next_widget_id:			Void -> Int
+					  }
+					  :					rw::Root_Window
+					  ;
+				
+
+
+		screen ->    		  { xsession:				xj::Xsession,
+					    screen_info:			xj::Screen_Info
+					  }
+					  :					xj::Screen
+					  ;
+
+		screen_info ->		  { xscreen:				dy::Xscreen,
+					    per_depth_imps:			List (xj::Per_Depth_Imps),
+					    rootwindow_per_depth_imps:  	      xj::Per_Depth_Imps
+					  }
+					  :					xj::Screen_Info
+					  ;
+
+		xsession -> 		  { xdisplay:				dy::Xdisplay,          			#  
+					    screens:				List( xj::Screen_Info ),		# Screens attached to this display.  Always a length-1 list in practice.
+
+					    default_screen_info:   		xj::Screen_Info,
+
+					    windowsystem_to_xevent_router:	a2r::Windowsystem_To_Xevent_Router,	# Feeds X events to appropriate toplevel window.
+
+					    font_index:          		fti::Font_Index,
+					    client_to_atom:          		ap::Client_To_Atom,
+
+					    client_to_window_watcher:		wpp::Client_To_Window_Watcher,
+					    client_to_selection:     		sep::Client_To_Selection,
+
+					    windowsystem_to_xserver:		w2x::Windowsystem_To_Xserver,
+#					    xclient_to_sequencer:		x2s::Xclient_To_Sequencer,
+					    xevent_router_to_keymap:		r2k::Xevent_Router_To_Keymap
+					  }
+					  :					xj::Xsession
+					  ;
+
+		xdisplay -> 		  { socket: 				sj::Stream_Socket(Int),			# Actual unix socket fd, wrapped up a bit. The 'Int' part is bogus -- I
+					    #										# don't get what Reppy was trying to do with that phantom type.
+					    name:				String,					# "host: display::screen",     e.g. "foo.com:0.0".
+					    vendor:				String,					# Name of the server's vendor, e.g. 'The X.Org Foundation'.
+
+					    default_screen
+						=>
+						default_screen_number:		Int,					# Number of the default screen.  Always 0 in practice.
+
+					    screens
+						=>
+						display_screens:		List( dy::Xscreen ),			# Screens attached to this display.  Always a length-1 list in practice.
+
+					    pixmap_formats:			List( xt::Pixmap_Format ),
+					    max_request_length:	Int,
+
+					    image_byte_order:			xt::Order,
+					    bitmap_bit_order:			xt::Order,
+
+					    bitmap_scanline_unit:		xt::Raw_Format,
+					    bitmap_scanline_pad:		xt::Raw_Format,
+
+					    min_keycode:			xt::Keycode,
+					    max_keycode:			xt::Keycode,
+
+					    next_xid:				Void -> xt::Xid				# resource id allocator.
+					  }
+					  :					dy::Xdisplay				# Implemented below by spawn_xid_factory_thread() from
+					  ;
+															# src/lib/x-kit/xclient/src/wire/display-old.pkg
+		default_screen =   xj::default_screen_of  xsession;
+
+		screen =  list::nth  (display_screens, default_screen_number);
+
+		screen ->  { root_window_id, root_visual, black_rgb8, white_rgb8, size_in_pixels, size_in_mm, ... }: dy::Xscreen;
+
+		window_id        =  next_xid ();
+
+		window_has_received_first_expose_xevent_oneshot
+			=
+			make_oneshot_maildrop(): Oneshot_Maildrop(Void);
+		#
+		fun wait_until_window_has_received_first_expose_xevent ()
+		    =
+		    get_from_oneshot  window_has_received_first_expose_xevent_oneshot;
+			 
+		seen_first_expose_event_for__window_id
+		    =
+		    REF FALSE;
+
+		#
+		fun xevent_sink												# Snoop on event for local purposes, then forward it to guiboss which will ship it to the appropriate widget (if any).
+		      (
+			route:		a2r::Envelope_Route,
+			event:		xet::x::Event
+		      )
+		    =
+		    {   
+			#
+			case event
+			    #
+			    xet::x::EXPOSE { exposed_window_id:  xt::Window_Id,						# The exposed window. 
+					    boxes:              List( g2d::Box ),					# The exposed rectangle.  The list is
+															# so  that multiple events can be packed. 
+					    count:              Int							# Number of subsequent expose events.
+					  }
+				=>  {
+# printf "xevent_sink(): EXPOSE { exposed_window_id d=%d (window_id d=%d) count d=%d list::length boxes d=%d     -- xclient-unit-test.pkg\n"
+#     (xt::xid_to_int exposed_window_id)
+#     (xt::xid_to_int window_id)
+#     count
+#     (list::length boxes)
+# ;
+					# The X protocol specifies that we should not
+					# send stuff to an X window until we have seen
+					# the first EXPOSE event for it, so we need to
+					# track that carefully:
+					#
+					if  (    (not *seen_first_expose_event_for__window_id)				# Avoid writing more than once to a oneshot!
+					    and  (xt::same_xid  (exposed_window_id, window_id))
+					    )
+					    seen_first_expose_event_for__window_id := TRUE;
+
+					    put_in_oneshot (window_has_received_first_expose_xevent_oneshot, ());	# Unblock ourself (below): When we return, new topwindow will be ready to accept draw commands.
+					fi;
+				    };
+
+			    _   =>  {
+# printf "xevent_sink(): ignoring '%s' x event     -- xclient-unit-test.pkg\n" (e2s::xevent_name event);
+					();
+				    };
+
+			esac;
+
+			guievent = x2g::xevent_to_gui_event (event, key_mapping);
+
+			guievent_sink  (route,  guievent);								# Note conversion from X-specific xet::x::Event to platform-agnostic evt::x::Event format.
+
+		    };
+
+		windowsystem_to_xevent_router.note_new_topwindow
+		  (
+		    window_id,
+		    site,
+		    xevent_sink
+		  );
+
+		case root_visual
+		    #
+		    xt::VISUAL
+		      {
+			visual_id,
+			depth as 24,
+			  red_mask => 0uxFF0000,										# Code currently assumes that we always get this case.
+			green_mask => 0ux00FF00,										# I'm assuming for now that this is a de facto standard. -- 2014-04-06 Cynbe
+			 blue_mask => 0ux0000FF,
+			...
+			}
+                        =>
+                        {
+			    fun create_window   (windowsystem_to_xserver: w2x::Windowsystem_To_Xserver)				# Create a new X-window with the given xid 
+				{
+				  window_id:    	xt::Window_Id,
+				  parent_window_id:	xt::Window_Id,
+				  visual_id:		xt::Visual_Id_Choice,
+				  #	
+				  io_class:		xt::Io_Class,
+				  depth:		Int,
+				  site:			g2d::Window_Site,
+				  attributes:		List( xt::a::Window_Attribute )
+				}
+				=
+				windowsystem_to_xserver.xclient_to_sequencer.send_xrequest  msg
+				where 
+				    msg =   v2w::encode_create_window
+					      {
+						window_id,
+						parent_window_id,
+						visual_id,
+						io_class,
+						depth,
+						site,
+						attributes
+					      };
+				end;
+
+			    create_window   windowsystem_to_xserver								# Create a window on the X server to draw stuff in etc.
+			      {
+				window_id,
+				parent_window_id =>	root_window_id,
+
+				visual_id        =>	xt::SAME_VISUAL_AS_PARENT,
+				#
+				depth,
+				io_class	 =>	xt::INPUT_OUTPUT,
+				#
+				site,												# Requested window-size-in-pixels and position. (Window manager seems to ignore position.)
+				#												# We require that client code provide this info.
+				attributes	 =>     [ xt::a::BORDER_PIXEL     border_pixel,
+							  xt::a::BACKGROUND_PIXEL background_pixel,
+							  xt::a::EVENT_MASK       wi::standard_xevent_mask
+							]
+			      };
+
+			    windowsystem_to_xserver.xclient_to_sequencer.send_xrequest
+				#
+				(v2w::encode_map_window { window_id });								# "map" (make visible) our new window.
+
+
+			    subwindow_or_view
+				=
+				THE (rwp::make_readwrite_pixmap  root_window.screen  (site.size, depth));			# Make a backup pixmap of same size as window; we can use this to redraw canvas contents when window gets EXPOSE event.
+																# Current idea is to make this stuff transparent to the widgets (but not guiboss-imp).
+
+			    wait_until_window_has_received_first_expose_xevent ();
+
+
+			    per_depth_imps = xj::per_depth_imps_for_depth (default_screen, depth);
+
+			    per_depth_imps
+				->
+				{ depth:			Int,
+				  windowsystem_to_xserver:	w2x::Windowsystem_To_Xserver,					# The xpacket encoder  for this depth on this screen.
+				  window_map_event_sink:	wme::Window_Map_Event_Sink
+				}												#
+				:				xj::Per_Depth_Imps    
+				;
+
+			    window												# Create a client-side window to represent our new X server window.
+			      =
+			      { window_id,
+				screen => default_screen,
+				per_depth_imps,
+				windowsystem_to_xserver,
+				subwindow_or_view
+			      }
+			      : xj::Window;
+
+			    window;
+			};
+
+		    xt::VISUAL { visual_id, depth, red_mask, green_mask, blue_mask, ... }
+                        =>
+                        {   printf      "This code assumes root visual has depth=24 red_mask=0xff0000 green_mask=0x00ff00 blue_mask=0x0000ff\n\
+					\but actually the  root visual has depth=%d red_mask=0x%06x green_mask=0x%06x blue_mask=0x%06x  -- guishim-imp-for-x.pkg\n"  depth  (unt::to_int red_mask)  (unt::to_int green_mask)  (unt::to_int blue_mask);
+			    raise exception FAIL "Unsupported X visual. -- guishim-imp-for-x.pkg";
+			};
+
+		    xt::NO_VISUAL_FOR_THIS_DEPTH int
+                        =>
+                        {   # This case should never happen.
+			    raise exception FAIL "root_visual is NO_VISUAL_FOR_THIS_DEPTH?! -- guishim-imp-for-x.pkg";
+			};
+		esac;
+	    };
+	#
+	fun convert_displaylist_to_drawoplist
+	      (
+		to:		xt::Window_Id,										# This will currently be either   window.window_id   or   (the window.subwindow_or_view).pixmap_id.
+		root_window:	rw::Root_Window,
+		ops:		gd::Gui_Displaylist,
+		rw_pixmaps:	im::Map( xj::Rw_Pixmap )								# All currently-existing Xserver-side Rw_Pixmaps.
+
+	      )
+	    =
+	    # Convert the platform-independent  Gui_Displaylist  format from   src/lib/x-kit/widget/theme/gui-displaylist.pkg
+	    # into    the        X-specific     List(Draw_Op)    format from   src/lib/x-kit/xclient/src/window/windowsystem-to-xserver.pkg
+	    #
+	    # The former is hierarchical and the latter linear,
+	    # so part of the job is flattening the tree. Also,
+	    # the latter uses 'pens' to represent color etc,	 pen is from   src/lib/x-kit/xclient/src/window/pen.pkg
+	    # so we need to construct those as we go along:
+	    #
+	    {
+		font 	  =  [ "fixed" ];			# A safe default.  For a list of standard X short font names do   find /usr -name fonts.alias   -- look for one in a directory named "misc".
+		pen       =  pen::default_pen;
+		draw_text =  gd::TO_RIGHT_OF_POINT;		# 
+		#
+		ops  = do_ops (pen, font, draw_text, ops, []);
+		#
+		reverse ops;					# do_ops produces a result list in reverse order of original 'ops' list, so here we reverse to restore original order.
+	    }
+	    where
+		not_relative = FALSE;				# We're not supporting or using the X relative-draw mode, in which the coordinates of each point are relative to the previous one. 
+		#
+		fun find_or_open_font [] =>   NULL;
+		    #
+		    find_or_open_font (font ! rest)
+			=>
+			case (root_window.screen.xsession.windowsystem_to_xserver.find_else_open_font  font)
+			    #
+			    NULL =>  find_or_open_font  rest;
+			    font =>  font;
+			esac;
+		end;
+
+		fun do_angle (angle: Float)
+		    =
+		    if   (angle <   0.0)   do_angle (angle + 360.0);
+		    elif (angle > 360.0)   do_angle (angle - 360.0);
+		    else                             angle;
+		    fi;
+
+		fun do_arc ({ row, col, high, wide, start_angle, fill_angle }: g2d::Arc)
+		    =
+		    { row, col, high, wide,
+		      #
+		      angle1 =>  float::round ((do_angle start_angle) * 64.0),
+		      angle2 =>  float::round ((do_angle  fill_angle) * 64.0)
+		    }
+		    : g2d::Arc64;
+
+		fun do_ops (pen, font, draw_text,        [], result) =>			                                                 result  ;
+		    do_ops (pen, font, draw_text, op ! rest, result) =>  do_ops (pen, font, draw_text, rest, do_op(pen,font,draw_text,op,result));
+		end
+		also
+		fun do_op (pen, font, draw_text, op, result)
+		    =
+		    case op
+			#
+			gd::POINTS	   (points: List(g2d::Point)) =>  { to, pen, op => w2x::x::POLY_POINT    (                   not_relative,                       points) }  !  result;
+			#
+			gd::PATH           (points: List(g2d::Point)) =>  { to, pen, op => w2x::x::POLY_LINE     (                   not_relative,                       points) }  !  result;
+			gd::POLYGON        (points: List(g2d::Point)) =>  { to, pen, op => w2x::x::POLY_LINE     (                   not_relative, (list::last points) ! points) }  !  result;
+			gd::FILLED_POLYGON (points: List(g2d::Point)) =>  { to, pen, op => w2x::x::FILL_POLY     (xt::COMPLEX_SHAPE, not_relative,                       points) }  !  result;
+			#
+			gd::LINES          (lines:  List(g2d::Line )) =>  { to, pen, op => w2x::x::POLY_SEG      (                                                       lines ) }  !  result;
+			#
+			gd::BOXES          (boxes:  List(g2d::Box  )) =>  { to, pen, op => w2x::x::POLY_BOX      (                                                       boxes ) }  !  result;
+			gd::FILLED_BOXES   (boxes:  List(g2d::Box  )) =>  { to, pen, op => w2x::x::POLY_FILL_BOX (                                                       boxes ) }  !  result;
+			#
+			gd::ARCS           (arcs:   List(g2d::Arc  )) =>  { to, pen, op => w2x::x::POLY_ARC      (		                            map  do_arc  arcs  ) }  !  result;
+			gd::FILLED_ARCS    (arcs:   List(g2d::Arc  )) =>  { to, pen, op => w2x::x::POLY_FILL_ARC (                                          map  do_arc  arcs  ) }  !  result;
+			#
+#			gd::CLEAR_AREA     (box:         g2d::Box   ) =>  { to, pen, op => w2x::x::CLEAR_AREA    (                                                       box   ) }  !  result;
+			#
+			gd::FONT  ( font:	List(String),								# X fontnames like "fixed" or "-misc-fixed-medium-r-semicondensed--13-120-75-75-c-60-iso8859-1" -- see eg /usr/share/fonts/X11/misc/fonts.alias
+				    ops:	List(gd::Draw_Op)							# TEXTs in 'ops' will be drawn in first font in FONT list which is found on X server. The best fonts are optional, hence the list: put best-first, most-common last.
+				  )
+			    =>												# 
+			    do_ops (pen, font, draw_text, ops, result);							# Process the sublist with the new fontlist.
+
+			#
+			gd::IMAGE { from_box:	Null_Or( g2d::Box ),							# Take this subrectangle (default: all)
+				    from:	mtx::Rw_Matrix( r8::Rgb8 ),						# from this pixel array
+				    to_point:	g2d::Point								# and write it to this point in window.
+				  }
+			    =>
+			    {   from_box =  case from_box
+						#
+						THE from_box => from_box;						# Should we do some validation here?	XXX QUERO FIXME
+						#
+						NULL	     => {   (mtx::rowscols from) -> (high, wide);
+								    { row => 0, col => 0, high, wide };
+								};
+					    esac;
+
+				draw_ops = cpt::make_clientside_pixmat_to_pixmap_copy_drawop 				# cs_pixmat			is from   src/lib/x-kit/xclient/src/window/cs-pixmat.pkg
+					      to
+					      root_window.screen.xsession.xdisplay
+					      { from, from_box, to_point };
+
+				draw_ops @ result;									# 
+			    };
+
+			gd::TEXT
+				  ( point:	g2d::Point,								# Where to draw the text.
+				    text:	String									# Text to draw.
+				  )
+			    =>
+			    case (find_or_open_font (font @ [ "fixed" ]))						# X server is required to have "fixed" so appending it saves us from dealing with "none of listed fonts are available" situations.
+				#
+				NULL     => result;									# No font found, ignore.  Probably should log a warning here, but X server is required to have "fixed", so the probability of arriving here is very low. XXX SUCKO FIXME.
+				#
+				THE font => {   fun do_text (text, result)						# Break 'text' up into a list of   w2x::t::TEXT(0,text)   elements, where each 'text' has length <= 254.
+						    =
+						    if (string::length text < 255)					# Max allowed w2x::t::TEXT length for X protocol is 254, see check in   encode_poly_text8/encode  in   src/lib/x-kit/xclient/src/wire/value-to-wire-pith.pkg
+							#
+							reverse (w2x::t::TEXT (0, text) ! result);			# The 'reverse' returns the parts of the string to original order.
+						    else								# The '0' is 'delta', extra space inserted before text:  See PolyText8 page in  http://mythryl.org/pub/exene/X-protocol-R6.pdf
+							first =  string::substring (text,   0, 250);			# First part of string: Per above URL must be <= 254 bytes in length
+							rest  =  string::extract   (text, 250, NULL);			# Rest of string.
+							#
+							do_text (rest, (w2x::t::TEXT (0, first)) ! result);
+						    fi;
+
+						textlen =  fb::text_width  font  text;
+
+						point -> { row, col };
+
+						point = case draw_text
+							    #
+							    gd::TO_RIGHT_OF_POINT => { row, col                    };	
+							    gd::CENTERED_ON_POINT => { row, col => col - textlen/2 };
+							    gd::TO_LEFT_OF_POINT  => { row, col => col - textlen   };	
+							esac;
+
+						op =   w2x::x::POLY_TEXT8 (font.id, point, do_text(text,[]));
+						#
+
+						{ to, pen, op }  ! result;
+					    };
+			    esac;						
+
+			gd::COPY_BOX { to_point: g2d::Point, from_box: g2d::Box }
+			    =>
+			    { to,  pen,  op => w2x::x::COPY_AREA (to_point, to, from_box) }   !   result;
+
+			gd::COPY_FROM_RW_PIXMAP { to_point: g2d::Point, from_box: g2d::Box, from_id: Id }
+			    =>
+			    case (im::get (rw_pixmaps, id_to_int from_id))
+				    #
+				    THE r =>    { to,  pen,  op => w2x::x::COPY_AREA (to_point, r.pixmap_id, from_box) }   !   result;
+				    #
+				    NULL  =>    {   log::warn {. "COPY_FROM_RW_PIXMAP.rw_pixmap not found in me.rw_pixmaps: Ignoring. -- convert_displaylist_to_drawoplist in guishim-imp-for-x.pkg"; };
+						    result;
+						};
+			    esac;
+
+			gd::COLOR ( color:	r64::Rgb,								# Use this color
+				    ops:	List(gd::Draw_Op)							# when drawing these ops.
+				  )
+			    =>
+			    {   color =  r8::rgb8_from_rgb  color;							# Convert color from float to byte representation.
+			    	#
+				pen = pen::clone_pen (pen, [ pen::p::FOREGROUND color ]);				# Construct a new pen identical to the previous one except for using the new color.
+
+				do_ops (pen, font, draw_text, ops, result);						# Process the sublist with the new pen.
+			    };
+
+			gd::CLIP_TO
+				  ( box:	g2d::Box,								# Clip everything outside this box
+				    ops:	List(gd::Draw_Op)							# when drawing these ops.
+				  )
+			    =>
+			    {   pen = pen::clone_pen (pen, [ pen::p::CLIP_MASK_UNSORTED_BOXES [ box ] ]);		# Construct a new pen identical to the previous one except for using the new line clip box.
+				#
+				do_ops (pen, font, draw_text, ops, result);						# Process the sublist with the new pen.
+			    };
+
+			gd::LINE_THICKNESS
+				  ( thickness:	Int,									# Draw in this thickness
+				    ops:	List(gd::Draw_Op)							# when drawing these ops.
+				  )
+			    =>
+			    {   pen = pen::clone_pen (pen, [ pen::p::LINE_WIDTH thickness ]);				# Construct a new pen identical to the previous one except for using the new line thickness.
+				#
+				do_ops (pen, font, draw_text, ops, result);						# Process the sublist with the new pen.
+			    };
+
+			gd::PUT_TEXT
+				  ( put_text:	gd::Put_Text,								# Draw ops text (TO_RIGHT_OF_POINT | CENTERED_ON_POINT | TO_LEFT_OF_POINT) relative to text point.
+				    ops:	List(gd::Draw_Op)							# when drawing these ops.
+				  )
+			    =>
+			    do_ops (pen, font, put_text, ops, result);							# Process the sublist with the text-justification setting.
+		    esac;
+	    end;
+
+	#
+	fun run (
+		  appwindow_q:			Appwindow_Q,		
+		  #
+		  runstate as
+		    {													# These values will be statically globally visible throughout the code body for the imp.
+		      me:			Appwindow_State,							# State which is preserved across imp shutdown/restart cycles.
+		      options:			List(Windowsystem_Option),
+		      imports:			Imports,								# Imps to which we send requests.
+		      to:			Replyqueue,								# The name makes   foo::pass_something(imp) to {. ... }   syntax read well.
+		      end_gun':			End_Gun,								# Used by widget subthreads to exit when main widget microthread exits.								# We shut down the microthread when this fires.
+#		      shutdown_oneshot:		Null_Or(Oneshot_Maildrop(gtg::Windowsystem_Arg)),			# When end_gun fires we save our state in this and exit.
+		      shutdown_oneshot:		Null_Or(Oneshot_Maildrop(Void)),					# When end_gun fires shutdown is signalled via this.
+		      change_callbacks:		Ref(List(Windowsystem_Needs -> Void)),					#
+		      fire_end_gun:		Void -> Void,
+		      root_window:		rw::Root_Window,
+		      key_mapping:		Ref (Null_Or (k2k::Key_Mapping ) )
+		    }
+		)
+	    =
+	    loop ()
+	    where
+		#
+		fun loop ()												# Outer loop for the imp.
+		    =
+		    {   do_one_mailop' to [
+			    #
+			    (end_gun'                            ==>  shut_down_appwindow_imp'),
+			    (take_from_mailqueue' appwindow_q    ==>  do_appwindow_plea)
+			];
+
+			loop ();
+		    }	
+		    where
+			fun do_appwindow_plea  thunk
+			    =
+			    thunk runstate;
+
+			#
+			fun shut_down_appwindow_imp' ()
+			    =
+			    {   fire_end_gun ();
+				#
+				case shutdown_oneshot									# Pass our state back to guiboss to allow later impnet restart without state loss.
+				    #
+				    NULL	=> ();
+				    THE oneshot => put_in_oneshot (oneshot, ());					# 
+				esac;
+
+
+				thread_exit { success => TRUE };							# Will not return.
+			    };
+		    end;
+	    end;	
+
+
+	#
+	fun startup   (id: Id,  reply_oneshot:  Oneshot_Maildrop( (Me_Slot, Exports) ))   ()				# Root fn of imp microthread.  Note currying.
+	    =
+	    {   me_slot  =  make_mailslot  ()	:  Me_Slot;
+		#
+		guiboss_to_guishim
+		  =
+		  { id,
+		    make_topwindow,
+		    make_rw_pixmap,
+		    root_window_size
+		  };
+
+		app_to_guishim_xspecific
+		  =
+		  { id,
+		    list_extensions,
+		    list_fonts
+		  };
+
+		to          =  make_replyqueue();
+		#
+		put_in_oneshot (reply_oneshot, (me_slot, { guiboss_to_guishim, app_to_guishim_xspecific }));		# Return value from windowsystem_egg'().
+
+		(take_from_mailslot  me_slot)										# Imports from windowsystem_egg'().
+		    ->
+		    { me, options, imports,
+		      run_gun', end_gun',
+		      shutdown_oneshot, change_callbacks, guishim_callbacks
+		    };
+
+# XXX BUGGO FIXME This code is sub-optimal in that:
+# 1) We never verify that the window manager gave us the window size (or position) that we requested,
+# 2) We don't track changes in window size or position.
+# 3) We probably should allow client code to specify whether to allow size changes,
+#    but I forget what the X API is for doing that.  -- 2014-04-06 CrT
+
+		apply   {. #callback guiboss_to_guishim; }   guishim_callbacks;						# Pass our port to everyone who asked for it.
+		apply   {. #callback *me.state;          }   *change_callbacks;						# Pass our initial state to everyone who is change-subscribed.
+
+		block_until_mailop_fires  run_gun';									# Wait for the starting gun.
+
+		(start_xsession ())
+		    ->
+		    (end_gun', fire_end_gun, root_window);
+
+		run (													# Will not return.
+		      appwindow_q,
+		      #
+		      {													# Runstate
+			me,
+			options,
+			imports,
+			to,
+			end_gun',
+			shutdown_oneshot,
+			change_callbacks,
+			fire_end_gun,
+			root_window,
+			key_mapping => REF (NULL: Null_Or( k2k::Key_Mapping ) )						# It would be nice to generate 'key_mapping' right after above start_xession,
+		      }													# but that leads to odd circularity issues centering on xevent_sink(),
+		    );													# so we settle for generating it later in make_topwindow().
+	    }
+	    where
+		appwindow_q     =  make_mailqueue (get_current_microthread()):  Appwindow_Q;
+		#
+		fun list_extensions ()											# Note that gadget_to_rw_pixmap and guiboss_to_topwindow interfaces write to the same appwindow_q, so
+		    =													# we should have no race conditions if guiboss writes to both in sequence: they will draw in sequence.
+		    {
+			reply_oneshot =  make_oneshot_maildrop():  Oneshot_Maildrop( List(String) );
+			#
+			put_in_mailqueue  (appwindow_q,
+			    #
+			    \\ ({ me, root_window, key_mapping, ... }: Runstate)
+				=
+				{   request =   value_to_wire::request_list_extensions;
+				    #
+				    req'    =   root_window.screen.xsession.windowsystem_to_xserver.xclient_to_sequencer.send_xrequest_and_read_reply
+						    #
+						    request;
+
+				    result  =   block_until_mailop_fires  req';						# XXX SUCKO FIXME. Blocking here isn't really good form.
+
+				    result  =   w2v::decode_list_extensions_reply  result;
+				    
+				    put_in_oneshot (reply_oneshot, result);
+				}
+			);
+
+			get_from_oneshot reply_oneshot;
+		    };
+
+
+		fun list_fonts (arg: { max: Int,  pattern: String })							# 
+		    =													# 
+		    {
+			reply_oneshot =  make_oneshot_maildrop():  Oneshot_Maildrop( List(String) );
+			#
+			put_in_mailqueue  (appwindow_q,
+			    #
+			    \\ ({ me, root_window, key_mapping, ... }: Runstate)
+				=
+				{   request =   value_to_wire::encode_list_fonts  arg;
+				    #
+				    req'    =   root_window.screen.xsession.windowsystem_to_xserver.xclient_to_sequencer.send_xrequest_and_read_reply
+						    #
+						    request;
+
+				    result  =   block_until_mailop_fires  req';						# XXX SUCKO FIXME. Blocking here isn't really good form.
+
+				    result  =   w2v::decode_list_fonts_reply  result;
+				    
+				    put_in_oneshot (reply_oneshot, result);
+				}
+			);
+
+			get_from_oneshot reply_oneshot;
+		    };
+
+
+
+		fun make__gadget_to_rw_pixmap
+		      (
+			me:		Appwindow_State,
+			size:		g2d::Size,
+			depth:		Int,
+			root_window:	rw::Root_Window,
+			rw_pixmap:	xj::Rw_Pixmap
+		      )
+		    =
+		    {	valid = REF TRUE;
+			#
+			fun draw_displaylist (displaylist:  gd::Gui_Displaylist)					# PUBLIC.
+			    =	
+			    if *valid
+				#
+				put_in_mailqueue  (appwindow_q,
+				    #
+				    \\ (r: Runstate)
+					=
+					root_window.screen.xsession.windowsystem_to_xserver.draw_ops
+					    #
+					    (convert_displaylist_to_drawoplist
+						(rw_pixmap.pixmap_id, root_window, displaylist, *me.rw_pixmaps))
+				);
+			    fi;
+
+			fun get_pixel_rectangle (rectangle_to_read: g2d::Box)
+			    =
+			    if *valid
+				#
+				rw_matrix_rgb8
+				    =
+				    cpt::make_clientside_pixmat_from_readwrite_pixmap (rectangle_to_read, rw_pixmap);	# Read selected part of our pixmap from X server.
+				#
+				rw_matrix_rgb8;
+			    else
+				msg = "get_pixel_rectangle: rw-pixmap has been free_rw_pixmap()'d! -- guishim-imp-for-x.pkg";
+				log::fatal msg;
+				raise exception FAIL msg;
+			    fi;
+
+			fun pass_pixel_rectangle
+				#
+				(rectangle_to_read:	g2d::Box)
+				(to:			Replyqueue)
+				(sink_fn:		mtx::Rw_Matrix(r8::Rgb8) -> Void)
+			    =
+			    if *valid
+				#
+				cpt::pass_clientside_pixmat_from_readwrite_pixmap					# Read selected part of our pixmap from X server.
+				    (rectangle_to_read, rw_pixmap)
+				    to
+				    sink_fn;
+			    fi;
+
+			id =  issue_unique_id();
+
+			fun free_rw_pixmap ()
+			    =
+			    {   valid := FALSE;										# Ignore all further calls to this pixmap (since the X-server side pixmap is about to be destroyed).
+				#
+				rwp::destroy_rw_pixmap  rw_pixmap;							# Destroy the X-server side pixmap.
+
+				me.rw_pixmaps :=  im::drop  (*me.rw_pixmaps,  id_to_int id);				# Drop the gadget_to_rw_pixmap instance from our index.
+			    };
+
+
+			{ id,												# We want every guiboss_to_rw_pixmap.id value to be unique within the running Mythryl process (address space).
+			  #												# Consequently we don't use our microthread 'id' here because we will typically have multiple topwindows per windowsystem imp.
+			  #												# Similarly    We don't use window.window_id here because we might have multiple windowsystem imps talking to different
+			  #												# X servers, two of which might issue identical window.window_id values.
+			  size,
+			  #
+			  draw_displaylist,
+			   get_pixel_rectangle,
+			  pass_pixel_rectangle,
+			  free_rw_pixmap
+			};
+		    };
+
+		#
+		fun make_rw_pixmap (size: g2d::Size)									# Note that gadget_to_rw_pixmap and guiboss_to_topwindow interfaces write to the same appwindow_q, so
+		    =													# we should have no race conditions if guiboss writes to both in sequence: they will draw in sequence.
+		    {
+			reply_oneshot =  make_oneshot_maildrop():  Oneshot_Maildrop( g2p::Gadget_To_Rw_Pixmap );
+			#
+			put_in_mailqueue  (appwindow_q,
+			    #
+			    \\ ({ me, root_window, key_mapping, ... }: Runstate)
+				=
+				{
+# Args: me size depth root_window appwindow_q rw_pixmap
+
+				    depth = 24;											# Currently we hardwire this.
+
+				    rw_pixmap =  rwp::make_readwrite_pixmap  root_window.screen  (size, depth);			# Make an Xserver-side readwrite pixmap for use by guiboss as backing store for a scrollable area or such.
+
+				    gadget_to_rw_pixmap
+					=
+					make__gadget_to_rw_pixmap (me, size, depth, root_window, rw_pixmap);
+
+				    me.rw_pixmaps :=  im::set  (*me.rw_pixmaps,  id_to_int gadget_to_rw_pixmap.id,  rw_pixmap);
+				    
+				    put_in_oneshot (reply_oneshot, gadget_to_rw_pixmap);
+				}
+			);
+
+			get_from_oneshot reply_oneshot;
+		    };
+
+		fun root_window_size ()
+		    =
+		    {
+			reply_oneshot =  make_oneshot_maildrop():  Oneshot_Maildrop(  { root_window_size_in_pixels:	g2d::Size,
+											root_window_size_in_mm:		g2d::Size
+										      }	
+										   );
+			#
+			put_in_mailqueue  (appwindow_q,
+			    #
+			    \\ ({ me, root_window, key_mapping, ... }: Runstate)
+				=
+				{   xsession =  root_window.screen.xsession;
+				    #
+				    xsession.xdisplay
+				      ->
+				      { default_screen =>  default_screen_number:		Int,					# Number of the default screen.  Always 0 in practice.
+					screens        =>  display_screens:			List( dy::Xscreen ),			# Screens attached to this display.  Always a length-1 list in practice.
+							    ...
+				      }
+				      :								dy::Xdisplay				# src/lib/x-kit/xclient/src/wire/display.pkg
+				      ;
+
+				    screen =  list::nth  (display_screens, default_screen_number);
+
+				    screen ->  { size_in_pixels, size_in_mm, ... }: dy::Xscreen;
+				    
+				    result =  { root_window_size_in_pixels => size_in_pixels,
+						root_window_size_in_mm	   => size_in_mm
+					      };
+
+				    put_in_oneshot (reply_oneshot, result);
+				}
+			);
+
+			get_from_oneshot reply_oneshot;
+		    };
+
+		#
+		fun make_topwindow
+		      (
+			topwindow_hints:	gtg::Topwindow_Hints,
+			guievent_sink:		(a2r::Envelope_Route, evt::x::Event) -> Void
+
+		      )
+		    =
+		    {
+			stipulate
+			    #
+			    fun process_hints (hints: List(gtg::Topwindow_Hint), { site, background_pixel, border_pixel })
+				=
+				{   my_site			=  REF site;
+				    my_background_pixel		=  REF background_pixel;
+				    my_border_pixel		=  REF border_pixel;
+
+				    apply  do_hint  hints
+				    where
+					fun do_hint (gtg::SITE		   s)  =>  my_site			:=  s;
+					    do_hint (gtg::BACKGROUND_PIXEL p)  =>  my_background_pixel		:=  p;
+					    do_hint (gtg::BORDER_PIXEL     p)  =>  my_border_pixel		:=  p;
+					end;
+				    end;
+
+				    { site		=>  *my_site,
+				      background_pixel	=>  *my_background_pixel,
+				      border_pixel	=>  *my_border_pixel
+				    };
+				};
+			herein
+
+			    (process_hints
+			      (
+			        topwindow_hints,
+				#
+				{ site => { upperleft		=>  { col =>    0, row  =>   0 },
+					    size		=>  { wide => 800, high => 600 },
+					    border_thickness	=>  1
+					  }: g2d::Window_Site,
+
+				  background_pixel	=>  r8::rgb8_from_ints (16, 128+32, 32),	# Slightly desaturated green.
+				  border_pixel		=>  r8::rgb8_from_ints (0,       0,  0)		# Black.
+				}
+			    ) )
+			      ->
+				{ site:			g2d::Window_Site,
+				  background_pixel:	r8::Rgb8,
+				  border_pixel:		r8::Rgb8
+				};
+			end;
+
+
+
+			reply_oneshot =  make_oneshot_maildrop():  Oneshot_Maildrop( gtg::Guiboss_To_Topwindow );
+			#
+			put_in_mailqueue  (appwindow_q,
+			    #
+			    \\ ({ me, root_window, key_mapping, ... }: Runstate)
+				=
+				{
+				    key_mapping'
+					=
+					case *key_mapping
+					    #
+					    THE km => km;
+
+					    NULL => {   km =    k2k::create_key_mapping
+								  (
+								    root_window.screen.xsession.windowsystem_to_xserver.xclient_to_sequencer,
+								    root_window.screen.xsession.xdisplay
+								  );
+
+							key_mapping = THE km;
+
+							km;
+						    };
+					esac;
+							    
+
+
+				    (create_x_window (site, background_pixel, border_pixel, root_window, guievent_sink, key_mapping'))
+					->
+					(window:	xj::Window);									# New topwindow.
+
+
+				    depth     =  24;
+				    size      =  site.size; 
+				    rw_pixmap =  the window.subwindow_or_view;
+
+				    gadget_to_rw_pixmap
+					=
+					make__gadget_to_rw_pixmap (me, size, depth, root_window, rw_pixmap);
+
+				    me.rw_pixmaps :=  im::set  (*me.rw_pixmaps,  id_to_int gadget_to_rw_pixmap.id,  rw_pixmap);
+
+
+				    # The following fns are defined here so that
+				    # they can lock in the above 'window' value:
+				    #
+				    fun subscribe_to_changes   callback									# PUBLIC.
+					=	
+					put_in_mailqueue  (appwindow_q,
+					    #
+					    \\ ({ change_callbacks, ... }: Runstate)
+						=
+						change_callbacks :=  callback ! *change_callbacks
+					);
+
+				    stipulate
+					fun find_or_open_font [] =>   NULL;
+					    #
+					    find_or_open_font (font ! rest)
+						=>
+						case (window.windowsystem_to_xserver.find_else_open_font  font)
+						    #
+						    NULL =>  find_or_open_font  rest;
+						    font =>  font;
+						esac;
+					end;
+
+					fun find_font
+						( reply_oneshot:	Oneshot_Maildrop( evt::Font ),
+						  font:			List(String)
+						)
+					    =
+					    {   make_thread														# We spin off a microthread to do the rest because we may wind up doing multiple
+						    "find_font"														# round-trips to the X server, and we don't want to lock up caller for that long.
+						    {.
+							id = issue_unique_id ();
+							#
+							result =    case (find_or_open_font (font @ [ "fixed" ]))							# X server is required to have "fixed" so appending it saves us from dealing with "none of listed fonts are available" situations.
+									#
+									THE font => {   (fb::font_high font) ->   font_height as { ascent, descent };
+											#
+											fun string_length_in_pixels (string: String)
+											    =
+											    fb::text_width  font  string;						# Is this fast, or does it go through some imp, in which case we should devise some sort of bypass?  XXX QUERO FIXME.
+
+											{ id, font_height, string_length_in_pixels };
+										    };
+
+									NULL     => {   font_height = { ascent => 0, descent => 0 };					# No font found, return nonsense.  Should maybe log a warning, but since X is required to have "fixed", chance of getting here is very low. XXX SUCKO FIXME.
+											#
+											fun string_length_in_pixels (string: String)
+											    =
+											    0;
+
+											{ id, font_height, string_length_in_pixels };
+										    };
+								    esac;	
+
+							put_in_oneshot (reply_oneshot, result);
+						    };
+					    };
+				    herein
+					#
+					fun get_font (font: List(String))								# PUBLIC.
+					    =
+					    {   reply_oneshot   =  make_oneshot_maildrop ()
+								:  Oneshot_Maildrop( evt::Font );
+
+						find_font (reply_oneshot, font);
+
+						(get_from_oneshot  reply_oneshot);
+					    };
+
+					fun pass_font 											# PUBLIC.
+						(font:			List(String))
+						(replyqueue:		Replyqueue)
+						(reply_handler:		evt::Font -> Void)
+					    =
+					    {   reply_oneshot =  make_oneshot_maildrop()
+							      :  Oneshot_Maildrop( evt::Font );
+
+						find_font (reply_oneshot, font);
+
+						put_in_replyqueue (replyqueue, (get_from_oneshot' reply_oneshot) ==> reply_handler);
+					    };
+				    end;
+
+				    #
+				    fun draw_displaylist (displaylist:  gd::Gui_Displaylist)						# PUBLIC.
+					=	
+					{
+					    put_in_mailqueue  (appwindow_q,
+						#
+						\\ (r: Runstate)
+						    =
+						    {   window.windowsystem_to_xserver.draw_ops
+							    #
+							    (convert_displaylist_to_drawoplist
+								(window.window_id, root_window, displaylist, *me.rw_pixmaps));
+						    }
+					    );
+					};
+
+# XXX BUGGO FIXME Currently we return the requested site for the window,
+# which may be totally different from that actually assigned by the window manager.
+# Also, it should be passed to make_topwindow(), see comments there. 
+				    #
+				    fun get_window_site (): g2d::Window_Site								# PUBLIC.
+					=
+					{   reply_oneshot =  make_oneshot_maildrop():  Oneshot_Maildrop( g2d::Window_Site );
+					    #
+					    put_in_mailqueue  (appwindow_q,
+						#
+						\\ ({ me, ... }: Runstate)
+						    =
+						    put_in_oneshot (reply_oneshot, site)
+					    );
+
+					    get_from_oneshot  reply_oneshot;
+					};
+
+				    #
+				    fun pass_window_site (replyqueue: Replyqueue)  (reply_handler: g2d::Window_Site -> Void)		# PUBLIC.
+					=
+					{   reply_oneshot =  make_oneshot_maildrop():  Oneshot_Maildrop( g2d::Window_Site );
+					    #
+					    put_in_mailqueue  (appwindow_q,
+						#
+						\\ ({ me, ... }: Runstate)
+						    =
+						    put_in_oneshot (reply_oneshot, site)
+					    );
+
+					    put_in_replyqueue (replyqueue, (get_from_oneshot' reply_oneshot) ==> reply_handler);
+					};
+
+
+# XXX SUCKO FIXME The functionality of the following two calls
+# should eventually migrate to (say) src/lib/x-kit/widget/widget-unit-test.pkg
+# so as to not clutter up core code with unit-test stuff.
+# These are currently here for purely historical reasons:
+				    #
+				    fun pass_appwindow_exercise_results  (replyqueue: Replyqueue)  (reply_handler: Int -> Void)		# PUBLIC.
+					=
+					{   reply_oneshot =  make_oneshot_maildrop():  Oneshot_Maildrop( Int );
+
+					    put_in_mailqueue  (appwindow_q,
+						#
+						\\ (r: Runstate)
+						    =
+						    {   exa::exercise_x_appwindow  window;
+							#
+							put_in_oneshot (reply_oneshot, 0);
+						    }
+					    );
+
+					    put_in_replyqueue (replyqueue, (get_from_oneshot' reply_oneshot) ==> reply_handler);
+					};
+				    #
+				    fun exercise_appwindow ()										# PUBLIC.
+					=	
+					{   reply_oneshot =  make_oneshot_maildrop():  Oneshot_Maildrop( Void );
+					    #
+					    put_in_mailqueue  (appwindow_q,
+						#
+						\\ (r: Runstate)
+						    =
+						    {   exa::exercise_x_appwindow  window;
+							#
+							put_in_oneshot (reply_oneshot, ());
+						    }
+					    );
+
+					    \\ () = get_from_oneshot reply_oneshot;							# Return a thunk which will wait until exercise is complete.
+					};
+
+
+				    fun send_fake_key_press_event									# Make 'window' receive a (faked) keyboard keypress at 'point'.
+					  (
+					    keycode:	evt::Keycode,									#  Keyboard key just "pressed down".
+					    point:	g2d::Point
+					  )
+					=
+					{   keycode =  g2x::gui_keycode_to_x_keycode  keycode;
+					    #
+# window.windowsystem_to_xserver.draw_ops
+# windowsystem_to_xserver.xclient_to_sequencer
+# xclient_to_sequencer	src/lib/x-kit/xclient/src/wire/xclient-to-sequencer.pkg
+#	    send_xrequest_and_read_reply:			v1u::Vector -> Mailop( v1u::Vector ),
+#	    send_xrequest_and_pass_reply:			v1u::Vector -> Replyqueue -> (v1u::Vector -> Void) -> Void,
+#	    send_xrequest_and_read_reply':			(v1u::Vector, Oneshot_Maildrop(Reply_Mail)) -> Void,
+
+
+					    xj::send_fake_key_press_xevent
+						#
+						window.screen.xsession
+						#
+						{ window, keycode, point };
+					};
+
+				    fun send_fake_key_release_event									# Make 'window' receive a (faked) keyboard key release at 'point'.
+					  (
+					    keycode:	evt::Keycode,									#  Keyboard key just "released".
+					    point:	g2d::Point
+					  )
+					=
+					{   keycode =  g2x::gui_keycode_to_x_keycode  keycode;
+					    #
+					    xj::send_fake_key_release_xevent
+						#
+						window.screen.xsession
+						#
+						{ window, keycode, point };
+					};
+
+				    fun send_fake_mousebutton_press_event								# Make 'window' receive a (faked) mousebutton click at 'point'.
+					  (
+					    button:	evt::Mousebutton,								# Mouse button just "clicked down".
+					    point:	g2d::Point
+					  )
+					=
+					{   button =  g2x::gui_mousebutton_to_x_mousebutton  button;
+					    #
+					    xj::send_fake_mousebutton_press_xevent
+						#
+						window.screen.xsession
+						#
+						{ window, button, point };
+					};
+
+
+				    fun send_fake_mousebutton_release_event								# Counterpart of previous:  make 'window' receive a (faked) mousebutton release at 'point'.
+					  (
+					    button:	evt::Mousebutton,								# Mouse button just "released".
+					    point:	g2d::Point
+					  )
+					=
+					{   button =  g2x::gui_mousebutton_to_x_mousebutton  button;
+					    #
+					    xj::send_fake_mousebutton_release_xevent
+						#
+						window.screen.xsession
+						#
+						{ window, button, point };
+					};
+
+				    fun send_fake_mouse_motion_event									# Make window receive a (faked) mouse "drag".
+					  (
+					    buttons:	List(evt::Mousebutton),								# Mouse button(s) being "dragged".
+					    point:	g2d::Point
+					  )
+					=
+					{   buttons =  map  g2x::gui_mousebutton_to_x_mousebutton  buttons;
+					    #
+					    xj::send_fake_mouse_motion_xevent
+						#
+						window.screen.xsession
+						#
+						{ window, buttons, point };
+					};
+
+				    fun send_fake_''mouse_enter''_event									# Make window receive a (faked) "mouse-enter".
+					  (
+					    point:	g2d::Point									# End-of-event coordinate, thus should be just inside window.
+					  )
+					=
+					xj::send_fake_''mouse_enter''_xevent
+					    #
+					    window.screen.xsession
+					    #
+					    { window, point };
+
+
+				    fun send_fake_''mouse_leave''_event									# Make window receive a (faked) "mouse-leave".
+					  (
+					    point:	g2d::Point									# End-of-event coordinate, thus should be just outside window.
+					  )
+					=
+					xj::send_fake_''mouse_leave''_xevent
+					    #
+					    window.screen.xsession
+					    #
+					    { window, point };
+
+
+				    fun get_pixel_rectangle (window_rectangle_to_read: g2d::Box)
+					=
+					{
+					    rw_matrix_rgb8
+						=
+						cpt::make_clientside_pixmat_from_window (window_rectangle_to_read, window);		# Read selected part of our window from X server.
+					    #
+					    rw_matrix_rgb8;
+					};
+
+				    fun pass_pixel_rectangle
+					    #
+					    (window_rectangle_to_read:	g2d::Box)
+					    (to:			Replyqueue)
+					    (sink_fn:			mtx::Rw_Matrix(r8::Rgb8) -> Void)
+					=
+					{
+					    cpt::pass_clientside_pixmat_from_window							# Read selected part of our window from X server.
+						(window_rectangle_to_read, window)
+						to
+						sink_fn;
+					};
+
+				    guiboss_to_topwindow
+					=
+					{ id	=> issue_unique_id(),									# We want every guiboss_to_topwindow.id value to be unique within the running Mythryl process (address space).
+					  #												# Consequently we don't use our microthread 'id' here because we will typically have multiple topwindows per windowsystem imp.
+					  #												# Similarly    We don't use window.window_id here because we might have multiple windowsystem imps talking to different
+					  #												# X servers, two of which might issue identical window.window_id values.
+					  subscribe_to_changes,
+					  draw_displaylist,
+					   get_font,
+					  pass_font,
+					  get_window_site,
+					  pass_window_site,
+					  exercise_appwindow,
+					  pass_appwindow_exercise_results,
+					  #
+					  send_fake_key_press_event,									# Make 'window' receive a (faked) keyboard keypress at 'point'.
+					  send_fake_key_release_event,									# Make 'window' receive a (faked) keyboard key release at 'point'.
+					  send_fake_mousebutton_press_event,								# Make 'window' receive a (faked) mousebutton click at 'point'.
+					  send_fake_mousebutton_release_event,								# Make 'window' receive a (faked) mousebutton release at 'point'.
+					  send_fake_mouse_motion_event,									# Make 'window' receive a (faked) mouse "drag".
+					  send_fake_''mouse_enter''_event,								# Make 'window' receive a (faked) "mouse-enter".
+					  send_fake_''mouse_leave''_event,								# Make 'window' receive a (faked) "mouse-leave".
+
+					   get_pixel_rectangle,
+					  pass_pixel_rectangle,
+
+					  subwindow_or_view => gadget_to_rw_pixmap
+					};
+
+				    
+				    put_in_oneshot (reply_oneshot, guiboss_to_topwindow);
+				}
+			);
+
+			get_from_oneshot reply_oneshot;
+		    };
+
+
+	    end;
+
+	#
+	fun process_options (options: List(Windowsystem_Option), { name, id, change_callbacks, guishim_callbacks })
+	    =
+	    {   my_name				=  REF name;
+		my_id				=  REF id;
+		my_change_callbacks		=     change_callbacks;		# Comes with REF pre-installed.
+		my_guishim_callbacks		= REF guishim_callbacks;
+
+		apply  do_option  options
+		where
+		    fun do_option (MICROTHREAD_NAME	 n)  =>  my_name			:=  n;
+		        do_option (ID			 i)  =>  my_id				:=  i;
+			#
+			do_option (CHANGE_CALLBACK	 c)  =>  my_change_callbacks		:=  c ! *my_change_callbacks;
+			do_option (WINDOWSYSTEM_CALLBACK c)  =>  my_guishim_callbacks		:=  c ! *my_guishim_callbacks;
+		    end;
+		end;
+
+		{ name				=>  *my_name,
+		  id 				=>  *my_id,
+		  #
+		  change_callbacks		=>   my_change_callbacks,
+		  guishim_callbacks		=>  *my_guishim_callbacks
+	        };
+	    };
+
+
+        ##########################################################################################
+	# PUBLIC.
+	#
+	fun make_windowsystem_egg
+	        ( needs:	     Windowsystem_Needs,
+		  options:	List(Windowsystem_Option)
+		)
+#		(shutdown_oneshot:	 Null_Or(Oneshot_Maildrop(gtg::Windowsystem_Arg)))					# When end_gun fires we save our state in this and exit.
+		(shutdown_oneshot:	 Null_Or(Oneshot_Maildrop(Void)))							# When end_gun fires shutdown is signalled via this.
+	    =
+	    {   (process_options
+		  ( options,
+		    { name			=>  "guishim_imp_for_x",
+		      id			=>  id_zero,
+		      #	
+		      change_callbacks		=> REF([]),
+		      guishim_callbacks		=> []
+		    }
+		) )
+		  ->
+		  { name,
+		    id,
+		    #
+		    change_callbacks,
+		    guishim_callbacks
+		  };
+	
+		my (id, options)
+		    =
+		    if (id_to_int(id) == 0)
+			id = issue_unique_id();										# Allocate unique imp id.
+			(id, ID id ! options);										# Make our id stable across stop/restart cycles.
+		    else
+			(id, options);
+		    fi;
+
+		me =  { id,
+			state      =>  REF needs,
+			rw_pixmaps =>  REF (im::empty:  im::Map( xj::Rw_Pixmap ))
+		      };
+
+		\\ () = {   reply_oneshot = make_oneshot_maildrop():  Oneshot_Maildrop( (Me_Slot, Exports) );		# PUBLIC. PHASE 2: Start our microthread and return our Exports to caller.
+			    #
+			    xlogger::make_thread  name  (startup  (id, reply_oneshot));					# Note that startup() is curried.
+
+			    (get_from_oneshot  reply_oneshot) -> (me_slot, exports);
+			    #
+			    fun phase3											# PUBLIC. PHASE 3: Accept our Imports, then wait for Run_Gun to fire.
+				(
+				  imports:	Imports,
+				  run_gun':	Run_Gun,	
+				  end_gun':	End_Gun
+				)
+				=
+				{
+				    put_in_mailslot  (me_slot, { me, options, imports, run_gun', end_gun', shutdown_oneshot, change_callbacks, guishim_callbacks });
+				};
+
+			    (exports, phase3);
+			};
+	    };
+    };
+
+end;
+
+
+
+
+##########################################################################
+#   The following is support for outline-minor-mode in emacs.		 #
+#  ^C @ ^T hides all Text. (Leaves all headings.)			 #
+#  ^C @ ^A shows All of file.						 #
+#  ^C @ ^Q Quickfolds entire file. (Leaves only top-level headings.)	 #
+#  ^C @ ^I shows Immediate children of node.				 #
+#  ^C @ ^S Shows all of a node.						 #
+#  ^C @ ^D hiDes all of a node.						 #
+#  ^HFoutline-mode gives more details.					 #
+#  (Or do ^HI and read emacs:outline mode.)				 #
+#									 #
+# Local variables:							 #
+# mode: outline-minor							 #
+# outline-regexp: "[{ \t]*\\(fun \\)"			 		 #
+# End:									 #
+##########################################################################
+
+
+## Original code by Jeff Prothero Copyright (c) 2014-2014,
+## released per terms of SMLNJ-COPYRIGHT.

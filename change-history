@@ -1,3 +1,321 @@
+2015-05-21-22.37.47: src/lib/x-kit/widget/edit/lineeditor.pkg:  default_redraw_fn:  First-cut cursor display logic working.
+2015-05-21-17.39.08: src/lib/std/src/string.api: Added   repeat: (String, Int) -> String;   where   repeat ("abc", 2)  -->  "abcabc".
+2015-05-20-21.30.12: src/lib/x-kit/widget/edit/textpane.pkg: Implemented  refresh_lineeditors  to display textbuffer contents.
+2015-05-19-22.10.21: src/lib/std/src/string.api:  Added   lines: String -> List(String);
+2015-05-19-21.03.38: src/lib/x-kit/widget/gui/guiboss-types.pkg: As debugging aids, added  doc: String  fields to Gp_Mark<prime>, Rg_Mark, Xi_Mark.
+2015-05-19-18.44.25: src/lib/x-kit/widget/gui/guiboss-widget-layout.pkg:  compute_size_preferences_for_rg_widget_tree/gt::RG_FRAME:  Fixed:  Was not using  frame_indent_hint  when computing size preference.
+2015-05-19-15.26.52: src/lib/x-kit/widget/widget-unit-test.pkg: Wrap texteditor in a proper popupframe.
+2015-05-19-15.19.10: widgets: Provide sensible default values for wi::DOC string.
+2015-05-19-14.55.31: src/lib/x-kit/widget/gui/guiboss-types.pkg: Dropped  doc: String  field from  Gp_Widget, Rg_Widget  because it was confusingly redundant with the  Guiboss_To_Gadget.doc: String  field.  Kept it on  Xi_Widget  because we do not include a guiboss_to_widget field in that record.
+2015-05-19-11.59.21: src/lib/x-kit/widget/edit/texteditor.pkg: Add DOC strings to widgets.
+2015-05-18-23.51.19: widgets:  Option:  Add  DOC String  case.
+2015-05-18-23.17.06: src/lib/x-kit/widget/gui/guiboss-types.pkg:  Guiboss_To_Widget, Guiboss_To_Gadget:  Add  doc: String   field.
+2015-05-18-23.10.05: src/lib/x-kit/widget/xkit/theme/widget/default/look/object-imp.pkg: Add  doc: String  stuff.
+2015-05-18-22.58.02: src/lib/x-kit/widget/xkit/theme/widget/default/look/sprite-imp.pkg: Add  doc: String  stuff.
+2015-05-18-22.48.14: src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp-types.pkg:  Key_Event_Fn_Arg:  Add  doc: String  arg.
+2015-05-18-22.17.15: src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp-types.pkg:  Mouse_Transit_Fn_Arg:  Add  doc: String  arg.
+2015-05-18-21.47.35: src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp-types.pkg:  Mouse_Drag_Fn_Arg:  Add  doc: String  arg.
+2015-05-18-21.28.02: src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp-types.pkg:  Mouse_Click_Fn_Arg:  Add  doc: String  arg.
+2015-05-18-21.04.28: src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp-types.pkg:  Redraw_Request_Fn_Arg:  Add  doc: String  arg.
+2015-05-18-15.57.17: src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp-types.pkg:  Initialize_Gadget_Fn_Arg:  Add  doc: String  arg.
+2015-05-18-15.47.56: src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp-types.pkg: Startup_Fn: Add  doc: String  arg.
+2015-05-18-15.38.22: src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp-types.pkg: Widget_Option: Add  DOC String  case.
+2015-05-18-15.23.19: src/lib/x-kit/widget/gui/guiboss-types.pkg: Xi_Widget:  Add  doc: String  field.
+2015-05-18-13.27.24: src/lib/x-kit/widget/gui/guiboss-types.pkg: Rg_Widget:  Add  doc: String  field.
+2015-05-18-13.09.59: src/lib/x-kit/widget/gui/guiboss-types.pkg: Gp_Widget:  Add  doc: String  field.
+2015-05-17-19.34.03: src/lib/x-kit/widget/gui/guiboss-widget-layout.pkg: Fixed: assign_sites_to_all_widgets/gt::RG_ROW,gt::RG_COL:  Was using float::round to allocate pixels to widgets, but this meant a RG_COL of 68 lineeditor.pkg widgets could easily wind up extending significantly beyond the assigned site for the RG_COL (resulting the last widget(s) getting clipped during rendering).
+2015-05-16-19.12.08: src/lib/x-kit/widget/edit/lineeditor.pkg:  fun with():  Change pixels_high_min default from 16 to 0, curing textpane.pkg of an infinite-resize loop.
+2015-05-16-18.22.54: src/lib/x-kit/widget/gui/guiboss-types.pkg:  FIXED:  pprint_subwindow_info & pprint_guipane<prime>: do_rg_widget/RG_MARK  had   rg_widget  where it needed  widget,  resulting in an infinite loop.
+2015-05-10-12.48.54: src/lib/x-kit/widget/edit/textpane.pkg: maybe_change_number_of_lineeditors() now gets the information it needs, next it needs to do something with it.
+2015-05-09-22.40.31: src/lib/x-kit/widget/edit/editboss-imp.pkg: Fill in various lacunae.
+2015-05-09-11.39.27: src/lib/x-kit/widget/edit/: Converted  lineeditor.pkg statusline.pkg minibuffer.pkg textpane.pkg textedit.pkg  from  Gadget_To_Guiboss.gadget_to_editboss  hack to more general  Gadget_To_Guiboss.find_global  mechanism.
+2015-05-09-10.23.25: src/lib/x-kit/widget/gui/guiboss-types.pkg: Guiboss_State: Add globals:Globals field.  Gadget_To_Guiboss: Add note_global, find_global, drop_global fields.
+2015-05-09-09.52.01: src/lib/core/init/pervasive.pkg: Added  doc:String  field to Crypt to maybe help a bit with its inherent lack of typesafety.
+2015-05-09-04.12.01: src/lib/x-kit/widget/gui/guiboss-types.pkg:  Changed type of Gadget_To_Guiboss.gadget_to_editboss from Exception to Crypt.
+2015-05-09-03.46.10: src/lib/core/init/pervasive.pkg: Added type Crypt.
+2015-05-08-11.32.04: src/lib/src/red-black-map-with-implicit-keys-g.pkg: Fixed clone-and-mutate oversight: last_keyval_else_null was still named first_keyval_else_null. Caught by unit test.
+2015-05-07-15.59.51: src/lib/x-kit/widget/edit/*: Commenting.
+2015-05-07-15.31.21: src/lib/x-kit/widget/edit/:  For clarity and consistency moved  exception GADGET_TO_EDITBOSS + Gadget_To_Editboss  from  textpane-to-textbuffer.pkg  into new file  src/lib/x-kit/widget/edit/gadget-to-editboss.pkg.
+2015-05-07-14.55.59: src/lib/src/map.api:  Add  last_val_else_null, last_keyval_else_null  parallel to existing  first_val_else_null, first_keyval_else_null.
+2015-05-06-23.18.55: src/lib/x-kit/widget/edit/: Rename linenumber -> paneline for clarity.
+2015-05-06-22.36.22: src/lib/x-kit/widget/edit/: Have lineeditor.pkg and statusline.pkg forward keystrokes to textpane.pkg and minibuffer.pkg to textedit.pkg.
+2015-05-06-14.02.47: src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp-types.pkg:  Add *_Arg types for the *_Fn types.   src/lib/x-kit/widget/edit/: Establish textpane-types.pkg.   src/lib/x-kit/widget/edit/lineeditor.pkg: Pass key events through to textpane.pkg.
+2015-05-05-23.29.38: src/lib/x-kit/widget/gui/guiboss-types.pkg: Gadget_To_Guiboss:  Changed  gadget_to_editboss  type from  texteditor_to_textbuffer::GADGET_TO_EDITBOSS  to  Exception, because guiboss should not know about editboss types (and allowing that introduces bad package dependency cycles).
+2015-05-05-13.24.45: src/lib/thread-kit/src/glue/redirect-slow-syscalls-via-support-hostthreads.pkg: Remove a couple of overlooked debug statements.  src/lib/x-kit/widget/edit/texteditor.pkg: Create textedit.pkg + textpane.pkg instances in synthesized Guiplan.
+2015-05-05-13.02.35: lineeditor.pkg, statusline.pkg, minibuffer.pkg, textpane.pkg, textedit.pkg: Cache supplied interfaces in *__globals in the note__* fns.
+2015-05-04-23.17.37: src/lib/x-kit/widget/edit/textedit.pkg: startup_fn: Call widget_to_guiboss.g.gadget_to_editboss.note_textedit().
+2015-05-04-23.02.57: src/lib/x-kit/widget/edit/textpane.pkg: startup_fn: Call widget_to_guiboss.g.gadget_to_editboss.note_textpane().
+2015-05-04-22.38.35: src/lib/x-kit/widget/edit/minibuffer.pkg: startup_fn: Call widget_to_guiboss.g.gadget_to_editboss.note_minibuffer().
+2015-05-04-22.13.21: src/lib/x-kit/widget/edit/statusline.pkg: startup_fn: Call widget_to_guiboss.g.gadget_to_editboss.note_statusline().
+2015-05-04-21.56.20: src/lib/x-kit/widget/edit/lineeditor.pkg: startup_fn: Call widget_to_guiboss.g.gadget_to_editboss.note_lineeditor().
+2015-05-04-12.02.34: src/lib/src/lib/thread-kit/src/core-thread-kit/microthread-preemptive-scheduler.pkg:  Change  hostthreads_to_start = max(1,hth::get_cpu_core_count()-1);  to  hostthreads_to_start = 8;  so  xclient-unit-test.pkg will not hang any more on boxes with less than three cores. See Note[1] for details.
+2015-05-01-00.51.53: src/lib/x-kit/widget/edit/editboss-imp.pkg:  Add   textedits_by_id: Ref(im::Map(Textedit_Info))   field to  Editboss_State,  also add  Textedit_Info  and  Textpane_Info  types.  Implement logic to wire up texteditor complexes.
+2015-04-30-13.44.48: src/lib/x-kit/widget/edit/: Established the interfaces for mutual communication between textedit, textpane, minibuffer, statusline and lineeditor instances: editboss-to-guiboss.pkg, editboss-to-textbuffer.pkg, lineeditor-to-textpane.pkg, minibuffer-to-textedit.pkg, statusline-to-textpane.pkg, textbuffer-to-editboss.pkg, texteditor-to-textbuffer.pkg, textedit-to-minibuffer.pkg, textedit-to-textpane.pkg, textpane-to-lineeditor.pkg, textpane-to-statusline.pkg, textpane-to-textedit.pkg.
+2015-04-28-22.23.57: src/lib/x-kit/widget/edit/texteditor.pkg: fun with: Create a realistic Guiplan instead of hardwiring a simple redraw fn.
+2015-04-28-21.45.52: src/lib/x-kit/widget/gui/guiboss-widget-layout.pkg: fun high_min_for_widget/RG_WIDGET: Bugfix: had pixels_wide_min where pixels_high_min was needed.
+2015-04-28-14.38.03: src/lib/x-kit/widget/edit/: Removed inherited frame-drawing support from statusline.pkg, minibuffer.pkg, lineeditor.pkg to simplify them: Can always wrap them in a gt::FRAME if a frame is really desired for some reason.
+2015-04-28-00.24.10: src/lib/x-kit/widget/edit/: Established minibuffer.pkg
+2015-04-28-00.06.22: src/lib/x-kit/widget/edit/: Established texteditor-frame.pkg, textpane-frame.pkg
+2015-04-27-00.25.12: src/lib/x-kit/widget/leaf/frame.pkg: default_redraw_fn: Fiddling to handle a wider range of frame shapes sanely.
+2015-04-26-21.26.44: src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp.api: Added   frame_indent_hint: gt::Frame_Indent_Hint  to  Redraw_Request_Fn.
+2015-04-26-12.26.03: src/lib/x-kit/widget/gui/guiboss-widget-layout.pkg:  assign_sites_to_all_widgets/gt::RG_FRAME:  Get frame dimensions via new guiboss_to_widget.get_frame_indent_hint () call instead of hardwiring them. (FINALLYmake rest ; sudo make install ; make check)
+2015-04-26-11.45.24: src/lib/x-kit/widget/gui/guiboss-types.pkg: Add Frame_Indent_Hint patterned on existing Widget_Layout_Hint. src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp.api: Added frame-indent support patterned on existing widget-layout support.
+2015-04-25-13.01.58: src/lib/x-kit/widget/widget-unit-test.pkg: Add a couple of gt::MARK nodes to exercise MARK support.
+2015-04-25-12.32.08: src/lib/x-kit/widget/gui/guiboss-imp.pkg:  Light commenting.  Generally: Add MARK support in a few places I missed on the last checkin.
+2015-04-25-00.30.36: src/lib/x-kit/widget/gui/guiboss-types.pkg: Added MARK nodes parallel to existing COL/ROW/GRID nodes to provide a reliable way of marking points in a Guiplan/Guipith tree.
+2015-04-24-01.37.48: Change SITEWATCHER protocol(s) to also pass iuw::Id widget id to event consumer.
+2015-04-23-21.42.11: Added an  id: iuw::Id  field to all App_To_Foo widget interfaces.
+2015-04-23-21.00.03: Rename issue-unique-look-id.pkg -> issue-unique-widget-id.pkg because look imps are history.
+2015-04-21-21.52.34: src/lib/x-kit/widget/gui/translate-guipane-to-guipith.pkg: guipiths_to_guipanes: Xi_Guiplan support now working (at least on widget-unit-tests.pkg sample case).
+2015-04-19-22.48.54: src/lib/x-kit/widget/widget-unit-test.pkg: Added logic to exercise gt::XI_GUIPLAN.
+2015-04-19-21.12.50: src/lib/x-kit/widget/gui/translate-guipane-to-guipith.pkg: Just got XI_GUIPLAN case coded. Untested.
+2015-04-18-20.15.27: src/lib/x-kit/widget/gui/guiboss-imp.pkg: First-cut versions of get_guipiths() + install_updated_guipiths() now working, at least on the widget-unit-test.pkg test case for them.
+2015-04-15-23.45.10: src/lib/x-kit/widget/gui/guiboss-types-junk.pkg: Small tweaks to topwindows prettyprint formatting.
+2015-04-14-21.40.31: src/lib/x-kit/widget/gui/guiboss-types-junk.pkg: Added  pprint_topwindows()  to provide visiblity into running guis.
+2015-04-11-14.01.34: Add ID option to widgets.
+2015-04-08-23.01.00: src/lib/x-kit/widget/gui/guiboss-imp.pkg: get_guipiths/install_updated_guipiths is ready for initial testing.
+2015-04-06-22.43.53: src/lib/x-kit/widget/gui/translate-guipane-to-guipith.pkg: Implemented  shut_down_dropped_imps().
+2015-03-29-21.28.25: src/lib/x-kit/widget/gui/translate-guipane-to-guipith.pkg: guipith_to_guipane:  Wrote gather_stuff_from_running_guis which collects the background information needed to complete guipith_to_guipane.
+2015-03-09-16.07.15: src/lib/x-kit/widget/gui/translate-guipane-to-guipith.pkg: guipith_to_guipane: Now have reasonable first-cut input validation in place, moving on to actual functionality.
+2015-03-07-23.24.30: src/lib/x-kit/widget/gui/guiboss-types-junk.pkg: Extend guipith_map and guipith_apply to iterate over full gui tree rooted at me.topwindows instead of just a single guiplane.  This is support for widget mobility between guipanes and topwindows instead of just within a guiplane.
+2015-03-04-20.28.40: src/lib/x-kit/widget/gui/guiboss-types.pkg:  Extended Xi_* guipith typeset to include Xi_Topwindow_Info + Xi_Guipane.  src/lib/x-kit/widget/gui/translate-guipane-to-guipith.pkg: guipane_to_guipith:  Changed type to  gt::Guiboss_State -> im::Map(gt::Xi_Topwindow_Info),  the point being that by returning all active guipanes instead of just one, we can support moving widgets between guipanes instead of just around within one guipane.
+2015-03-01-11.54.06: src/lib/x-kit/widget/gui/guiboss-types.pkg: Additional cleanup of no-longer-needed Paused_Gui support:  Removed saved_(object|widget|sprite)_state.
+2015-02-28-18.36.33: Renamed widget and space imp  endstate_oneshot  fields to  shutdown_oneshot  because the state was only for Paused_Gui which is now defunct; also changed return value to Void for same reason.
+2015-02-28-13.56.12: src/lib/x-kit/widget/gui/guiboss-types.pkg (etc): Eliminated Paused_Gui types and support code.
+2015-02-25-23.16.28: src/lib/x-kit/widget/gui/guiboss-imp.pkg (etc):  Preliminary work toward eliminating gt::Paused_Gui.
+2015-02-24-20.32.58: src/lib/x-kit/widget/gui/guiboss-popup-junk.pkg:  refresh_topwindow_rectangle:  Fixed red-crud problem by calling  update_offscreen_parent_pixmaps_and_then_topwindow  only on intersection of from_box and guipane_site, instead of (erroneously) on entire from_box. Still have red crud when resizing a popup smaller, however.
+2015-02-22-18.36.56: src/lib/x-kit/widget/theme/app-to-guishim-xspecific.pkg:  App_To_Guishim_Xspecific:  Added   list_fonts: { max: Int,  pattern: String } -> List(String)   field.
+2015-02-22-10.12.54: src/lib/x-kit/widget/gui/guiboss-imp.pkg: Dynamic resizing of popups is also working, with same caveat that a trail of red crud tends to be left behind.
+2015-02-21-17.13.03: src/lib/x-kit/widget/gui/guiboss-types.pkg:  Subwindow_Info:  Change  pixmap  from  g2p::Gadget_To_Rw_Pixmap -> Ref(g2p::Gadget_To_Rw_Pixmap)  to support dynamic resizing of popups.
+2015-02-21-14.13.03: Dragging popups mostly Just Worked first try. (!)  There is an issue with leaving a trail of red crud, also observed when not dragging popups, apparently introduced while setting up the infrastructure for this.
+2015-02-19-22.00.28: src/lib/x-kit/xclient/src/wire/value-to-wire-pith.pkg:  decode_list_extensions_reply:  Use correct buffer offset for string-count field in ListExtensions reply. Now works. :-)
+2015-02-19-21.27.10: src/lib/x-kit/widget/theme/:  Renamed guiboss-to-guishim-xspecific.pkg -> app-to-guishim-xspecific.pkg;  App_To_Guishim_Xspecific:  Added   list_extensions: Void -> List(String).   src/lib/x-kit/widget/xkit/app/guishim-imp-for-x.pkg:  First-cut implementation of list_extensions().
+2015-02-19-18.49.58: Established src/lib/x-kit/widget/theme/guiboss-to-guishim-xspecific.pkg.
+2015-02-19-17.38.44: src/lib/x-kit/widget/leaf/popupframe.pkg:  default_mouse_drag_fn:  Complete first-cut code for dragging popup windows. (Untested.)
+2015-02-18-21.48.34: src/lib/x-kit/widget/gui/guiboss-imp.pkg: Factor position_subwindow_entirely_within_parent out of make_subwindow_info_for_popup.
+2015-02-18-21.26.20: src/lib/x-kit/widget/gui: For clarity renamed  origin -> upperleft  various places.
+2015-02-17-21.43.55: src/lib/x-kit/widget/leaf/popupframe.pkg:  Sketch in some preliminary code for  default_mouse_drag_fn.
+2015-02-17-21.36.46: src/lib/x-kit/widget/gui/guiboss-imp.pkg:  Sketch in some preliminary code for  pass_guipane_offset + set_guipane_offset.
+2015-02-17-21.11.08: src/lib/x-kit/widget/gui/guiboss-types.pkg: Gadget_To_Guiboss: Change  get_guipane_offset -> pass_guipane_offset  to eliminate one potential source of deadlock.
+2015-02-17-20.31.45: src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp.api (etc): Dropped   visible: Bool  field from the various redraw_widget_request calls.  This was early forward provisioning which wound up not getting used.
+2015-02-17-20.13.36: src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp.api (etc):  Pass  to: Replyqueue  to widget hook fns so they can make nonblocking calls to other imps.
+2015-02-16-20.46.07: src/lib/x-kit/widget/gui/guiboss-popup-junk.pkg:  First-cut implementation of  refresh_topwindow_rectangle().  Untested.
+2015-02-15-19.33.31: src/lib/x-kit/widget/gui/guiboss-types.pkg:  Gadget_To_Guiboss:  Established  get_guipane_offset, set_guipane_offset  fields to allow gadgets to move around popup windows.
+2015-02-15-18.46.14: src/lib/x-kit/widget/gui/guiboss-event-dispatch.pkg:  do_motion_notify: gt::DRAGGING:  Tweak to always generate DRAG events, whether or not mouse is still on gadget on which drag originated.  (Need this in popupframe.pkg to drag popups around. I think.)
+2015-02-15-16.51.00: src/lib/x-kit/widget/leaf/popupframe.pkg: Add a default_mouse_drag_fn() and wire it up.
+2015-02-15-14.39.06: src/lib/x-kit/widget/leaf/popupframe.pkg: Tweaked to call gadget_to_guiboss.kill_popup() when upper-right X clicked.
+2015-02-15-13.32.30: src/lib/x-kit/widget/gui/guiboss-types.pkg:  Gadget_To_Guiboss:  Add kill_popup() field.
+2015-02-14-22.09.13: src/lib/x-kit/widget/leaf/popupframe.pkg: Fatten the upper-right X for better visibility.
+2015-02-14-21.13.47: src/lib/x-kit/widget/leaf/popupframe.pkg:  First-cut implementation of default_redraw_fn.
+2015-02-14-17.33.28: Clean out debug statements left over from previous.
+2015-02-14-14.29.04: src/lib/x-kit/widget/gui/guiboss-imp.pkg: Dynamic re-layout in response to widget_to_guiboss.note_widget_layout_hint() is now working.  Only hitch was that widget-unit-test.pkg was using maildrops instead of mailqueues to read site information, and (worse!) was using get_from_maildrop() instead of take_from_maildrop() to read them, so when arrowbutton.pkg notified sitewatchers of new site, maildrop threw a MAY_NOT_FILL_ALREADY_FULL_MAILDROP exception, which disappeared silently because microthread exception handling is essentially unimplemented.
+2015-02-13-22.08.08: src/lib/x-kit/widget/xkit/theme/widget/default/widget-theme-imp.pkg: Add color_by_depth to visually separate popups from their parent guipanes, as an alternative to drop shadows (which are difficult to do with just the original X drawops).
+2015-02-13-12.36.15: src/lib/x-kit/widget/leaf: Established popup-frame.pkg by cloning frame.pkg.
+2015-02-13-11.02.05: src/lib/x-kit/widget/gui/guiboss-imp.pkg: A little preliminary groundwork toward supporting dynamic resizing of widgets in a running gui.
+2015-02-12-23.24.13: src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp.api: Add  widget_layout_hint: gt::Widget_Layout_Hint  field to Mouse_(Click|Drag|Transit)_Fn and Key_Event_Fn.
+2015-02-11-22.43.57: src/lib/x-kit/widget/widget-unit-test.pkg: mouse_drag_and_popup_fn_*: Use previous to respond only to button1 clicks.
+2015-02-11-22.02.50: src/lib/x-kit/widget/gui/guiboss-types.pkg (etc):  Guiboss_To_Gadget:  note_mouse_drag_event:  Add   button: evt::Mousebutton  field to argument record.
+2015-02-11-20.11.36: src/lib/x-kit/widget/gui/guiboss-types.pkg: Renamed Export_Gui -> Guipith for brevity and parallelism with Guiplan and Guipane.
+2015-02-11-19.47.24: src/lib/x-kit/widget/gui/guiboss-types.pkg: Renamed Running_Gui -> Guipane for brevity and parallelism with Guiplan.
+2015-02-11-19.24.09: src/lib/x-kit/widget/gui/guiboss-types.pkg (etc): For brevity rename Gui_Plan -> Guiplan.
+2015-02-11-18.38.13: src/lib/x-kit/widget/gui/guiboss-widget-layout.pkg:  Implement gather_widget_layout_hints().
+2015-02-08-22.30.50: src/lib/x-kit/widget/leaf/*slider*pkg: Make these more selective about which mousedrags + mouseclicks they respond to. (No modifier keys.)
+2015-02-08-22.14.01: src/lib/x-kit/widget/widget-unit-test.pkg: Make drag fns more selective about which buttons they respond to.
+2015-02-08-21.30.00: src/lib/x-kit/widget/leaf/:  *button*.pkg:  Changed default_mouse_click_fn() to be sensitive only to mouse button1 with no modifier keys down.  (It was responding to clicks of any button with any modifier. Sloppy.)
+2015-02-08-19.03.25: Moved more stuff from guiboss-imp.pkg into support libraries. guiboss-imp.pkg now under 2000 loc, looks reasonable again.
+2015-02-08-00.51.51: src/lib/x-kit/widget/gui/guiboss-widget-layout.pkg: For purity, changed lay_out_widgets() to construct and return an explicit result map instead of implicitly side-effecting *me.gadget_imps.
+2015-02-07-18.49.27: src/lib/x-kit/widget/gui/guiboss-widget-layout.pkg:  Established this package and moved widget-layout code here from widgetspace-imp.pkg because the doing layout in a separate imp is more of a nuisance than a help at this point.
+2015-02-07-15.26.55: src/lib/x-kit/widget/gui/guiboss-types-junk.pkg:  Established this package and moved all code here from guiboss-types.pkg because the latter was growing unwieldy.
+2015-02-07-14.52.17: src/lib/x-kit/widget/gui/: For consistency and clarity renamed guiboss-export-import.pkg -> translate-runninggui-to-exportgui.pkg.
+2015-02-07-14.38.55: src/lib/x-kit/widget/gui/translate-guiplan-to-runninggui.pkg:  Established this package and moved Gui_Plan-translation logic here from guiboss-imp.pkg because the latter was growing unwieldy.
+2015-02-07-13.01.25: src/lib/x-kit/widget/gui/guiboss-event-dispatch.pkg:  Established this package and moved event-dispatch logic here from guiboss-imp.pkg because the latter was growing unwieldy.
+2015-02-06-19.51.27: src/lib/x-kit/widget/gui/guiboss-imp.pkg:  Move   gadget_imps, spritespace_imps, objectspace_imps, widgetspace_imps, widget_layout_hints  from Topwindow_Info to Guiboss_State because I now think they need to be global across all topwindows, not just per-topwindow.
+2015-02-06-18.44.07: src/lib/x-kit/widget/gui/guiboss-types.pkg: Collapse enumerated pixels_(high|wide)_(cut|max) quadruple-field sets into single widget_layout_hint fields in various records.
+2015-02-05-21.06.16: src/lib/x-kit/widget/gui/guiboss-types.pkg:  Add  running_guis_apply()  for easy iteration over all Running_Gui instances for a given topwindow.
+2015-02-05-20.33.54: src/lib/x-kit/widget/gui/guiboss-types.pkg:  Add a  gui_plan_map  to go with  gui_plan_apply.
+2015-02-05-20.01.10: src/lib/x-kit/widget/gui/guiboss-types.pkg: gui_plan_apply:  Implement missing OBJECTSPACE and SPRITESPACE cases.
+2015-02-04-23.23.14: Removed end_gun support from widget_imp because it makes no sense with widgets wandering between running_gui instances. Removed end_gun support from sprite_imp and object_imp for consistency.
+2015-02-04-21.51.21: src/lib/x-kit/widget/gui/guiboss-types.pkg: Running_Gui: Similarly, drop fields gadget_imps_for_gui, spritespace_imps_for_gui, objectspace_imps_for_gui, widgetspace_imps_for_gui.
+2015-02-04-21.10.34: src/lib/x-kit/widget/gui/guiboss-types.pkg:  Subwindow_Info:  Drop pixmaps field, as part of eliminating per-running-gui indices to facilitate widget migration between running guis.
+2015-02-04-01.09.47: src/lib/x-kit/widget/gui/guiboss-imp.pkg:  First-cut implementation of free__running_gui__resources().   src/lib/x-kit/widget/gui/guiboss-types.pkg: Much tidying.
+2015-02-03-13.42.14: src/lib/x-kit/widget/gui/guiboss-types.pkg: Gadget_To_Guiboss: redraw_gadget:  Add   site: g2d::Box   fn arg.  This is intended to allow guiboss_imp to detect and discard stale redraw_gadget() messages.
+2015-02-01-20.40.40: src/lib/x-kit/widget/gui/guiboss-types.pkg:  Simplified Rg_Tabport a bit.  That concludes the great multiple-scrollables-per-scrollport/multile-tabbables-per-tabport blind alley: Too much added complexity for too little added functionality.
+2015-02-01-15.44.03: src/lib/x-kit/widget/gui/guiboss-types.pkg: More simplification of Rg_Scrollport.
+2015-02-01-11.47.10: Cleanup after previous.
+2015-02-01-00.28.11: src/lib/x-kit/widget/gui/guiboss-types.pkg: Moved Widget_To_Guiboss here (used to have its own package), included Gadget_To_Guiboss in it as a subport.
+2015-01-31-20.39.43: src/lib/x-kit/widget/gui/guiboss-types.pkg: Added  die: Void -> Void  field to Guiboss_To_Objectspace, Guiboss_To_Spritespace, Guiboss_To_Widgetspace. (Same functionality as endgun, but retail instead of wholesale.)  src/lib/x-kit/widget/space/widget/: Renamed widget-to-widgetspace.pkg -> widget-to-guiboss.pkg because with widgets wandering freely between widgespaces it is better for widgets to talk to guiboss-imp than widgetspace-imp.
+2015-01-27-20.32.07: src/lib/x-kit/widget/space/widget/widgetspace-to-widget.pkg:  Widgetspace_To_Widget:  Replace layout hint constants pixel_(high|wide)_(min|cut) with a function returning layout hints, as support for more dynamic guis.
+2015-01-26-23.04.25: src/lib/x-kit/widget/gui/guiboss-types.pkg: More map and apply fns over gui-plans, paused-guis, running-guis and exported-guis.
+2015-01-25-22.17.58: src/lib/x-kit/widget/gui/guiboss-types.pkg:  Added map_export_gui().
+2015-01-25-00.05.56: src/lib/x-kit/widget/gui/guiboss-types.pkg (etc):  Clean up formatting disturbed by preceding passes.
+2015-01-24-23.53.44: src/lib/x-kit/widget/gui/guiboss-types.pkg: More minor fiddling with scrollport/tabport stuff.
+2015-01-24-22.41.07: src/lib/x-kit/widget/gui/guiboss-types.pkg: Tidying.
+2015-01-24-19.38.12: src/lib/x-kit/widget/gui/guiboss-types.pkg: More type rationalization: Replaced Tabview with Viewable_Data.
+2015-01-24-00.51.12: src/lib/x-kit/widget/gui/guiboss-types.pkg: Tightened up the typing by changing various fields from Subwindow_Or_Viewport_Info to either Subwindow_Data or Viewport_Data. This improved typesafety and allowed removing a number of ugly runtime checks from guiboss-imp.pkg.
+2015-01-22-20.30.08: src/lib/x-kit/widget/gui/guiboss-export-import.pkg: First-cut implementation of running_gui__to__export_gui().
+2015-01-22-15.00.10: src/lib/x-kit/widget/gui/guiboss-export-import.pkg:  Overview/motivation comments.   src/lib/x-kit/widget/gui/guiboss-types.pkg:  Gadget_To_Guiboss:  get_exported_running_gui, morph_running_gui.
+2015-01-21-19.10.16: src/lib/x-kit/widget/gui/: Establish guiboss-export-import.pkg, guiboss-export-import.api.
+2015-01-20-22.33.41: src/lib/x-kit/widget/gui/guiboss-types.pkg: First-cut Xi_Widget etc types (support for export/import of Running_Gui).
+2015-01-20-15.56.32: src/lib/x-kit/widget/gui/guiboss-imp.pkg: Factored   pg_widget__to__rg_widget out of paused_gui__to__running_gui  and   gp_widget__to__pg_widget out of start_gui<prime>, as groundwork for making running guis more dynamic.
+2015-01-18-21.33.04: Minor tidying.
+2015-01-17-18.55.50: src/lib/x-kit/widget/gui/guiboss-types.pkg: Add (|PG_|RG_)_EDITABLE_(ROW|COL).
+2015-01-17-15.42.15: src/lib/x-kit/widget/gui/guiboss-types.pkg: Guiboss_To_Gadget: Added die(), to allow killing individual gadgets the way end_gun' kills an entire gui.
+2015-01-14-23.38.52: src/lib/x-kit/widget/gui/guiboss-imp.pkg:  find_appropriate_gadget_info:  search_topwindow_pixmaps_in_descending_stacking_order: BUGFIX: Was failing to properly transform  topwindow_pixmap.site into coordinate system of event_point.
+2015-01-13-23.53.50: src/lib/x-kit/widget/gui/guiboss-types.pkg (etc):  Gadget_To_Guiboss:  Add   make_popup: Make_Popup_Fn.  Strip out all the old crud used to propagate make_popup.
+2015-01-13-21.07.27: src/lib/x-kit/widget/edit/: Establish lineeditor.pkg + statusline.pkg by clone-and-mutate of textentry.pkg
+2015-01-12-22.45.55: src/lib/x-kit/widget/edit/texteditor.pkg:  with:  Add a mandatory  buffername: String  arg.
+2015-01-12-22.32.26: src/lib/x-kit/widget/edit/editboss-imp.pkg: Track extant textbuffers by name and id.
+2015-01-12-00.08.54: src/lib/x-kit/widget/gui/guiboss-types.pkg: Gadget_To_Guiboss: Add  gadget_to_editboss: Gadget_To_Editboss  field.   src/lib/x-kit/widget/edit/texteditor-to-textbuffer.pkg: Guiboss_To_Editboss:  Add  get_or_make_textbuffer: Textbuffer_Arg -> Texteditor_To_Textbuffer.
+2015-01-11-14.34.03: Renamed state_watcher -> statewatcher etc.
+2015-01-11-14.25.07: src/lib/x-kit/widget/edit/textbuffer-imp.pkg: More fleshing out.
+2015-01-10-11.36.58: src/lib/x-kit/widget/theme/: Renamed guiboss-to-windowsystem.pkg to guiboss-to-guishim.pkg.  Et cetera.
+2015-01-10-00.20.33: Fleshing out src/lib/x-kit/widget/edit/textbuffer-imp.pkg.
+2015-01-07-23.07.14: src/lib/x-kit/widget/edit/: Cleaning and commenting.
+2015-01-07-22.32.59: src/lib/x-kit/widget/edit/: Established textbuffer-imp.api, textbuffer-imp.pkg, editboss-to-textbuffer.pkg, textbuffer-to-editboss.pkg.
+2015-01-07-21.59.02: src/lib/x-kit/widget/gui/guiboss-imp.pkg:  startup:  Add logic to set up editboss_imp as part of guiboss_imp startup.
+2015-01-07-21.44.11: src/lib/x-kit/widget/edit/editboss-imp.pkg: Chopped out all the irrelevant guiboss code, leaving just the imp skeleton.
+2015-01-07-21.26.34: Establish src/lib/x-kit/widget/edit/editboss-to-guiboss.pkg.
+2015-01-07-21.16.53: Establish   src/lib/x-kit/widget/edit/guiboss-to-editboss.pkg.
+2015-01-07-20.56.25: Established  src/lib/x-kit/widget/edit/editboss-imp.pkg  by clone-and-mutate of   src/lib/x-kit/widget/gui/guiboss-types.pkg.
+2015-01-07-20.46.22: src/lib/x-kit/widget/edit/: Established this directory to hold emacs-flavored edit stuff.  Move text-editor.api + text-editor.pkg over from ../leaf.  Established editboss-imp.pkg by clone-and-mutate of guiboss-imp.pkg.
+2015-01-05-22.14.02: src/lib/x-kit/widget/leaf/text-entry.pkg:  Blinking cursor, driven by new gadget_to_guiboss.wake_me() functionality.
+2015-01-05-19.51.36: src/lib/x-kit/widget/gui/guiboss-types.pkg:  Gadget_Info:  Add  at_frame_n  and  every_n_frames  fields.
+2015-01-05-18.55.48: src/lib/x-kit/widget/gui/guiboss-types.pkg (etc):  Run wiring to support gadget_to_guiboss.wake_me and guiboss_to_gadget.wakeup.
+2015-01-05-18.10.55: src/lib/x-kit/widget/gui/guiboss-types.pkg:  Gadget_Mode:  Drop   mousebutton_is_down  field, which does not belong and has never proved useful.
+2015-01-04-22.14.46: src/lib/x-kit/widget/leaf/:  Moved Font_Weight from concrete widgets into src/lib/x-kit/widget/theme/widget/widget-theme.pkg, since there is no obvious need to specialize it per-widget.
+2015-01-04-21.17.53: src/lib/x-kit/widget/leaf/:  Rename font_type -> font_weight for consistency with standard X font nomenclature.
+2015-01-04-20.48.24: src/lib/x-kit/widget/widget-unit-test.pkg:  Added texteditor popup.
+2015-01-04-19.32.58: src/lib/x-kit/widget/leaf/:  Tidying.
+2015-01-04-12.29.24: src/lib/x-kit/widget/leaf/:  Established text-editor.pkg by clone-and-mutate of text-entry.pkg.
+2015-01-04-12.18.20: src/lib/x-kit/widget/leaf/text-entry.pkg: Horizontal scrolling when full, also better clipping and bold font by default.
+2015-01-03-19.42.11: src/lib/x-kit/widget/leaf/*: Commenting + tidying.
+2015-01-03-19.00.11: src/lib/x-kit/widget/leaf/*: Pervasively distributed <<do>> fn and <<end_gun>> as support for subthreads in concrete widgets.
+2015-01-02-23.10.57: src/lib/x-kit/widget/leaf/text-entry.pkg: Operational at first-cut level.
+2015-01-02-22.02.23: src/lib/std/src/char.api:  Added constants ctrl_a ... ctrl_z, plus nul.
+2015-01-02-21.15.52: src/lib/x-kit/widget/leaf/:  Key_Event_Fn_Arg: Added char field holding string contents when string::length string == 1 (else NUL).
+2015-01-02-19.48.45: src/lib/x-kit/xclient/src/window/keysym-to-ascii.pkg + keymap-ximp.pkg: Tweaked so that releasing KeyCap would not crash us.
+2015-01-02-17.04.50: src/lib/x-kit/xclient/src/window/keysym-to-ascii.pkg:  translate_keysym_to_ascii:  Changed to return the empty string (vs throwing an exception) when no simple ascii equivalent is available, because throwing exceptions is a great way to crash concurrent programs. Added strings <F1> ... <F35> etc etc.
+2015-01-01-13.47.55: src/lib/x-kit/widget/leaf/: Established text-entry.pkg + .api by cloning button.pkg + .api.
+2015-01-01-09.59.48: src/lib/x-kit/widget/theme/gui-displaylist.pkg: Renamed DRAW_TEXT -> PUT_TEXT for brevity and clarity.
+2014-12-31-00.40.37: src/lib/x-kit/widget/leaf/*slider*:  Added Option COVERAGE plus get_coverage() and get_coverage_to() calls in support of using sliders as scrollbars.
+2014-12-30-21.34.27: src/lib/x-kit/widget/leaf/*slider*:  Added support for SHOW_VALUE Option.
+2014-12-30-19.45.07: src/lib/x-kit/widget/leaf/:  *float-slider.pkg: Added support for mousewheel scrolling.
+2014-12-30-17.50.53: src/lib/x-kit/widget/leaf/:  *int-slider.pkg: Added support for mousewheel scrolling.
+2014-12-30-14.19.09: src/lib/x-kit/widget/leaf/: Vertical sliders look usable now.
+2014-12-30-12.06.54: src/lib/x-kit/widget/leaf/: Created vertical-(int|float)-slider.pkg via clone-and-mutate of horizontal-(int|float)-slider.pkg.
+2014-12-30-10.02.26: src/lib/x-kit/widget/leaf/horizontal-int-slider.pkg, horizontal-float-slider.pkg: Changed cursor outline from color (0.0,0.0,0.0) to (0.9,0.9,0.9) to improve readability of overlying black text.
+2014-12-29-22.23.36: src/lib/x-kit/widget/leaf/horizontal-float-slider.pkg: Seems usable.
+2014-12-29-21.34.45: src/lib/x-kit/widget/leaf/horizontal-int-slider.pkg: Looks usable.
+2014-12-28-23.00.56: src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg:  Clean out debug   nb {. ...; };   stuff.  Watch  The Imitation Game.
+2014-12-28-18.18.54: src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg: assign_sites_to_all_widgets: gt::RG_GRID: Fixed: Had uses of total_high_cut vs total_wide_cut interchanged, leading to strange results on nonsquare grids.
+2014-12-28-11.20.47: src/lib/x-kit/widget/leaf/*.pkg: Minor tidying.
+2014-12-28-11.10.53: src/lib/x-kit/widget/leaf/*.pkg:  Moved pick_text_to_use() functionality from   default_redraw_fn   to   redraw_request_fn_wrapper   to simplify writing redraw_fns.
+2014-12-28-09.50.31: src/lib/x-kit/widget/xkit/theme/widget/default/widget-theme-imp.pkg: Renamed   *_darkening -> *_blackening   and   *_lightening -> *_whitening   for accuracy, and because we may at some point want the former names for HSV-based color ops.
+2014-12-28-01.31.18: src/lib/x-kit/widget/leaf/: Per-widget overrides of theme-default body color.
+2014-12-27-23.32.35: src/lib/x-kit/widget/leaf/leaf/*.pkg: Option:  Added BODY_COLOR, BODY_COLOR_WITH_MOUSEFOCUS, BODY_COLOR_WHEN_ON, BODY_COLOR_WHEN_ON_WITH_MOUSEFOCUS.
+2014-12-27-01.23.37: src/lib/x-kit/widget/leaf/: Roll-over highlighting for all widgets.
+2014-12-26-14.33.33: Fixed: Forgot to send NULLs to popup watchers in our widget shutdown_fns.
+2014-12-26-14.23.43: src/lib/x-kit/widget/leaf/: Changed all widget FOO_WATCHER protocols to take   Null_Or(Foo) -> Void  instead of   Foo -> Void  args because this allows cleanly signalling imp shutdown (port no longer valid) as well as startup (port now valid).
+2014-12-26-11.12.45: src/lib/x-kit/widget/widget-unit-test.pkg: Established SLIDERS popup.
+2014-12-25-10.08.27: src/lib/x-kit/widget/leaf/:  Established horizontal-int-slider.pkg by clone-and-mutate of diamondbutton.pkg.
+2014-12-25-00.21.04: src/lib/x-kit/widget/leaf/arrowbutton.pkg: Reworked on model of button.pkg code.
+2014-12-24-23.15.08: src/lib/x-kit/widget/leaf/roundbutton.pkg: Reworked on model of button.pkg code.
+2014-12-24-16.14.20: src/lib/x-kit/widget/leaf/: Renamed boxbutton.pkg -> button.pkg because it is clearly the workhorse button.   src/lib/x-kit/widget/leaf/diamondbutton.pkg: Reworked on model of button.pkg code.
+2014-12-24-15.23.59: src/lib/x-kit/widget/leaf/checkbutton.pkg: Redid based on updated button.pkg code.
+2014-12-24-08.58.27: src/lib/x-kit/widget/leaf/boxbutton.pkg: Option:  Added support for TEXT_AT_LEFT, TEXT_AT_RIGHT, TEXT_IN_CENTER.
+2014-12-23-22.42.01: src/lib/x-kit/widget/leaf/boxbutton.pkg: App_To_Boxbutton:  Add (get|set)_button_(on|off|)_(text|image).
+2014-12-23-21.59.56: src/lib/x-kit/widget/leaf/boxbutton.pkg:  Polishing and fine-tuning.
+2014-12-23-09.40.18: src/lib/x-kit/widget/leaf/boxbutton.pkg: Forgot I had commented out the font. *blush*
+2014-12-23-00.46.58: src/lib/x-kit/widget/xkit/theme/widget/default/widget-theme-imp.pkg: Fiddling with font support.  src/lib/x-kit/widget/leaf/boxbutton.pkg: Fiddling with support for different on/off state text labels.
+2014-12-21-13.58.02: src/lib/x-kit/widget/leaf/boxbutton.pkg:  Option:  Add NO_BOX option.
+2014-12-21-13.49.01: src/lib/x-kit/widget/leaf/boxbutton.pkg:  Option:  Add FONT_ROMAN, FONT_ITALIC, FONT_BOLD, FONT_SIZE options.
+2014-12-21-13.34.03: src/lib/x-kit/widget/leaf/boxbutton.pkg:  Option:  Add IMAGE, ON_IMAGE, OFF_IMAGE, ON_TEXT, OFF_TEXT options.
+2014-12-21-12.45.02: src/lib/x-kit/widget/leaf/blank.pkg: Dropped all the irrelevant button stuff inherited via clone-and-mutate.
+2014-12-21-01.17.05: src/lib/x-kit/widget/theme/widget/widget-theme.pkg:  Add get_default_font_size, set_default_font_size.
+2014-12-21-01.06.37: src/lib/x-kit/widget/xkit/theme/widget/default/widget-theme-imp.pkg:  First-cut implementations of the new font calls.
+2014-12-20-23.53.40: src/lib/x-kit/widget/theme/widget/widget-theme.pkg: Establish font support fns (get|set)_(roman|italic|bold)_font(_spex)?.
+2014-12-20-21.24.16: src/lib/x-kit/widget/leaf/: Got rid of labelbutton.pkg + textbutton.pkg -- I think we can fold that functionality into boxbutton.pkg.
+2014-12-20-20.25.44: src/lib/x-kit/widget/leaf/checkbutton.pkg:  Updated default_redraw_request_fn, cribbing from src/lib/x-kit/widget/old/leaf/checkbutton-look.pkg.
+2014-12-20-15.03.07: src/lib/x-kit/widget/leaf/roundbutton.pkg:  Updated default_redraw_request_fn, cribbing from src/lib/x-kit/widget/old/leaf/roundbutton-drawfn-and-sizefn.pkg.
+2014-12-20-10.43.37: src/lib/x-kit/widget/leaf/diamondbutton.pkg:  Updated default_redraw_request_fn from src/lib/x-kit/widget/old/leaf/diamondbutton-drawfn-and-sizefn.pkg.
+2014-12-20-10.32.36: src/lib/x-kit/widget/leaf/boxbutton.pkg: Updated default_redraw_request_fn per src/lib/x-kit/widget/old/leaf/boxbutton-drawfn-and-sizefn.pkg.
+2014-12-19-23.43.04: src/lib/x-kit/widget/leaf/: Updated all other widgets on pattern of revised arrowbutton widget.
+2014-12-18-21.46.05: src/lib/x-kit/widget/leaf/arrowbutton.pkg: Reworked hook-fn interface to be essentially a superset of widget-imp.pkg -- same hook-fns except for adding button state to the input arg.
+2014-12-18-00.06.36: src/lib/x-kit/widget/leaf/arrowbutton.api:  Option:  Added   (MOUSEBUTTON_FN Mousebutton_Fn).      arrowbutton.api: Added support for  MOUSEBUTTON_FN  option.  The fog seems to be lifting...
+2014-12-17-22.20.05: src/lib/x-kit/widget/leaf/: Flatten appearance fn args.
+2014-12-17-21.35.29: src/lib/x-kit/widget/leaf/: Eliminated <<last>> arg to appearance fns. I think thats was a bridge too far in trying to be helpful to client code.
+2014-12-17-00.09.57: src/lib/x-kit/widget/leaf/arrowbutton.pkg: Fiddling.
+2014-12-15-00.28.55: Moved the cycle-through-all-reliefs checkout logic from arrowbutton.pkg to widget-unit-test.pkg, so arrowbuttons can become more production-oriented.
+2014-12-14-13.31.49: src/lib/x-kit/widget/leaf/: Added relief get/set fns.
+2014-12-14-12.26.05: src/lib/x-kit/widget/leaf/*: Rationalization.
+2014-12-14-10.06.25: src/lib/x-kit/widget/leaf/leaf/*: Tidying.
+2014-12-13-19.52.37: src/lib/x-kit/widget/leaf/: Established textbutton.api + textbutton.pkg.
+2014-12-13-19.11.57: src/lib/x-kit/widget/leaf/: Established labelbutton.api + labelbutton.pkg.
+2014-12-13-18.41.58: src/lib/x-kit/widget/leaf/: Established checkbutton.api + checkbutton.pkg.
+2014-12-13-14.38.49: src/lib/x-kit/widget/leaf/*button*:  Tidying.
+2014-12-12-22.22.32: src/lib/x-kit/widget/widget-unit-test.pkg: Add make_zoo_gui_plan() to showcase additional widgets, hook it up to relabelled ZOO button on base three-line gui plan.
+2014-12-08-21.39.50: src/lib/x-kit/widget/gui/guiboss-types.pkg (etc): Cleaning + tidying.
+2014-12-08-18.30.38: src/lib/x-kit/widget/gui/guiboss-types.pkg: Tidying.
+2014-12-08-00.15.12: src/lib/x-kit/widget/gui/guiboss-types.pkg: Tidying.
+2014-12-07-22.47.43: src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg: gt::GRID support seems to be working now.  src/lib/x-kit/widget/leaf/arrowbutton.pkg: Tidying and tweaking.
+2014-12-07-01.56.46: src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg:  Finished sketching in code for gt::RG_GRID support.
+2014-12-04-23.23.52: Same as previous, for objects and sprites.
+2014-12-03-22.11.42: src/lib/x-kit/widget/gui/guiboss-types.pkg: Simplified ROW,COL,GRID to having just a list of widgets, instead of a list of (hint,widget) pairs:  In practice, I found I was handling this stuff by passing hints to the widgets, who then exported them via guiboss_to_gui interface.
+2014-12-02-22.00.28: src/lib/x-kit/widget/gui/guiboss-imp.pkg:  gui_plan__to__paused_gui:  do_widget_widget:  gt::GRID:  Regularize widget grid so that all rows are guaranteed to have same number of widgets.
+2014-12-02-20.11.38: Renamed  packedspace -> widgetspace,  bouncespace -> spritespace,  canvasspace -> objectspace  (etc) because it is easier to remember that widgetspace goes with widgets than that packedspace goes with widgets.
+2014-12-01-23.55.01: src/lib/x-kit/widget/gui/ guiboss-imp.pkg, guiboss-types.pkg:  Wrote the routine support code for GRID.  Still to be written: the GRID code in src/lib/x-kit/widget/space/packed/packedspace-imp.pkg, where the real work is.
+2014-12-01-09.19.49: src/lib/prettyprint/big/src/standard-prettyprint-mill.api:  Renamed seq -> seqx, list -> listx for consistency with the convention established by tuple/tuplex.
+2014-11-30-18.57.06: src/lib/x-kit/widget/gui/guiboss-types.pkg:  Renamed   Sg_* -> Pg_*  and  SG_* -> PG_*   because <<stopped gui>> was long ago replaced by <<paused gui>> as the preferred nomenclature.
+2014-11-30-18.38.22: src/lib/x-kit/widget/gui/guiboss-types.pkg: Introduced   Packed_Widget.GRID, Sg_Packed_Widget.SG_GRID, Rg_Packed_Widget.RG_FRAME and Grid.  Affected code augmented with stubs pending full implementation.
+2014-11-30-17.26.39: src/lib/x-kit/widget/leaf/: Cloned   arrowbutton.api + arrowbutton.pkg   to establish   blank.api + blank.pkg   (support for guiboss-types.pkg GRID construct for grouping scrolled areas with scrollbars).
+2014-11-30-17.02.51: src/lib/x-kit/widget/gui/ guiboss-imp.pkg, guiboss-types.pkg, src/lib/x-kit/widget/space/packed/packedspace-imp.pkg:  Gui_Plan Packed_Widget.FRAME functionality now working.  src/lib/x-kit/widget/widget-unit-test.pkg:  make_gui_plan:  Use gt::FRAME to improve visual esthetics.
+2014-11-30-11.39.15: src/lib/x-kit/widget/gui/guiboss-types.pkg:  Added in Packed_Widget.FRAME, Sg_Packed_Widget.SG_FRAME, Rg_Packed_Widget.RG_FRAME to support framing widget groups.
+2014-11-30-09.19.15: src/lib/x-kit/widget/widget-unit-test.pkg, src/lib/x-kit/widget/leaf/:  *button.api, *button.pkg, frame.api, frame.pkg:  Renamed  arrowbutton::has [...]  ->  arrowbutton::with [...]   (etc) because it reads better and <<with>> is no longer a reserved word.
+2014-11-29-14.41.24: src/lib/x-kit/widget/leaf/frame.pkg: Chopped out most of the irrelevant stuff inherited from arrowbutton.pkg.
+2014-11-29-11.31.19: src/lib/x-kit/widget/leaf/: Cloned   arrowbutton.api + arrowbutton.pkg   to establish   frame.api + frame.pkg   (support for guiboss-types.pkg FRAME construct for drawing a frame around a subtree of widgets).
+2014-11-29-11.08.26: src/lib/x-kit/widget/gui/guiboss-types.pkg:  Tidying.
+2014-11-28-20.06.57: src/lib/x-kit/widget/gui/guiboss-imp.pkg:  Implemented streamlined redraw protocol detailed in Note[3]:  Basically guiboss_imp sends a guiboss_to_gadget.redraw_gadget_request only in response to a gadget_to_guiboss.needs_redraw_gadget_request, except at GUI initialization and GUI re-layout.  Also cleared out more debug crud.
+2014-11-28-17.46.49: src/lib/x-kit/widget/gui/guiboss-imp.pkg: Commenting.
+2014-11-28-13.44.58: src/lib/x-kit/widget/gui/guiboss-imp.pkg (etc):  In hopes of improved clarity:  Renamed:   before_first_frame -> initialize_gadget,   start_of_frame -> redraw_gadget_request,   update_gadget_appearance -> redraw_gadget,   gadget_may_have_visibly_changed -> needs_redraw_gadget_request.
+2014-11-27-21.54.39: src/lib/x-kit/widget/gui/guiboss-imp.pkg: Popups seem to be more or less working:  Stripped out a lot of accumulated debug crud.
+2014-11-27-17.54.26: src/lib/x-kit/widget/widget-unit-test.pkg:  Tidying:  gui_plan, popup_plan and popup_plan2 are now all generated via calls to make_gui_plan() rather than the previous massive inline code duplication.
+2014-11-27-11.57.47: src/lib/x-kit/widget/gui/guiboss-imp.pkg:  To reduce the Mystery Factor, have kill_gui write No GUI running on the window when all GUIs have been stopped, rather than just clearing it to black.   src/lib/x-kit/widget/widget-unit-test.pkg: Establish make_gui_plan() as part of cleaning up and reducing code duplication.
+2014-11-26-21.18.13: src/lib/x-kit/widget/widget-unit-test.pkg: More tidying.
+2014-11-26-19.10.23: src/lib/x-kit/widget/widget-unit-test.pkg: Tidying.
+2014-11-25-22.10.19: src/lib/std/2d/geometry2d.pkg:  package box:  Added area().  subtract_box_b_from_box_a: The quadsect logic was broken, switched over entirely to bisect logic, fixed it up a bit to work better.  Looks good for now.
+2014-11-24-22.19.17: src/lib/x-kit/widget/gui/guiboss-imp.pkg: restart_gui: paused_gui__to__running_gui: do_packed_widget: gt::SG_SCROLLABLE_VIEW:  Track created Xserver-side gadget_to_rw_pixmap created here for proper recycling at kill-gui time.
+2014-11-23-21.44.03: src/lib/x-kit/widget/gui/guiboss-imp.pkg:  pause_gui and kill_gui now call remove_per_gui_imps_from_global_imp_indices_then_clear_per_gui_indices.
+2014-11-23-21.02.41: src/lib/x-kit/widget/gui/guiboss-imp.pkg: paused_gui__to__running_gui();  Populate new per_gui_gadget_imps/per_gui_bounce_imps/per_gui_canvas_imps/per_gui_packed_imps maps.
+2014-11-23-20.43.10: src/lib/x-kit/widget/gui/guiboss-types.pkg:  Running_Gui:  Rename gadget_imps/bounce_imps/canvas_imps/packed_imps to per_gui_gadget_imps/per_gui_bounce_imps/per_gui_canvas_imps/per_gui_packed_imps to reduce confusion (and name collisions) with the Topwindow_Info gadget_imps/bounce_imps/canvas_imps/packed_imps fields.
+2014-11-23-11.54.46: src/lib/x-kit/widget/gui/guiboss-types.pkg: Running_Gui: Add fields to track per-running-gui imps (so that we can remove them from the matching global indices at gui shutdown), viz:  gadget_imps: Gadget_Imps, bounce_imps: Bounce_Imps, canvas_imps: Canvas_Imps, packed_imps: Packed_Imps.
+2014-11-23-10.39.22: src/lib/compiler/front/parser/lex/mythryl-token-table-g.pkg: Light commenting.
+2014-11-23-10.05.25: src/lib/compiler/front/parser/yacc/mythryl.grammar, src/lib/compiler/front/parser/lex/mythryl-token-table-g.pkg:  Discovered that the reserved word "with" was in fact no longer used anywhere in the Mythryl grammar *blush*, so I removed it from the parser and lexer, returning it to the general pool of identifiers.
+2014-11-23-09.28.14: Moved Bounce_Imps, Canvas_Imps, Packed_Imps, Gadget_Imps type defs from   src/lib/x-kit/widget/gui/guiboss-imp.pkg   to   src/lib/x-kit/widget/gui/guiboss-types.pkg.
+2014-11-22-19.55.40: src/lib/x-kit/widget/gui/guiboss-imp.pkg:  fun kill_gui:  Call free_rw_pixmap() on our main backing rw_pixmap and also all scratch rw_pixmaps allocated by widgets for this running gui.
+2014-11-22-19.26.57: src/lib/x-kit/widget/gui/guiboss-imp.pkg:  fun display_one_frame:  fun make_rw_pixmap:  Actually record new rw_pixmap in appropriate TOPWINDOW_PIXMAP.pixmaps.
+2014-11-22-18.33.47: src/lib/x-kit/widget/gui/guiboss-imp.pkg: fun display_one_frame:  Establish  fun make_rw_pixmap  wrapper of  imports.guiboss_to_windowsystem.make_rw_pixmap   to support tracking of all rw_pixmaps created by a given running_gui.
+2014-11-22-18.14.25: src/lib/x-kit/widget/gui/guiboss-types.pkg:  TOPWINDOW_PIXMAP:  Added  pixmaps: Ref( im::Map( g2p::Gadget_To_Rw_Pixmap ))   field to track Xserver-side pixmaps allocated by/for running gui, so we can reliably recycle them at gui shutdown time, rather than leaking X server memory.
+2014-11-22-17.50.55: src/lib/x-kit/widget/gui/guiboss-imp.pkg:  Improve handling of Topwindow_Info.backing_pixmap field in context of new popup support (== possibly multiple running guis per topwindow).
+2014-11-22-17.03.55: src/lib/x-kit/widget/gui/guiboss-imp.pkg: Topwindow_Info: Removed gadget_to_guiboss and space_to_gui fields because they wound up not being used, and make no sense in the context of the new popup support, where there can be multiple gadget_to_guiboss and space_to_gui imps active per topwindow.
+2014-11-22-15.56.47: Light commenting of various gui files.
+2014-11-22-13.10.36: src/c/heapcleaner/heap-debug-stuff.c: Tweaks to accomodate additional warnings by later gcc versions.
+2014-11-20-00.19.48: src/lib/x-kit/widget/gui/guiboss-imp.pkg: Killing of popups now works to zeroth-order.
+2014-11-17-21.41.38: src/lib/x-kit/widget/gui/guiboss-imp.pkg: Sketched in framework for kill_gui() support. Not yet functional.
+2014-11-17-09.16.07: src/lib/x-kit/widget/gui/guiboss-imp.pkg:  find_frombox_parts_not_hidden_by_popups:  Do a better job of getting things in the right coordinate systems. Now dual overlapping popups appear to display correctly.
+2014-11-16-12.02.56: src/lib/x-kit/widget/gui/guiboss-imp.pkg: find_appropriate_gadget_info: Tweaked to support sending mouse events to widgets on popups as well as widgets on base-window.
+2014-11-13-09.56.39: src/lib/x-kit/widget/gui/guiboss-imp.pkg:  display_one_frame:  Do not call  before_first_frame  or  start_of_frame  until   site   is valid.  This resolves a race condition between packedspace_imp doing widget layout and guiboss_imp doing initial draw of widget.
+2014-11-12-20.57.48: src/lib/x-kit/widget/gui/guiboss-imp.pkg:  Kill now-unneeded first_frame global.
+2014-11-12-20.44.50: src/lib/x-kit/widget/gui/guiboss-imp.pkg:  frameclock microthread:  Switch control of sending before_first_frame calls from global first_frame flag to per-widget sent__before_first_frame flags.
+2014-11-12-20.32.44: src/lib/x-kit/widget/gui/guiboss-imp.pkg:  Gadget_Info:  Added    sent__before_first_frame: Ref(Bool)   field.
+2014-11-12-20.17.10: src/lib/x-kit/widget/gui/guiboss-imp.pkg: restart_gui: Fixed: We were starting up a frameclock microthread on every call, which was fine when we had at most one running gui per topwindow, but we need to be more selective now that we also support secondary (popup) running guis.
+2014-11-11-23.54.38: src/lib/std/2d/geometry2d.pkg:  subtract_box_b_from_box_a:  Fixed:  This fn was not correctly handling case where no box b vertex was in box a, but box b edges still crossed box a.
+2014-11-11-21.33.33: src/lib/x-kit/widget/gui/guiboss-imp.pkg: restart_gui: Fixed: Logic was assuming that every gui started was toplevel gui for topwindow and recording it as such.  With secondary (popup) guis now supported we need to be more selective about updating the topwindow_info.backing_pixmap field.
+2014-11-11-21.06.43: src/lib/x-kit/widget/gui/guiboss-imp.pkg: Move next_stacking_order field from Running_Gui to Topwindow_Info because we need exactly one, and we now support multiple running_gui instances per topwindow (for popups).
+2014-11-09-19.53.04: src/lib/x-kit/widget/gui/guiboss-imp.pkg:  Fixed: restart_gui was hardwired to use the toplevel window as the gui size, instead of taking the size from its topwindow_pixmap arg.
+2014-11-09-18.33.32: src/lib/x-kit/widget/gui/guiboss-imp.pkg:  propagate_frombox_changes_to_all_parents_in_which_they_are_visible:  draw_fragment:  Add in origin of popup when drawing fragments on a popup.
+2014-11-09-17.01.27: src/lib/x-kit/widget/gui/guiboss-imp.pkg:  make_backing_pixmap_for_popup: FIXED: due a brainfart had high/wide where row/col were required.
+2014-11-09-15.18.02: src/lib/x-kit/widget/gui/guiboss-imp.pkg: propagate_frombox_changes_to_all_parents_in_which_they_are_visible: draw_fragment:  FIXED: Was erroneously using a single to_point value for all fragments instead of recomputing appropriately per-fragment.
+2014-11-07-22.16.53: src/lib/x-kit/widget/gui/guiboss-imp.pkg: Topwindow_Info: Replace   running_gui: Ref(Null_Or(gt::Running_Gui))   field with   backing_pixmap: Ref(Null_Or(gt::Backing_Pixmap))   field because with popups having their own Running_Gui instances we can no longer think in terms of at most one Running_Gui per topwindow.   src/lib/x-kit/widget/gui/guiboss-imp.pkg: Backing_Pixmap:  TOPWINDOW_PIXMAP:  Add a   running_gui: Ref(Null_Or(Running_Gui))  field because we have established Backing_Pixmap as the recursive datastructure tracking the popup parent/child tree, so this is the natural place now for the Running_Gui record for each popup to live.
 2014-10-21-23.16.49: src/lib/std/2d/geometry2d-junk.pkg: Established, populated with box_to_string, boxes_to_string etc.  src/lib/x-kit/widget/gui/guiboss-imp.pkg: Instrumentation.
 2014-10-19-18.44.05: src/lib/x-kit/widget/widget-unit-test.pkg: Logic to actually exercise popup support. Now debugging can begin in earnest. :-)
 2014-10-16-20.34.40: src/lib/x-kit/widget/gui/guiboss-imp.pkg: propagate_frombox_changes_to_all_parents_in_which_they_are_visible: Switch on the new do-not-clobber-overlying-popups logic. In principle popups are now working. Debugging starts this weekend. :-)

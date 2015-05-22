@@ -1,4 +1,3 @@
-
 # xkit-widget.sublib
 #
 # The library sources file for the X-Kit graph utilities level.
@@ -52,9 +51,10 @@ SUBLIBRARY_EXPORTS
 	api Get_Mouse_Selection
 
 
-	api Windowsystem_Imp
-	pkg windowsystem_imp_for_x
-	pkg guiboss_to_windowsystem
+	api Guishim_Imp
+	pkg guishim_imp_for_x
+	pkg guiboss_to_guishim
+	pkg app_to_guishim_xspecific
 	pkg gadget_to_pixmap
 	pkg gui_displaylist
 	pkg exercise_x_appwindow
@@ -65,54 +65,57 @@ SUBLIBRARY_EXPORTS
 	api Gui_Event_To_Xevent
 	pkg gui_event_to_xevent
 
+	api Guiboss_Event_Dispatch		# There is probably no good reason to export
+	pkg guiboss_event_dispatch		# these two from this library, actually.
+
+	api Guiboss_Popup_Junk			# There is probably no good reason to export
+	pkg guiboss_popup_junk			# these two from this library, actually.
+
+	api Guiboss_Widget_Layout
+	pkg guiboss_widget_layout
+
+	api Translate_Guiplan_To_Guipane
+	pkg translate_guiplan_to_guipane
+
+	api Translate_Guipane_To_Guipith
+	pkg translate_guipane_to_guipith
+
 	pkg guiboss_types
+	pkg guiboss_types_junk
 	pkg gui_event_types
 	#	
 	api Gui_Event_To_String
 	pkg gui_event_to_string
 
-	api Canvasspace_Imp
-	pkg canvasspace_imp
-
-	pkg canvasspace_layout_hint
+	api Objectspace_Imp
+	pkg objectspace_imp
 
 
-	api Packedspace_Imp
-	pkg packedspace_imp
-
-	pkg packedspace_layout_hint
+	api Widgetspace_Imp
+	pkg widgetspace_imp
 
 
-	api Bouncespace_Imp
-	pkg bouncespace_imp
-
-	pkg bouncespace_layout_hint
+	api Spritespace_Imp
+	pkg spritespace_imp
 
 
-	api Bounce_Theme_Imp
-	pkg gui_to_bounce_theme
+	api Sprite_Theme_Imp
+	pkg gui_to_sprite_theme
 
-	api Canvas_Theme_Imp
-	pkg gui_to_canvas_theme
+	api Object_Theme_Imp
+	pkg gui_to_object_theme
 
-	api Packed_Theme_Imp
-	pkg packed_theme
+	api Widget_Theme_Imp
+	pkg widget_theme
 
 
-	pkg bounce_theme_imp
-	pkg canvas_theme_imp
-	pkg packed_theme_imp
+	pkg sprite_theme_imp
+	pkg object_theme_imp
+	pkg widget_theme_imp
 
-# SOON! these should die
-#	generic bounce_look_imp_g
-#	generic canvas_look_imp_g
-#	pkg      ball_look_imp
-#	pkg      node_look_imp
-
-	pkg sprite_to_bouncespace
-	pkg object_to_canvasspace
-	pkg widget_to_packedspace
-        pkg issue_unique_look_id
+	pkg sprite_to_spritespace
+	pkg object_to_objectspace
+        pkg issue_unique_widget_id
 
 	api Widget_Imp
 	pkg widget_imp
@@ -120,8 +123,6 @@ SUBLIBRARY_EXPORTS
 
 	api Guiboss_Imp
 	pkg guiboss_imp
-	#
-	pkg space_to_gui
 
 
 	api Root_Window
@@ -143,9 +144,8 @@ SUBLIBRARY_EXPORTS
 
 	pkg widget_types
 
-	pkg bouncespace_to_sprite
-	pkg canvasspace_to_object
-	pkg packedspace_to_widget
+	pkg spritespace_to_sprite
+	pkg objectspace_to_object
 
 	api Run_In_X_Window
 	pkg run_in_x_window
@@ -168,6 +168,7 @@ SUBLIBRARY_EXPORTS
 
 	api Widget_Imp
 	pkg widget_imp
+	pkg widget_imp_types
 
 	api Shade_Ximp
 	pkg shade_ximp
@@ -176,17 +177,95 @@ SUBLIBRARY_EXPORTS
 	pkg widget_style
 	pkg widget_style_old
 
+	api Blank
+	pkg blank
+
+	api Frame
+	pkg frame
+
+	api Popupframe
+	pkg popupframe
+
 	api Arrowbutton
 	pkg arrowbutton
 
-	api Boxbutton
-	pkg boxbutton
+	api Button
+	pkg button
+
+	api Checkbox
+	pkg checkbox
 
 	api Diamondbutton
 	pkg diamondbutton
 
 	api Roundbutton
 	pkg roundbutton
+
+	api Horizontal_Int_Slider
+	pkg horizontal_int_slider
+
+	api Horizontal_Float_Slider
+	pkg horizontal_float_slider
+
+	api Vertical_Int_Slider
+	pkg vertical_int_slider
+
+	api Vertical_Float_Slider
+	pkg vertical_float_slider
+
+	api Textentry
+	pkg textentry
+
+	api Texteditor
+	pkg texteditor
+
+	api Textedit
+	pkg textedit
+
+	api Textpane
+	pkg textpane
+	pkg textpane_types
+
+	api Lineeditor
+	pkg lineeditor
+
+	api Statusline
+	pkg statusline
+
+	api Minibuffer
+	pkg minibuffer
+
+	api Editboss_Imp
+	pkg editboss_imp
+	pkg editboss_types
+
+	pkg gadget_to_editboss
+	pkg editboss_to_guiboss
+
+	api Textbuffer_Imp
+	pkg textbuffer_imp
+
+	pkg editboss_to_textbuffer
+	pkg textbuffer_to_editboss
+	pkg textpane_to_textbuffer
+
+	pkg textpane_to_lineeditor
+	pkg textpane_to_statusline
+
+	pkg textedit_to_minibuffer
+	pkg textedit_to_textpane
+	pkg lineeditor_to_textpane
+	pkg statusline_to_textpane
+
+	pkg editboss_to_minibuffer
+	pkg editboss_to_statusline
+	pkg editboss_to_lineeditor
+	#
+	pkg editboss_to_textedit
+	pkg editboss_to_textpane
+
+	pkg minibuffer_to_textedit
+	pkg textpane_to_textedit
 
 	pkg quark
 	pkg scrollable_string_editor
@@ -274,17 +353,98 @@ SUBLIBRARY_COMPONENTS
 	old/basic/widget-attributes.api
 	old/basic/widget-attributes.pkg
 
+	leaf/blank.api
+	leaf/blank.pkg
+
+	leaf/frame.api
+	leaf/frame.pkg
+
+	leaf/popupframe.api
+	leaf/popupframe.pkg
+
 	leaf/arrowbutton.api
 	leaf/arrowbutton.pkg
 
-	leaf/boxbutton.api
-	leaf/boxbutton.pkg
+	leaf/button.api
+	leaf/button.pkg
+
+	leaf/checkbox.api
+	leaf/checkbox.pkg
 
 	leaf/diamondbutton.api
 	leaf/diamondbutton.pkg
 
 	leaf/roundbutton.api
 	leaf/roundbutton.pkg
+
+	leaf/horizontal-int-slider.api
+	leaf/horizontal-int-slider.pkg
+
+	leaf/horizontal-float-slider.api
+	leaf/horizontal-float-slider.pkg
+
+	leaf/vertical-int-slider.api
+	leaf/vertical-int-slider.pkg
+
+	leaf/vertical-float-slider.api
+	leaf/vertical-float-slider.pkg
+
+	leaf/textentry.api
+	leaf/textentry.pkg
+
+	edit/texteditor.api
+	edit/texteditor.pkg
+
+	edit/textedit.api
+	edit/textedit.pkg
+
+	edit/textpane.api
+	edit/textpane.pkg
+	edit/textpane-types.pkg
+
+	edit/lineeditor.api
+	edit/lineeditor.pkg
+
+	edit/statusline.api
+	edit/statusline.pkg
+
+	edit/minibuffer.api
+	edit/minibuffer.pkg
+
+	edit/editboss-imp.api
+	edit/editboss-imp.pkg
+	edit/editboss-types.pkg
+
+	edit/gadget-to-editboss.pkg
+	edit/editboss-to-guiboss.pkg
+
+	edit/textbuffer-imp.api
+	edit/textbuffer-imp.pkg
+
+	edit/editboss-to-textbuffer.pkg
+	edit/textbuffer-to-editboss.pkg
+
+	edit/textpane-to-textbuffer.pkg
+
+	edit/textpane-to-lineeditor.pkg
+	edit/textpane-to-statusline.pkg
+
+	edit/textedit-to-minibuffer.pkg
+	edit/textedit-to-textpane.pkg
+
+	edit/lineeditor-to-textpane.pkg
+	edit/statusline-to-textpane.pkg
+
+	edit/editboss-to-minibuffer.pkg
+	edit/editboss-to-statusline.pkg
+	edit/editboss-to-lineeditor.pkg
+
+	edit/editboss-to-textedit.pkg
+	edit/editboss-to-textpane.pkg
+
+	edit/minibuffer-to-textedit.pkg
+	edit/textpane-to-textedit.pkg
+	
 
 	old/leaf/arrowbutton-drawfn-and-sizefn.pkg
 	old/leaf/arrowbutton-look.pkg
@@ -454,60 +614,73 @@ SUBLIBRARY_COMPONENTS
 	old/lib/button-group.api
 	old/lib/button-group.pkg
 
-	xkit/app/windowsystem-imp-for-x.pkg
+	xkit/app/guishim-imp-for-x.pkg
 	xkit/app/exercise-x-appwindow.pkg
         xkit/app/xevent-to-gui-event.pkg
         xkit/app/gui-event-to-xevent.pkg
 
-	space/bounce/bouncespace-to-sprite.pkg
+	space/sprite/spritespace-to-sprite.pkg
 
-	space/canvas/canvasspace-to-object.pkg
-
-
-	space/packed/packedspace-to-widget.pkg
+	space/object/objectspace-to-object.pkg
 
 
-	space/canvas/canvasspace-imp.api		space/canvas/canvasspace-imp.pkg		space/canvas/canvasspace-layout-hint.pkg
-	space/packed/packedspace-imp.api		space/packed/packedspace-imp.pkg		space/packed/packedspace-layout-hint.pkg
-	space/bounce/bouncespace-imp.api		space/bounce/bouncespace-imp.pkg		space/bounce/bouncespace-layout-hint.pkg
+	space/object/objectspace-imp.api		space/object/objectspace-imp.pkg
+	space/widget/widgetspace-imp.api		space/widget/widgetspace-imp.pkg
+	space/sprite/spritespace-imp.api		space/sprite/spritespace-imp.pkg
 
-	space/bounce/sprite-to-bouncespace.pkg
-	space/canvas/object-to-canvasspace.pkg
-	space/packed/widget-to-packedspace.pkg
+	space/sprite/sprite-to-spritespace.pkg
+	space/object/object-to-objectspace.pkg
 
-	gui/space-to-gui.pkg
-
-	theme/bounce/bounce-theme-imp.api		theme/bounce/gui-to-bounce-theme.pkg
-	theme/canvas/canvas-theme-imp.api		theme/canvas/gui-to-canvas-theme.pkg
-	theme/packed/packed-theme-imp.api		theme/packed/packed-theme.pkg
+	theme/sprite/sprite-theme-imp.api		theme/sprite/gui-to-sprite-theme.pkg
+	theme/object/object-theme-imp.api		theme/object/gui-to-object-theme.pkg
+	theme/widget/widget-theme-imp.api		theme/widget/widget-theme.pkg
 
 
-	theme/windowsystem-imp.api
-	theme/guiboss-to-windowsystem.pkg
+	theme/guishim-imp.api
+	theme/guiboss-to-guishim.pkg
+	theme/app-to-guishim-xspecific.pkg
 	theme/gadget-to-pixmap.pkg
 	theme/gui-displaylist.pkg
-	xkit/theme/bounce/default/bounce-theme-imp.pkg
-	xkit/theme/canvas/default/canvas-theme-imp.pkg
-	xkit/theme/packed/default/packed-theme-imp.pkg
+	xkit/theme/sprite/default/sprite-theme-imp.pkg
+	xkit/theme/object/default/object-theme-imp.pkg
+	xkit/theme/widget/default/widget-theme-imp.pkg
 
-	xkit/theme/packed/default/look/widget-imp.api
-	xkit/theme/packed/default/look/widget-imp.pkg
+	xkit/theme/widget/default/look/widget-imp.api
+	xkit/theme/widget/default/look/widget-imp.pkg
+	xkit/theme/widget/default/look/widget-imp-types.pkg
 
-	xkit/theme/packed/default/look/sprite-imp.api
-	xkit/theme/packed/default/look/sprite-imp.pkg
+	xkit/theme/widget/default/look/sprite-imp.api
+	xkit/theme/widget/default/look/sprite-imp.pkg
 
-	xkit/theme/packed/default/look/object-imp.api
-	xkit/theme/packed/default/look/object-imp.pkg
+	xkit/theme/widget/default/look/object-imp.api
+	xkit/theme/widget/default/look/object-imp.pkg
 
-
-	gui/guiboss-types.pkg
-	gui/gui-event-types.pkg
-	gui/gui-event-to-string.pkg
 
 
 	gui/guiboss-imp.api
 	gui/guiboss-imp.pkg
-	gui/issue-unique-look-id.pkg
+	gui/issue-unique-widget-id.pkg
+
+	gui/guiboss-types.pkg
+	gui/guiboss-types-junk.pkg
+
+	gui/gui-event-types.pkg
+	gui/gui-event-to-string.pkg
+
+	gui/guiboss-event-dispatch.api
+	gui/guiboss-event-dispatch.pkg
+
+	gui/guiboss-popup-junk.api
+	gui/guiboss-popup-junk.pkg
+
+	gui/guiboss-widget-layout.api
+	gui/guiboss-widget-layout.pkg
+
+	gui/translate-guipane-to-guipith.api
+	gui/translate-guipane-to-guipith.pkg
+
+	gui/translate-guiplan-to-guipane.api
+	gui/translate-guiplan-to-guipane.pkg
 
 	widget-unit-test.pkg
 

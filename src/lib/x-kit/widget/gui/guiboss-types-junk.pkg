@@ -1,0 +1,4555 @@
+## guiboss-types-junk.pkg
+#
+# Support code relating to src/lib/x-kit/widget/gui/guiboss-types.pkg
+
+# Compiled by:
+#     src/lib/x-kit/widget/xkit-widget.sublib
+
+
+stipulate
+    include package   threadkit;							# threadkit				is from   src/lib/src/lib/thread-kit/src/core-thread-kit/threadkit.pkg
+    #
+    package g2d =  geometry2d;								# geometry2d				is from   src/lib/std/2d/geometry2d.pkg
+    package g2j =  geometry2d_junk;							# geometry2d_junk			is from   src/lib/std/2d/geometry2d-junk.pkg
+
+    package wt  =  widget_theme;							# widget_theme				is from   src/lib/x-kit/widget/theme/widget/widget-theme.pkg
+    package evt =  gui_event_types;							# gui_event_types			is from   src/lib/x-kit/widget/gui/gui-event-types.pkg
+
+    package o2c =  object_to_objectspace;						# object_to_objectspace			is from   src/lib/x-kit/widget/space/object/object-to-objectspace.pkg   
+    package c2o =  objectspace_to_object;						# objectspace_to_object			is from   src/lib/x-kit/widget/space/object/objectspace-to-object.pkg
+
+    package s2b =  sprite_to_spritespace;						# sprite_to_spritespace			is from   src/lib/x-kit/widget/space/sprite/sprite-to-spritespace.pkg   
+    package b2s =  spritespace_to_sprite;						# spritespace_to_sprite			is from   src/lib/x-kit/widget/space/sprite/spritespace-to-sprite.pkg
+
+    package g2p =  gadget_to_pixmap;							# gadget_to_pixmap			is from   src/lib/x-kit/widget/theme/gadget-to-pixmap.pkg
+
+    package im  =  int_red_black_map;							# int_red_black_map			is from   src/lib/src/int-red-black-map.pkg
+    package iuw =  issue_unique_widget_id;						# issue_unique_widget_id		is from   src/lib/x-kit/widget/gui/issue-unique-widget-id.pkg
+    package gtg =  guiboss_to_guishim;							# guiboss_to_guishim			is from   src/lib/x-kit/widget/theme/guiboss-to-guishim.pkg
+
+    package pp  =  standard_prettyprint_mill;						# standard_prettyprint_mill		is from   src/lib/prettyprint/big/src/standard-prettyprint-mill.pkg
+
+    package lms =  list_mergesort;							# list_mergesort			is from   src/lib/src/list-mergesort.pkg
+
+    package err =  error_message;							# error_message				is from   src/lib/compiler/front/basics/errormsg/error-message.pkg
+
+    package gd  =  gui_displaylist;							# gui_displaylist			is from   src/lib/x-kit/widget/theme/gui-displaylist.pkg
+    package t2t =  textpane_to_textbuffer;						# textpane_to_textbuffer		is from   src/lib/x-kit/widget/edit/textpane-to-textbuffer.pkg
+
+
+    nb = log::note_on_stderr;								# log					is from   src/lib/std/src/log.pkg
+
+    include package   guiboss_types;							# guiboss_types				is from   src/lib/x-kit/widget/gui/guiboss-types.pkg
+
+herein
+
+    package guiboss_types_junk
+    {
+	Dummy = Int;
+	#
+	fun widget_layout_hint__to__string
+	      (
+		h:  Widget_Layout_Hint
+	      )
+	    =
+	    sprintf "{ pixels_high_min => %d, pixels_wide_min => %d, pixels_high_cut => %g, pixels_wide_cut => %g }"
+		     h.pixels_high_min      h.pixels_wide_min      h.pixels_high_cut      h.pixels_wide_cut
+		    ;
+
+
+	fun make_nested_box
+	      (
+		site:			g2d::Box,
+		frame_indent_hint: 	Frame_Indent_Hint
+	      )
+	    =
+	    {   site ->		      { col:				Int,
+					row:				Int,
+					#
+					wide:				Int,
+					high:				Int
+				      };
+		#
+		frame_indent_hint ->  { pixels_for_top_of_frame:	Int,
+					pixels_for_bottom_of_frame:	Int,
+					#
+					pixels_for_left_of_frame:	Int,
+					pixels_for_right_of_frame:	Int
+				      };
+
+		col  =   col + pixels_for_left_of_frame;
+		row  =   row + pixels_for_top_of_frame;
+
+		wide =  wide - (pixels_for_left_of_frame + pixels_for_right_of_frame );
+		high =  high - (pixels_for_top_of_frame  + pixels_for_bottom_of_frame);
+
+		col  =  int::min  (col,  site.col + site.wide);
+		row  =  int::min  (row,  site.row + site.high);
+
+		wide =  int::max  (wide, 0);
+		high =  int::max  (high, 0);
+
+		{ row, col, wide, high };
+	    };
+
+
+	#########################################################################################
+	### Gadget_Imp_Info code
+
+	fun same_gadget_imp_info
+	      (
+		{ guiboss_to_gadget => guiboss_to_gadget1, ... }:	Gadget_Imp_Info,	
+		{ guiboss_to_gadget => guiboss_to_gadget2, ... }:	Gadget_Imp_Info
+	      )
+	    =
+	    iuw::same_id ( guiboss_to_gadget1.id,
+			   guiboss_to_gadget2.id
+			 );
+
+
+	fun get_gadget_imp_info
+	      (
+		gadget_imps:	Gadget_Imps,
+		id:		iuw::Id
+	      )
+	    =
+	    case (im::get (*gadget_imps,  iuw::id_to_int id))
+		#
+		THE gadget_imp_info =>    gadget_imp_info;
+
+		NULL =>     {   msg = sprintf "imp %d not found in gadget_imps?! -- get_gadget_imp_info in guiboss-types-junk.pkg" (iuw::id_to_int id);	# Should be impossible -- all widgets, sprites and objects should be in gadget_imps.
+				log::note_on_stderr {. msg; };												# [LATER:] But guis are getting more dynamic, we might be getting stale requests from recently-deceased widgets etc. Maybe we should silently ignore these.
+				raise exception FAIL msg;
+			    };
+	    esac;
+
+	#########################################################################################
+	### Subwindow_Or_View code
+
+	fun subwindow_or_view_id_of    (SUBWINDOW_INFO   r) => (*r.pixmap).id;
+	    subwindow_or_view_id_of    (SCROLLABLE_INFO  r) =>   r.pixmap.id;
+	    subwindow_or_view_id_of    (TABBABLE_INFO    r) =>   r.pixmap.id;
+	end; 
+
+	fun subwindow_info_id_of    (SUBWINDOW_DATA r) = (*r.pixmap).id;
+	fun scrollable_info_id_of   (r: Rg_Scrollport) =   r.pixmap.id;
+
+	fun gadget_to_rw_pixmap__of (SUBWINDOW_INFO   r) =>  *r.pixmap;
+	    gadget_to_rw_pixmap__of (SCROLLABLE_INFO  r) =>   r.pixmap;
+	    gadget_to_rw_pixmap__of (TABBABLE_INFO    r) =>   r.pixmap;
+	end; 
+
+
+# As of 2014-10-13 this appears to be nowhere used.
+# If we don't find a use for it soon we should probably delete it.
+# XXX SUCKO FIXME
+	fun subwindow_or_view_is_visible (SUBWINDOW_INFO _)								# This fn is used for finding which widget was clicked on by user;  we're just trying to exclude widgets on de-selected views
+		=>													# in TABPORT sets.  Consequently we don't worry about whether scrolling has made a pixmap actually not visible to user.
+		TRUE;													# SUBWINDOW_INFO is by definition visible.
+
+	    subwindow_or_view_is_visible (SCROLLABLE_INFO r)								# A SCROLLABLE_INFO is visible if it has *is_visible==TRUE and some chain of parents leading to a SUBWINDOW_INFO are also visible.
+		=>
+		TRUE;
+
+	    subwindow_or_view_is_visible (TABBABLE_INFO r)								# A SCROLLABLE_INFO is visible if it has *is_visible==TRUE and some chain of parents leading to a SUBWINDOW_INFO are also visible.
+		=>
+		*r.is_visible;
+	end; 
+
+
+	fun subwindow_or_view_id (bp: Subwindow_Or_View)
+	    =
+	    case bp
+		#
+		SUBWINDOW_INFO  {											# 
+				    pixmap:		Ref( g2p::Gadget_To_Rw_Pixmap ),				# 
+				    stacking_order:	Int,
+				    upperleft:		Ref( g2d::Point),
+				    ...
+				  }
+		    =>
+		    sprintf "SUBWINDOW_INFO with pixmap.id => %d  pixmap.size => %s   upperleft => %s  stacking_order => %d"  (id_to_int (*pixmap).id)  (g2j::size_to_string (*pixmap).size)  (g2j::point_to_string *upperleft)  stacking_order;
+
+		SCROLLABLE_INFO     { pixmap:		g2p::Gadget_To_Rw_Pixmap,					# The pixmap visible in the scrollport.
+				    ...
+				  }
+		    =>
+		    sprintf "SCROLLABLE_INFO with pixmap.id => %d  pixmap.size => %s"  (id_to_int pixmap.id)  (g2j::size_to_string pixmap.size);
+
+		TABBABLE_INFO     { pixmap:		g2p::Gadget_To_Rw_Pixmap,					# The pixmap visible in the tabport.
+				    ...
+				  }
+		    =>
+		    sprintf "TABBABLE_INFO with pixmap.id => %d  pixmap.size => %s"  (id_to_int pixmap.id)  (g2j::size_to_string pixmap.size);
+	    esac;
+
+	fun subwindow_info_id (bp: Subwindow_Data)
+	    =
+	    case bp
+		#
+		SUBWINDOW_DATA  {											# 
+				  pixmap:		Ref( g2p::Gadget_To_Rw_Pixmap ),				# 
+				  stacking_order:	Int,
+				  upperleft:		Ref( g2d::Point),
+				  ...
+				}
+		    =>
+		    sprintf "SUBWINDOW_DATA with pixmap.id => %d  pixmap.size => %s   upperleft => %s  stacking_order => %d"  (id_to_int (*pixmap).id)  (g2j::size_to_string (*pixmap).size)  (g2j::point_to_string *upperleft)  stacking_order;
+	    esac;
+
+	stipulate
+	    fun die ()
+		=
+		{   msg = "arg should never be a SCROLLABLE_INFO! -- find_all_subwindow_infos_above_given_subwindow_info_in_stacking_order in guiboss-types.pkg";
+		    log::fatal msg;
+		    raise exception FAIL msg;
+		};
+
+	herein
+	    fun root_pixmap (subwindow_info:	Subwindow_Data)
+		=
+		case subwindow_info
+		    #
+		    SUBWINDOW_DATA r
+			=>
+			case r.parent
+			    #
+			    THE subwindow_info =>  root_pixmap subwindow_info;
+			    NULL	       =>	       subwindow_info;
+			esac;			    
+		esac;
+
+
+	    fun subwindow_info_upperleft_in_base_window_coordinates							# We support popups on popups, and each popup upperleft is relative to its parent, so we need to sum the upperlefts of given subwindow_info plus all of its parents.
+		  (
+		    subwindow_info:	Subwindow_Info
+		  )
+		  :			g2d::Point
+		=
+		*subwindow_info.upperleft
+		+
+		(sum_of_parent_upperlefts  subwindow_info)
+		where
+		    fun sum_of_parent_upperlefts subwindow_info
+			=
+			case subwindow_info.parent
+			    #
+			    NULL => g2d::point::zero;
+			    #
+			    THE (SUBWINDOW_DATA r)
+				=>
+				*r.upperleft + (sum_of_parent_upperlefts r);
+			esac;
+		end;
+
+	    fun subwindow_info_of_subwindow_data
+		  (
+		    subwindow_info:	Subwindow_Data
+		  )
+		  :			Subwindow_Info
+		=
+		case subwindow_info
+		    #
+		    SUBWINDOW_DATA r => r;
+		esac;
+
+	    fun subwindow_info_of_subwindow_or_view									# Used in  make_rw_pixmap()  wrapper in  display_one_frame()  in  src/lib/x-kit/widget/gui/guiboss-imp.pkg
+		  (
+		    subwindow_or_view:	Subwindow_Or_View
+		  )
+		  :				Subwindow_Info
+		=
+		case subwindow_or_view
+		    #
+		    SUBWINDOW_INFO r => r;
+		    #
+		    SCROLLABLE_INFO r
+			=>
+			subwindow_info_of_subwindow_or_view  r.parent_subwindow_or_view;
+		    #
+		    TABBABLE_INFO r
+			=>
+			subwindow_info_of_subwindow_or_view  r.parent_subwindow_or_view;
+		esac;
+
+	    fun find_all_subwindow_datas_above_given_stacking_order							# Called below and also by   redraw_all_popups()   in   src/lib/x-kit/widget/gui/guiboss-imp.pkg
+		  (
+		    subwindow_info:	Subwindow_Data,
+		    our_stacking_order:	Int
+		  )
+		  :			List( Subwindow_Data )								# 
+		=
+		case subwindow_info
+		    #
+		    SUBWINDOW_DATA r
+			=>
+{
+# nb {. sprintf "find_all_subwindow_datas_above_given_stacking_order our_stacking_order d=%d r.stacking_order d=%d r.pixmap.id d=%d r.parent=%s #popups d=%d" our_stacking_order r.stacking_order (id_to_int r.pixmap.id) (case r.parent NULL => "NULL"; _ => "NON-null"; esac) (list::length *r.popups); };
+			{    
+# nb {. sprintf "find_all_subwindow_datas_above_given_stacking_order subwindow_info s=%s" (subwindow_or_view_id subwindow_info); };
+			    subwindow_info =  root_pixmap subwindow_info;
+# nb {. sprintf "find_all_subwindow_datas_above_given_stacking_order (root_pixmap subwindow_info) s=%s" (subwindow_or_view_id subwindow_info); };
+# result =
+			    find' subwindow_info;
+# nb {. "find_all_subwindow_datas_above_given_stacking_order resultlist:"; };
+# apply show_subwindow_or_view result
+# where
+#     fun show_subwindow_or_view (subwindow_or_view: Subwindow_Or_View)
+# 	=
+# 	nb {. sprintf "resultlist element == %s"  (subwindow_or_view_id subwindow_or_view); };
+# end;
+# 
+# result;
+			}
+			where
+			    fun find' tp
+				=
+{
+# nb {. sprintf "find_all_subwindow_datas_above_given_stacking_order/find' tp s=%s" (subwindow_or_view_id tp); };
+				case tp
+				    #
+				    SUBWINDOW_DATA (pm: Subwindow_Info)
+					=>
+					{
+# nb {. sprintf "find_all_subwindow_datas_above_given_stacking_order/find' our_stacking_order=%d r.stacking_order=%d pm.stacking_order=%d r.pixmap.id=%d r.parent=%s #popups=%d" our_stacking_order r.stacking_order pm.stacking_order (id_to_int (*r.pixmap).id) (case r.parent NULL => "NULL"; _ => "NON-null"; esac) (list::length *r.popups); };
+					    results =   if (pm.stacking_order > our_stacking_order)   [ tp ];
+							else					      [    ];
+							fi;	
+
+# result =
+					    list::cat  (results  !  (map find' *pm.popups));
+# nb {. sprintf "find_all_subwindow_datas_above_given_stacking_order/find' our_stacking_order=%d r.stacking_order=%d r.pixmap.id=%d r.parent=%s #popups=%d #results=%d" our_stacking_order r.stacking_order (id_to_int (*r.pixmap).id) (case r.parent NULL => "NULL"; _ => "NON-null"; esac) (list::length *r.popups) (list::length result); };
+# result;
+					};
+
+				esac;
+};
+			end;
+};
+
+		esac;
+
+	    fun find_all_subwindow_infos_above_given_subwindow_or_view_in_stacking_order
+		  (
+		    subwindow_or_view:	Subwindow_Or_View
+		  )
+		  :			List( Subwindow_Info )								# By returning  List(Subwindow_Info)  rather than  List(Subwindow_Or_View)  we spare our caller the nuisance of dealing with all the impossible SCROLLABLE_INFO cases.
+		=
+		case subwindow_or_view
+		    #
+		    SUBWINDOW_INFO r
+			=>
+			{   subwindow_infos
+				=
+				find_all_subwindow_datas_above_given_stacking_order
+				  (
+				    SUBWINDOW_DATA r,
+				    r.stacking_order
+				  );
+
+			    subwindow_infos
+				=
+				map  subwindow_info_of_subwindow_data  subwindow_infos;
+
+
+			    subwindow_infos;
+			};
+
+		    SCROLLABLE_INFO r											# A scrollport/tabport does not have an independent stacking order, it lies at the same stacking order as its parent. (Every scrollport/tabport has a non-port ancestor.)
+			=>
+			find_all_subwindow_infos_above_given_subwindow_or_view_in_stacking_order			# 
+			    #
+			    r.parent_subwindow_or_view;
+
+
+		    TABBABLE_INFO r											# A scrollport/tabport does not have an independent stacking order, it lies at the same stacking order as its parent. (Every scrollport/tabport has a non-port ancestor.)
+			=>
+ 			find_all_subwindow_infos_above_given_subwindow_or_view_in_stacking_order			# 
+ 			    #
+ 			    r.parent_subwindow_or_view;
+		esac;
+
+	    fun return_all_subwindow_infos_in_descending_stacking_order
+		  (
+		    null_or_subwindow_info:	Null_Or (Subwindow_Data)
+		  )
+		  :				List( Subwindow_Info )							# By returning  List(Subwindow_Info)  rather than  List(Subwindow_Or_View)  we spare our caller the nuisance of dealing with all the impossible SCROLLABLE_INFO cases.
+		=
+		case null_or_subwindow_info
+		    #
+		    THE (subwindow_info as SUBWINDOW_DATA r)
+			=>
+			{   subwindow_datas
+				=
+				find_all_subwindow_datas_above_given_stacking_order
+				  (
+				    subwindow_info,
+				    0
+				  );
+
+			    subwindow_infos
+				=
+				map  subwindow_info_of_subwindow_data  subwindow_datas;
+
+			    subwindow_infos
+				=
+				lms::sort_list subwindow_info_gt subwindow_infos
+				where
+				    fun subwindow_info_gt
+					  (
+					    p1:	Subwindow_Info,
+					    p2:	Subwindow_Info
+					  )
+					=
+					p1.stacking_order < p2.stacking_order;
+				end;
+
+# nb {. "subwindow_infos in order:"; };
+# apply print_pixmap_order subwindow_infos
+# where
+#     fun print_pixmap_order (p: Subwindow_Info)
+# 	=
+# 	nb {. sprintf "subwindow_info.stacking_order d=%d" p.stacking_order; };
+# end;
+
+
+			    subwindow_infos;
+			};
+
+		    NULL => [];
+		esac;
+
+	    fun find__guipane__containing_gadget
+		  (
+		    gadget_imp_info:	Gadget_Imp_Info
+		  )
+		=
+		{    subwindow_info
+			=
+			subwindow_info_of_subwindow_or_view
+			    #
+			    *gadget_imp_info.subwindow_or_view;
+
+		    *subwindow_info.guipane;
+		};
+
+	    fun adjust_origin (origin: g2d::Point, parent: Null_Or(Subwindow_Data))
+		=
+		case parent
+		    #
+		    NULL  =>    origin;
+		    #
+		    THE p =>    case p
+				    #
+				    SUBWINDOW_DATA (pm: Subwindow_Info)
+					=>
+					adjust_origin (origin + *pm.upperleft, pm.parent);
+				esac;
+		esac;
+
+	    fun subwindow_info_site_in_basewindow_coordinates
+		  (
+		    subwindow_info:	Subwindow_Info
+		  )
+		=
+		{	 
+		    size   =  (*subwindow_info.pixmap).size;
+		    #
+		    origin =   *subwindow_info.upperleft;
+
+		    origin =    adjust_origin (origin, subwindow_info.parent);
+
+		   g2d::box::make (origin, size);
+		};
+
+# This is unused and should probably be deleted XXX SUCKO FIXME
+	    fun translate_frombox_to_basewindow_coordinates
+		  (
+		    subwindow_info:	Subwindow_Info,
+		    from_box:		g2d::Box
+		  )
+		=
+		{   box_origin = g2d::box::upperleft from_box;
+		    #
+		    origin =   *subwindow_info.upperleft + box_origin;
+
+		    origin =    adjust_origin (origin, subwindow_info.parent);
+
+		    g2d::box::clone_box_at (from_box, origin);
+		};
+	end;
+
+
+
+
+
+	#########################################################################################
+	### widgetspace-imp code
+
+	fun pprint_widgetspace_arg
+	      (pp:		pp::Prettyprint_Mill)
+	      (widgetspace_arg:	Widgetspace_Arg)
+	    =
+	    {
+		widgetspace_arg
+		    ->
+		    (
+			options:	List(Widgetspace_Option)
+		    );
+
+		pp.box {.
+		    pp.txt "[ ";
+		    pp::seqx {. pp.txt ", "; }
+			    pprint_option
+			    options
+			    ;	
+		    pp.txt " ]";
+		    pp.lit ")";
+		};
+	    }
+	    where
+		fun pprint_option option
+		    =
+		    case option
+			#
+			PS_MICROTHREAD_NAME name =>  {  pp.lit (sprintf "PS_MICROTHREAD_NAME \"%s\"" name);	};
+			PS_ID               id	 =>  {  pp.lit (sprintf "PS_ID %d" (id_to_int id)         );	};
+			PS_CALLBACK _		 =>  {  pp.lit          "PS_CALLBACK (callback)";		};
+		    esac;
+	    end;
+
+
+
+
+	#########################################################################################
+	### objectspace-imp code
+
+
+	fun pprint_objectspace_arg
+	      (pp:			pp::Prettyprint_Mill)
+	      (objectspace_arg:	Objectspace_Arg)
+	    =
+	    {
+		objectspace_arg
+		    ->
+		    (
+			options:	List(Objectspace_Option)
+		    );
+
+		pp.box {.
+		    pp.txt "[ ";
+		    pp::seqx {. pp.txt ", "; }
+			    pprint_option
+			    options
+			    ;	
+		    pp.txt " ]";
+		    pp.lit ")";
+		};
+	    }
+	    where
+		fun pprint_option option
+		    =
+		    case option
+			#
+			CS_MICROTHREAD_NAME	name	=>  {  pp.lit (sprintf "CS_MICROTHREAD_NAME \"%s\"" name);	};
+			CS_ID			id	=>  {  pp.lit (sprintf "CS_ID %d" (id_to_int id)         );	};
+			CS_OBJECTSPACE_CALLBACK _	=>  {  pp.lit          "CS_OBJECTSPACE_CALLBACK (callback)";	};
+		    esac;
+	    end;
+
+
+	#########################################################################################
+	### spritespace-imp code
+
+	fun pprint_spritespace_arg
+	      (pp:			pp::Prettyprint_Mill)
+	      (spritespace_arg:		Spritespace_Arg)
+	    =
+	    {
+		spritespace_arg
+		    ->
+		    (
+			options:	List(Spritespace_Option)
+		    );
+
+		pp.box {.
+		    pp.txt "[ ";
+		    pp::seqx {. pp.txt ", "; }
+			    pprint_option
+			    options
+			    ;	
+		    pp.txt " ]";
+		    pp.lit ")";
+		};
+	    }
+	    where
+		fun pprint_option option
+		    =
+		    case option
+			#
+			OS_MICROTHREAD_NAME name	=>  {  pp.lit (sprintf "OS_MICROTHREAD_NAME \"%s\"" name);	};
+			OS_ID               id		=>  {  pp.lit (sprintf "OS_ID %d" (id_to_int id)          );	};
+			OS_SPRITESPACE_CALLBACK _	=>  {  pp.lit          "OS_SPRITESPACE_CALLBACK (callback)";	};
+		    esac;
+	    end;
+
+
+
+	#########################################################################################
+	### gui-plan code
+
+
+	Guiplan_Apply_Option									# The following guiplan_apply() facility allows clients to iterate over nodes in a Guiplan tree without having to write out the whole recursion.
+	  #
+	  = GP_ROW_FN		(Gp_Row	 	 -> Void)					# Call this fn on ROW    	     nodes in Guiplan. Defaults to null fn.
+	  | GP_COL_FN		(Gp_Col 	 -> Void)					# Call this fn on COL    	     nodes in Guiplan. Defaults to null fn.
+	  | GP_GRID_FN		(Gp_Grid 	 -> Void)					# Call this fn on GRID               nodes in Guiplan. Defaults to null fn.
+	  | GP_MARK_FN		(Gp_Mark 	 -> Void)					# Call this fn on MARK               nodes in Guiplan. Defaults to null fn.
+	  #
+	  | GP_ROW'_FN		(Gp_Row'	 -> Void)					# Call this fn on ROW'    	     nodes in Guiplan. Defaults to null fn.
+	  | GP_COL'_FN		(Gp_Col' 	 -> Void)					# Call this fn on COL'    	     nodes in Guiplan. Defaults to null fn.
+	  | GP_GRID'_FN		(Gp_Grid' 	 -> Void)					# Call this fn on GRID'              nodes in Guiplan. Defaults to null fn.
+	  | GP_MARK'_FN		(Gp_Mark' 	 -> Void)					# Call this fn on MARK'              nodes in Guiplan. Defaults to null fn.
+	  #
+	  | GP_SCROLLPORT_FN	(Gp_Scrollport 	 -> Void)					# Call this fn on SCROLLPORT	     nodes in Guiplan. Defaults to null fn.
+	  | GP_TABPORT_FN	(Gp_Tabport	 -> Void)					# Call this fn on TABPORT	     nodes in Guiplan. Defaults to null fn.
+	  | GP_FRAME_FN		(Gp_Frame 	 -> Void)					# Call this fn on FRAME              nodes in Guiplan. Defaults to null fn.
+	  #
+	  | GP_WIDGET_FN	(Gp_Widget	 -> Void)					# Call this fn on WIDGET             nodes in Guiplan. Defaults to null fn.
+	  | GP_SPRITE_FN	(Sprite_Start_Fn -> Void)					# Call this fn on SPRITE             nodes in Guiplan. Defaults to null fn.
+	  | GP_OBJECT_FN	(Object_Start_Fn -> Void)					# Call this fn on OBJECT             nodes in Guiplan. Defaults to null fn.
+	  #
+	  | GP_WIDGETSPACE_FN	(Gp_Widgetspace	 -> Void)					# Call this fn on WIDGETSPACE        nodes in Guiplan. Defaults to null fn.
+	  | GP_OBJECTSPACE_FN	(Gp_Objectspace	 -> Void)					# Call this fn on OBJECTSPACE        nodes in Guiplan. Defaults to null fn.
+	  | GP_SPRITESPACE_FN	(Gp_Spritespace	 -> Void)					# Call this fn on SPRITESPACE        nodes in Guiplan. Defaults to null fn.
+	  ;
+
+
+	fun guiplan_apply
+	      (
+		guiplan as	( gp_widget:		Gp_Widget_Type
+				),
+		options:	List( Guiplan_Apply_Option )
+	      )
+	    =
+	    do_gp_widget  gp_widget
+	    where
+
+		fun process_options  (options:  List(Guiplan_Apply_Option))
+		    =
+		    {   null_fn = (\\ (x: X) = ());
+			#
+			my_row_fn			=  REF  null_fn;
+			my_col_fn			=  REF  null_fn;
+			my_grid_fn			=  REF  null_fn;
+			my_mark_fn			=  REF  null_fn;
+			#
+			my_row'_fn			=  REF  null_fn;
+			my_col'_fn			=  REF  null_fn;
+			my_grid'_fn			=  REF  null_fn;
+			my_mark'_fn			=  REF  null_fn;
+			#
+			my_scrollport_fn		=  REF  null_fn;
+			my_tabport_fn			=  REF  null_fn;
+			my_frame_fn			=  REF  null_fn;
+			#
+			my_widget_fn			=  REF  null_fn;
+			my_object_fn			=  REF  null_fn;
+			my_sprite_fn			=  REF  null_fn;
+			#
+			my_widgetspace_fn		=  REF  null_fn;
+			my_objectspace_fn		=  REF  null_fn;
+			my_spritespace_fn		=  REF  null_fn;
+
+			apply  do_option  options
+			where
+			    fun do_option (GP_ROW_FN			fn) =>  my_row_fn			:=  fn;
+				do_option (GP_COL_FN			fn) =>  my_col_fn			:=  fn;
+				do_option (GP_GRID_FN			fn) =>  my_grid_fn			:=  fn;
+				do_option (GP_MARK_FN			fn) =>  my_mark_fn			:=  fn;
+				#
+				do_option (GP_ROW'_FN			fn) =>  my_row'_fn			:=  fn;
+				do_option (GP_COL'_FN			fn) =>  my_col'_fn			:=  fn;
+				do_option (GP_GRID'_FN			fn) =>  my_grid'_fn			:=  fn;
+				do_option (GP_MARK'_FN			fn) =>  my_mark'_fn			:=  fn;
+				#
+				do_option (GP_SCROLLPORT_FN		fn) =>  my_scrollport_fn		:=  fn;
+				do_option (GP_TABPORT_FN		fn) =>  my_tabport_fn			:=  fn;
+				do_option (GP_FRAME_FN			fn) =>  my_frame_fn			:=  fn;
+				#
+				do_option (GP_WIDGET_FN			fn) =>  my_widget_fn			:=  fn;
+				do_option (GP_OBJECT_FN			fn) =>  my_object_fn			:=  fn;
+				do_option (GP_SPRITE_FN			fn) =>  my_sprite_fn			:=  fn;
+				#
+				do_option (GP_WIDGETSPACE_FN		fn) =>  my_widgetspace_fn		:=  fn;
+				do_option (GP_OBJECTSPACE_FN		fn) =>  my_objectspace_fn		:=  fn;
+				do_option (GP_SPRITESPACE_FN		fn) =>  my_spritespace_fn		:=  fn;
+			    end;
+			end;
+
+			{ row_fn			=>  *my_row_fn,
+			  col_fn			=>  *my_col_fn,
+			  grid_fn			=>  *my_grid_fn,
+			  mark_fn			=>  *my_mark_fn,
+			  #
+			  row'_fn			=>  *my_row'_fn,
+			  col'_fn			=>  *my_col'_fn,
+			  grid'_fn			=>  *my_grid'_fn,
+			  mark'_fn			=>  *my_mark'_fn,
+			  #
+			  scrollport_fn			=>  *my_scrollport_fn,
+			  tabport_fn			=>  *my_tabport_fn,
+			  frame_fn			=>  *my_frame_fn,
+			  #
+			  widget_fn			=>  *my_widget_fn,
+			  object_fn			=>  *my_object_fn,
+			  sprite_fn			=>  *my_sprite_fn,
+			  #
+			  widgetspace_fn		=>  *my_widgetspace_fn,
+			  objectspace_fn		=>  *my_objectspace_fn,
+			  spritespace_fn		=>  *my_spritespace_fn
+			};
+		    };
+
+		options =  process_options  options;
+
+		fun do_gp_widget (gp_widget: Gp_Widget_Type)
+		    =
+		    case gp_widget
+			#
+			ROW (arg:	Gp_Row)
+			    =>
+			    {   arg -> (widgets:	List( Gp_Widget_Type ));
+				#
+				apply	do_gp_widget  widgets;
+
+				options.row_fn  arg;
+			    };
+
+			COL (arg:	Gp_Col)
+			    =>
+			    {   arg -> (widgets:	List( Gp_Widget_Type ));
+				#
+				apply	do_gp_widget  widgets;
+
+				options.col_fn  arg;
+			    };
+
+			ROW' (arg:	Gp_Row')
+			    =>
+			    {   arg ->  ( id:		Id,
+					  widgets:	List( Gp_Widget_Type )
+					);
+				#
+				apply	do_gp_widget  widgets;
+
+				options.row'_fn  arg;
+			    };
+
+			COL' (arg:	Gp_Col')
+			    =>
+			    {   arg ->  ( id:		Id,
+					  widgets:	List( Gp_Widget_Type )
+					);
+				#
+				apply	do_gp_widget  widgets;
+
+				options.col'_fn  arg;
+			    };
+
+			GRID (arg:	Gp_Grid)
+			    =>
+			    {   arg ->  (widgets:	List( List( Gp_Widget_Type ) ));
+				#
+				apply	do_widgets   widgets
+					where
+					    fun do_widgets (widgets: List(Gp_Widget_Type))
+						=
+						apply do_gp_widget widgets;
+					end;
+
+				options.grid_fn  arg;
+			    };
+
+			GRID' (arg:	Gp_Grid')
+			    =>
+			    {   arg ->  ( id:		Id,
+					  widgets:	List( List( Gp_Widget_Type ) )
+					);
+				#
+				apply	do_widgets   widgets
+					where
+					    fun do_widgets (widgets: List(Gp_Widget_Type))
+						=
+						apply do_gp_widget widgets;
+					end;
+
+				options.grid'_fn  arg;
+			    };
+
+			MARK (arg:	Gp_Mark)
+			    =>
+			    {   arg ->  (widget:	Gp_Widget_Type);
+				#
+				do_gp_widget widget;
+
+				options.mark_fn  arg;
+			    };
+
+			MARK' (arg:	Gp_Mark')
+			    =>
+			    {   arg ->  ( id:		Id,
+					  doc:		String,
+					  widget:	Gp_Widget_Type
+					);
+				#
+				do_gp_widget widget;
+
+				options.mark'_fn  arg;
+			    };
+
+			SCROLLPORT (arg:	Gp_Scrollport)
+			    =>
+			    {   arg ->  { scroller_callback:	Scroller_Callback,
+					  pixmap_size:	g2d::Size,								# Size of pixmap visible in scrollport.
+					  widget:	Gp_Widget_Type								# Widget-tree providing content visible in scrollport -- will be rendered onto pixmap.
+					};
+
+				do_gp_widget  widget;
+
+				options.scrollport_fn  arg;
+			    };
+
+			TABPORT (arg:	Gp_Tabport)
+			    =>
+			    {   arg ->  ( tab_picker_callback:	Tab_Picker_Callback,
+					  tab:			Gp_Widget_Type,
+					  tabs:			List( Gp_Widget_Type )							# 
+					);
+
+				apply  do_gp_widget  (tab ! tabs);
+
+				options.tabport_fn  arg;
+			    };
+
+			FRAME (arg:	Gp_Frame)
+			    =>
+			    {   arg ->  ( frame_options:	List(Frame_Option),
+					  widget:		Gp_Widget_Type
+					);
+
+				do_gp_widget widget;
+					    #
+				options.frame_fn  arg;
+			    };
+
+			WIDGET (arg:	Gp_Widget)
+			    =>
+			    {   arg ->  (
+					  widget:	Widget_Start_Fn
+					);
+				#
+				options.widget_fn  arg;
+			    };
+
+			OBJECTSPACE (arg:	Gp_Objectspace)
+			    =>
+			    {   arg ->  ( objectspace_options:	List( Objectspace_Option ),
+					  objects:		List( Gp_Object )
+					);
+
+				apply  do_gp_object  objects;
+
+				options.objectspace_fn  arg;
+			    };
+
+			SPRITESPACE (arg:	Gp_Spritespace)
+			    =>
+			    {   arg ->  ( spritespace_options:	List( Spritespace_Option ),
+					  sprites:		List( Gp_Sprite )
+					);
+
+				apply  do_gp_sprite  sprites;
+
+				options.spritespace_fn  arg;
+			    };
+
+			NULL_WIDGET
+			    =>
+			    {
+				();									# Move along, nothing to see here.
+			    };
+		    esac
+
+		also
+		fun do_gp_object  (gp_object:	Gp_Object)
+		    =
+		    case gp_object
+			#
+			WIDGETSPACE	arg
+			    =>
+			    {   arg ->  ( widgetspace_options:	List(Widgetspace_Option),
+					  gp_widget:		Gp_Widget_Type
+					);
+
+				do_gp_widget  gp_widget;
+
+				options.widgetspace_fn  arg;
+			    };
+
+			OBJECT	(arg:	Object_Start_Fn)
+			    =>
+			    {   
+				options.object_fn  arg;
+			    };
+		    esac
+
+		also
+		fun do_gp_sprite  (gp_sprite:	Gp_Sprite)
+		    =
+		    case gp_sprite
+			#
+			SPRITE	(arg:	Sprite_Start_Fn)
+			    =>
+			    {   
+				options.sprite_fn  arg;
+			    };
+		    esac;
+	    end;
+
+
+	Guiplan_Map_Option									# The following guiplan_map() facility allows clients to recursively rewrite a Guiplan tree without having to write out the whole recursion.
+	  #
+	  = GP_ROW_MAP_FN		(Gp_Row	 	 -> Gp_Row)				# Call this fn on ROW    	     nodes in Guiplan. Defaults to null fn.
+	  | GP_COL_MAP_FN		(Gp_Col 	 -> Gp_Col)				# Call this fn on COL    	     nodes in Guiplan. Defaults to null fn.
+	  | GP_GRID_MAP_FN		(Gp_Grid 	 -> Gp_Grid)				# Call this fn on GRID               nodes in Guiplan. Defaults to null fn.
+	  | GP_MARK_MAP_FN		(Gp_Mark 	 -> Gp_Mark)				# Call this fn on MARK               nodes in Guiplan. Defaults to null fn.
+	  #
+	  | GP_ROW'_MAP_FN		(Gp_Row'	 -> Gp_Row')				# Call this fn on ROW'    	     nodes in Guiplan. Defaults to null fn.
+	  | GP_COL'_MAP_FN		(Gp_Col' 	 -> Gp_Col')				# Call this fn on COL'    	     nodes in Guiplan. Defaults to null fn.
+	  | GP_GRID'_MAP_FN		(Gp_Grid' 	 -> Gp_Grid')				# Call this fn on GRID'              nodes in Guiplan. Defaults to null fn.
+	  | GP_MARK'_MAP_FN		(Gp_Mark' 	 -> Gp_Mark')				# Call this fn on MARK'              nodes in Guiplan. Defaults to null fn.
+	  #
+	  | GP_SCROLLPORT_MAP_FN	(Gp_Scrollport 	 -> Gp_Scrollport)			# Call this fn on SCROLLPORT	     nodes in Guiplan. Defaults to null fn.
+	  | GP_TABPORT_MAP_FN		(Gp_Tabport	 -> Gp_Tabport)				# Call this fn on TABPORT	     nodes in Guiplan. Defaults to null fn.
+	  | GP_FRAME_MAP_FN		(Gp_Frame 	 -> Gp_Frame)				# Call this fn on FRAME              nodes in Guiplan. Defaults to null fn.
+	  #
+	  | GP_WIDGET_MAP_FN		(Gp_Widget	 -> Gp_Widget)				# Call this fn on WIDGET             nodes in Guiplan. Defaults to null fn.
+	  | GP_SPRITE_MAP_FN		(Sprite_Start_Fn -> Sprite_Start_Fn)			# Call this fn on SPRITE             nodes in Guiplan. Defaults to null fn.
+	  | GP_OBJECT_MAP_FN		(Object_Start_Fn -> Object_Start_Fn)			# Call this fn on OBJECT             nodes in Guiplan. Defaults to null fn.
+	  #
+	  | GP_WIDGETSPACE_MAP_FN	(Gp_Widgetspace	 -> Gp_Widgetspace)			# Call this fn on WIDGETSPACE        nodes in Guiplan. Defaults to null fn.
+	  | GP_OBJECTSPACE_MAP_FN	(Gp_Objectspace	 -> Gp_Objectspace)			# Call this fn on OBJECTSPACE        nodes in Guiplan. Defaults to null fn.
+	  | GP_SPRITESPACE_MAP_FN	(Gp_Spritespace	 -> Gp_Spritespace)			# Call this fn on SPRITESPACE        nodes in Guiplan. Defaults to null fn.
+	  ;
+
+
+	fun guiplan_map
+	      (
+		guiplan as	( gp_widget:		Gp_Widget_Type
+				),
+		options:	List( Guiplan_Map_Option )
+	      )
+	    =
+	    do_gp_widget  gp_widget
+	    where
+
+		fun process_options  (options:  List(Guiplan_Map_Option))
+		    =
+		    {   null_fn = (\\ (x: X) = x);
+			#
+			my_row_fn			=  REF  null_fn;
+			my_col_fn			=  REF  null_fn;
+			my_grid_fn			=  REF  null_fn;
+			my_mark_fn			=  REF  null_fn;
+			#
+			my_row'_fn			=  REF  null_fn;
+			my_col'_fn			=  REF  null_fn;
+			my_grid'_fn			=  REF  null_fn;
+			my_mark'_fn			=  REF  null_fn;
+			#
+			my_scrollport_fn		=  REF  null_fn;
+			my_tabport_fn			=  REF  null_fn;
+			my_frame_fn			=  REF  null_fn;
+			#
+			my_widget_fn			=  REF  null_fn;
+			my_object_fn			=  REF  null_fn;
+			my_sprite_fn			=  REF  null_fn;
+			#
+			my_widgetspace_fn		=  REF  null_fn;
+			my_objectspace_fn		=  REF  null_fn;
+			my_spritespace_fn		=  REF  null_fn;
+
+			apply  do_option  options
+			where
+			    fun do_option (GP_ROW_MAP_FN		fn) =>  my_row_fn			:=  fn;
+				do_option (GP_COL_MAP_FN		fn) =>  my_col_fn			:=  fn;
+				do_option (GP_GRID_MAP_FN		fn) =>  my_grid_fn			:=  fn;
+				do_option (GP_MARK_MAP_FN		fn) =>  my_mark_fn			:=  fn;
+				#
+				do_option (GP_ROW'_MAP_FN		fn) =>  my_row'_fn			:=  fn;
+				do_option (GP_COL'_MAP_FN		fn) =>  my_col'_fn			:=  fn;
+				do_option (GP_GRID'_MAP_FN		fn) =>  my_grid'_fn			:=  fn;
+				do_option (GP_MARK'_MAP_FN		fn) =>  my_mark'_fn			:=  fn;
+				#
+				do_option (GP_SCROLLPORT_MAP_FN		fn) =>  my_scrollport_fn		:=  fn;
+				do_option (GP_TABPORT_MAP_FN		fn) =>  my_tabport_fn			:=  fn;
+				do_option (GP_FRAME_MAP_FN		fn) =>  my_frame_fn			:=  fn;
+				#
+				do_option (GP_WIDGET_MAP_FN		fn) =>  my_widget_fn			:=  fn;
+				do_option (GP_OBJECT_MAP_FN		fn) =>  my_object_fn			:=  fn;
+				do_option (GP_SPRITE_MAP_FN		fn) =>  my_sprite_fn			:=  fn;
+				#
+				do_option (GP_WIDGETSPACE_MAP_FN	fn) =>  my_widgetspace_fn		:=  fn;
+				do_option (GP_OBJECTSPACE_MAP_FN	fn) =>  my_objectspace_fn		:=  fn;
+				do_option (GP_SPRITESPACE_MAP_FN	fn) =>  my_spritespace_fn		:=  fn;
+			    end;
+			end;
+
+			{ row_fn			=>  *my_row_fn,
+			  col_fn			=>  *my_col_fn,
+			  grid_fn			=>  *my_grid_fn,
+			  mark_fn			=>  *my_mark_fn,
+			  #
+			  row'_fn			=>  *my_row'_fn,
+			  col'_fn			=>  *my_col'_fn,
+			  grid'_fn			=>  *my_grid'_fn,
+			  mark'_fn			=>  *my_mark'_fn,
+			  #
+			  scrollport_fn			=>  *my_scrollport_fn,
+			  tabport_fn			=>  *my_tabport_fn,
+			  frame_fn			=>  *my_frame_fn,
+			  #
+			  widget_fn			=>  *my_widget_fn,
+			  object_fn			=>  *my_object_fn,
+			  sprite_fn			=>  *my_sprite_fn,
+			  #
+			  widgetspace_fn		=>  *my_widgetspace_fn,
+			  objectspace_fn		=>  *my_objectspace_fn,
+			  spritespace_fn		=>  *my_spritespace_fn
+			};
+		    };
+
+		options =  process_options  options;
+
+		fun do_gp_widget (gp_widget: Gp_Widget_Type)
+		    =
+		    case gp_widget
+			#
+			ROW (arg:	Gp_Row)
+			    =>
+			    {   arg -> (widgets:	List( Gp_Widget_Type ));
+				#
+				widgets =  map	do_gp_widget  widgets;
+
+				arg =   widgets;
+
+				ROW (options.row_fn  arg);
+			    };
+
+			COL (arg:	Gp_Col)
+			    =>
+			    {   arg -> (widgets:	List( Gp_Widget_Type ));
+				#
+				widgets =  map	do_gp_widget  widgets;
+
+				arg =   widgets;
+
+				COL (options.col_fn  arg);
+			    };
+
+			GRID (arg:	Gp_Grid)
+			    =>
+			    {   arg ->  (widgets:	List( List( Gp_Widget_Type ) ));
+				#
+				widgets =  map	do_widgets   widgets
+					    where
+						fun do_widgets (widgets: List(Gp_Widget_Type))
+						    =
+						    map do_gp_widget widgets;
+					    end;
+
+				arg =    widgets;
+
+				GRID (options.grid_fn  arg);
+			    };
+
+			MARK (arg:	Gp_Mark)
+			    =>
+			    {   arg ->  (widget:	Gp_Widget_Type);
+				#
+				do_gp_widget widget;
+
+				arg =    widget;
+
+				MARK (options.mark_fn  arg);
+			    };
+
+			ROW' (arg:	Gp_Row')
+			    =>
+			    {   arg ->  ( id:		Id,
+					  widgets:	List( Gp_Widget_Type )
+					);
+				#
+				widget =  map	do_gp_widget  widgets;
+
+				arg =   ( id,
+					  widgets
+					);
+
+				ROW' (options.row'_fn  arg);
+			    };
+
+			COL' (arg:	Gp_Col')
+			    =>
+			    {   arg ->  ( id:		Id,
+					  widgets:	List( Gp_Widget_Type )
+					);
+				#
+				widget =  map	do_gp_widget  widgets;
+
+				arg =   ( id,
+					  widgets
+					);
+
+				COL' (options.col'_fn  arg);
+			    };
+
+			GRID' (arg:	Gp_Grid')
+			    =>
+			    {   arg ->  ( id:		Id,
+					  widgets:	List( List( Gp_Widget_Type ) )
+					);
+				#
+				widgets =  map	do_widgets   widgets
+					    where
+						fun do_widgets (widgets: List(Gp_Widget_Type))
+						    =
+						    map do_gp_widget widgets;
+					    end;
+
+				arg =    (id, widgets);
+
+				GRID' (options.grid'_fn  arg);
+			    };
+
+			MARK' (arg:	Gp_Mark')
+			    =>
+			    {   arg ->  ( id:		Id,
+					  doc:		String,
+					  widget:	Gp_Widget_Type
+					);
+				#
+				widget =  do_gp_widget widget;
+
+				arg =    (id, doc, widget);
+
+				MARK' (options.mark'_fn  arg);
+			    };
+
+			SCROLLPORT (arg:	Gp_Scrollport)
+			    =>
+			    {   arg ->  { scroller_callback:	Scroller_Callback,
+					  pixmap_size:		g2d::Size,							# Full size of pixmap partly visible in scrollport.
+					  widget:		Gp_Widget_Type							# Widget-tree providing content visible in scrollport -- will be rendered onto pixmap.
+					};
+
+				widget =  do_gp_widget  widget;
+
+				arg =   { scroller_callback,
+					  pixmap_size,
+					  widget
+					};
+
+				SCROLLPORT (options.scrollport_fn  arg);
+			    };
+
+			TABPORT (arg:	Gp_Tabport)
+			    =>
+			    {   arg ->  ( tab_picker_callback:	Tab_Picker_Callback,
+					  tab:			Gp_Widget_Type,
+					  tabs:			List( Gp_Widget_Type )							# 
+					);
+
+				tab  =       do_gp_widget  tab;
+				tabs =  map  do_gp_widget  tabs;
+
+				arg =   ( tab_picker_callback,
+					  tab,
+					  tabs
+					);
+
+				TABPORT (options.tabport_fn  arg);
+			    };
+
+			FRAME (arg:	Gp_Frame)
+			    =>
+			    {   arg ->  ( frame_options:	List(Frame_Option),
+					  widget:		Gp_Widget_Type
+					);
+
+				widget =  do_gp_widget  widget;
+					    #
+				arg =   ( frame_options,
+					  widget
+					);
+
+				FRAME (options.frame_fn  arg);
+			    };
+
+			WIDGET (arg:	Gp_Widget)
+			    =>
+			    {   arg ->  (
+					  widget:	Widget_Start_Fn
+					);
+				#
+				WIDGET (options.widget_fn  arg);
+			    };
+
+			OBJECTSPACE (arg:	Gp_Objectspace)
+			    =>
+			    {   arg ->  ( objectspace_options:	List( Objectspace_Option ),
+					  objects:		List( Gp_Object )
+					);
+
+				objects =  map  do_gp_object  objects;
+
+				arg =   ( objectspace_options,
+					  objects
+					);
+
+				OBJECTSPACE (options.objectspace_fn  arg);
+			    };
+
+			SPRITESPACE (arg:	Gp_Spritespace)
+			    =>
+			    {   arg ->  ( spritespace_options:	List( Spritespace_Option ),
+					  sprites:		List( Gp_Sprite )
+					);
+
+				sprites =  map  do_gp_sprite  sprites;
+
+				arg =   ( spritespace_options,
+					  sprites
+					);
+
+				SPRITESPACE (options.spritespace_fn  arg);
+			    };
+
+			NULL_WIDGET
+			    =>
+			    {
+				NULL_WIDGET;									# Move along, nothing to see here.
+			    };
+		    esac
+
+		also
+		fun do_gp_object  (gp_object:	Gp_Object)
+		    =
+		    case gp_object
+			#
+			WIDGETSPACE	arg
+			    =>
+			    {   arg ->  ( widgetspace_options:	List(Widgetspace_Option),
+					  gp_widget:		Gp_Widget_Type
+					);
+
+				gp_widget =  do_gp_widget  gp_widget;
+
+				arg =   ( widgetspace_options,
+					  gp_widget
+					);
+
+				WIDGETSPACE (options.widgetspace_fn  arg);
+			    };
+
+			OBJECT	(arg:	Object_Start_Fn)
+			    =>
+			    {   
+				OBJECT (options.object_fn  arg);
+			    };
+		    esac
+
+		also
+		fun do_gp_sprite  (gp_sprite:	Gp_Sprite)
+		    =
+		    case gp_sprite
+			#
+			SPRITE	(arg:	Sprite_Start_Fn)
+			    =>
+			    {   
+				SPRITE (options.sprite_fn  arg);
+			    };
+		    esac;
+	    end;
+
+
+	fun pprint_guiplan (guiplan: Guiplan)							# "pprint" == "prettyprint".
+	    =
+	    pp::with_standard_prettyprint_mill
+		#
+		(err::default_plaint_sink ())	[]
+		#
+		(\\ pp:   pp::Prettyprint_Mill
+		    =
+		    do_guiplan  guiplan
+		    where
+			fun do_guiplan  guiplan
+			    =
+			    do_gp_widget    guiplan
+
+			also
+			fun do_widgetspace
+			      ( widgetspace_arg:	Widgetspace_Arg,
+				gp_widget:		Gp_Widget_Type
+			      )
+			    =
+			    {   pp.box {.
+				    do_widgetspace_arg  widgetspace_arg;
+				    do_gp_widget     gp_widget;
+				};
+				pp.newline();
+			    }
+
+			also
+			fun do_spritespace
+			      (
+				spritespace_arg:	Spritespace_Arg,
+				pg_sprites:		List(  Gp_Sprite  )
+			      )
+			    =
+			    {   pp.box {.
+				    do_spritespace_arg  spritespace_arg;
+				    do_pg_sprites   	pg_sprites;
+				};
+				pp.newline();
+			    }
+
+			also
+			fun do_spritespace_arg  (spritespace_arg:	Spritespace_Arg)
+			    =
+			    {
+				pprint_spritespace_arg  pp  spritespace_arg;
+				pp.newline();
+			    }
+
+
+			also
+			fun do_pg_sprites  (gp_sprites:		List( Gp_Sprite ))
+			    =
+			    {
+				pp.box' 0 -1 {.
+				    pp.lit  "[";
+				    pp.ind 2;
+				    pp.txt " ";
+
+				    fun do_sprite (gp_sprite: Gp_Sprite)
+					=
+					pp.box {.
+					    do_gp_sprite			gp_sprite;
+					    pp.endlit ",";
+					    pp.txt " ";
+					};
+
+				    pp::seqx
+					{.   pp.endlit ",";   pp.txt " ";   }	# Inter-element separator.
+					do_sprite				# Print one list element.
+					gp_sprites;				# List of elements.
+
+				    pp.ind 0;
+				    pp.txt " ";
+				    pp.lit "]";
+				};
+			    }
+
+			also
+			fun do_gp_sprite  (gp_sprite:	Gp_Sprite)
+			    =
+			    case gp_sprite
+				#
+				SPRITE _
+				    =>
+				    {
+					pp.box {.
+					    pp.lit  "SPRITE _";
+					};
+					pp.newline();
+				    };
+			    esac
+
+			also
+			fun do_objectspace
+			      (
+				objectspace_arg:	Objectspace_Arg,
+				object_widgets:		List(  Gp_Object )
+			      )
+			    =
+			    {   pp.box {.
+				    do_objectspace_arg  objectspace_arg;
+				    do_object_widgets    object_widgets;
+				};
+				pp.newline();
+			    }
+
+			also
+			fun do_objectspace_arg  (objectspace_arg:	Objectspace_Arg)
+			    =
+			    {
+				pprint_objectspace_arg  pp  objectspace_arg;
+				pp.newline();
+			    }
+
+			also
+			fun do_object_widgets  (object_widgets:		List( Gp_Object ))
+			    =
+			    {
+				pp.box' 0 -1 {.
+				    pp.lit  "[";
+				    pp.ind 2;
+				    pp.txt " ";
+
+
+				    fun do_widget (object_widget: Gp_Object)
+					=
+					pp.box {.
+					    do_object_widget			object_widget;
+					    pp.endlit ",";
+					    pp.txt " ";
+					};
+
+				    pp::seqx
+					{.   pp.endlit ",";   pp.txt " ";   }	# Inter-element separator.
+					do_widget				# Print one list element.
+					object_widgets;				# List of elements.
+
+				    pp.ind 0;
+				    pp.txt " ";
+				    pp.lit "]";
+				};
+			    }
+
+			also
+			fun do_object_widget  (object_widget:	Gp_Object)
+			    =
+			    case object_widget
+				#
+				OBJECT _
+				    =>
+				    {
+					pp.box {.
+					    pp.lit  "OBJECT _";
+					};
+					pp.newline();
+				    };
+
+			        WIDGETSPACE  widgetspace
+				    =>
+				    {
+					pp.lit  "WIDGETSPACE ";
+					pp.newline();
+					do_widgetspace widgetspace;
+					pp.newline();
+				    };
+			    esac
+
+			also
+			fun do_widgetspace_arg  (widgetspace_arg:	Widgetspace_Arg)
+			    =
+			    {
+				pprint_widgetspace_arg  pp  widgetspace_arg;
+				pp.newline();
+			    }
+
+			also
+			fun do_gp_widget  (gp_widget:	Gp_Widget_Type)
+			    =
+			    case gp_widget
+				#
+			        ROW	(widgets:	 List( Gp_Widget_Type ))
+				    =>
+				    {
+					pp.box' 0 -1 {.
+					    pp.lit  "ROW [";
+					    pp.ind 2;
+					    pp.txt " ";
+
+					    fun do_widget (gp_widget: Gp_Widget_Type)
+						=
+						pp.box {.
+						    do_gp_widget			gp_widget;
+						    pp.endlit ",";
+						};
+
+					    pp::seqx
+						{.   pp.endlit ",";   pp.txt " ";   }	# Inter-element separator.
+						do_widget				# Print one list element.
+						widgets;				# List of elements.
+
+					    pp.ind 0;
+					    pp.txt " ";
+					    pp.lit "]";
+					};
+				    };
+
+			        COL	(a:	 List( Gp_Widget_Type ))
+				    =>
+				    {
+					pp.lit  "COL";
+					pp.newline();
+				    };
+
+			        GRID	(a: List( List( Gp_Widget_Type )))
+				    =>
+				    {
+					pp.lit  "GRID ... ";
+					pp.newline();
+				    };
+
+			        MARK	(a: Gp_Widget_Type)
+				    =>
+				    {
+					pp.lit  "MARK ... ";
+					pp.newline();
+				    };
+
+			        ROW' (id, a:	 List( Gp_Widget_Type ))
+				    =>
+				    {
+					pp.lit  "ROW'";
+					pp.newline();
+				    };
+
+			        COL' (id, a:	 List( Gp_Widget_Type ))
+				    =>
+				    {
+					pp.lit  "COL'";
+					pp.newline();
+				    };
+
+				GRID'	(id, a: List( List( Gp_Widget_Type )))
+				    =>
+				    {
+					pp.lit  "GRID' ... ";
+					pp.newline();
+				    };
+
+				MARK'	(id, doc, a: Gp_Widget_Type)
+				    =>
+				    {
+					pp.lit  (sprintf "MARK' ('%s') " doc);
+					pp.newline();
+				    };
+
+				SCROLLPORT _
+				    =>
+				    {
+					pp.box {.
+					    pp.lit  "SCROLLPORT _";
+					};
+					pp.newline();
+				    };
+
+				TABPORT _
+				    =>
+				    {
+					pp.box {.
+					    pp.lit  "TABPORT _";
+					};
+					pp.newline();
+				    };
+
+				FRAME _
+				    =>
+				    {
+					pp.box {.
+					    pp.lit  "FRAME _";
+					};
+					pp.newline();
+				    };
+
+				WIDGET _
+				    =>
+				    {
+					pp.box {.
+					    pp.lit  "WIDGET _";
+					};
+					pp.newline();
+				    };
+
+			        OBJECTSPACE (objectspace:	(Objectspace_Arg,  List( Gp_Object)))
+				    =>
+				    {
+					pp.lit  "OBJECTSPACE";
+					do_objectspace  objectspace;
+					pp.newline();
+				    };
+
+			        SPRITESPACE (spritespace:	(Spritespace_Arg,  List( Gp_Sprite )))
+				    =>
+				    {
+					pp.lit  "SPRITESPACE";
+					do_spritespace  spritespace;
+					pp.newline();
+				    };
+			      
+			        NULL_WIDGET
+				    =>
+				    {
+					pp.lit  "NULL_WIDGET";
+					pp.newline();
+				    };
+			    esac;
+		    end
+		);
+
+	#########################################################################################
+	### running-gui code
+
+	fun rg_widget_site (rg_widget: Rg_Widget_Type)
+	    =
+	    case rg_widget
+		#
+		RG_ROW 		r	=>  *r.site;
+		RG_COL 		r	=>  *r.site;
+		RG_GRID 	r	=>  *r.site;
+		RG_MARK 	r	=>  *r.site;
+		RG_SCROLLPORT	r	=>  *r.site;
+		RG_TABPORT 	r	=>  *r.site;
+		RG_FRAME 	r	=>  *r.site;
+		RG_WIDGET 	r	=>  *r.site;
+		RG_OBJECTSPACE  r	=>  *r.site;
+		RG_SPRITESPACE  r	=>  *r.site;
+		#
+		RG_NULL_WIDGET		=>  g2d::box::zero;
+	    esac;
+
+	fun rg_widget_id (rg_widget: Rg_Widget_Type)									# For debugging.  NOTE THAT this fn confutes Id and iuw::Id values, so uniqueness is not assured!
+	    =
+	    case rg_widget
+		#
+		RG_ROW 		r	=>       id_to_int r.id;
+		RG_COL 		r	=>       id_to_int r.id;
+		RG_GRID 	r	=>       id_to_int r.id;
+		RG_MARK 	r	=>       id_to_int r.id;
+		RG_SCROLLPORT	r	=>       id_to_int r.id;
+		RG_TABPORT 	r	=>       id_to_int r.id;
+		RG_FRAME 	r	=>       id_to_int r.id;
+		RG_WIDGET 	r	=>  iuw::id_to_int r.guiboss_to_widget.id;
+		RG_OBJECTSPACE  r	=>       id_to_int r.guiboss_to_objectspace.id;
+		RG_SPRITESPACE  r	=>       id_to_int r.guiboss_to_spritespace.id;
+		#
+		RG_NULL_WIDGET		=>  0;
+	    esac;
+
+
+
+	Guipane_Map_Option												# The following guipane_map() facility allows clients to rewrite a Guipane tree without having to write out the whole recursion.
+	  #
+	  = RG_ROW_MAP_FN		(Rg_Row		 -> Rg_Row)							# Call this fn on RG_ROW    	     nodes in Guipane. Defaults to null fn.
+	  | RG_COL_MAP_FN		(Rg_Col		 -> Rg_Col)							# Call this fn on RG_COL    	     nodes in Guipane. Defaults to null fn.
+	  | RG_GRID_MAP_FN		(Rg_Grid	 -> Rg_Grid)							# Call this fn on RG_GRID            nodes in Guipane. Defaults to null fn.
+	  | RG_MARK_MAP_FN		(Rg_Mark	 -> Rg_Mark)							# Call this fn on RG_MARK            nodes in Guipane. Defaults to null fn.
+	  | RG_SCROLLPORT_MAP_FN	(Rg_Scrollport	 -> Rg_Scrollport)						# Call this fn on RG_SCROLLPORT	     nodes in Guipane. Defaults to null fn.
+	  | RG_TABPORT_MAP_FN		(Rg_Tabport	 -> Rg_Tabport)							# Call this fn on RG_TABPORT	     nodes in Guipane. Defaults to null fn.
+	  | RG_FRAME_MAP_FN		(Rg_Frame	 -> Rg_Frame)							# Call this fn on RG_FRAME           nodes in Guipane. Defaults to null fn.
+	  | RG_WIDGET_MAP_FN		(Rg_Widget	 -> Rg_Widget)							# Call this fn on RG_WIDGET          nodes in Guipane. Defaults to null fn.
+	  | RG_SPRITE_MAP_FN		(Rg_Sprite	 -> Rg_Sprite)							# Call this fn on RG_SPRITE          nodes in Guipane. Defaults to null fn.
+	  | RG_OBJECT_MAP_FN		(Rg_Object	 -> Rg_Object)							# Call this fn on RG_OBJECT          nodes in Guipane. Defaults to null fn.
+	  | RG_OBJECTSPACE_MAP_FN	(Rg_Objectspace  -> Rg_Objectspace)						# Call this fn on RG_OBJECTSPACE     nodes in Guipane. Defaults to null fn.
+	  | RG_SPRITESPACE_MAP_FN	(Rg_Spritespace  -> Rg_Spritespace)						# Call this fn on RG_SPRITESPACE     nodes in Guipane. Defaults to null fn.
+	  | RG_WIDGETSPACE_MAP_FN	(Rg_Widgetspace  -> Rg_Widgetspace)						# Call this fn on RG_WIDGETSPACE     nodes in Guipane. Defaults to null fn.
+	  ;
+
+	fun guipane_map
+	      (
+		guipane:	Guipane,
+		options:	List( Guipane_Map_Option )
+	      )
+	    :			Guipane
+	    =
+	    {   guipane ->	  { id:				Id,
+				    rg_widget:			Rg_Widget_Type,						# The widget (or more commonly, tree of widgets) managed by the gui-tree's toplevel widgetspace-imp.
+				    guiboss_to_widgetspace: 	Guiboss_To_Widgetspace,
+				    widget_to_guiboss:	 	Widget_To_Guiboss,
+				    space_to_gui:		Space_To_Gui,
+				    topwindow:			gtg::Guiboss_To_Topwindow,				# The topwindow on which to draw our widgets.
+				    subwindow_info:		Subwindow_Data,						# Holds toplevel SUBWINDOW_DATA for gui.
+				    needs_layout_and_redraw:	Ref( Bool )
+				  };
+
+		rg_widget =  do_rg_widget  rg_widget;
+
+		guipane =	  { id,
+				    rg_widget,
+				    guiboss_to_widgetspace,
+				    widget_to_guiboss,
+				    space_to_gui,
+				    topwindow,
+				    subwindow_info,
+				    needs_layout_and_redraw								# Should we allocate a new refcell here?  Seems more likely to hurt than help us.
+				  };
+		guipane;
+	    }
+	    where
+
+		fun process_options  (options:  List(Guipane_Map_Option))
+		    =
+		    {   null_fn = (\\ (x: X) = x);
+			#
+			my_row_fn			=  REF  null_fn;
+			my_col_fn			=  REF  null_fn;
+			my_grid_fn			=  REF  null_fn;
+			my_mark_fn			=  REF  null_fn;
+			#
+			my_scrollport_fn		=  REF  null_fn;
+			my_tabport_fn			=  REF  null_fn;
+			my_frame_fn			=  REF  null_fn;
+			#
+			my_widget_fn			=  REF  null_fn;
+			my_object_fn			=  REF  null_fn;
+			my_sprite_fn			=  REF  null_fn;
+			#
+			my_widgetspace_fn		=  REF  null_fn;
+			my_objectspace_fn		=  REF  null_fn;
+			my_spritespace_fn		=  REF  null_fn;
+
+			apply  do_option  options
+			where
+			    fun do_option (RG_ROW_MAP_FN		fn) =>  my_row_fn			:=  fn;
+				do_option (RG_COL_MAP_FN		fn) =>  my_col_fn			:=  fn;
+				do_option (RG_GRID_MAP_FN		fn) =>  my_grid_fn			:=  fn;
+				do_option (RG_MARK_MAP_FN		fn) =>  my_mark_fn			:=  fn;
+				#
+				do_option (RG_SCROLLPORT_MAP_FN		fn) =>  my_scrollport_fn		:=  fn;
+				do_option (RG_TABPORT_MAP_FN		fn) =>  my_tabport_fn			:=  fn;
+				do_option (RG_FRAME_MAP_FN		fn) =>  my_frame_fn			:=  fn;
+				#
+				do_option (RG_WIDGET_MAP_FN		fn) =>  my_widget_fn			:=  fn;
+				do_option (RG_OBJECT_MAP_FN		fn) =>  my_object_fn			:=  fn;
+				do_option (RG_SPRITE_MAP_FN		fn) =>  my_sprite_fn			:=  fn;
+				#
+				do_option (RG_WIDGETSPACE_MAP_FN	fn) =>  my_widgetspace_fn		:=  fn;
+				do_option (RG_OBJECTSPACE_MAP_FN	fn) =>  my_objectspace_fn		:=  fn;
+				do_option (RG_SPRITESPACE_MAP_FN	fn) =>  my_spritespace_fn		:=  fn;
+			    end;
+			end;
+
+			{ row_fn			=>  *my_row_fn,
+			  col_fn			=>  *my_col_fn,
+			  grid_fn			=>  *my_grid_fn,
+			  mark_fn			=>  *my_mark_fn,
+			  #
+			  scrollport_fn			=>  *my_scrollport_fn,
+			  tabport_fn			=>  *my_tabport_fn,
+			  frame_fn			=>  *my_frame_fn,
+			  #
+			  widget_fn			=>  *my_widget_fn,
+			  object_fn			=>  *my_object_fn,
+			  sprite_fn			=>  *my_sprite_fn,
+			  #
+			  widgetspace_fn		=>  *my_widgetspace_fn,
+			  objectspace_fn		=>  *my_objectspace_fn,
+			  spritespace_fn		=>  *my_spritespace_fn
+			};
+		    };
+
+		options =  process_options  options;
+
+		fun do_rg_widget (rg_widget: Rg_Widget_Type)
+		    =
+		    case rg_widget
+			#
+			RG_ROW (arg:	Rg_Row)
+			    =>
+			    {   arg ->	  { id:				Id,
+					    widgets:			List( Rg_Widget_Type ),								# The list of widgets to be laid out and displayed in this row.
+					    widget_layout_hint:		Ref( Widget_Layout_Hint ),
+					    site:			Ref(g2d::Box)									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					  };
+
+				widgets =  map do_rg_widget widgets;
+
+				arg =	  { id,
+					    widgets,
+					    widget_layout_hint,
+					    site
+					  };
+
+				RG_ROW (options.row_fn  arg);
+			    };
+
+			RG_COL (arg:	Rg_Col)
+			    =>
+			    {   arg ->	  { id:				Id,
+					    widgets:			List( Rg_Widget_Type ),								# The list of widgets to be laid out and displayed in this row.
+					    widget_layout_hint:		Ref( Widget_Layout_Hint ),
+					    site:			Ref(g2d::Box)									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					  };
+
+				widgets =  map do_rg_widget widgets;
+
+				arg =	  { id,
+					    widgets,
+					    widget_layout_hint,
+					    site
+					  };
+
+				RG_COL (options.col_fn  arg);
+			    };
+
+			RG_GRID (arg:	Rg_Grid)
+			    =>
+			    {   arg ->	  { id:				Id,
+					    widgets:			List(	List( Rg_Widget_Type )   ),							# The list lists of widgets to be laid out and displayed in this grid.
+					    widget_layout_hint:		Ref( Widget_Layout_Hint ),
+					    site:			Ref(g2d::Box)									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					  };
+
+				widgets =  map  do_widgets  widgets
+						where
+						    fun do_widgets (widgets: List(Rg_Widget_Type))
+							=
+							map  do_rg_widget  widgets;
+						end;
+
+				arg =	  { id,
+					    widgets,
+					    widget_layout_hint,
+					    site
+					  };
+
+
+
+				RG_GRID  (options.grid_fn  arg);
+			    };
+
+			RG_MARK (arg:	Rg_Mark)
+			    =>
+			    {   arg ->	  { id:				Id,
+					    doc:			String,
+					    widget:			Rg_Widget_Type,									# The widget to be displayed.
+					    widget_layout_hint:		Ref( Widget_Layout_Hint ),
+					    site:			Ref(g2d::Box)									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					  };
+
+				widget = do_rg_widget  widget;
+
+				arg =	  { id,
+					    doc,
+					    widget,
+					    widget_layout_hint,
+					    site
+					  };
+
+
+
+				RG_MARK  (options.mark_fn  arg);
+			    };
+
+			RG_SCROLLPORT (arg:	Rg_Scrollport)
+			    =>
+			    {
+				arg ->
+					  { id:				Id,
+					    upperleft:			Ref(g2d::Point),								# Upperleft of view's subwindow_or_view in scrollport coordinates, used for scrolling pixmap in scrollport.
+					    scroller:			Ref(Scroller),									# Client-code interface for controlling view_upperleft.
+					    callback:			Scroller_Callback,								# This is how we pass our Scroller to app client code, which basically lets it set 'pixmap_upperleft' above.
+					    site:			Ref(g2d::Box),									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+
+					    rg_widget:			Ref( Rg_Widget_Type ),								# Widget-tree visible in this viewable, which gets rendered onto 'pixmap' here.
+					    #														# rg_widget is a Ref not because we intend to change it, but to work around a technical difficulty in guiboss-imp.pkg:do_pg_widget:PG_SCROLLPORT where  viewable_data and rg_widget each want to be created first.
+					    pixmap:			g2p::Gadget_To_Rw_Pixmap,							# 
+																			#		                      
+					    parent_subwindow_or_view:	Subwindow_Or_View								# This can be a SCROLLABLE_INFO if we have a scrollport located on a scrollport.
+					  };
+
+				rg_widget = do_rg_widget  *rg_widget;
+
+				arg =	  { id,
+					    upperleft,
+					    scroller,
+					    callback,
+					    site,
+
+					    rg_widget =>	REF rg_widget,
+					    pixmap,
+					    parent_subwindow_or_view
+					  };
+
+				RG_SCROLLPORT (options.scrollport_fn  arg);
+			    };
+
+			RG_TABPORT (arg:	Rg_Tabport)
+			    =>
+			    {   arg ->	  { id:				Id,
+					    tabs:			List( Tabbable_Info ),								# This record holds one of the alternate views which may be made visible in the scrollport.  *** WE REQUIRE AT LEAST ONE ENTRY IN THE LIST! *** 
+					    visible_tab:		Ref ( Int ),									# Which of 'tabs' is currently visible?  This refcell references one element from 'tabs';  it supports switching between the tabbed views.
+					    #
+					    callback:			Tab_Picker_Callback,								# This is how we pass our Tab_Picker to app client code, which basically lets it set 'visible_tab' above.
+					    site:			Ref(g2d::Box)									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					  };
+	
+				site = REF *site;													# Establish a new refcell to be shared between tabs and rg_tabport.
+
+				tabs =  map  do_tab  tabs
+					where
+					    fun do_tab (arg: Tabbable_Info)
+						=
+						{   arg ->    {	rg_widget:			Rg_Widget_Type,
+								pixmap:				g2p::Gadget_To_Rw_Pixmap,
+								#
+								parent_subwindow_or_view:	Subwindow_Or_View,					# This can be a SCROLLABLE_INFO if we have a tabport located on a scrollport, for example.
+								site:				Ref(g2d::Box),						# Size and location of subwindow scrollport in parent Subwindow_Or_View coordinates.
+								#
+								is_visible:			Ref( Bool )
+							      };
+
+						    rg_widget = do_rg_widget  rg_widget;
+
+						    arg =     {	rg_widget,
+								pixmap,
+								#
+								parent_subwindow_or_view,
+								site,											# Maintain the invariant that tab.site == rg_tabport.site for all tabs (i.e., refcell is shared).
+								#
+								is_visible  =>	REF *is_visible
+							      };
+						    arg;
+						};
+					end;
+
+
+				arg =	  { id,
+					    tabs,
+					    visible_tab => REF *visible_tab,
+					    #
+					    callback,
+					    site
+					  };
+
+				RG_TABPORT  (options.tabport_fn  arg);
+			    };
+
+			RG_FRAME (arg:	Rg_Frame)
+			    =>
+			    {   arg -> 	  { id:				Id,
+					    frame_widget:		Rg_Widget_Type,									# Widget which will draw the frame surround.
+					    widget:			Rg_Widget_Type,									# Widget-tree to draw surrounded by frame.
+					    widget_layout_hint:		Ref( Widget_Layout_Hint ),
+					    site:			Ref(g2d::Box)									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					  };
+
+				frame_widget =  do_rg_widget  frame_widget;
+				widget	     =  do_rg_widget        widget;
+
+				arg = 	  { id,
+					    frame_widget,
+					    widget,
+					    widget_layout_hint,
+					    site	    =>		REF *site
+					  };
+
+				RG_FRAME (options.frame_fn  arg);
+			    };
+
+			RG_WIDGET (arg: Rg_Widget)
+			    =>
+			    {   arg ->	  { guiboss_to_widget:		Guiboss_To_Widget,								# The command end of a port for communication to a widget-imp from a					src/lib/x-kit/widget/gui/guiboss-imp.pkg
+					    shutdown_oneshot:		Once( Void ),									# The widget-imp will fire this one-shot when shutting down due to die(). Used by guiboss-imp.
+					    site:			Ref(g2d::Box)									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					  };
+
+				arg =	  { guiboss_to_widget,
+					    shutdown_oneshot,
+					    site			=> REF *site
+					  };
+
+				RG_WIDGET (options.widget_fn  arg);
+			    };
+
+			RG_OBJECTSPACE (arg:	Rg_Objectspace)
+			    =>
+			    {   arg -> 	  { guiboss_to_objectspace:	Guiboss_To_Objectspace,
+					    object_to_objectspace:	o2c::Object_To_Objectspace,							# 
+					    objects:			List( Rg_Object_Type ),								# The list of objects to be drawn. These can be placed arbitrarily, including possible overlaps.
+					    site:			Ref(g2d::Box)									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					  };
+
+				objects =  map  do_rg_object  objects;
+
+				arg = 	  { guiboss_to_objectspace,
+					    object_to_objectspace,
+					    objects,
+					    site		=> REF *site
+					  };
+
+				RG_OBJECTSPACE (options.objectspace_fn arg);
+
+			    };
+
+			RG_SPRITESPACE (arg:	Rg_Spritespace)
+			    =>
+			    {   arg ->	  { guiboss_to_spritespace:	Guiboss_To_Spritespace,
+					    sprite_to_spritespace:	s2b::Sprite_To_Spritespace,							# 
+					    sprites:			List( Rg_Sprite_Type ),								# The list of widgets to be drawn on the spritespace. These can be placed arbitrarily.
+					    site:			Ref(g2d::Box)									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					  };
+
+				sprites =  map  do_rg_sprite  sprites;
+
+				arg =	  { guiboss_to_spritespace,
+					    sprite_to_spritespace,
+					    sprites,
+					    site		=> REF *site
+					  };
+
+				RG_SPRITESPACE (options.spritespace_fn arg);
+			    };
+
+			RG_NULL_WIDGET
+			    =>
+			    {
+				rg_widget;
+			    };
+		    esac
+
+
+		also
+		fun do_rg_object (rg_object: Rg_Object_Type)
+		    =
+		    case rg_object
+			#
+			RG_WIDGETSPACE  (arg: Rg_Widgetspace)												# A widget space embedded in a object, to allow all widgetspace widgets to be used also on a object.
+			    =>
+			    {	arg ->	  { guiboss_to_widgetspace: 	Guiboss_To_Widgetspace,
+					    rg_widget:			Rg_Widget_Type
+					  };
+
+				rg_widget =  do_rg_widget rg_widget;
+
+				arg =	  { guiboss_to_widgetspace,
+					    rg_widget
+					  };
+
+				RG_WIDGETSPACE (options.widgetspace_fn  arg);
+			    };
+
+			RG_OBJECT (arg: Rg_Object)
+			    =>
+			    {	arg ->	  {
+					    objectspace_to_object:	c2o::Objectspace_To_Object,							# 
+					    guiboss_to_gadget:		Guiboss_To_Gadget,								# 
+					    shutdown_oneshot:		Once( Void )									# The sprite-imp will fire this one-shot when shutting down due to die(). Used by guiboss-imp.
+					  };
+
+				arg =	  { objectspace_to_object,
+					    guiboss_to_gadget,
+					    shutdown_oneshot
+					  };
+
+
+				RG_OBJECT (options.object_fn  arg);
+			    };
+		    esac
+
+		also
+		fun do_rg_sprite (rg_sprite: Rg_Sprite_Type)
+		    =
+		    case rg_sprite
+			#
+			RG_SPRITE  (arg: Rg_Sprite)
+			    =>
+			    {	arg ->	  { spritespace_to_sprite:	b2s::Spritespace_To_Sprite,							# 
+					    guiboss_to_gadget:		Guiboss_To_Gadget,								# 
+					    shutdown_oneshot:		Once( Void ) 									# The sprite-imp will fire this one-shot when shutting down due to die(). Used by guiboss-imp.
+					  };
+
+				arg =	  { spritespace_to_sprite,
+					    guiboss_to_gadget,
+					    shutdown_oneshot
+					  };
+
+				RG_SPRITE  (options.sprite_fn  arg);
+			    };
+		    esac;
+	    end;
+
+
+
+	Guipane_Apply_Option													# The following guipane_apply() facility allows clients to walk a Guipane tree without having to write out the whole recursion.
+	  #
+	  = RG_ROW_FN		(Rg_Row		 -> Void)									# Call this fn on RG_ROW    	     nodes in Guipane. Defaults to null fn.
+	  | RG_COL_FN		(Rg_Col		 -> Void)									# Call this fn on RG_COL    	     nodes in Guipane. Defaults to null fn.
+	  | RG_GRID_FN		(Rg_Grid	 -> Void)									# Call this fn on RG_GRID            nodes in Guipane. Defaults to null fn.
+	  | RG_MARK_FN		(Rg_Mark	 -> Void)									# Call this fn on RG_MARK            nodes in Guipane. Defaults to null fn.
+	  | RG_SCROLLPORT_FN	(Rg_Scrollport 	 -> Void)									# Call this fn on RG_SCROLLPORT	     nodes in Guipane. Defaults to null fn.
+	  | RG_TABPORT_FN	(Rg_Tabport	 -> Void)									# Call this fn on RG_TABPORT	     nodes in Guipane. Defaults to null fn.
+	  | RG_FRAME_FN		(Rg_Frame	 -> Void)									# Call this fn on RG_FRAME           nodes in Guipane. Defaults to null fn.
+	  | RG_WIDGET_FN	(Rg_Widget	 -> Void)									# Call this fn on RG_WIDGET          nodes in Guipane. Defaults to null fn.
+	  | RG_OBJECT_FN	(Rg_Object	 -> Void)									# Call this fn on RG_OBJECT          nodes in Guipane. Defaults to null fn.
+	  | RG_SPRITE_FN	(Rg_Sprite	 -> Void)									# Call this fn on RG_OBJECT          nodes in Guipane. Defaults to null fn.
+	  | RG_OBJECTSPACE_FN	(Rg_Objectspace  -> Void)									# Call this fn on RG_OBJECTSPACE     nodes in Guipane. Defaults to null fn.
+	  | RG_SPRITESPACE_FN	(Rg_Spritespace  -> Void)									# Call this fn on RG_SPRITESPACE     nodes in Guipane. Defaults to null fn.
+	  | RG_WIDGETSPACE_FN	(Rg_Widgetspace  -> Void)									# Call this fn on RG_WIDGETSPACE     nodes in Guipane. Defaults to null fn.
+	  ;
+
+	fun guipane_apply
+	      (
+		guipane:	Guipane,
+		options:	List( Guipane_Apply_Option )
+	      )
+	    :			Void
+	    =
+	    {   guipane ->	  { id:				Id,
+				    rg_widget:			Rg_Widget_Type,							# The widget (or more commonly, tree of widgets) to display on the Guipane.
+				    guiboss_to_widgetspace: 	Guiboss_To_Widgetspace,
+				    widget_to_guiboss:	 	Widget_To_Guiboss,
+				    space_to_gui:		Space_To_Gui,
+				    topwindow:			gtg::Guiboss_To_Topwindow,					# The topwindow on which to draw our widgets.
+				    subwindow_info:		Subwindow_Data,							# Holds toplevel SUBWINDOW_DATA for gui.
+				    needs_layout_and_redraw:	Ref( Bool )
+				  };
+
+		do_rg_widget  rg_widget;
+	    }
+	    where
+
+		fun process_options  (options:  List(Guipane_Apply_Option))
+		    =
+		    {   null_fn = (\\ (x: X) = ());
+			#
+			my_row_fn			=  REF  null_fn;
+			my_col_fn			=  REF  null_fn;
+			my_grid_fn			=  REF  null_fn;
+			my_mark_fn			=  REF  null_fn;
+			#
+			my_scrollport_fn		=  REF  null_fn;
+			my_tabport_fn			=  REF  null_fn;
+			my_frame_fn			=  REF  null_fn;
+			my_widget_fn			=  REF  null_fn;
+			my_object_fn			=  REF  null_fn;
+			my_sprite_fn			=  REF  null_fn;
+			#
+			my_spritespace_fn		=  REF  null_fn;
+			my_objectspace_fn		=  REF  null_fn;
+			my_widgetspace_fn		=  REF  null_fn;
+
+			apply  do_option  options
+			where
+			    fun do_option (RG_ROW_FN		fn) =>  my_row_fn			:=  fn;
+				do_option (RG_COL_FN		fn) =>  my_col_fn			:=  fn;
+				do_option (RG_GRID_FN		fn) =>  my_grid_fn			:=  fn;
+				do_option (RG_MARK_FN		fn) =>  my_mark_fn			:=  fn;
+				#
+				do_option (RG_SCROLLPORT_FN	fn) =>  my_scrollport_fn		:=  fn;
+				do_option (RG_TABPORT_FN	fn) =>  my_tabport_fn			:=  fn;
+				do_option (RG_FRAME_FN		fn) =>  my_frame_fn			:=  fn;
+				do_option (RG_WIDGET_FN		fn) =>  my_widget_fn			:=  fn;
+				do_option (RG_OBJECT_FN		fn) =>  my_object_fn			:=  fn;
+				do_option (RG_SPRITE_FN		fn) =>  my_sprite_fn			:=  fn;
+				#
+				do_option (RG_SPRITESPACE_FN	fn) =>  my_spritespace_fn		:=  fn;
+				do_option (RG_OBJECTSPACE_FN	fn) =>  my_objectspace_fn		:=  fn;
+				do_option (RG_WIDGETSPACE_FN	fn) =>  my_widgetspace_fn		:=  fn;
+			    end;
+			end;
+
+			{ row_fn			=>  *my_row_fn,
+			  col_fn			=>  *my_col_fn,
+			  grid_fn			=>  *my_grid_fn,
+			  mark_fn			=>  *my_mark_fn,
+			  #
+			  scrollport_fn			=>  *my_scrollport_fn,
+			  tabport_fn			=>  *my_tabport_fn,
+			  frame_fn			=>  *my_frame_fn,
+			  widget_fn			=>  *my_widget_fn,
+			  object_fn			=>  *my_object_fn,
+			  sprite_fn			=>  *my_sprite_fn,
+			  #
+			  spritespace_fn		=>  *my_spritespace_fn,
+			  objectspace_fn		=>  *my_objectspace_fn,
+			  widgetspace_fn		=>  *my_widgetspace_fn
+			};
+		    };
+
+		options =  process_options  options;
+
+		fun do_rg_widget (rg_widget: Rg_Widget_Type)
+		    =
+		    case rg_widget
+			#
+			RG_ROW (arg:	Rg_Row)
+			    =>
+			    {   arg ->	  { id:				Id,
+					    widgets:			List( Rg_Widget_Type ),								# The list of widgets to be laid out and displayed in this row.
+					    widget_layout_hint:		Ref( Widget_Layout_Hint ),
+					    site:			Ref(g2d::Box)									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					  };
+
+				apply  do_rg_widget widgets;
+
+				options.row_fn  arg;
+			    };
+
+			RG_COL (arg:	Rg_Col)
+			    =>
+			    {   arg ->	  { id:				Id,
+					    widgets:			List( Rg_Widget_Type ),								# The list of widgets to be laid out and displayed in this row.
+					    widget_layout_hint:		Ref( Widget_Layout_Hint ),
+					    site:			Ref(g2d::Box)									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					  };
+
+				apply do_rg_widget widgets;
+
+				options.col_fn  arg;
+			    };
+
+			RG_GRID (arg:	Rg_Grid)
+			    =>
+			    {   arg ->	  { id:				Id,
+					    widgets:			List(	List( Rg_Widget_Type )   ),						# The list lists of widgets to be laid out and displayed in this grid.
+					    widget_layout_hint:		Ref( Widget_Layout_Hint ),
+					    site:			Ref(g2d::Box)									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					  };
+
+				apply   do_widgets  widgets
+					where
+					    fun do_widgets (widgets: List(Rg_Widget_Type))
+						=
+						apply  do_rg_widget  widgets;
+					end;
+
+				options.grid_fn  arg;
+			    };
+
+			RG_MARK (arg:	Rg_Mark)
+			    =>
+			    {   arg ->	  { id:				Id,
+					    doc:			String,
+					    widget:			Rg_Widget_Type,									# The widget to display.
+					    widget_layout_hint:		Ref( Widget_Layout_Hint ),
+					    site:			Ref(g2d::Box)									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					  };
+
+				do_rg_widget  widget;
+
+				options.mark_fn  arg;
+			    };
+
+			RG_SCROLLPORT (arg:	Rg_Scrollport)
+			    =>
+			    {
+				arg ->	  { id:				Id,
+					    upperleft:			Ref(g2d::Point),								# Upperleft of view's subwindow_or_view in scrollport coordinates, used for scrolling pixmap in scrollport.
+					    scroller:			Ref(Scroller),									# Client-code interface for controlling view_upperleft.
+					    callback:			Scroller_Callback,								# This is how we pass our Scroller to app client code, which basically lets it set 'pixmap_upperleft' above.
+					    site:			Ref(g2d::Box),									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+
+					    rg_widget:			Ref( Rg_Widget_Type ),								# Widget-tree visible in this viewable, which gets rendered onto 'pixmap' here.
+					    #														# rg_widget is a Ref not because we intend to change it, but to work around a technical difficulty in guiboss-imp.pkg:do_pg_widget:PG_SCROLLPORT where  viewable_data and rg_widget each want to be created first.
+					    pixmap:			g2p::Gadget_To_Rw_Pixmap,							# 
+																			# 
+					    parent_subwindow_or_view:	Subwindow_Or_View								# This can be a SCROLLABLE_INFO if we have a scrollport located on a scrollport.
+					  };
+
+				do_rg_widget  *rg_widget;
+
+				options.scrollport_fn  arg;
+			    };
+
+			RG_TABPORT (arg:	Rg_Tabport)
+			    =>
+			    {   arg ->	  { id:				Id,
+					    tabs:			List( Tabbable_Info ),								# This holds the alternate views which may be made visible in the tabport.  This list is guaranteed to be non-empty.
+					    visible_tab:		Ref ( Int ),									# Which of 'tabs' is currently visible?  This refcell references one element from 'tabs';  it supports switching between the tabbed views.
+					    #
+					    callback:			Tab_Picker_Callback,								# This is how we pass our Tab_Picker to app client code, which basically lets it set 'visible_tab' above.
+					    site:			Ref(g2d::Box)									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					  };
+	
+				apply   do_tab  tabs
+					where
+					    fun do_tab (arg: Tabbable_Info)
+						=
+						{   arg ->    {	rg_widget:			Rg_Widget_Type,
+								pixmap:				g2p::Gadget_To_Rw_Pixmap,
+
+								parent_subwindow_or_view:	Subwindow_Or_View,					# This can be a SCROLLABLE_INFO if we have a tabport located on a scrollport, for example.
+								site:				Ref(g2d::Box),						# Size and location of subwindow scrollport in parent Subwindow_Or_View coordinates.
+
+								is_visible:			Ref( Bool )
+							      };
+
+						    do_rg_widget  rg_widget;
+						};
+					end;
+
+
+				options.tabport_fn  arg;
+			    };
+
+			RG_FRAME (arg:	Rg_Frame)
+			    =>
+			    {   arg -> 	  { id:				Id,
+					    frame_widget:		Rg_Widget_Type,									# Widget which will draw the frame surround.
+					    widget:			Rg_Widget_Type,									# Widget-tree to draw surrounded by frame.
+					    widget_layout_hint:		Ref( Widget_Layout_Hint ),
+					    site:			Ref(g2d::Box)									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					  };
+
+				do_rg_widget  frame_widget;
+				do_rg_widget        widget;
+
+				options.frame_fn  arg;
+			    };
+
+			RG_WIDGET (arg: Rg_Widget)
+			    =>
+			    {   arg ->	  { guiboss_to_widget:		Guiboss_To_Widget,								# The command end of a port for communication to a widget-imp from a					src/lib/x-kit/widget/gui/guiboss-imp.pkg
+					    shutdown_oneshot:		Once( Void ),									# The widget-imp will fire this one-shot when shutting down due to die(). Used by guiboss-imp.
+					    site:			Ref(g2d::Box)									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					  };
+
+				options.widget_fn  arg;
+			    };
+
+			RG_OBJECTSPACE (arg:	Rg_Objectspace)
+			    =>
+			    {   arg -> 	  { guiboss_to_objectspace:	Guiboss_To_Objectspace,
+					    object_to_objectspace:	o2c::Object_To_Objectspace,							# 
+					    objects:			List( Rg_Object_Type ),								# The list of objects to be drawn. These can be placed arbitrarily, including possible overlaps.
+					    site:			Ref(g2d::Box)									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					  };
+
+				
+				# Eventually we'll have to do the full subrecursion here but for the moment none of that stuff is really operational.
+
+				options.objectspace_fn  arg;
+			    };
+
+			RG_SPRITESPACE (arg:	Rg_Spritespace)
+			    =>
+			    {   arg ->	  { guiboss_to_spritespace:	Guiboss_To_Spritespace,
+					    sprite_to_spritespace:	s2b::Sprite_To_Spritespace,							# 
+					    sprites:			List( Rg_Sprite_Type ),								# The list of widgets to be drawn on the spritespace. These can be placed arbitrarily.
+					    site:			Ref(g2d::Box)									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					  };
+
+				# Eventually we'll have to do the full subrecursion here but for the moment none of that stuff is really operational.
+
+				options.spritespace_fn  arg;
+			    };
+
+			RG_NULL_WIDGET
+			    =>
+			    {
+			    };
+		    esac
+
+		also
+		fun do_rg_object (rg_object: Rg_Object_Type)
+		    =
+		    case rg_object
+			#
+			RG_WIDGETSPACE  (arg: Rg_Widgetspace)												# A widget space embedded in a object, to allow all widgetspace widgets to be used also on a object.
+			    =>
+			    {	arg ->	  { guiboss_to_widgetspace: 	Guiboss_To_Widgetspace,
+					    rg_widget:			Rg_Widget_Type
+					  };
+
+				do_rg_widget        rg_widget;
+
+				options.widgetspace_fn  arg;
+			    };
+
+			RG_OBJECT (arg: Rg_Object)
+			    =>
+			    {	arg ->	  {
+					    objectspace_to_object:	c2o::Objectspace_To_Object,							# 
+					    guiboss_to_gadget:		Guiboss_To_Gadget,								# 
+					    shutdown_oneshot:		Once( Void )									# The sprite-imp will fire this one-shot when shutting down due to die(). Used by guiboss-imp.
+					  };
+
+
+				options.object_fn  arg;
+			    };
+		    esac
+
+		also
+		fun do_rg_sprite (rg_sprite: Rg_Sprite_Type)
+		    =
+		    case rg_sprite
+			#
+			RG_SPRITE  (arg: Rg_Sprite)
+			    =>
+			    {	arg ->	  { spritespace_to_sprite:	b2s::Spritespace_To_Sprite,							# 
+					    guiboss_to_gadget:		Guiboss_To_Gadget,								# 
+					    shutdown_oneshot:		Once( Void ) 									# The sprite-imp will fire this one-shot when shutting down due to die(). Used by guiboss-imp.
+					  };
+
+				options.sprite_fn  arg;
+			    };
+		    esac;	
+	    end;
+
+	fun all_guipanes_on_topwindow_apply														# Apply guipane_fn to all Guipane instances on this topwindow.
+	      #
+	      (topwindow_info:		Topwindow_Info)
+	      #
+	      (guipane_fn:		Guipane -> Void)
+	    =
+	    case *topwindow_info.subwindow_info
+		#
+		THE subwindow_data
+		    =>
+		    do_subwindow_data  subwindow_data;
+
+		NULL => ();
+	    esac
+	    where
+		fun do_subwindow_data (SUBWINDOW_DATA (subwindow_info: Subwindow_Info))
+		    =
+		    {	apply do_subwindow_data  *subwindow_info.popups;
+			#
+			case *subwindow_info.guipane
+			    #
+			    THE (guipane: Guipane)
+				=>
+				guipane_fn  guipane;
+
+			    NULL => ();
+			esac;
+		    };
+	    end;
+
+
+	fun pprint_guipane'															# "pprint" == "prettyprint".
+	      (
+		me:		Guiboss_State,
+		guipane:	Guipane,
+		pp:		pp::Prettyprint_Mill
+	      )
+	    =
+	    do_guipane  guipane
+	    where
+		fun do_guipane (guipane: Guipane)
+		    =
+		    {	guipane ->	  { id:				Id,
+					    rg_widget:			Rg_Widget_Type,							# The widget (or more commonly, tree of widgets) to display on the Guipane.
+					    guiboss_to_widgetspace: 	Guiboss_To_Widgetspace,
+					    widget_to_guiboss:	 	Widget_To_Guiboss,
+					    space_to_gui:		Space_To_Gui,
+					    topwindow:			gtg::Guiboss_To_Topwindow,					# The topwindow on which to draw our widgets.
+					    subwindow_info:		Subwindow_Data,							# Holds toplevel SUBWINDOW_DATA for gui.
+					    needs_layout_and_redraw:	Ref( Bool )
+					  };
+
+			do_rg_widget  rg_widget;
+		    }
+
+		also
+		fun do_rg_widget (rg_widget: Rg_Widget_Type)
+		    =
+		    case rg_widget
+			#
+			RG_ROW (arg:	Rg_Row)
+			    =>
+			    {
+				arg ->	  { id:				Id,
+					    widgets:			List( Rg_Widget_Type ),						# The list of widgets to be laid out and displayed in this row.
+					    widget_layout_hint:		Ref( Widget_Layout_Hint ),
+					    site:			Ref(g2d::Box)							# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					  };
+
+				pp.box' 0 -1 {.
+				    pp.lit  (sprintf "RG_ROW id=%d [" (id_to_int id));
+				    pp.ind 2;
+				    pp.txt " ";
+
+				    fun do_widget (rg_widget: Rg_Widget_Type)
+					=
+					pp.box {.
+					    do_rg_widget		rg_widget;
+					};
+
+				    pp::seqx
+					{.   pp.endlit ",";   pp.txt " ";   }	# Inter-element separator.
+					do_widget				# Print one list element.
+					widgets;				# List of elements.
+
+				    pp.ind 0;
+				    pp.txt " ";
+				    pp.lit "]";
+				};
+			    };
+
+			RG_COL (arg:	Rg_Col)
+			    =>
+			    {
+				arg ->	  { id:				Id,
+					    widgets:			List( Rg_Widget_Type ),								# The list of widgets to be laid out and displayed in this row.
+					    widget_layout_hint:		Ref( Widget_Layout_Hint ),
+					    site:			Ref(g2d::Box)									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					  };
+
+				pp.box' 0 -1 {.
+				    pp.lit  (sprintf "RG_COL id=%d [" (id_to_int id));
+				    pp.ind 2;
+				    pp.txt " ";
+
+				    fun do_widget (rg_widget: Rg_Widget_Type)
+					=
+					pp.box {.
+					    do_rg_widget		rg_widget;
+					};
+
+				    pp::seqx
+					{.   pp.endlit ",";   pp.txt " ";   }	# Inter-element separator.
+					do_widget				# Print one list element.
+					widgets;				# List of elements.
+
+				    pp.ind 0;
+				    pp.txt " ";
+				    pp.lit "]";
+				};
+			    };
+
+			RG_GRID (arg:	Rg_Grid)
+			    =>
+			    {
+				arg ->	  { id:				Id,
+					    widgets => widget_lists:	List(	List( Rg_Widget_Type )   ),							# The list lists of widgets to be laid out and displayed in this grid.
+					    widget_layout_hint:		Ref( Widget_Layout_Hint ),
+					    site:			Ref(g2d::Box)									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					  };
+
+				pp.box' 0 -1 {.
+				    pp.lit  (sprintf "RG_GRID id=%d [" (id_to_int id));
+				    pp.ind 2;
+				    pp.txt " ";
+
+				    fun do_widgets (rg_widgets: List(Rg_Widget_Type))
+					=
+					pp.box {.
+					    pp.lit  " [";
+					    pp.ind 2;
+					    pp.txt " ";
+
+					    fun do_widget (rg_widget: Rg_Widget_Type)
+						=
+						pp.box {.
+						    do_rg_widget		rg_widget;
+						};
+
+					    pp::seqx
+						{.   pp.endlit ",";   pp.txt " ";   }	# Inter-element separator.
+						do_widget				# Print one widget
+						rg_widgets;				# List of elements.
+
+
+					    pp.ind 0;
+					    pp.txt " ";
+					    pp.lit "]";
+					};
+
+				    pp::seqx
+					{.   pp.endlit ",";   pp.txt " ";   }	# Inter-element separator.
+					do_widgets				# Print one widget list.
+					widget_lists;				# List of elements.
+
+				    pp.ind 0;
+				    pp.txt " ";
+				    pp.lit "]";
+				};
+			    };
+
+			RG_MARK (arg:	Rg_Mark)
+			    =>
+			    {
+				arg ->	  { id:				Id,
+					    doc:			String,
+					    widget:			Rg_Widget_Type,									# The widget to display.
+					    widget_layout_hint:		Ref( Widget_Layout_Hint ),
+					    site:			Ref(g2d::Box)									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					  };
+
+				pp.box' 0 -1 {.
+				    pp.lit  (sprintf "RG_MARK id=%d doc='%s' <" (id_to_int id) doc);
+				    pp.ind 2;
+				    pp.txt " ";
+
+				    do_rg_widget	widget;
+
+				    pp.ind 0;
+				    pp.txt " ";
+				    pp.lit ">";
+				};
+			    };
+
+			RG_SCROLLPORT (arg:	Rg_Scrollport)
+			    =>
+			    {
+				arg ->	  { id:				Id,
+					    upperleft:			Ref(g2d::Point),								# Upperleft of view's subwindow_or_view in scrollport coordinates, used for scrolling pixmap in scrollport.
+					    scroller:			Ref(Scroller),									# Client-code interface for controlling view_upperleft.
+					    callback:			Scroller_Callback,								# This is how we pass our Scroller to app client code, which basically lets it set 'pixmap_upperleft' above.
+					    site:			Ref(g2d::Box),									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+
+					    rg_widget:			Ref( Rg_Widget_Type ),								# Widget-tree visible in this viewable, which gets rendered onto 'pixmap' here.
+					    #														# rg_widget is a Ref not because we intend to change it, but to work around a technical difficulty in guiboss-imp.pkg:do_pg_widget:PG_SCROLLPORT where  viewable_data and rg_widget each want to be created first.
+					    pixmap:			g2p::Gadget_To_Rw_Pixmap,							# 
+																			# 
+					    parent_subwindow_or_view:	Subwindow_Or_View								# This can be a SCROLLABLE_INFO if we have a scrollport located on a scrollport.
+					  };
+
+				pp.box {.
+				    pp.lit  (sprintf "SCROLLPORT %d " (id_to_int id));
+				    #
+				    do_rg_widget  *rg_widget;
+				};
+				pp.newline();
+			    };
+
+			RG_TABPORT (arg:	Rg_Tabport)
+			    =>
+			    {
+				arg ->	  { id:				Id,
+					    tabs:			List( Tabbable_Info ),								# This holds the alternate views which may be made visible in the tabport.  This list is guaranteed to be non-empty.
+					    visible_tab:		Ref ( Int ),									# Which of 'tabs' is currently visible?  This refcell references one element from 'tabs';  it supports switching between the tabbed views.
+					    #
+					    callback:			Tab_Picker_Callback,								# This is how we pass our Tab_Picker to app client code, which basically lets it set 'visible_tab' above.
+					    site:			Ref(g2d::Box)									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					  };
+
+				pp.box' 0 -1 {.
+				    pp.lit  (sprintf "RG_TABPORT id=%d [" (id_to_int id));
+				    pp.ind 2;
+				    pp.txt " ";
+
+				    fun do_tab (tab: Tabbable_Info)
+					=
+					{   tab ->    {	rg_widget:			Rg_Widget_Type,
+							pixmap:				g2p::Gadget_To_Rw_Pixmap,
+
+							parent_subwindow_or_view:	Subwindow_Or_View,					# This can be a SCROLLABLE_INFO if we have a tabport located on a scrollport, for example.
+							site:				Ref(g2d::Box),						# Size and location of subwindow scrollport in parent Subwindow_Or_View coordinates.
+
+							is_visible:			Ref( Bool )
+						      };
+
+					    pp.box {.
+						do_rg_widget		rg_widget;
+						pp.endlit ",";
+					    };
+					};
+
+				    pp::seqx
+					{.   pp.endlit ",";   pp.txt " ";   }	# Inter-element separator.
+					do_tab					# Print one list element.
+					tabs;					# List of elements.
+
+				    pp.ind 0;
+				    pp.txt " ";
+				    pp.lit "]";
+				};
+			    };
+
+			RG_FRAME (arg:	Rg_Frame)
+			    =>
+			    {
+				arg -> 	  { id:				Id,
+					    frame_widget:		Rg_Widget_Type,									# Widget which will draw the frame surround.
+					    widget:			Rg_Widget_Type,									# Widget-tree to draw surrounded by frame.
+					    widget_layout_hint:		Ref( Widget_Layout_Hint ),
+					    site:			Ref(g2d::Box)									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					  };
+
+				pp.lit  (sprintf "RG_FRAME id=%d {" (id_to_int id));
+				pp.ind 2;
+				pp.txt " ";
+
+				pp.box {.
+				    pp.lit  "frame_widget => ";
+				    pp.box {.
+				        do_rg_widget  frame_widget;
+				    };
+				    pp.endlit ",";
+				};
+				pp.box {.
+				    pp.lit  "widget => ";
+				    pp.box {.
+					do_rg_widget        widget;
+				    };
+				};
+				pp.ind 0;
+				pp.txt " ";
+				pp.lit "}";
+
+			    };
+
+			RG_WIDGET (arg: Rg_Widget)
+			    =>
+			    {
+				arg ->	  { guiboss_to_widget:		Guiboss_To_Widget,								# The command end of a port for communication to a widget-imp from a					src/lib/x-kit/widget/gui/guiboss-imp.pkg
+					    shutdown_oneshot:		Once( Void ),									# The widget-imp will fire this one-shot when shutting down due to die(). Used by guiboss-imp.
+					    site:			Ref(g2d::Box)									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					  };
+
+				key =  iuw::id_to_int  guiboss_to_widget.id;
+
+				widget_layout_hint
+				    =
+				    case (im::get (*me.widget_layout_hints, key))
+					#
+					THE h =>  widget_layout_hint__to__string  h;
+
+					NULL  =>  "<unknown>";
+				    esac;
+
+				pp.box' 0 -1 {.
+				    pp.lit  (sprintf "RG_WIDGET id=%d guiboss_to_widget.doc=\"%s\" {"  key  guiboss_to_widget.doc);
+				    pp.ind 2;
+				    pp.txt " ";
+
+				    pp.box {.
+					pp.lit  (sprintf "site => %s" (g2j::box_to_string *site));
+					pp.endlit ",";
+				    };
+
+				    pp.txt " ";
+				    pp.box {.
+					pp.lit  (sprintf "widget_layout_hint => %s" widget_layout_hint);
+				    };
+
+				    pp.ind 0;
+				    pp.txt " ";
+				    pp.lit "}";
+				};
+			    };
+
+			RG_OBJECTSPACE (arg:	Rg_Objectspace)
+			    =>
+			    {
+				arg -> 	  { guiboss_to_objectspace:	Guiboss_To_Objectspace,
+					    object_to_objectspace:	o2c::Object_To_Objectspace,							# 
+					    objects:			List( Rg_Object_Type ),								# The list of objects to be drawn. These can be placed arbitrarily, including possible overlaps.
+					    site:			Ref(g2d::Box)									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					  };
+
+				pp.lit  "RG_OBJECTSPACE";
+				# Eventually we'll have to do the full subrecursion here but for the moment none of that stuff is really operational.
+				pp.newline();
+			    };
+
+			RG_SPRITESPACE (arg:	Rg_Spritespace)
+			    =>
+			    {
+				arg ->	  { guiboss_to_spritespace:	Guiboss_To_Spritespace,
+					    sprite_to_spritespace:	s2b::Sprite_To_Spritespace,							# 
+					    sprites:			List( Rg_Sprite_Type ),								# The list of widgets to be drawn on the spritespace. These can be placed arbitrarily.
+					    site:			Ref(g2d::Box)									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					  };
+
+				pp.lit  "RG_SPRITESPACE";
+				# Eventually we'll have to do the full subrecursion here but for the moment none of that stuff is really operational.
+				pp.newline();
+			    };
+
+			RG_NULL_WIDGET
+			    =>
+			    {
+				pp.lit  "RG_NULL_WIDGET";
+			    };
+		    esac
+
+
+		also
+		fun do_rg_object (rg_object: Rg_Object_Type)
+		    =
+		    case rg_object
+			#
+			RG_WIDGETSPACE  (arg: Rg_Widgetspace)												# A widget space embedded in a object, to allow all widgetspace widgets to be used also on a object.
+			    =>
+			    {	arg ->	  { guiboss_to_widgetspace: 	Guiboss_To_Widgetspace,
+					    rg_widget:			Rg_Widget_Type
+					  };
+
+				key =  id_to_int  guiboss_to_widgetspace.id;
+
+				pp.box' 0 -1 {.
+				    pp.lit  (sprintf "RG_WIDGETSPACE id=%d <" key);
+				    pp.ind 2;
+				    pp.txt " ";
+
+				    do_rg_widget        rg_widget;
+
+				    pp.ind 0;
+				    pp.txt " ";
+				    pp.lit ">";
+				};
+
+			    };
+
+			RG_OBJECT (arg: Rg_Object)
+			    =>
+			    {	arg ->	  {
+					    objectspace_to_object:	c2o::Objectspace_To_Object,							# 
+					    guiboss_to_gadget:		Guiboss_To_Gadget,								# 
+					    shutdown_oneshot:		Once( Void )									# The sprite-imp will fire this one-shot when shutting down due to die(). Used by guiboss-imp.
+					  };
+
+				key =  iuw::id_to_int  guiboss_to_gadget.id;
+
+				pp.box' 0 -1 {.
+				    pp.lit  (sprintf "RG_OBJECT id=%d <" key);
+				    pp.ind 2;
+				    pp.txt " ";
+
+				    pp.ind 0;
+				    pp.txt " ";
+				    pp.lit ">";
+				};
+			    };
+		    esac
+
+		also
+		fun do_rg_sprite (rg_sprite: Rg_Sprite_Type)
+		    =
+		    case rg_sprite
+			#
+			RG_SPRITE  (arg: Rg_Sprite)
+			    =>
+			    {	arg ->	  { spritespace_to_sprite:	b2s::Spritespace_To_Sprite,							# 
+					    guiboss_to_gadget:		Guiboss_To_Gadget,								# 
+					    shutdown_oneshot:		Once( Void ) 									# The sprite-imp will fire this one-shot when shutting down due to die(). Used by guiboss-imp.
+					  };
+
+				key =  iuw::id_to_int  guiboss_to_gadget.id;
+
+				pp.box' 0 -1 {.
+				    pp.lit  (sprintf "RG_SPRITE id=%d <" key);
+				    pp.ind 2;
+				    pp.txt " ";
+
+				    pp.ind 0;
+				    pp.txt " ";
+				    pp.lit ">";
+				};
+			    };
+		    esac;	
+	    end;
+
+	fun pprint_guipane																# "pprint" == "prettyprint".
+	      (
+		me:		Guiboss_State,
+		guipane:	Guipane
+	      )
+	    =
+	    pp::with_standard_prettyprint_mill
+		#
+		(err::default_plaint_sink ())	[]
+		#
+		(\\ pp:   pp::Prettyprint_Mill
+		    =
+		    pprint_guipane' (me, guipane, pp)
+		);
+
+	fun pprint_topwindows
+	      (
+		me:		Guiboss_State,
+		topwindows:	im::Map( Topwindow_Info )
+	      )
+	    =
+	    pp::with_standard_prettyprint_mill
+		#
+		(err::default_plaint_sink ())	[]
+		#
+		(\\ pp:   pp::Prettyprint_Mill
+		    =
+		    {
+			pp.box' 0 -1 {.
+			    pp.lit  "topwindows [";
+			    pp.ind 2;
+			    pp.txt " ";
+
+			    fun do_topwindow
+				  (
+				    arg:	Topwindow_Info
+				  )
+				=
+				{
+				    arg ->  { guiboss_to_topwindow:			gtg::Guiboss_To_Topwindow,
+					      current_frame_number:			Ref(Int),							# We count frames for convenience of widgets and debugging.
+					      seconds_per_frame:			Ref(Float),							# Primarily so widgets can do motion blurring if they wish.
+					      done_extra_redraw_request_this_frame:	Ref(Bool),							# See Note[3].
+					      next_stacking_order:			Ref(Int),							# Next Subwindow_Or_View.stacking_order value to issue.
+					      subwindow_info:				Ref( Null_Or( Subwindow_Data ) )
+					    };
+
+				    pp.lit  (sprintf "topwindow %d ["  (id_to_int  guiboss_to_topwindow.id));
+				    pp.ind 2;
+				    pp.txt " ";
+
+				    fun do_subwindow_info (subwindow_info: Subwindow_Info)
+					=
+					{
+					    subwindow_info
+					      ->
+					      { id:			Id,
+						guipane:		Ref( Null_Or( Guipane ) ),
+						pixmap:			Ref( g2p::Gadget_To_Rw_Pixmap ),						# Main backing store for this running gui.
+						popups:			Ref(List(Subwindow_Data)),							# These will all be SUBWINDOW_INFO, so 'Ref(List(Subwindow_Info))' would be a better type here.
+						parent:			Null_Or( Subwindow_Data ),							# For popups this points to the parent; for the original non-popup window it is NULL.
+						stacking_order:		Int,										# Assigned in increasing order starting at 1;  these determine who overlies who visually on the screen in case of overlaps. (Popups must be entirely within parent, but sibling popups can overlap.)
+						upperleft:		Ref(g2d::Point)									# If we have a parent, this gives our location on it. Note that pixmap.size gives our size.
+					      };
+
+					    pp.box' 0 -1 {.
+						pp.lit  (sprintf "subwindow_info %d {"  (id_to_int  id));
+						pp.ind 2;
+						pp.txt " ";
+
+						pp.lit (sprintf "stacking_order => %d," stacking_order);
+						pp.lit (sprintf "upperleft => %s," (g2j::point_to_string *upperleft));
+
+						case *guipane
+						    #
+						    THE guipane
+							=>
+							pp.box' 0 -1 {.
+							    pp.lit "guipane => ";
+							    pp.ind 2;
+							    pprint_guipane'	(me, guipane, pp);
+							};
+
+						    NULL => ();
+						esac;
+
+						case *popups
+						    #
+						    [] =>   ();
+						    _  =>   {
+							        pp.box' 0 -1 {.
+								    pp.lit  sprintf "popups => [";
+								    pp.ind 2;
+								    pp.txt " ";
+
+								    fun do_subwindow_data (SUBWINDOW_DATA subwindow_info)
+									=
+									do_subwindow_info  subwindow_info;
+
+								    pp::seqx
+									{.   pp.endlit ",";   pp.txt " ";   }		# Inter-element separator.
+									do_subwindow_data				# Print one list element.
+									*popups;					# List of elements.
+
+
+								    pp.ind 0;
+								    pp.txt " ";
+								    pp.lit "]";
+								};
+							    };
+						esac;
+					    };
+					};
+
+				    case *subwindow_info
+					#
+					THE (SUBWINDOW_DATA    subwindow_info)
+					 => do_subwindow_info  subwindow_info;
+
+					NULL => ();
+				    esac;
+
+				    pp.ind 0;
+				    pp.txt " ";
+				    pp.lit "]";
+				};
+
+			    pp::seqx
+				{.   pp.endlit ",";   pp.txt " ";   }	# Inter-element separator.
+				do_topwindow				# Print one list element.
+				(im::vals_list  topwindows);		# List of elements.
+
+			    pp.ind 0;
+			    pp.txt " ";
+			    pp.lit "]";
+			};
+		    }
+		);
+
+
+	#########################################################################################
+	### export-gui code
+
+
+	Guipith_Map_Option												# The following guipith_map() facility allows clients to rewrite an Guipith tree without having to write out the whole recursion.
+	  #
+	  = XI_ROW_MAP_FN		(Xi_Row	 		-> Xi_Row		)				# Call this fn on XI_ROW    	     nodes in Guipith. Defaults to null fn.
+	  | XI_COL_MAP_FN		(Xi_Col	 		-> Xi_Col		)				# Call this fn on XI_COL    	     nodes in Guipith. Defaults to null fn.
+	  | XI_GRID_MAP_FN		(Xi_Grid 		-> Xi_Grid		)				# Call this fn on XI_GRID            nodes in Guipith. Defaults to null fn.
+	  | XI_MARK_MAP_FN		(Xi_Mark 		-> Xi_Mark		)				# Call this fn on XI_MARK            nodes in Guipith. Defaults to null fn.
+	  | XI_SCROLLPORT_MAP_FN	(Xi_Scrollport 		-> Xi_Scrollport	)				# Call this fn on XI_SCROLLPORT	     nodes in Guipith. Defaults to null fn.
+	  | XI_TABPORT_MAP_FN		(Xi_Tabport		-> Xi_Tabport		)				# Call this fn on XI_TABPORT	     nodes in Guipith. Defaults to null fn.
+	  | XI_FRAME_MAP_FN		(Xi_Frame 		-> Xi_Frame		)				# Call this fn on XI_FRAME           nodes in Guipith. Defaults to null fn.
+	  | XI_WIDGET_MAP_FN		(Xi_Widget		-> Xi_Widget		)				# Call this fn on XI_WIDGET          nodes in Guipith. Defaults to null fn.
+	  | XI_GUIPLAN_MAP_FN		(Guiplan		-> Guiplan		)				# Call this fn on XI_WIDGET          nodes in Guipith. Defaults to null fn.
+	  #
+	  | XI_TOPWINDOW_INFO_MAP_FN	(Xi_Topwindow_Info	-> Xi_Topwindow_Info	)
+	  | XI_SUBWINDOW_INFO_MAP_FN	(Xi_Subwindow_Info	-> Xi_Subwindow_Info	)
+	  | XI_GUIPANE_MAP_FN		(Xi_Guipane		-> Xi_Guipane		)
+	  #
+	  | XI_GP_ROW_MAP_FN		(Gp_Row			-> Gp_Row		)
+	  | XI_GP_COL_MAP_FN		(Gp_Col			-> Gp_Col		)
+	  | XI_GP_GRID_MAP_FN		(Gp_Grid 		-> Gp_Grid		)
+	  | XI_GP_MARK_MAP_FN		(Gp_Mark 		-> Gp_Mark		)
+	  | XI_GP_ROW'_MAP_FN		(Gp_Row'		-> Gp_Row'		)
+	  | XI_GP_COL'_MAP_FN		(Gp_Col'		-> Gp_Col'		)
+	  | XI_GP_GRID'_MAP_FN		(Gp_Grid' 		-> Gp_Grid'		)
+	  | XI_GP_MARK'_MAP_FN		(Gp_Mark' 		-> Gp_Mark'		)
+	  | XI_GP_SCROLLPORT_MAP_FN	(Gp_Scrollport		-> Gp_Scrollport	)
+	  | XI_GP_TABPORT_MAP_FN	(Gp_Tabport		-> Gp_Tabport		)
+	  | XI_GP_FRAME_MAP_FN		(Gp_Frame		-> Gp_Frame		)
+	  | XI_GP_WIDGET_MAP_FN		(Gp_Widget		-> Gp_Widget		)
+	  ;
+
+
+	fun guipith_map
+	      (
+		guipiths:	im::Map( Xi_Topwindow_Info ),
+		#
+		options:	List( Guipith_Map_Option )
+	      )
+	    =
+	    {   guipiths =  do_topwindows  guipiths;
+		#
+		guipiths;
+	    }
+	    where
+
+		fun process_options  (options:  List(Guipith_Map_Option))
+		    =
+		    {   null_fn = (\\ (x: X) = x);
+			#
+			my_row_fn			=  REF  null_fn;
+			my_col_fn			=  REF  null_fn;
+			my_grid_fn			=  REF  null_fn;
+			my_mark_fn			=  REF  null_fn;
+			#
+			my_scrollport_fn		=  REF  null_fn;
+			my_tabport_fn			=  REF  null_fn;
+			my_frame_fn			=  REF  null_fn;
+			my_widget_fn			=  REF  null_fn;
+			my_guiplan_fn			=  REF  null_fn;
+			#
+			my_topwindow_info_fn		=  REF  null_fn;
+			my_subwindow_info_fn		=  REF  null_fn;
+			my_guipane_fn			=  REF  null_fn;
+
+			my_gp_row_fn			=  REF  null_fn;
+			my_gp_col_fn			=  REF  null_fn;
+			my_gp_grid_fn			=  REF  null_fn;
+			my_gp_mark_fn			=  REF  null_fn;
+			my_gp_row'_fn			=  REF  null_fn;
+			my_gp_col'_fn			=  REF  null_fn;
+			my_gp_grid'_fn			=  REF  null_fn;
+			my_gp_mark'_fn			=  REF  null_fn;
+			my_gp_scrollport_fn		=  REF  null_fn;
+			my_gp_tabport_fn		=  REF  null_fn;
+			my_gp_frame_fn			=  REF  null_fn;
+			my_gp_widget_fn			=  REF  null_fn;
+
+			apply  do_option  options
+			where
+			    fun do_option (XI_ROW_MAP_FN		fn) =>  my_row_fn			:=  fn;
+				do_option (XI_COL_MAP_FN		fn) =>  my_col_fn			:=  fn;
+				do_option (XI_GRID_MAP_FN		fn) =>  my_grid_fn			:=  fn;
+				do_option (XI_MARK_MAP_FN		fn) =>  my_mark_fn			:=  fn;
+				#
+				do_option (XI_SCROLLPORT_MAP_FN		fn) =>  my_scrollport_fn		:=  fn;
+				do_option (XI_TABPORT_MAP_FN		fn) =>  my_tabport_fn			:=  fn;
+				do_option (XI_FRAME_MAP_FN		fn) =>  my_frame_fn			:=  fn;
+				do_option (XI_WIDGET_MAP_FN		fn) =>  my_widget_fn			:=  fn;
+				do_option (XI_GUIPLAN_MAP_FN		fn) =>  my_guiplan_fn			:=  fn;
+				#
+				#
+				do_option (XI_TOPWINDOW_INFO_MAP_FN	fn) =>  my_topwindow_info_fn		:=  fn;
+				do_option (XI_SUBWINDOW_INFO_MAP_FN	fn) =>  my_subwindow_info_fn		:=  fn;
+				do_option (XI_GUIPANE_MAP_FN		fn) =>  my_guipane_fn			:=  fn;
+
+				do_option (XI_GP_ROW_MAP_FN		fn) =>  my_gp_row_fn			:=  fn;
+				do_option (XI_GP_COL_MAP_FN		fn) =>  my_gp_col_fn			:=  fn;
+				do_option (XI_GP_GRID_MAP_FN		fn) =>  my_gp_grid_fn			:=  fn;
+				do_option (XI_GP_MARK_MAP_FN		fn) =>  my_gp_mark_fn			:=  fn;
+				do_option (XI_GP_ROW'_MAP_FN		fn) =>  my_gp_row'_fn			:=  fn;
+				do_option (XI_GP_COL'_MAP_FN		fn) =>  my_gp_col'_fn			:=  fn;
+				do_option (XI_GP_GRID'_MAP_FN		fn) =>  my_gp_grid'_fn			:=  fn;
+				do_option (XI_GP_MARK'_MAP_FN		fn) =>  my_gp_mark'_fn			:=  fn;
+				do_option (XI_GP_SCROLLPORT_MAP_FN	fn) =>  my_gp_scrollport_fn		:=  fn;
+				do_option (XI_GP_TABPORT_MAP_FN		fn) =>  my_gp_tabport_fn		:=  fn;
+				do_option (XI_GP_FRAME_MAP_FN		fn) =>  my_gp_frame_fn			:=  fn;
+				do_option (XI_GP_WIDGET_MAP_FN		fn) =>  my_gp_widget_fn			:=  fn;
+			    end;
+			end;
+
+			{ row_fn			=>  *my_row_fn,
+			  col_fn			=>  *my_col_fn,
+			  grid_fn			=>  *my_grid_fn,
+			  mark_fn			=>  *my_mark_fn,
+			  #
+			  scrollport_fn			=>  *my_scrollport_fn,
+			  tabport_fn			=>  *my_tabport_fn,
+			  frame_fn			=>  *my_frame_fn,
+			  widget_fn			=>  *my_widget_fn,
+			  guiplan_fn			=>  *my_guiplan_fn,
+			  #
+			  topwindow_info_fn		=>  *my_topwindow_info_fn,
+			  subwindow_info_fn		=>  *my_subwindow_info_fn,
+			  guipane_fn			=>  *my_guipane_fn,
+
+			  gp_row_fn			=>  *my_gp_row_fn,
+			  gp_col_fn			=>  *my_gp_col_fn,
+			  gp_grid_fn			=>  *my_gp_grid_fn,
+			  gp_mark_fn			=>  *my_gp_mark_fn,
+			  gp_row'_fn			=>  *my_gp_row'_fn,
+			  gp_col'_fn			=>  *my_gp_col'_fn,
+			  gp_grid'_fn			=>  *my_gp_grid'_fn,
+			  gp_mark'_fn			=>  *my_gp_mark'_fn,
+			  gp_scrollport_fn		=>  *my_gp_scrollport_fn,
+			  gp_tabport_fn			=>  *my_gp_tabport_fn,
+			  gp_frame_fn			=>  *my_gp_frame_fn,
+			  gp_widget_fn			=>  *my_gp_widget_fn
+			};
+		    };
+
+		options =  process_options  options;
+
+
+		fun do_gp_widget (gp_widget: Gp_Widget_Type):  Gp_Widget_Type
+		    =
+		    case gp_widget
+			#
+			ROW (arg:	Gp_Row)
+			    =>
+			    {	arg -> (row:  List(Gp_Widget_Type));
+				#
+				row =  map  do_gp_widget  row;
+
+				ROW (options.gp_row_fn  row);
+			    };
+
+			COL (arg:	Gp_Col)
+			    =>
+			    {	arg -> (col:  List(Gp_Widget_Type));
+				#
+				col =  map  do_gp_widget  col;
+				#
+				COL (options.gp_col_fn  col);
+			    };
+
+			GRID (arg:	Gp_Grid)
+			    =>
+			    {	arg -> (grid:  List(List(Gp_Widget_Type)));
+				#
+				grid =	map  do_gp_widgets  grid
+					    where
+						fun do_gp_widgets (widgets: List(Gp_Widget_Type))
+						    =
+						    map  do_gp_widget  widgets;
+					    end	;
+
+				arg = grid;
+
+				GRID (options.gp_grid_fn  arg);
+			    };
+
+			MARK (arg:	Gp_Mark)
+			    =>
+			    {	arg -> (widget:  Gp_Widget_Type);
+				#
+				widget = do_gp_widget  widget;
+
+				arg = widget;
+
+				MARK (options.gp_mark_fn  arg);
+			    };
+
+			ROW' (arg:	Gp_Row')
+			    =>
+			    {   arg ->  ( id:		Id,
+					  widgets:	List(Gp_Widget_Type)
+					);
+				#
+				widgets =  map  do_gp_widget  widgets;
+
+				arg = (id, widgets);
+
+				ROW' (options.gp_row'_fn  arg);
+			    };
+
+			COL' (arg:	Gp_Col')
+			    =>
+			    {   arg ->  ( id:		Id,
+					  widgets:	List(Gp_Widget_Type)
+					);
+				#
+				widgets =  map  do_gp_widget  widgets;
+
+				arg = (id, widgets);
+
+				COL' (options.gp_col'_fn  arg);
+			    };
+
+			GRID' (arg:	Gp_Grid')
+			    =>
+			    {	arg ->  ( id:		Id,
+					  grid:		List(List(Gp_Widget_Type))
+					);
+				#
+				grid =	map  do_gp_widgets  grid
+					    where
+						fun do_gp_widgets (widgets: List(Gp_Widget_Type))
+						    =
+						    map  do_gp_widget  widgets;
+					    end	;
+
+				arg = (id, grid);
+
+				GRID' (options.gp_grid'_fn  arg);
+			    };
+
+			MARK' (arg:	Gp_Mark')
+			    =>
+			    {	arg ->  ( id:		Id,
+					  doc:		String,
+					  widget:	Gp_Widget_Type
+					);
+				#
+				widget =  do_gp_widget  widget;
+
+				arg = (id, doc, widget);
+
+				MARK' (options.gp_mark'_fn  arg);
+			    };
+
+			SCROLLPORT (arg:  Gp_Scrollport)
+			    =>
+			    {	arg ->  { scroller_callback:	Scroller_Callback,
+					  pixmap_size:		g2d::Size,							# Size of pixmap visible in scrollport.
+					  widget:		Gp_Widget_Type							# Widget-tree providing content visible in scrollport -- will be rendered onto pixmap.
+					};
+
+#				arg =   { scroller_callback,
+#					  pixmap_size,
+#					  widget
+#					};
+
+				SCROLLPORT (options.gp_scrollport_fn  arg);
+			    };
+
+			TABPORT (arg:  Gp_Tabport)
+			    =>
+			    {	arg ->  ( tab_picker_callback:	Tab_Picker_Callback,
+					  tab:			Gp_Widget_Type,
+					  tabs:			List( Gp_Widget_Type )						# 
+					);
+
+				tabs =  map  do_gp_widget  (tab ! tabs);
+
+				arg  =  ( tab_picker_callback,
+					  tab,
+					  tabs
+					);
+
+				TABPORT (options.gp_tabport_fn  arg);
+			    };
+
+			FRAME (arg:  Gp_Frame)
+			    =>
+			    {   arg ->  ( frame_options:	List(Frame_Option),
+					  gp_widget:		Gp_Widget_Type
+					);
+
+				gp_widget =  do_gp_widget  gp_widget;
+
+				arg ->  ( frame_options, gp_widget);
+
+				FRAME (options.gp_frame_fn  arg);
+			    };
+
+			WIDGET (arg:	Gp_Widget)
+			    =>
+			    {   arg ->  (
+					  widget:		Widget_Start_Fn
+					);
+				#
+				WIDGET (options.gp_widget_fn  arg);
+			    };
+
+			OBJECTSPACE (arg:	Gp_Objectspace)
+			    =>
+			    {   arg ->  ( objectspace_options:	List( Objectspace_Option ),
+					  objects:		List( Gp_Object )
+					);
+
+				arg =   ( objectspace_options,
+					  objects
+					);
+
+				OBJECTSPACE arg;										# Eventually we'll have to do the full subrecursion here but for the moment none of that stuff is really operational.
+			    };
+
+			SPRITESPACE   (arg:	Gp_Spritespace)
+			    =>
+			    {   arg ->  ( spritespace_options:	List( Spritespace_Option ),
+					  sprites:		List( Gp_Sprite )
+					);
+
+				arg =   ( spritespace_options,
+					  sprites
+					);
+
+				SPRITESPACE arg;										# Eventually we'll have to do the full subrecursion here but for the moment none of that stuff is really operational.
+			    };
+
+			NULL_WIDGET
+			    =>
+			    {
+				gp_widget;
+			    };
+		    esac;
+
+
+		fun do_xi_widget (xi_widget: Xi_Widget_Type)
+		    =
+		    case xi_widget
+			#
+			XI_ROW (arg:	Xi_Row)
+			    =>
+			    {   arg -> 	{ id, widgets };
+				#
+				widgets =  map  do_xi_widget  widgets;
+
+				arg = 	{ id, widgets };
+
+				XI_ROW  (options.row_fn  arg);
+			    };
+
+			XI_COL (arg:	Xi_Col)
+			    =>
+			    {   arg -> 	{ id, widgets };
+				#
+				widgets =  map  do_xi_widget  widgets;
+
+				arg = 	{ id, widgets };
+
+				XI_COL (options.row_fn  arg);
+			    };
+
+
+			XI_GRID (arg:	Xi_Grid)
+			    =>
+			    {   arg ->  { id:		Id,
+					  widgets:	List( List( Xi_Widget_Type ))
+					};
+				#
+				widgets =   map do_widgets widgets
+						where
+						    fun do_widgets (widgets: List(Xi_Widget_Type))
+							=
+							map  do_xi_widget  widgets;
+						end;
+
+				arg =  { id, widgets };
+
+				XI_GRID (options.grid_fn  arg);
+			    };
+
+			XI_MARK (arg:	Xi_Mark)
+			    =>
+			    {   arg ->  { id:		Id,
+					  doc:		String,
+					  widget:	Xi_Widget_Type
+					};
+				#
+				widget = do_xi_widget  widget;
+
+				arg =  { id, doc, widget };
+
+				XI_MARK (options.mark_fn  arg);
+			    };
+
+			XI_SCROLLPORT (arg:	Xi_Scrollport)
+			    =>
+			    {   arg ->    { id:				Id,
+					    xi_widget:			Xi_Widget_Type									# Tree of widgets partially visible in scrollport.
+					  };
+
+				xi_widget =  do_xi_widget  xi_widget;
+
+				arg =     { id,
+					    xi_widget
+					  };
+
+				XI_SCROLLPORT (options.scrollport_fn  arg);
+			    };
+
+			XI_TABPORT (arg:	Xi_Tabport)
+			    =>
+			    {   arg ->  {  id:			Id,
+				    	   widgets:		List( Xi_Widget_Type )
+					};
+
+				widgets =  map  do_xi_widget  widgets;
+
+				arg =   {  id, widgets };
+
+				XI_TABPORT (options.tabport_fn  arg);
+			    };
+
+			XI_FRAME (arg:		Xi_Frame)
+			    =>
+			    {   arg -> 	{ id:			Id,
+					  frame_widget:		Xi_Widget_Type,									# Widget which will draw the frame surround.
+					  widget:		Xi_Widget_Type									# Widget-tree to draw surrounded by frame.
+					};
+
+				frame_widget =  do_xi_widget  frame_widget;
+				widget	     =  do_xi_widget  widget;
+
+				arg = 	{ id,
+					  frame_widget,
+					  widget
+					};
+
+				XI_FRAME (options.frame_fn  arg);
+			    };
+
+			XI_WIDGET (arg:		Xi_Widget)
+			    =>
+			    {   arg -> 	{ widget_id:		iuw::Id,
+					  widget_layout_hint:	Widget_Layout_Hint,
+					  doc:			String
+					};
+
+				arg =   { widget_id,
+					  widget_layout_hint,
+					  doc
+					};
+
+				XI_WIDGET (options.widget_fn  arg);
+			    };
+
+			XI_OBJECTSPACE (arg:	Xi_Objectspace)
+			    =>
+			    {   arg -> { guiboss_to_objectspace_id:	Id,	
+					 xi_objects:			List(Xi_Object)
+				       };
+
+				#
+				arg =  { guiboss_to_objectspace_id,
+					 xi_objects
+				       };
+
+				XI_OBJECTSPACE arg;												# Eventually we'll have to do the full subrecursion here but for the moment none of that stuff is really operational.
+			    };
+
+			XI_SPRITESPACE (arg:	Xi_Spritespace)
+			    =>
+			    {   arg ->  { guiboss_to_spritespace_id:	Id,	
+					  xi_sprites:			List(Xi_Sprite)
+					};
+				#
+				arg =   { guiboss_to_spritespace_id,
+					  xi_sprites
+					};
+
+				XI_SPRITESPACE arg;												# Eventually we'll have to do the full subrecursion here but for the moment none of that stuff is really operational.
+			    };
+
+			XI_NULL_WIDGET
+			    =>
+			    {
+				xi_widget;
+			    };
+
+			XI_GUIPLAN (arg:	Guiplan)
+			    =>
+			    {   arg -> (gp_widget:	Gp_Widget_Type);
+				#
+				gp_widget =  do_gp_widget  gp_widget;
+
+				arg =  (gp_widget);
+
+				XI_GUIPLAN (options.guiplan_fn  arg);
+			    };
+		    esac;
+
+
+		fun do_xi_guipane (arg:  Xi_Guipane)
+		    =
+		    {   arg ->	  { id:				Id,
+				    guiboss_to_widgetspace_id: 	Id,
+				    xi_widget:			Xi_Widget_Type									# The widget (or more commonly, tree of widgets) managed by the gui-tree's toplevel widgetspace-imp.
+				  };
+
+			xi_widget =  do_xi_widget  xi_widget;
+
+			arg =	  { id, guiboss_to_widgetspace_id, xi_widget };
+
+			options.guipane_fn  arg;
+		    };
+
+		fun do_xi_subwindow_info  (arg:  Xi_Subwindow_Info)
+		    =
+		    {   arg -> 	  { id:				Id,										# From (*Subwindow_Info.pixmap).id
+				    guipane:			Null_Or( Xi_Guipane ),
+				    popups:			List(Xi_Subwindow_Data)								# 
+				  };
+
+			guipane =   case guipane
+					#
+					THE guipane =>  THE (do_xi_guipane  guipane);
+					NULL	    =>  NULL;
+				    esac;
+
+			popups =    map  do_info  popups
+					where
+					    fun do_info  (XI_SUBWINDOW_DATA  xi_subwindow_info)
+						=
+						XI_SUBWINDOW_DATA  (do_xi_subwindow_info  xi_subwindow_info);
+					end;
+
+
+			arg    =  { id, guipane, popups };
+
+			options.subwindow_info_fn  arg;
+		    };
+
+		fun do_topwindows (topwindows:	im::Map( Xi_Topwindow_Info ))
+		    =
+		    {	topwindows = REF topwindows;
+			#
+			fun do_topwindow
+			      (
+				i:	Int,
+				arg:	Xi_Topwindow_Info
+			      )
+			    =
+			    {   arg ->  { id:			Id,										# From topwindow_info.guiboss_to_topwindow.id
+					  subwindow_info:	Null_Or( Xi_Subwindow_Data )
+					};
+
+				subwindow_info
+				    =
+				    case subwindow_info
+					#
+					THE (XI_SUBWINDOW_DATA  xi_subwindow_info)
+					    => 
+					    THE (XI_SUBWINDOW_DATA (do_xi_subwindow_info  xi_subwindow_info));
+
+					NULL => NULL;
+				    esac;
+
+				arg =   { id, subwindow_info };
+
+				arg =   options.topwindow_info_fn  arg;
+
+				topwindows :=  im::set (*topwindows, i, arg);
+			    };
+
+			apply do_topwindow (im::keyvals_list *topwindows);
+			#
+			*topwindows;
+		    };
+	    end;
+
+
+
+
+	Guipith_Apply_Option												# The following guipith_apply() facility allows clients to rewrite an Guipith tree without having to write out the whole recursion.
+	  #
+	  = XI_ROW_FN			(Xi_Row	 		-> Void)								# Call this fn on XI_ROW    	     nodes in Guipith. Defaults to null fn.
+	  | XI_COL_FN			(Xi_Col	 		-> Void)								# Call this fn on XI_COL    	     nodes in Guipith. Defaults to null fn.
+	  | XI_GRID_FN			(Xi_Grid 		-> Void)								# Call this fn on XI_GRID            nodes in Guipith. Defaults to null fn.
+	  | XI_MARK_FN			(Xi_Mark 		-> Void)								# Call this fn on XI_MARK            nodes in Guipith. Defaults to null fn.
+	  | XI_SCROLLPORT_FN		(Xi_Scrollport 		-> Void)								# Call this fn on XI_SCROLLPORT	     nodes in Guipith. Defaults to null fn.
+	  | XI_TABPORT_FN		(Xi_Tabport		-> Void)								# Call this fn on XI_TABPORT	     nodes in Guipith. Defaults to null fn.
+	  | XI_FRAME_FN			(Xi_Frame 		-> Void)								# Call this fn on XI_FRAME           nodes in Guipith. Defaults to null fn.
+	  | XI_WIDGET_FN		(Xi_Widget		-> Void)								# Call this fn on XI_WIDGET          nodes in Guipith. Defaults to null fn.
+	  | XI_GUIPLAN_FN		(Guiplan		-> Void)								# Call this fn on XI_WIDGET          nodes in Guipith. Defaults to null fn.
+	  #
+	  | XI_TOPWINDOW_INFO_FN	(Xi_Topwindow_Info	-> Void)
+	  | XI_SUBWINDOW_INFO_FN	(Xi_Subwindow_Info	-> Void)
+	  | XI_GUIPANE_FN		(Xi_Guipane		-> Void)
+	  #
+	  | XI_GP_ROW_FN		(Gp_Row			-> Void)
+	  | XI_GP_COL_FN		(Gp_Col			-> Void)
+	  | XI_GP_GRID_FN		(Gp_Grid 		-> Void)
+	  | XI_GP_MARK_FN		(Gp_Mark 		-> Void)
+	  | XI_GP_ROW'_FN		(Gp_Row'		-> Void)
+	  | XI_GP_COL'_FN		(Gp_Col'		-> Void)
+	  | XI_GP_GRID'_FN		(Gp_Grid' 		-> Void)
+	  | XI_GP_MARK'_FN		(Gp_Mark' 		-> Void)
+	  | XI_GP_SCROLLPORT_FN		(Gp_Scrollport		-> Void)
+	  | XI_GP_TABPORT_FN		(Gp_Tabport		-> Void)
+	  | XI_GP_FRAME_FN		(Gp_Frame		-> Void)
+	  | XI_GP_WIDGET_FN		(Gp_Widget		-> Void)
+	  ;
+
+
+	fun guipith_apply
+	      (
+		topwindows:	im::Map( Xi_Topwindow_Info ),
+		#
+		options:	List( Guipith_Apply_Option )
+	      )
+	    =
+	    do_topwindows topwindows
+	    where
+
+		fun process_options  (options:  List(Guipith_Apply_Option))
+		    =
+		    {   null_fn = (\\ (x: X) = ());
+			#
+			my_row_fn			=  REF  null_fn;
+			my_col_fn			=  REF  null_fn;
+			my_grid_fn			=  REF  null_fn;
+			my_mark_fn			=  REF  null_fn;
+			#
+			my_scrollport_fn		=  REF  null_fn;
+			my_tabport_fn			=  REF  null_fn;
+			my_frame_fn			=  REF  null_fn;
+			my_widget_fn			=  REF  null_fn;
+			my_guiplan_fn			=  REF  null_fn;
+			#
+			my_topwindow_info_fn		=  REF  null_fn;
+			my_subwindow_info_fn		=  REF  null_fn;
+			my_guipane_fn			=  REF  null_fn;
+
+			my_gp_row_fn			=  REF  null_fn;
+			my_gp_col_fn			=  REF  null_fn;
+			my_gp_grid_fn			=  REF  null_fn;
+			my_gp_mark_fn			=  REF  null_fn;
+			my_gp_row'_fn			=  REF  null_fn;
+			my_gp_col'_fn			=  REF  null_fn;
+			my_gp_grid'_fn			=  REF  null_fn;
+			my_gp_mark'_fn			=  REF  null_fn;
+			my_gp_scrollport_fn		=  REF  null_fn;
+			my_gp_tabport_fn		=  REF  null_fn;
+			my_gp_frame_fn			=  REF  null_fn;
+			my_gp_widget_fn			=  REF  null_fn;
+
+			apply  do_option  options
+			where
+			    fun do_option (XI_ROW_FN		fn) =>  my_row_fn			:=  fn;
+				do_option (XI_COL_FN		fn) =>  my_col_fn			:=  fn;
+				do_option (XI_GRID_FN		fn) =>  my_grid_fn			:=  fn;
+				do_option (XI_MARK_FN		fn) =>  my_mark_fn			:=  fn;
+				#
+				do_option (XI_SCROLLPORT_FN	fn) =>  my_scrollport_fn		:=  fn;
+				do_option (XI_TABPORT_FN	fn) =>  my_tabport_fn			:=  fn;
+				do_option (XI_FRAME_FN		fn) =>  my_frame_fn			:=  fn;
+				do_option (XI_WIDGET_FN		fn) =>  my_widget_fn			:=  fn;
+				do_option (XI_GUIPLAN_FN	fn) =>  my_guiplan_fn			:=  fn;
+				#
+				do_option (XI_TOPWINDOW_INFO_FN	fn) =>  my_topwindow_info_fn		:=  fn;
+				do_option (XI_SUBWINDOW_INFO_FN	fn) =>  my_subwindow_info_fn		:=  fn;
+				do_option (XI_GUIPANE_FN	fn) =>  my_guipane_fn			:=  fn;
+				#
+				do_option (XI_GP_ROW_FN		fn) =>  my_gp_row_fn			:=  fn;
+				do_option (XI_GP_COL_FN		fn) =>  my_gp_col_fn			:=  fn;
+				do_option (XI_GP_GRID_FN	fn) =>  my_gp_grid_fn			:=  fn;
+				do_option (XI_GP_MARK_FN	fn) =>  my_gp_mark_fn			:=  fn;
+				do_option (XI_GP_ROW'_FN	fn) =>  my_gp_row'_fn			:=  fn;
+				do_option (XI_GP_COL'_FN	fn) =>  my_gp_col'_fn			:=  fn;
+				do_option (XI_GP_GRID'_FN	fn) =>  my_gp_grid'_fn			:=  fn;
+				do_option (XI_GP_MARK'_FN	fn) =>  my_gp_mark'_fn			:=  fn;
+				do_option (XI_GP_SCROLLPORT_FN	fn) =>  my_gp_scrollport_fn		:=  fn;
+				do_option (XI_GP_TABPORT_FN	fn) =>  my_gp_tabport_fn		:=  fn;
+				do_option (XI_GP_FRAME_FN	fn) =>  my_gp_frame_fn			:=  fn;
+				do_option (XI_GP_WIDGET_FN	fn) =>  my_gp_widget_fn			:=  fn;
+			    end;
+			end;
+
+			{ row_fn			=>  *my_row_fn,
+			  col_fn			=>  *my_col_fn,
+			  grid_fn			=>  *my_grid_fn,
+			  mark_fn			=>  *my_mark_fn,
+			  #
+			  scrollport_fn			=>  *my_scrollport_fn,
+			  tabport_fn			=>  *my_tabport_fn,
+			  frame_fn			=>  *my_frame_fn,
+			  widget_fn			=>  *my_widget_fn,
+			  guiplan_fn			=>  *my_guiplan_fn,
+			  #
+			  topwindow_info_fn		=>  *my_topwindow_info_fn,
+			  subwindow_info_fn		=>  *my_subwindow_info_fn,
+			  guipane_fn			=>  *my_guipane_fn,
+			  #
+			  gp_row_fn			=>  *my_gp_row_fn,
+			  gp_col_fn			=>  *my_gp_col_fn,
+			  gp_grid_fn			=>  *my_gp_grid_fn,
+			  gp_mark_fn			=>  *my_gp_mark_fn,
+			  gp_row'_fn			=>  *my_gp_row'_fn,
+			  gp_col'_fn			=>  *my_gp_col'_fn,
+			  gp_grid'_fn			=>  *my_gp_grid'_fn,
+			  gp_mark'_fn			=>  *my_gp_mark'_fn,
+			  gp_scrollport_fn		=>  *my_gp_scrollport_fn,
+			  gp_tabport_fn			=>  *my_gp_tabport_fn,
+			  gp_frame_fn			=>  *my_gp_frame_fn,
+			  gp_widget_fn			=>  *my_gp_widget_fn
+			};
+		    };
+
+		options =  process_options  options;
+
+
+		fun do_gp_widget (gp_widget: Gp_Widget_Type):  Void
+		    =
+		    case gp_widget
+			#
+			ROW (arg:	Gp_Row)
+			    =>
+			    {	arg -> (row:  List(Gp_Widget_Type));
+				#
+				apply  do_gp_widget  row;
+
+				options.gp_row_fn  arg;
+			    };
+
+			COL (arg:	Gp_Col)
+			    =>
+			    {	arg -> (col:  List(Gp_Widget_Type));
+				#
+				apply  do_gp_widget  col;
+
+				options.gp_col_fn  arg;
+			    };
+
+			GRID (arg:	Gp_Grid)
+			    =>
+			    {	arg -> (grid:		List(List(Gp_Widget_Type)));
+				#
+				apply   do_gp_widgets  grid
+					where
+					    fun do_gp_widgets (widgets: List(Gp_Widget_Type))
+						=
+						apply  do_gp_widget  widgets;
+					end;
+
+				options.gp_grid_fn  arg;
+			    };
+
+			MARK (arg:	Gp_Mark)
+			    =>
+			    {	arg -> (widget:		Gp_Widget_Type);
+				#
+				do_gp_widget  widget;
+
+				options.gp_mark_fn  arg;
+			    };
+
+			ROW' (arg:	Gp_Row')
+			    =>
+			    {   arg ->  ( id:		Id,
+					  widgets:	List(Gp_Widget_Type)
+					);
+				#
+				apply  do_gp_widget  widgets;
+
+				options.gp_row'_fn  arg;
+			    };
+
+			COL' (arg:	Gp_Col')
+			    =>
+			    {   arg ->  ( id:		Id,
+					  widgets:	List(Gp_Widget_Type)
+					);
+				#
+				apply  do_gp_widget  widgets;
+
+				options.gp_col'_fn  arg;
+			    };
+
+			GRID' (arg:	Gp_Grid')
+			    =>
+			    {	arg ->  ( id:		Id,
+					  grid:		List(List(Gp_Widget_Type))
+					);
+				#
+				apply   do_gp_widgets  grid
+					where
+					    fun do_gp_widgets (widgets: List(Gp_Widget_Type))
+						=
+						apply  do_gp_widget  widgets;
+					end;
+
+				options.gp_grid'_fn  arg;
+			    };
+
+			MARK' (arg:	Gp_Mark')
+			    =>
+			    {	arg ->  ( id:			Id,
+					  doc:			String,
+					  widget:		Gp_Widget_Type
+					);
+				#
+				do_gp_widget  widget;
+
+				options.gp_mark'_fn  arg;
+			    };
+
+			SCROLLPORT (arg:  Gp_Scrollport)
+			    =>
+			    {	arg ->  { scroller_callback:	Scroller_Callback,
+					  pixmap_size:		g2d::Size,								# Size of pixmap visible in scrollport.
+					  widget:		Gp_Widget_Type								# Widget-tree providing content visible in scrollport -- will be rendered onto pixmap.
+					};
+
+				options.gp_scrollport_fn  arg;
+			    };
+
+			TABPORT (arg:  Gp_Tabport)
+			    =>
+			    {	arg ->  ( tab_picker_callback:	Tab_Picker_Callback,
+					  tab:			Gp_Widget_Type,
+					  tabs:			List( Gp_Widget_Type )							# 
+					);
+
+				apply  do_gp_widget  (tab ! tabs);
+
+				options.gp_tabport_fn  arg;
+			    };
+
+			FRAME (arg:  Gp_Frame)
+			    =>
+			    {   arg ->  ( frame_options:	List(Frame_Option),
+					  gp_widget:		Gp_Widget_Type
+					);
+
+				do_gp_widget  gp_widget;
+
+				options.gp_frame_fn  arg;
+			    };
+
+			WIDGET (arg:	Gp_Widget)
+			    =>
+			    {   arg ->  (
+					  widget:		Widget_Start_Fn
+					);
+				#
+				options.gp_widget_fn  arg;
+			    };
+
+			OBJECTSPACE (arg:	Gp_Objectspace)
+			    =>
+			    {   arg ->  ( objectspace_options:	List( Objectspace_Option ),
+					  objects:		List( Gp_Object )
+					);
+
+				# Eventually we'll have to do the full subrecursion here but for the moment none of that stuff is really operational.
+			    };
+
+			SPRITESPACE   (arg:	Gp_Spritespace)
+			    =>
+			    {   arg ->  ( spritesapce_options:	List( Spritespace_Option ),
+					  sprites:		List( Gp_Sprite )
+					);
+
+				# Eventually we'll have to do the full subrecursion here but for the moment none of that stuff is really operational.
+			    };
+
+			NULL_WIDGET
+			    =>
+			    {
+			    };
+		    esac;
+
+
+		fun do_xi_widget (xi_widget: Xi_Widget_Type)
+		    =
+		    case xi_widget
+			#
+			XI_ROW (arg:	Xi_Row)
+			    =>
+			    {   arg -> 	{ id, widgets };
+				#
+				apply  do_xi_widget  widgets;
+
+				options.row_fn  arg;
+			    };
+
+			XI_COL (arg:	Xi_Col)
+			    =>
+			    {   arg -> 	{ id, widgets };
+				#
+				apply  do_xi_widget  widgets;
+
+				options.row_fn  arg;
+			    };
+
+
+			XI_GRID (arg:	Xi_Grid)
+			    =>
+			    {   arg ->  { id:		Id,
+					  widgets:	List( List( Xi_Widget_Type ))
+					};
+				#
+				apply   do_widgets widgets
+					where
+					    fun do_widgets (widgets: List(Xi_Widget_Type))
+						=
+						apply  do_xi_widget  widgets;
+					end;
+
+				options.grid_fn  arg;
+			    };
+
+			XI_MARK (arg:	Xi_Mark)
+			    =>
+			    {   arg ->  { id:		Id,
+					  doc:		String,
+					  widget:	Xi_Widget_Type
+					};
+				#
+				do_xi_widget  widget;
+
+				options.mark_fn  arg;
+			    };
+
+			XI_SCROLLPORT (arg:	Xi_Scrollport)
+			    =>
+			    {   arg ->    { id:				Id,
+					    xi_widget:			Xi_Widget_Type									# Tree of widgets partially visible in scrollport.
+					  };
+
+				do_xi_widget  xi_widget;
+
+				options.scrollport_fn  arg;
+			    };
+
+			XI_TABPORT (arg:	Xi_Tabport)
+			    =>
+			    {   arg ->  { id:				Id,
+					  widgets:			List( Xi_Widget_Type )
+					};
+
+				apply  do_xi_widget  widgets;
+
+				options.tabport_fn  arg;
+			    };
+
+			XI_FRAME (arg:		Xi_Frame)
+			    =>
+			    {   arg -> 	{ id:			Id,
+					  frame_widget:		Xi_Widget_Type,									# Widget which will draw the frame surround.
+					  widget:		Xi_Widget_Type									# Widget-tree to draw surrounded by frame.
+					};
+
+				do_xi_widget  frame_widget;
+				do_xi_widget  widget;
+
+				options.frame_fn  arg;
+			    };
+
+			XI_WIDGET (arg:		Xi_Widget)
+			    =>
+			    {   arg -> 	{ widget_id:		iuw::Id,
+					  widget_layout_hint:	Widget_Layout_Hint,
+					  doc:			String
+					};
+
+				options.widget_fn  arg;
+			    };
+
+			XI_OBJECTSPACE (arg:	Xi_Objectspace)
+			    =>
+			    {   arg -> { guiboss_to_objectspace_id:	Id,	
+					 xi_objects:			List(Xi_Object)
+				       };
+				#
+				# Eventually we'll have to do the full subrecursion here but for the moment none of that stuff is really operational.
+			    };
+
+			XI_SPRITESPACE (arg:	Xi_Spritespace)
+			    =>
+			    {   arg ->  { guiboss_to_spritespace_id:	Id,	
+					  xi_sprites:			List(Xi_Sprite)
+					};
+				#
+				# Eventually we'll have to do the full subrecursion here but for the moment none of that stuff is really operational.
+			    };
+
+			XI_NULL_WIDGET
+			    =>
+			    {
+			    };
+
+			XI_GUIPLAN (arg:	Guiplan)
+			    =>
+			    {   arg -> (gp_widget:	Gp_Widget_Type);
+				#
+				do_gp_widget  gp_widget;
+
+				options.guiplan_fn  arg;
+			    };
+		    esac;
+
+		fun do_xi_guipane (arg:  Xi_Guipane)
+		    =
+		    {   arg ->	  { id:				Id,
+				    guiboss_to_widgetspace_id: 	Id,
+				    xi_widget:			Xi_Widget_Type									# The widget (or more commonly, tree of widgets) managed by the gui-tree's toplevel widgetspace-imp.
+				  };
+
+			do_xi_widget xi_widget;
+
+			options.guipane_fn  arg;
+		    };
+
+		fun do_xi_subwindow_info  (arg:  Xi_Subwindow_Info)
+		    =
+		    {   arg -> 	  { id:				Id,										# From (*Subwindow_Info.pixmap).id
+				    guipane:			Null_Or( Xi_Guipane ),
+				    popups:			List(Xi_Subwindow_Data)								# 
+				  };
+
+			case guipane
+			    #
+			    THE guipane =>  do_xi_guipane  guipane;
+			    NULL	=>  ();
+			esac;
+
+			apply do_info  popups
+			    where
+				fun do_info  (XI_SUBWINDOW_DATA  xi_subwindow_info)
+				    =
+				    do_xi_subwindow_info  xi_subwindow_info;
+			    end;
+
+			options.subwindow_info_fn  arg;
+		    };
+
+		fun do_topwindows (topwindows:	im::Map( Xi_Topwindow_Info ))
+		    =
+		    apply do_topwindow (im::vals_list topwindows)
+			where
+			    fun do_topwindow (arg:	 Xi_Topwindow_Info)
+				=
+				{   arg ->  { id:			Id,										# From topwindow_info.guiboss_to_topwindow.id
+					      subwindow_info:		Null_Or( Xi_Subwindow_Data )
+					    };
+
+				    case subwindow_info
+					#
+					THE (XI_SUBWINDOW_DATA  xi_subwindow_info)
+					    => 
+					    do_xi_subwindow_info  xi_subwindow_info;
+
+					NULL => ();
+				    esac;
+
+				    options.topwindow_info_fn  arg;
+				};
+			end;
+	    end;
+
+
+
+
+	fun pprint_subwindow_info (subwindow_info: Subwindow_Data)
+	    =
+	    pp::with_standard_prettyprint_mill
+		#
+		(err::default_plaint_sink ())	[]
+		#
+		(\\ pp:   pp::Prettyprint_Mill
+		    =
+		    do_subwindow_info subwindow_info
+		    where
+
+			fun do_guipane
+			      (
+				{ id:				Id,
+				  rg_widget:			Rg_Widget_Type,						# The widget (or more commonly, tree of widgets) managed by the gui-tree's toplevel widgetspace-imp.
+				  guiboss_to_widgetspace: 	Guiboss_To_Widgetspace,
+				  widget_to_guiboss:	 	Widget_To_Guiboss,
+				  space_to_gui:			Space_To_Gui,
+				  topwindow:			gtg::Guiboss_To_Topwindow,				# The topwindow on which to draw our widgets.
+				  subwindow_info:		Subwindow_Data,						# Holds toplevel SUBWINDOW_DATA for gui.
+				  needs_layout_and_redraw:	Ref( Bool )
+				}
+				:			Guipane
+			      )
+			    =
+			    {   pp.box {.
+				    pp.lit  "GUIPANE {";
+				    pp.ind 2;
+				    pp.txt " ";
+
+				    pp.lit  (sprintf "id => %d" (id_to_int id));
+				    pp.endlit ",";
+				    
+				    pp.lit  (sprintf "guiboss_to_widgetspace.id => %d" (id_to_int guiboss_to_widgetspace.id));
+				    pp.endlit ",";
+				    
+				    pp.lit  (sprintf "topwindow => { id => %d, subwindow_or_view:Gadget_To_Rw_Pixmap => { id => %d, size => %s... }" (id_to_int topwindow.id) (id_to_int topwindow.subwindow_or_view.id) (g2j::size_to_string topwindow.subwindow_or_view.size));
+				    pp.endlit ",";
+
+				    pp.box {.
+					pp.lit  "rg_widget => ";
+					do_rg_widget rg_widget;
+				    };
+				    pp.endlit ",";
+
+				    pp.lit  (sprintf "subwindow_info => %s" (subwindow_info_id subwindow_info));
+				    pp.ind 0;
+				    pp.txt " ";
+				    pp.lit "}";
+				};
+				pp.newline();
+			    }	
+
+			also
+			fun do_subwindow_info (bp: Subwindow_Data)
+			    =
+			    case bp
+				#
+			        SUBWINDOW_DATA  {   id:			Id,									# 
+						    guipane:		Ref( Null_Or( Guipane ) ),						# 
+						    pixmap:		Ref( g2p::Gadget_To_Rw_Pixmap ),					# Main backing pixmap for this running gui.
+						    popups:		Ref( List(Subwindow_Data) ),						# These will all be SUBWINDOW_DATA, so 'Ref(List(Subwindow_Data))' would be a better type here.
+						    parent:		Null_Or( Subwindow_Data ),						# For popups this points to the parent; for the original non-popup window it is NULL.
+						    stacking_order:	Int,									# Assigned in increasing order starting at 1;  these determine who overlies who visually on the screen in case of overlaps. (Popups must be entirely within parent, but sibling popups can overlap.)
+						    upperleft:		Ref( g2d::Point )							# If we have a parent, this gives our location on it. Note that pixmap.size gives our size.
+						  }
+				    =>
+				    {
+					pp.box' 0 -1 {.
+					    pp.lit  "SUBWINDOW_INFO {";
+					    pp.ind 2;
+					    pp.txt " ";
+
+					    pp.lit  (sprintf "id => %d" (id_to_int id));
+					    pp.endlit ",";
+
+					    pp.lit  (sprintf "stacking_order => %d" stacking_order);
+					    pp.endlit ",";
+
+					    pp.lit  (sprintf "upperleft => %s" (g2j::point_to_string *upperleft));
+					    pp.endlit ",";
+
+					    pp.lit  (sprintf "pixmap.id => %d" (id_to_int (*pixmap).id));
+					    pp.endlit ",";
+
+					    case *guipane
+						#
+						NULL   =>  pp.lit "running_site => NULL";
+						THE rg =>  do_guipane rg;
+					    esac;
+					    pp.endlit ",";
+
+					    case parent
+						NULL  => pp.lit  "parent => NULL";
+						THE p => pp.lit  (sprintf "parent => <<< %s >>>" (subwindow_info_id p));
+					    esac;
+					    pp.endlit ",";
+
+					    pp.lit  (sprintf "#popups => %d" (list::length *popups));
+					    pp.endlit ",";
+
+					    pp::seqx
+						{.   pp.endlit ",";   pp.txt " ";   }	# Inter-element separator.
+						do_subwindow_info			# Print one list element.
+						*popups;				# List of elements.
+
+					    pp.ind 0;
+					    pp.txt " ";
+					    pp.lit "}";
+					};
+					pp.newline();
+				    };
+			        #	
+			    esac
+
+ 			also
+			fun do_widgetspace_arg  (widgetspace_arg:	Widgetspace_Arg)
+			    =
+			    {
+				pprint_widgetspace_arg  pp  widgetspace_arg;
+				pp.newline();
+			    }
+
+			also
+			fun do_rg_widget  (rg_widget:	Rg_Widget_Type)
+			    =
+			    case rg_widget
+				#
+			        RG_ROW	{ id:			Id,
+					  widgets:		List( Rg_Widget_Type ),
+					  widget_layout_hint:	Ref( Widget_Layout_Hint ),
+					  site:			Ref(g2d::Box)							# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					}
+				    =>
+				    {
+					pp.box' 0 -1 {.
+					    pp.lit  "RG_ROW {";
+					    pp.ind 2;
+					    pp.txt " ";
+					    pp.lit (sprintf "site => %s" (g2j::box_to_string *site));
+					    pp.endlit ",";
+
+					    fun do_widget (rg_widget: Rg_Widget_Type)
+						=
+						pp.box {.
+						    do_rg_widget		rg_widget;
+						    pp.endlit ",";
+						    pp.txt " ";
+						};
+
+					    pp::listx pp
+						do_widget				# Print one list element.
+						""					# Title.
+						widgets;				# List of elements.
+
+
+					    pp.ind 0;
+					    pp.txt " ";
+					    pp.lit "}";
+					};
+				    };
+
+
+			        RG_COL	{ id:			Id,
+					  widgets:		List( Rg_Widget_Type ),
+					  widget_layout_hint:	Ref( Widget_Layout_Hint ),
+					  site:			Ref(g2d::Box)							# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					}
+				    =>
+				    {
+					pp.box' 0 -1 {.
+					    pp.lit  "RG_COL {";
+					    pp.ind 2;
+					    pp.txt " ";
+					    pp.lit (sprintf "site => %s" (g2j::box_to_string *site));
+					    pp.endlit ",";
+
+					    fun do_widget (rg_widget: Rg_Widget_Type)
+						=
+						pp.box {.
+						    do_rg_widget  rg_widget;
+						    pp.endlit ",";
+						    pp.txt " ";
+						};
+
+					    pp::listx pp
+						do_widget				# Print one list element.
+						""					# Title.
+						widgets;				# List of elements.
+
+					    pp.ind 0;
+					    pp.txt " ";
+					    pp.lit "}";
+					};
+				    };
+
+
+			        RG_GRID	{ id:			Id,
+					  widgets:		List( List( Rg_Widget_Type ) ),
+					  widget_layout_hint:	Ref( Widget_Layout_Hint ),
+					  site:			Ref(g2d::Box)								# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					}
+				    =>
+				    {
+					pp.box' 0 -1 {.
+					    pp.lit  "RG_GRID {";
+					    pp.ind 2;
+					    pp.txt " ";
+					    pp.lit (sprintf "site => %s" (g2j::box_to_string *site));
+					    pp.endlit ",";
+
+					    pp::listx pp
+						do_row											# Print one list element.
+						""											# Title.
+						widgets											# List of elements.
+					    where
+						fun do_row (widgets:	List(Rg_Widget_Type))
+						    =
+						    pp::listx pp
+							do_widget									# Print one list element.
+							""										# Title.
+							widgets										# List of elements.
+						    where
+							fun do_widget (rg_widget:	Rg_Widget_Type)
+							    =
+							    pp.box {.
+								do_rg_widget  rg_widget;
+								pp.endlit ",";
+								pp.txt " ";
+							    };
+						    end;
+					    end;
+
+
+					    pp.ind 0;
+					    pp.txt " ";
+					    pp.lit "}";
+					};
+				    };
+
+
+			        RG_MARK	{ id:			Id,
+					  doc:			String,
+					  widget:		Rg_Widget_Type,
+					  widget_layout_hint:	Ref( Widget_Layout_Hint ),
+					  site:			Ref(g2d::Box)								# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					}
+				    =>
+				    {
+					pp.box' 0 -1 {.
+					    pp.lit  (sprintf "RG_MARK id=%d doc='%s' {" (id_to_int id) doc);
+					    pp.ind 2;
+					    pp.txt " ";
+					    pp.lit (sprintf "site => %s" (g2j::box_to_string *site));
+					    pp.endlit ",";
+
+					    do_rg_widget  widget;
+
+					    pp.ind 0;
+					    pp.txt " ";
+					    pp.lit "}";
+					};
+				    };
+
+
+			        RG_SCROLLPORT
+					    { id:		Id,									# Here we provide support for widgets visible through a scrollable scrollport.  Actually providing scrollbars happens at a higher level; here we handle pixmap state maintenance and redraw support.
+					      upperleft:	Ref(g2d::Point),							# Upperleft of view's subwindow_or_view in scrollport coordinates, used for scrolling pixmap in scrollport.
+					      scroller:		Ref(Scroller),								# Client-code interface for controlling view_upperleft. This is a ref to resolve mutual recursion issues at creation, not because we expect to update it.
+					      callback:		Scroller_Callback,							# This is how we pass our Scroller to app client code, which basically lets it set 'pixmap_upperleft' above.
+					      site:		Ref(g2d::Box),								# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+
+					      rg_widget:	Ref( Rg_Widget_Type ),							# Widget-tree visible in this viewable, which gets rendered onto 'pixmap' here.
+					      #												# rg_widget is a Ref not because we intend to change it, but to work around a technical difficulty in guiboss-imp.pkg:do_pg_widget:PG_SCROLLPORT where  viewable_data and rg_widget each want to be created first.
+					      pixmap:		g2p::Gadget_To_Rw_Pixmap,						# 
+																	# 
+																	#		                      
+					      parent_subwindow_or_view:	Subwindow_Or_View						# This can be a SCROLLABLE_INFO if we have a scrollport located on a scrollport.
+					    }
+				    =>
+				    {
+					pp.lit  "RG_SCROLLPORT { ... }";
+					pp.newline();
+				    };
+
+				RG_TABPORT												# Here we provide support for selection between alternate views in scrollport.  Actually providing tabs happens at a higher level; here we handle pixmap state maintenance and redraw support.
+					{ id:			Id,
+					  tabs:			List( Tabbable_Info ),							# Each record holds one of the alternate tabs which may be made visible in the tabport.  This list is guaranteed to be non-empty.
+					  visible_tab:		Ref ( Int ),								# Which of 'tabs' is currently visible?  This refcell references one element from 'tabs';  it supports switching between the tabbed views.
+
+					  callback:		Tab_Picker_Callback,							# This is how we pass our Tab_Picker to app client code, which basically lets it set 'visible_tab' above.
+					  site:			Ref(g2d::Box)								# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					}
+				    =>
+				    {
+					pp.lit  "RG_TABPORT { ... }";
+					pp.newline();
+				    };
+
+				RG_FRAME  _
+				    =>
+				    {
+					pp.lit  "RG_FRAME { ... }";
+					pp.newline();
+				    };
+
+			        RG_WIDGET  {												# An actual leaf widget like an arrowbutton or label or text-entry box. These are all customizations of src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp.pkg
+					     guiboss_to_widget:			Guiboss_To_Widget,					# The command end of a port for communication to a widget-imp from a					src/lib/x-kit/widget/gui/guiboss-imp.pkg
+					     shutdown_oneshot:			Once( Void ),						# The widget-imp will fire this one-shot when shutting down due to die(). Used by guiboss-imp.
+					     site:				Ref(g2d::Box)						# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					   }
+				    =>
+				    {
+					pp.box {.
+					    pp.lit (sprintf "RG_WIDGET guiboss_to_widget.doc=\"%s\" {"  guiboss_to_widget.doc);
+
+					    pp.lit (sprintf "guiboss_to_widget.id => %d" (iuw::id_to_int guiboss_to_widget.id));
+					    pp.endlit ",";
+
+					    pp.lit (sprintf "site => %s" (g2j::box_to_string *site));
+					    pp.lit  " }";
+					};
+					pp.newline();
+				    };
+
+
+			        RG_OBJECTSPACE  { guiboss_to_objectspace:	Guiboss_To_Objectspace,
+						  object_to_objectspace:	o2c::Object_To_Objectspace,				# 
+						  objects:			List( Rg_Object_Type ),					# The list of objects to be drawn. These can be placed arbitrarily, including possible overlaps.
+						  site:				Ref(g2d::Box)						# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+						}
+				    =>
+				    {
+					pp.lit  "RG_OBJECTSPACE";
+#					do_objectspace  objectspace;
+					pp.newline();
+				    };
+
+			       RG_SPRITESPACE { guiboss_to_spritespace:	Guiboss_To_Spritespace,
+						sprite_to_spritespace:	s2b::Sprite_To_Spritespace,					# 
+						sprites:		List( Rg_Sprite_Type ),						# The list of widgets to be drawn on the spritespace. These can be placed arbitrarily.
+						site:			Ref(g2d::Box)							# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					      }
+				    =>
+				    {
+					pp.lit  "RG_SPRITESPACE";
+#					do_spritespace  spritespace;
+					pp.newline();
+				    };
+			      
+			        RG_NULL_WIDGET
+				    =>
+				    {
+					pp.lit  "RG_NULL_WIDGET";
+					pp.newline();
+				    };
+			    esac;
+		    end
+		);
+
+
+	fun make_base_subwindow_data													# Make the base SUBWINDOW_DATA instance for a GUI. (There will be an additional SUBWINDOW_DATA for each popup's Guipane.)
+		#
+		(pixmap:	g2p::Gadget_To_Rw_Pixmap)
+		#
+		: Subwindow_Data
+	    =
+	    SUBWINDOW_DATA
+	      { id		=>  issue_unique_id (),
+		stacking_order	=>  1,
+		guipane		=>  REF NULL,
+		pixmap		=>  REF pixmap,												# Main backing pixmap for this running gui.
+		popups		=>  REF ([]: List( Subwindow_Data)),
+		parent		=>  NULL: Null_Or( Subwindow_Data ),
+		upperleft	=>  REF { row => 0, col => 0 }
+	      };
+
+
+
+	fun pprint_gadget_imp_info (gadget_imp_info: Gadget_Imp_Info)
+	    =
+	    pp::with_standard_prettyprint_mill
+		#
+		(err::default_plaint_sink ())	[]
+		#
+		(\\ pp:   pp::Prettyprint_Mill
+		    =
+		    do_gadget_imp_info gadget_imp_info
+		    where
+			fun do_gadget_imp_info
+			      (
+				{
+				  site:				Site,										# Where to draw this gadget, in topwindow coordinates.
+				  subwindow_or_view:		Ref(Subwindow_Or_View),
+				  #
+				  guiboss_to_gadget:		Guiboss_To_Gadget,								# We use this to make requests of visible gadgets.
+				  gadget_mode:			Ref( Gadget_Mode ),
+				  #
+				  needs_redraw_request:		Ref( Bool ),									# 
+				  sent__initialize_gadget:	Ref( Bool ),
+				  #
+				  point_in_gadget:		Ref( Null_Or( g2d::Point -> Bool )),						# Optional fn to decide if a mouseclick actually hit the gadget itself, or just somewhere near it in the screenspace assigned to it.
+				  #
+				  pixmaps:			Ref( im::Map( g2p::Gadget_To_Rw_Pixmap )),					# This tracks all X-server pixmaps created by this particular gadget. We need this so that we can reliably recycle them all when killing the gadget -- otherwise we're leaking memory in the X server.
+				  #
+				  at_frame_n:			Ref (	Null_Or									# Call gadget.wakeup once, during frame N, and pass wakeup_fn in call. NULL means this wakeup is off.
+									  { at_frame:	Int,
+									    wakeup_fn:	Wakeup_Arg -> Void
+									  }
+								    ),
+				  every_n_frames:		Ref (	Null_Or									# Call gadget.wakeup every N frames,       and pass wakeup_fn in call. NULL means this wakeup is off.
+									  { n:		Int,
+									    next:	Ref(Int),
+									    wakeup_fn:	Wakeup_Arg -> Void
+									  }
+								    )
+
+				}:				Gadget_Imp_Info
+			      )
+			    =
+			    {   pp.box {.
+				    pp.lit  "Gadget_Imp_Info {";
+				    pp.ind 2;
+				    pp.txt " ";
+
+				    pp.lit  (sprintf "site => %s" (g2j::box_to_string *site));
+				    pp.endlit ",";
+
+				    pp.lit  (sprintf "subwindow_or_view => %s" (subwindow_or_view_id *subwindow_or_view));
+				    pp.endlit ",";
+				    
+				    pp.lit (sprintf "id => %d" (iuw::id_to_int guiboss_to_gadget.id));
+
+				    pp.ind 0;
+				    pp.txt " ";
+				    pp.lit "}";
+				};
+				pp.newline();
+			    };	
+		    end
+		);
+
+    };
+end;
+
+##########################################################################
+# Note[1]
+#
+# We need a NULL_WIDGET but not a NULL_SPRITE or NULL_OBJECT
+# because Guiplans are required arguments to guiboss-imp and
+# Gp_Widget_Type is a required component of a Guiplan, but
+# sprite and object spaces are always optional.
+
+
+##########################################################################
+# Note[2]
+#
+#           "Simple  things should be simple.
+#            Complex things should be possible."
+#                             -- Alan Kay
+#
+# The purpose of the Rg_Widget_Type facilities generally and
+# of RG_ROW RG_COL RG_GRID specifically is to make simple GUI
+# layout problems simple.
+#
+# In general, complex widget layout issues should be handled by
+# writing custom code which lays out widgets (etc) on a object,
+# not by cluttering Rg_Widget_Type with special cases.
+#
+# Trying to make complex things simple will always fail;
+# the result will be instead to make simple things complex.
+
+
+
+##########################################################################
+#   The following is support for outline-minor-mode in emacs.		 #
+#  ^C @ ^T hides all Text. (Leaves all headings.)			 #
+#  ^C @ ^A shows All of file.						 #
+#  ^C @ ^Q Quickfolds entire file. (Leaves only top-level headings.)	 #
+#  ^C @ ^I shows Immediate children of node.				 #
+#  ^C @ ^S Shows all of a node.						 #
+#  ^C @ ^D hiDes all of a node.						 #
+#  ^HFoutline-mode gives more details.					 #
+#  (Or do ^HI and read emacs:outline mode.)				 #
+#									 #
+# Local variables:							 #
+# mode: outline-minor							 #
+# outline-regexp: "[{ \t]*\\(fun \\|### \\)"		 		 #
+# End:									 #
+##########################################################################
+
+
+## Original code by Jeff Prothero Copyright (c) 2014-2014,
+## released per terms of SMLNJ-COPYRIGHT.
+
