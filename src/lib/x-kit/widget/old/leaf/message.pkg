@@ -13,7 +13,7 @@
 stipulate
     include package   threadkit;		# threadkit		is from   src/lib/src/lib/thread-kit/src/core-thread-kit/threadkit.pkg
     #
-    package d3 =  three_d;			# three_d		is from   src/lib/x-kit/widget/lib/three-d.pkg
+    package d3 =  three_d;			# three_d		is from   src/lib/x-kit/widget/old/lib/three-d.pkg
     package wg =  widget;			# widget		is from   src/lib/x-kit/widget/old/basic/widget.pkg
     package wa =  widget_attribute_old;		# widget_attribute_old	is from   src/lib/x-kit/widget/old/lib/widget-attribute-old.pkg
     package wt =  widget_types;			# widget_types		is from   src/lib/x-kit/widget/old/basic/widget-types.pkg
@@ -64,9 +64,9 @@ herein
 			  #
 			  (i, curx);
 		      else 
-			  c = string::get (text, i);
-
-			  if (c == '\n' )
+			  c = string::get_byte_as_char (text, i);
+			  #
+			  if (c == '\n')
 			      #
 			      (i, curx);
 			  else
@@ -137,7 +137,7 @@ herein
 			#
 			(maxw, txtht);
 
-		    elif (string::get (text, i) == '\n' )
+		    elif (string::get_byte_as_char (text, i) == '\n' )
 			#
 			get_size (i+1, maxw, txtht+font_high, width);
 
@@ -150,7 +150,7 @@ herein
 
 			fun skip_ws i
 			    =
-			    {   c = string::get (text, i);
+			    {   c = string::get_byte_as_char (text, i);
 				#
 				if   (c == '\n')         i+1;
 				elif (char::is_space c)  skip_ws (i+1);
@@ -335,7 +335,7 @@ herein
 
 		fun do_text (y, i)
 		    = 
-		    if (string::get (text, i) == '\n')
+		    if (string::get_byte_as_char (text, i) == '\n')
 			#
 			do_text (y+font_high, i+1);
 		    else
@@ -359,7 +359,7 @@ herein
 
 			fun skip_ws i
 			    =
-			    {   c = string::get (text, i);
+			    {   c = string::get_byte_as_char (text, i);
 				#
 				if   (c == '\n')         i+1;
 				elif (char::is_space c)  skip_ws (i+1);
@@ -575,5 +575,5 @@ end;
 
 
 ## COPYRIGHT (c) 1994 by AT&T Bell Laboratories  See SMLNJ-COPYRIGHT file for details.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

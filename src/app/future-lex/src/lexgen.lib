@@ -13,7 +13,7 @@ LIBRARY_EXPORTS
 LIBRARY_COMPONENTS
 
 	$ROOT/src/lib/std/standard.lib
-	$ROOT/src/lib/prettyprint/big/prettyprint-mill.lib
+	$ROOT/src/lib/prettyprint/big/prettyprinter.lib
 
 	frontends/lex-spec.pkg
 
@@ -43,5 +43,5 @@ LIBRARY_COMPONENTS
 # John Reppy (http://www.cs.uchicago.edu/~jhr)
 # Aaron Turon (adrassi@gmail.com)
 # All rights reserved.
-# Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+# Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 # released per terms of SMLNJ-COPYRIGHT.

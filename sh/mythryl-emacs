@@ -1,0 +1,125 @@
+#!/usr/bin/mythryl
+
+use "src/lib/x-kit/xkit.lib";
+
+stipulate
+    include package   makelib::scripting_globals;
+    include package   threadkit;				# threadkit				is from   src/lib/src/lib/thread-kit/src/core-thread-kit/threadkit.pkg
+    #
+    package awx =  guishim_imp_for_x;				# guishim_imp_for_x			is from   src/lib/x-kit/widget/xkit/app/guishim-imp-for-x.pkg
+    package dbx =  sprite_theme_imp;				# sprite_theme_imp			is from   src/lib/x-kit/widget/xkit/theme/sprite/default/default-sprite-theme-for-x.pkg
+    package dcx =  object_theme_imp;				# object_theme_imp			is from   src/lib/x-kit/widget/xkit/theme/object/default/default-object-theme-for-x.pkg
+    package dtx =  widget_theme_imp;				# widget_theme_imp			is from   src/lib/x-kit/widget/xkit/theme/widget/default/default-widget-theme-for-x.pkg
+    package g2d =  geometry2d;					# geometry2d				is from   src/lib/std/2d/geometry2d.pkg
+    package gq  =  guiboss_imp;					# guiboss_imp				is from   src/lib/x-kit/widget/gui/guiboss-imp.pkg
+    package gt  =  guiboss_types;				# guiboss_types				is from   src/lib/x-kit/widget/gui/guiboss-types.pkg
+    package gtg =  guiboss_to_guishim;				# guiboss_to_guishim			is from   src/lib/x-kit/widget/theme/guiboss-to-guishim.pkg
+    package r8  =  rgb8;					# rgb8					is from   src/lib/x-kit/xclient/src/color/rgb8.pkg
+    package rgb =  rgb;						# rgb					is from   src/lib/x-kit/xclient/src/color/rgb.pkg
+    package ted =  texteditor;					# texteditor				is from   src/lib/x-kit/widget/edit/texteditor.pkg
+
+    package oim =  object_imp;					# object_imp				is from   src/lib/x-kit/widget/xkit/theme/widget/default/look/object-imp.pkg
+    package sim =  sprite_imp;					# sprite_imp				is from   src/lib/x-kit/widget/xkit/theme/widget/default/look/sprite-imp.pkg
+    package wim =  widget_imp;					# widget_imp				is from   src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp.pkg
+
+    package rgx =  run_guiplan_on_x;				# run_guiplan_on_x			is from   src/lib/x-kit/widget/gui/run-guiplan-on-x.pkg
+
+    nb =  log::note_on_stderr;					# log					is from   src/lib/std/src/log.pkg
+
+
+    sample_text
+	=
+	"=====================================\t# This is a poem by\n\
+	\#\t\t\t\t\t# Samuel Taylor Coleridge\n\
+	\In Xanadu did Kubla Khan\n\
+	\A stately pleasure-dome decree:\n\
+	\Where Alph, the sacred river, ran\n\
+	\Through caverns measureless to man\n\
+	\\tDown to a sunless sea.\n\
+	\So twice five miles of fertile ground\n\
+	\With walls and towers were girdled round;\n\
+	\And there were gardens bright with sinuous rills,\n\
+	\Where blossomed many an incense-bearing tree;\n\
+	\And here were forests ancient as the hills,\n\
+	\Enfolding sunny spots of greenery.\n\
+	\\n\
+	\But oh! that deep romantic chasm which slanted\n\
+	\Down the green hill athwart a cedarn cover!\n\
+	\A savage place! as holy and enchanted\n\
+	\As e'er beneath a waning moon was haunted\n\
+	\By woman wailing for her demon-lover!\n\
+	\And from this chasm, with ceaseless turmoil seething,\n\
+	\As if this earth in fast thick pants were breathing,\n\
+	\A mighty fountain momently was forced:\n\
+	\Amid whose swift half-intermitted burst\n\
+	\Huge fragments vaulted like rebounding hail,\n\
+	\Or chaffy grain beneath the thresher's flail:\n\
+	\And 'mid these dancing rocks at once and ever\n\
+	\It flung up momently the sacred river.\n\
+	\Five miles meandering with a mazy motion\n\
+	\Through wood and dale the sacred river ran,\n\
+	\Then reached the caverns measureless to man,\n\
+	\And sank in tumult to a lifeless ocean;\n\
+	\And 'mid this tumult Kubla heard from far\n\
+	\Ancestral voices prophesying war!\n\
+	\   The shadow of the dome of pleasure\n\
+	\   Floated midway on the waves;\n\
+	\   Where was heard the mingled measure\n\
+	\   From the fountain and the caves.\n\
+	\It was a miracle of rare device,\n\
+	\A sunny pleasure-dome with caves of ice!\n\
+	\\n\
+	\   A damsel with a dulcimer\n\
+	\   In a vision once I saw:\n\
+	\   It was an Abyssinian maid\n\
+	\   And on her dulcimer she played,\n\
+	\   Singing of Mount Abora.\n\
+	\   Could I revive within me\n\
+	\   Her symphony and song,\n\
+	\   To such a deep delight 'twould win me,\n\
+	\That with music loud and long,\n\
+	\I would build that dome in air,\n\
+	\That sunny dome! those caves of ice!\n\
+	\And all who heard should see them there,\n\
+	\And all should cry, Beware! Beware!\n\
+	\His flashing eyes, his floating hair!\n\
+	\Weave a circle round him thrice,\n\
+	\And close your eyes with holy dread\n\
+	\For he on honey-dew hath fed,\n\
+	\And drunk the milk of Paradise.\n\
+	\\^A\^B\^C\^I\^K\n\
+	\And now for something completely different -- some test 16-bit UTF8 chars.\n\
+	\Depending on your font, you may see mostly boxes:\n\
+	\ĀāĂăĄąĆćĈĉĊċČčĎďĐđĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħĨĩĪīĬĭĮįİıĲĳĴĵĶķĸĹĺĻļĽľĿŀŁłŃńŅņŇňŉŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴŵŶŷŸŹźŻżŽžſ\n\
+	\ƀƁƂƃƄƅƆƇƈƉƊƋƌƍƎƏƐƑƒƓƔƕƖƗƘƙƚƛƜƝƞƟƠơƢƣƤƥƦƧƨƩƪƫƬƭƮƯưƱƲƳƴƵƶƷƸƹƺƻƼƽƾƿǀǁǂǃǄǅǆǇǈǉǊǋǌǍǎǏǐǑǒǓǔǕǖǗǘǙǚǛǜǝǞǟǠǡǢǣǤǥǦǧǨǩǪǫǬǭǮǯǰǱǲǳǴǵǶǷǸǹǺǻǼǽǾǿȀȁȂȃȄȅȆȇȈȉȊȋȌȍȎȏȐȑȒȓȔȕȖȗȘșȚțȜȝȞȟȠȡȢȣȤȥȦȧȨȩȪȫȬȭȮȯȰȱȲȳȴȵȶȷȸȹȺȻȼȽȾȿɀɁɂɃɄɅɆɇɈɉɊɋɌɍɎɏ\n\
+	\ɐɑɒɓɔɕɖɗɘəɚɛɜɝɞɟɠɡɢɣɤɥɦɧɨɩɪɫɬɭɮɯɰɱɲɳɴɵɶɷɸɹɺɻɼɽɾɿʀʁʂʃʄʅʆʇʈʉʊʋʌʍʎʏʐʑʒʓʔʕʖʗʘʙʚʛʜʝʞʟʠʡʢʣʤʥʦʧʨʩʪʫʬʭʮʯ\n\
+	\ʰʱʲʳʴʵʶʷʸʹʺʻʼʽʾʿˀˁ˂˃˄˅ˆˇˈˉˊˋˌˍˎˏːˑ˒˓˔˕˖˗˘˙˚˛˜˝˞˟ˠˡˢˣˤ˥˦˧˨˩˪˫ˬ˭ˮ˯˰˱˲˳˴˵˶˷˸˹˺˻˼˽˾˿\n\
+	\ͰͱͲͳʹ͵Ͷͷͺͻͼͽ;Ϳ΄΅Ά·ΈΉΊΌΎΏΐΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩΪΫάέήίΰαβγδεζηθικλμνξοπρςστυφχψωϊϋόύώϏϐϑϒϓϔϕϖϗϘϙϚϛϜϝϞϟϠϡϢϣϤϥϦϧϨϩϪϫϬϭϮϯϰϱϲϳϴϵ϶ϷϸϹϺϻϼϽϾϿ\n\
+	\ЀЁЂЃЄЅІЇЈЉЊЋЌЍЎЏАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюяѐёђѓєѕіїјљњћќѝўџѠѡѢѣѤѥѦѧѨѩѪѫѬѭѮѯѰѱѲѳѴѵѶѷѸѹѺѻѼѽѾѿҀҁ҂҃҄҅҆҇҈҉ҊҋҌҍҎҏҐґҒғҔҕҖҗҘҙҚқҜҝҞҟҠҡҢңҤҥҦҧҨҩҪҫҬҭҮүҰұҲҳҴҵҶҷҸҹҺһҼҽҾҿӀӁӂӃӄӅӆӇӈӉӊӋӌӍӎӏӐӑӒӓӔӕӖӗӘәӚӛӜӝӞӟӠӡӢӣӤӥӦӧӨөӪӫӬӭӮӯӰӱӲӳӴӵӶӷӸӹӺӻӼӽӾӿ\\n\
+	\ԱԲԳԴԵԶԷԸԹԺԻԼԽԾԿՀՁՂՃՄՅՆՇՈՉՊՋՌՍՎՏՐՑՒՓՔՕՖՙ՚՛՜՝՞ ՟աբգդեզէըթժիլխծկհձղճմյնշոչպջռսվտրցւփքօֆև։֊֍֎֏\n\
+	\ֿ׀ׁׂ׃ׅׄ׆ׇאבגדהוזחטיךכלםמןנסעףפץצקרשתװױײ׳״\n\
+	\℀℁ℂ℃℄℅℆ℇ℈℉ℊℋℌℍℎℏℐℑℒℓ℔ℕ№℗℘ℙℚℛℜℝ℞℟℠℡™℣ℤ℥Ω℧ℨ℩KÅℬℭ℮ℯℰℱℲℳℴℵℶℷℸℹ℺℻ℼℽℾℿ⅀⅁⅂⅃⅄ⅅⅆⅇⅈⅉ⅊⅋⅌⅍ⅎ⅏\n\
+	\⟰⟱⟲⟳⟴⟵⟶⟷⟸⟹⟺⟻⟼⟽⟾⟿⤀⤁⤂⤃⤄⤅⤆⤇⤈⤉⤊⤋⤌⤍⤎⤏⤐⤑⤒⤓⤔⤕⤖⤗⤘⤙⤚⤛⤜⤝⤞⤟⤠⤡⤢⤣⤤⤥⤦⤧⤨⤩⤪⤫⤬⤭⤮⤯⤰⤱⤲⤳⤴⤵⤶⤷⤸⤹⤺⤻⤼⤽⤾⤿⥀⥁⥂⥃⥄⥅⥆⥇⥈⥉⥊⥋⥌⥍⥎⥏⥐⥑⥒⥓⥔⥕⥖⥗⥘⥙⥚⥛⥜⥝⥞⥟⥠⥡⥢⥣⥤⥥⥦⥧⥨⥩⥪⥫⥬⥭⥮⥯⥰⥱⥲⥳⥴⥵⥶⥷⥸⥹⥺⥻⥼⥽⥾⥿\n\
+	\✁✂✃✄✅✆✇✈✉✊✋✌✍✎✏✐✑✒✓✔✕✖✗✘✙✚✛✜✝✞✟✠✡✢✣✤✥✦✧✨✩✪✫✬✭✮✯✰✱✲✳✴✵✶✷✸✹✺✻✼✽✾✿❀❁❂❃❄❅❆❇❈❉❊❋❌❍❎❏❐❑❒❓❔❕❖❗❘❙❚❛❜❝❞❟❠❡❢❣❤❥❦❧❨❩❪❫❬❭❮❯❰❱❲❳❴❵❶❷❸❹❺❻❼❽❾❿➀➁➂➃➄➅➆➇➈➉➊➋➌➍➎➏➐➑➒➓➔➕➖➗➘➙➚➛➜➝➞➟➠➡➢➣➤➥➦➧➨➩➪➫➬➭➮➯➰➱➲➳➴➵➶➷➸➹➺➻➼➽➾➿\n\
+	\∑−∓∔∕∖∗∘∙√∛∜∝∞∟\n\
+	\";
+
+
+
+herein
+
+
+    guiplan =	{.  gt::FRAME
+		      ( [ gt::FRAME_WIDGET (popupframe::with []) ],
+			  #
+			texteditor::with ("*testbuffer*", [ ted::UTF8 sample_text ])
+		      );
+		}
+	    :	Void ->	gt::Guiplan;								# This needs to be a thunk (Void -> gt::Guiplan   instead of just   gt::Guiplan)
+												# in order to allow   run_guiplan_on_x()  to set up the required infrastructure
+												# (in particular, starting up  guiboss-imp.pkg and millboss-imp.pkg) before we
+												# execute guiplan code like  texteditor::with().
+    rgx::run_guiplan_on_x  guiplan  [];
+
+end;
+

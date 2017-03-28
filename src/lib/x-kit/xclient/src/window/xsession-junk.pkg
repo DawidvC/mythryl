@@ -56,7 +56,7 @@
 #  |      xserver_ximp     |    |          |                    |                                  .
 #  -------------------------    |          |                    |                                  .
 #              ^                |          |get_window_site     |                                  .
-#              |                | xevents  |note_new_topwindow  |                                 ---
+#              |                | xevents  |note_new_hostwindow  |                                 ---
 #              |                v          |                    v
 # (.................................to/from widget threads......................................)
 #        ^                |	          ^                |	          ^                |	     
@@ -95,7 +95,7 @@
 #  o  The   xevent_to_window_imp   imp receives all X events
 #     (e.g. keystrokes and mouseclicks) and feeds each one to the
 #     appropriate toplevel window, or more precisely to the
-#     topwindow_to_widget_router   at the root of the widgettree for
+#     hostwindow_to_widget_router   at the root of the widgettree for
 #   ("xevent_to_widget_imp" might be a better name)
 #     that window, there to trickle down the widgettree to its ultimate
 #     target widget.
@@ -136,7 +136,7 @@
 # All mouse and keyboard events flow down through the
 # inbuf, sequencer, decoder and xevent-to-window imps
 # and thence down through the widget hierarchy
-# associated with the relevant topwindow.
+# associated with the relevant hostwindow.
 #
 # Client xserver requests and responses are sent
 # directly to the sequencer imp, with the exception
@@ -197,7 +197,7 @@ stipulate
 #   package fti =  font_imp_old; # "fi" is taken! :-)	# font_imp_old				is from   src/lib/x-kit/xclient/src/window/font-imp-old.pkg
     package fti =  font_index;				# font_index				is from	  src/lib/x-kit/xclient/src/window/font-index.pkg
 
-#   package s2t =  xsocket_to_topwindow_router_old;	# xsocket_to_topwindow_router_old	is from   src/lib/x-kit/xclient/src/window/xsocket-to-topwindow-router-old.pkg
+#   package s2t =  xsocket_to_hostwindow_router_old;	# xsocket_to_hostwindow_router_old	is from   src/lib/x-kit/xclient/src/window/xsocket-to-hostwindow-router-old.pkg
     package s2t =  xevent_router_ximp;			# xevent_router_ximp			is from   src/lib/x-kit/xclient/src/window/xevent-router-ximp.pkg
     package a2r =  windowsystem_to_xevent_router;	# windowsystem_to_xevent_router		is from   src/lib/x-kit/xclient/src/window/windowsystem-to-xevent-router.pkg
     #
@@ -216,7 +216,7 @@ stipulate
     package ki  =  keymap_ximp;				# keymap_ximp				is from	  src/lib/x-kit/xclient/src/window/keymap-ximp.pkg
     package r2k =  xevent_router_to_keymap;		# xevent_router_to_keymap		is from   src/lib/x-kit/xclient/src/window/xevent-router-to-keymap.pkg
 
-    package w2x =  windowsystem_to_xserver;		# windowsystem_to_xserver		is from   src/lib/x-kit/xclient/src/window/xserver.pkg
+    package w2x =  windowsystem_to_xserver;		# windowsystem_to_xserver		is from   src/lib/x-kit/xclient/src/window/windowsystem-to-xserver.pkg
     package exx =  xserver_ximp;			# xserver_ximp				is from   src/lib/x-kit/xclient/src/window/xserver-ximp.pkg
 
 #   package si  =  selection_imp_old;			# selection_imp_old			is from   src/lib/x-kit/xclient/src/window/selection-imp-old.pkg
@@ -325,7 +325,7 @@ herein
 	      {
 		run_gun':			mop::Run_Gun,
 		end_gun':			mop::End_Gun,
-		windowsystem_to_xevent_router:	a2r::Windowsystem_To_Xevent_Router,	# Directs X mouseclicks etc to right topwindow.
+		windowsystem_to_xevent_router:	a2r::Windowsystem_To_Xevent_Router,	# Directs X mouseclicks etc to right hostwindow.
 		windowsystem_to_xserver:	w2x::Windowsystem_To_Xserver,		# Everyone but xserver-imp should use this instead of xclient_to_sequencer.
 		xclient_to_sequencer:		x2s::Xclient_To_Sequencer,		# All drawing commands go to Xserver via sequencer then outbuf.
 		client_to_atom:          	ap::Client_To_Atom,
@@ -478,7 +478,7 @@ herein
 				    except
 					INDEX_OUT_OF_BOUNDS = {   msg = "Bad default_screen value -- make_root_window in xclient-ximps-junk.pkg";
 							log::fatal msg;			# Doesn't return.
-							raise exception FAIL msg;	# Should never get here.
+							raise exception DIE msg;	# Should never get here.
 						    };
 
 		default_screen ->   { root_window_id, ... }: dy::Xscreen;
@@ -1089,7 +1089,7 @@ herein
         # Close the xsession.
         # NOTE: there are probably other things
         # that should go on here, such as notifying
-        # the xbuf_to_topwindow_xevent_router.           XXX BUGGO FIXME
+        # the xbuf_to_hostwindow_xevent_router.           XXX BUGGO FIXME
         #
 	fun close_xsession ({ xdisplay, ... }: Xsession )
             =
@@ -1141,7 +1141,7 @@ log::fatal "close_xsession called -- xsession-junk.pkg";
 		#
 		NULL	 => {   msg =   sprintf  "find_font unable to find font '%s' -- xsession-junk.pkg"  font_name;
 				log::fatal msg;					# Should not return.
-				raise exception FAIL msg;			# Should never get here.
+				raise exception DIE msg;			# Should never get here.
 			    };
 	    esac;
 
@@ -1151,11 +1151,11 @@ log::fatal "close_xsession called -- xsession-junk.pkg";
 	    { xsession, screen_info => default_screen_info }: Screen;
 
 	#
-#	fun get_''gui_startup_complete''_oneshot_of_xsession  (xsession as { xsocket_to_topwindow_router, ... }: Xsession )
+#	fun get_''gui_startup_complete''_oneshot_of_xsession  (xsession as { xsocket_to_hostwindow_router, ... }: Xsession )
 #	    =
 #	    s2t::get_''gui_startup_complete''_oneshot_of
 #		#
-#		xsocket_to_topwindow_router;
+#		xsocket_to_hostwindow_router;
 
 	#
 #	fun screens_of  (xsession as { screens, ... }: Xsession )
@@ -1228,7 +1228,7 @@ log::fatal "close_xsession called -- xsession-junk.pkg";
 
 		    search [] =>    {   msg = "invalid depth for screen";
 					log::fatal  msg;
-					raise exception FAIL msg;
+					raise exception DIE msg;
 				    };
 		end;
 	    end;
@@ -1260,5 +1260,5 @@ end;									# stipulate.
 
 
 ## COPYRIGHT (c) 1990, 1991 by John H. Reppy.  See SMLNJ-COPYRIGHT file for details.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

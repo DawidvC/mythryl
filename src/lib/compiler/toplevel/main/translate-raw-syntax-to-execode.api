@@ -24,9 +24,9 @@ stipulate
     package tmp =  highcode_codetemp;		# highcode_codetemp		is from   src/lib/compiler/back/top/highcode/highcode-codetemp.pkg
     package imp =  import_tree;			# import_tree			is from   src/lib/compiler/execution/main/import-tree.pkg
     package im  =  inlining_mapstack;		# inlining_mapstack		is from   src/lib/compiler/toplevel/compiler-state/inlining-mapstack.pkg
-    package pcd =  per_compile_data;		# per_compile_data		is from   src/lib/compiler/front/typer-stuff/main/per-compile-data.pkg
+    package pcs =  per_compile_stuff;		# per_compile_stuff		is from   src/lib/compiler/front/typer-stuff/main/per-compile-stuff.pkg
     package ph  =  picklehash;			# picklehash			is from   src/lib/compiler/front/basics/map/picklehash.pkg
-    package pp  =  standard_prettyprint_mill;	# standard_prettyprint_mill	is from   src/lib/prettyprint/big/src/standard-prettyprint-mill.pkg
+    package pp  =  standard_prettyprinter;	# standard_prettyprinter	is from   src/lib/prettyprint/big/src/standard-prettyprinter.pkg
     package raw =  raw_syntax;			# raw_syntax			is from   src/lib/compiler/front/parser/raw-syntax/raw-syntax.pkg
     package sci =  sourcecode_info;		# sourcecode_info		is from   src/lib/compiler/front/basics/source/sourcecode-info.pkg
     package syx =  symbolmapstack;		# symbolmapstack		is from   src/lib/compiler/front/typer-stuff/symbolmapstack/symbolmapstack.pkg
@@ -44,14 +44,15 @@ herein
 	Picklehash = ph::Picklehash;	# 
 	Compiledfile_Version;
 
-	make_per_compile_data
+	make_per_compile_stuff
 	    :
 	    { sourcecode_info:		sci::Sourcecode_Info,
-	      transform:		ds::Declaration -> ds::Declaration,
-	      prettyprinter_or_null:	Null_Or pp::Prettyprint_Mill
+	      deep_syntax_transform:	ds::Declaration -> ds::Declaration,			# This can be used to profile or instrument code or to add debug support.  This transform gets applied in      src/lib/compiler/front/typer/main/type-package-language-g.pkg
+	      prettyprinter_or_null:	Null_Or( pp::Prettyprinter ),
+	      compiler_verbosity:	pcs::Compiler_Verbosity
 	    }
 	    ->
-	    pcd::Per_Compile_Data( ds::Declaration );
+	    pcs::Per_Compile_Stuff( ds::Declaration );
 
 
 
@@ -62,7 +63,7 @@ herein
 	    :
 	    { raw_declaration:		    raw::Declaration,					# Actual raw syntax to compile.
 	      symbolmapstack:               syx::Symbolmapstack,				# Symbol table containing info from all .compiled files we depend on.
-	      per_compile_data:             pcd::Per_Compile_Data( ds::Declaration ),
+	      per_compile_stuff:             pcs::Per_Compile_Stuff( ds::Declaration ),
 	      compiledfile_version:         Compiledfile_Version,
 	      sourcecode_info:		    sci::Sourcecode_Info
 	    }
@@ -87,7 +88,7 @@ herein
 	    symbolmapstack:			    syx::Symbolmapstack,			# Symbol table containing info from all .compiled files we depend on.
 	    inlining_mapstack:			    im::Picklehash_To_Anormcode_Mapstack,	# Inlining table matching symbolmapstack.
 
-	    per_compile_data:			    pcd::Per_Compile_Data( ds::Declaration ), 
+	    per_compile_stuff:			    pcs::Per_Compile_Stuff( ds::Declaration ), 
 	    compiledfile_version:		    Compiledfile_Version,
 	    handle_compile_errors:		    String -> Void,
 	    crossmodule_inlining_aggressiveness:    Null_Or( Int )
@@ -106,7 +107,7 @@ herein
 	    import_trees:			    List( imp::Import_Tree )
 	  };
 
-    };												#  Api Translate_raw_syntax_to_execode_0
+    };												#  Api Translate_Raw_Syntax_To_Execode_0
 end;
 
 api Translate_Raw_Syntax_To_Execode
@@ -117,7 +118,7 @@ api Translate_Raw_Syntax_To_Execode
 	 also  Compiledfile_Version   == String;
 
 
-api Toplevel_Translate_raw_syntax_to_execode
+api Toplevel_Translate_Raw_Syntax_To_Execode
     =
     Translate_Raw_Syntax_To_Execode_0
         where  Hash                 == Void
@@ -125,5 +126,5 @@ api Toplevel_Translate_raw_syntax_to_execode
 
 
 ## COPYRIGHT (c) 1996 Bell Laboratories 
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

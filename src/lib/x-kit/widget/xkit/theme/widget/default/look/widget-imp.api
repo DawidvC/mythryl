@@ -1,5 +1,9 @@
 ## widget-imp.api
 #
+# Here we define the hook functions which a client may supply
+# in order to customize the behavior of a widget.  This is the
+# interface used by specialized widgets to define their behavior
+# layered on top of the basic services supplied by widget-imp.pkg.
 
 # Compiled by:
 #     src/lib/x-kit/widget/xkit-widget.sublib
@@ -47,7 +51,7 @@ stipulate
 
     package gd  =  gui_displaylist;				# gui_displaylist		is from   src/lib/x-kit/widget/theme/gui-displaylist.pkg
 
-    package pp  =  standard_prettyprint_mill;			# standard_prettyprint_mill	is from   src/lib/prettyprint/big/src/standard-prettyprint-mill.pkg
+    package pp  =  standard_prettyprinter;			# standard_prettyprinter	is from   src/lib/prettyprint/big/src/standard-prettyprinter.pkg
     package r8  =  rgb8;					# rgb8				is from   src/lib/x-kit/xclient/src/color/rgb8.pkg
     #
     package g2p =  gadget_to_pixmap;				# gadget_to_pixmap		is from   src/lib/x-kit/widget/theme/gadget-to-pixmap.pkg
@@ -58,10 +62,6 @@ stipulate
     package gt  =  guiboss_types;				# guiboss_types			is from   src/lib/x-kit/widget/gui/guiboss-types.pkg
     package wt  =  widget_theme;				# widget_theme			is from   src/lib/x-kit/widget/theme/widget/widget-theme.pkg
     package wit =  widget_imp_types;				# widget_imp_types		is from   src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp-types.pkg
-
-    package iuw =  issue_unique_widget_id;			# issue_unique_widget_id	is from   src/lib/x-kit/widget/gui/issue-unique-widget-id.pkg
-
-
     #
     tracefile   =  "widget-unit-test.trace.log";
 
@@ -101,7 +101,7 @@ herein
 	    gt::Widget_Start_Fn
 	    ;
 
-	pprint_widget_arg:	pp::Prettyprint_Mill -> wit::Widget_Arg -> Void;
+	pprint_widget_arg:	pp::Prettyprinter -> wit::Widget_Arg -> Void;
     };
 
 
@@ -114,7 +114,7 @@ end;
 # Note[1]:
 # The intention here is that most code can simply use 'string'.
 #
-# For plain-ascii keystrokes, 'string' will have string::length 1.
+# For plain-ascii keystrokes, 'string' will have string::length_in_bytes 1.
 #
 # For special keys, 'string' will be "<F1>" or such.
 # This coding is done in
@@ -230,7 +230,7 @@ end;
 #     ...
 #     event.keysym ->  evt::KEYSYM k;
 #     ...
-#     if (k == evt:;k::backspace)
+#     if (k == evt::k::backspace)
 #         ...
 #     else
 #         ...

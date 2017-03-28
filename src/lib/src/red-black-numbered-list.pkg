@@ -153,14 +153,9 @@
 #     leave the existing red-black code alone.
 
 package red_black_numbered_list
-:
-Numbered_List							# Numbered_List	is from   src/lib/src/numbered-list.api
-=
-package {
-
-    Color
-        =
-        RED | BLACK;
+:                 Numbered_List					# Numbered_List	is from   src/lib/src/numbered-list.api
+{
+    Color =  RED | BLACK;
 
 
 
@@ -434,7 +429,7 @@ package {
 			     pad1_string   =  do_indent (indent, []);
 			     color_string  =  case color    RED => "RED"; BLACK => "BLACK"; esac;
 			     string        =  pad1_string + color_string;
-			     size          =  string::length string;
+			     size          =  string::length_in_bytes string;
 			     pad2_string   =  do_indent (40-size, []);
 			     print  string;
 			     print  pad2_string;
@@ -738,11 +733,11 @@ package {
     fun contains_key (sequence, key)
         =
         case (max_key sequence)
-          
-             NULL  =>  FALSE;
+	    #          
+	    NULL  =>  FALSE;
 
-             THE n =>  key >= 0  and
-                       key <= n;
+	    THE n =>  key >= 0  and
+		      key <= n;
         esac;
 
 
@@ -760,14 +755,14 @@ package {
 	        find' ((IMPLICIT_NODE(_, left, kids2, val2, right)), key)
 		    =>
                     {   left_kids =  kids_of left;
-
+			#
                         if   (key < 0)     raise exception exceptions::INDEX_OUT_OF_BOUNDS;   fi;
 
 			case (int::compare (key, left_kids))
-			  
-			     LESS    =>  find' (left,  key);
-			     EQUAL   =>  THE val2;
-			     GREATER =>  find' (right, key - (left_kids+1));
+			    #			  
+			    LESS    =>  find' (left,  key);
+			    EQUAL   =>  THE val2;
+			    GREATER =>  find' (right, key - (left_kids+1));
 			esac;
 		    };
             end;
@@ -775,11 +770,11 @@ package {
 
     fun get (sequence, i)
         =
-        case (find (sequence, i))
-          
-             NULL    =>  raise exception exceptions::INDEX_OUT_OF_BOUNDS;
-             THE value =>  value;
-        esac;
+	case (find (sequence, i))
+            #
+            NULL      =>  raise exception exceptions::INDEX_OUT_OF_BOUNDS;
+            THE value =>  value;
+	esac;
 
     # Note:  The (_[])   enables   'vec[index]'           notation;
     #
@@ -854,14 +849,6 @@ package {
                 #
                 if   (i < 0)     raise exception exceptions::INDEX_OUT_OF_BOUNDS;   fi;
 
-                removed_value
-                    =
-                    case (find (input, i))
-                      
-                         THE value => value;
-                         NULL      => raise exception lib_base::NOT_FOUND;
-                    esac;
-
 		new_tree
                     =
                     case (descend (i, input_tree, TOP))
@@ -876,7 +863,7 @@ package {
                          ok  => ok;
                     esac;
 	    
-		(NUMBERED_LIST (new_tree), removed_value);
+		NUMBERED_LIST (new_tree);
             }
             where 
                 fun color_name RED   => "RED";
@@ -1243,36 +1230,36 @@ package {
         vals_count (NUMBERED_LIST (IMPLICIT_NODE (_,_, kids, _,_))) =>  kids;
     end;
 
-     # Remove and return first value in sequence:
-     #
-     fun shift sequence
-         =
-         (THE (remove (sequence, 0)))
-         except
-             lib_base::NOT_FOUND = NULL;
+    # Remove and return first value in sequence:
+    #
+    fun shift sequence
+	=
+	(THE (remove (sequence, 0)))
+	except
+	    lib_base::NOT_FOUND = NULL;
 
 
-     # Prepend a value to sequence:
-     #
-     fun unshift (sequence, value)
-         =
-         set (sequence, 0, value);
+    # Prepend a value to sequence:
+    #
+    fun unshift (sequence, value)
+	=
+	set (sequence, 0, value);
 
-     # Remove and return last value in sequence:
-     #
-     fun pop sequence
-         =
-         case (vals_count sequence)
-           
-              0 =>  NULL;
-              n =>  THE (remove (sequence, n - 1));
-         esac;
+    # Remove and return last value in sequence:
+    #
+    fun pop sequence
+	=
+	case (vals_count sequence)
+	    #
+	    0 =>  NULL;
+	    n =>  THE (remove (sequence, n - 1));
+	esac;
 
-     # Append a value to sequence:
-     #
-     fun push (sequence, value)
-         =
-         set (sequence, vals_count sequence, value);
+    # Append a value to sequence:
+    #
+    fun push (sequence, value)
+	=
+	set (sequence, vals_count sequence, value);
 
 
     # Call
@@ -2022,5 +2009,5 @@ package {
 
 
 ## COPYRIGHT (c) 1999 Bell Labs, Lucent Technologies.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

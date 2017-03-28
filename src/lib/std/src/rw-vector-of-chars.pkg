@@ -31,8 +31,8 @@ herein
 	unsafe_set =  rwv::set;
 	unsafe_get =  rwv::get;
 	#
-	ro_unsafe_set = it::vector_of_chars::set;
-	ro_unsafe_get = it::vector_of_chars::get;
+	ro_unsafe_set = it::vector_of_chars::set_char_as_byte;
+	ro_unsafe_get = it::vector_of_chars::get_byte_as_char;
 	#
 	ro_length     = it::vector_of_chars::length;
 
@@ -406,5 +406,5 @@ end;
 
 
 ## COPYRIGHT (c) 1994 AT&T Bell Labs.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

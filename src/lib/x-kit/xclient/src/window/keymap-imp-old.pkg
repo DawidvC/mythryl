@@ -221,7 +221,7 @@ herein
 		   _ => (xt::KEYSYM symbol, xt::KEYSYM symbol);
 		esac;
 
-	    convert_case  xt::NO_SYMBOL =>   raise exception FAIL "Bug: Unsupported case in convert_case";
+	    convert_case  xt::NO_SYMBOL =>   raise exception DIE "Bug: Unsupported case in convert_case";
 	end;
 
 	lower_case =  #1 o convert_case;
@@ -520,5 +520,5 @@ end;
 
 
 ## COPYRIGHT (c) 1990, 1991 by John H. Reppy.  See SMLNJ-COPYRIGHT file for details.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

@@ -25,7 +25,7 @@ herein
 				List( sy::Symbol ),
 				Int,
 				lnd::Source_Code_Region,
-				trs::Per_Compile_Data
+				trs::Per_Compile_Stuff
                               )
 			      ->
                               ( syx::Symbolmapstack,
@@ -62,5 +62,5 @@ end;
 
 
 ## Copyright 1996 by AT&T Bell Laboratories 
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

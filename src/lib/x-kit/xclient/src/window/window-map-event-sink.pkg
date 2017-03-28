@@ -19,15 +19,15 @@ herein
 
     # This port is implemented in:
     #
-    #     src/lib/x-kit/xclient/src/wire/xserver-ximp.pkg
+    #     src/lib/x-kit/xclient/src/window/xserver-ximp.pkg
     #
     package window_map_event_sink {
 	#
 	package s {
 	    #
 	    Mapped_State
-	      = TOPWINDOW_IS_NOW_UNMAPPED
-	      | TOPWINDOW_IS_NOW_MAPPED
+	      = HOSTWINDOW_IS_NOW_UNMAPPED
+	      | HOSTWINDOW_IS_NOW_MAPPED
 	      | FIRST_EXPOSE
 	      ;
 	};
@@ -62,5 +62,5 @@ end;
 
 
 ## COPYRIGHT (c) 1990, 1991 by John H. Reppy.  See SMLNJ-COPYRIGHT file for details.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

@@ -257,7 +257,7 @@ stipulate
 
 		stipulate
 		    fun un_reg (tcf::CODETEMP_INFO (_, r)) =>  r;
-			un_reg _                 =>  raise exception FAIL "sparc-nextcode-registers: unREG";
+			un_reg _                 =>  raise exception DIE "sparc-nextcode-registers: unREG";
 		    end;
 
 		    package cos =  rkj::cos;						# "cos" == "colorset".
@@ -521,7 +521,7 @@ herein
 end;
 
 ## COPYRIGHT (c) 1998 AT&T Bell Laboratories.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.
 
 

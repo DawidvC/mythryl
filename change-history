@@ -1,3 +1,215 @@
+2015-12-06-08.39.04: Test.
+2015-10-18-17.42.10: Light commenting.
+2015-10-18-17.21.53: Light commenting.
+2015-10-09-00.05.13: src/lib/x-kit/widget/edit/: millboss-types.pkg, textpane.pkg, textmill.pkg:  Did the wiring to get Mode_To_Drawpane delivered to *-mode.pkg clients.
+2015-10-08-10.34.27: sh/mythryl-emacs:  Changed  guiplan  arg to   run_guiplan_on_x::run_guiplan_on_x() (in src/lib/x-kit/widget/gui/run-guiplan-on-x.pkg)  from  guiboss_types::Guiplan  to  Void -> guiboss_types::Guiplan  because we need to ensure that  guiboss_imp  and  millboss_imp  are running before executing code embedded in the guiplan.
+2015-10-05-22.32.31: src/lib/x-kit/widget/edit/fundamental-mode.pkg: rotate_panepair:  Update first_cut correctly when doing rotation.
+2015-10-04-21.51.13: src/lib/x-kit/widget/edit/fundamental-mode.pkg:  rotate_panepair:  Now working.
+2015-10-03-23.13.15: src/lib/x-kit/widget/edit/fundamental-mode.pkg: Established rotate_panepair__editfn.
+2015-09-27-23.01.25: src/lib/x-kit/widget/edit/eval-mode.pkg:  Should be usable now;  time to move on to other facilities.
+2015-09-27-13.01.27: Plumb  parse_string_to_raw_declarations, compile_raw_declaration_to_package_closure, link_and_run_package_closure  from  src/lib/compiler/toplevel/interact/read-eval-print-loop-g.pkg  to  src/lib/x-kit/widget/edit/compile-imp.pkg.
+2015-09-26-13.25.34: src/lib/x-kit/widget/edit/eval-mode.pkg:  Compiles are now done via compile-imp.pkg rather than direct calls to makelib::compile_and_eval_string_in_given_compiler_state, to ensure only one compile at a time (since the SML/NJ compiler design makes heavy use of global variables, and is thus not thread-safe if called directly).
+2015-09-25-21.59.26: src/lib/x-kit/widget/edit/compile-imp.pkg:  Did plumbing to have it started by guiboss-imp.pkg and available via  guiboss_types::Gadget_To_Guiboss.app_to_compileimp: app_to_compileimp::App_To_Compileimp  port.
+2015-09-23-22.31.46: src/lib/x-kit/widget/edit/eval-mode.pkg, src/lib/compiler/toplevel/interact/read-eval-print-loop-g.pkg:  Eval-mode now correctly catches compile errors and inserts them in the eval buffer (vs previous pattern of sending them them to stdout).  This is a major milestone!
+2015-09-21-23.46.46: src/lib/compiler/toplevel/interact/read-eval-print-loop-g.pkg:  compile_and_eval_string_in_given_compiler_state:  Uncaught exceptions now get reported in eval-mode.pkg buffer instead of to stderr.
+2015-09-21-20.42.27: src/lib/compiler/toplevel/interact/read-eval-print-loops.api:  For improved clarity renamed  with_error_handling  to  with_exception_trapping.
+2015-09-15-22.40.57: src/lib/x-kit/widget/edit/millboss-types.pkg: Bugfix: Was unable to insert doublequote or backslash into editbuffers.  Root cause was that millboss_types::add_editfn_to_keymap_throughout_char_range was using char::to_string which prepends a backslash when converting those two chars to string, whereas the keystroke-event pipeline does not, so they arrived as single-byte strings, whereupon the keymap keystring lookup would fail.  Fixed by removing the backslash in millboss_types::add_editfn_to_keymap_throughout_char_range.
+2015-09-13-23.10.42: src/lib/x-kit/widget/edit/eval-mode.pkg:  Can now type   2+2;   at  eval:  prompt and have it compiled, executed, and  4  inserted back into the eval buffer.  Lots of work remaining, but that is a big milestone!
+2015-09-12-18.14.03: src/lib/compiler/front/basics/main/compiler-verbosity.pkg: Established, used to implement fine(r)-grained control of intermediate-code dumping during compiles.
+2015-09-10-22.43.26: src/c/main/error-reporting.c:  Major rewrite to handle arbitrarily large output:  vasprintf() instead of vsnprintf(), loop sanely on EINTR and partial write()s. Need this mostly when logging prettyprinted datastructures, which can be huge.
+2015-09-09-19.55.40: Commit work done in infusion center, mostly on eval-mode.pkg, also establishing shell-mode.pkg and dired-mode.pkg.
+2015-09-07-11.59.13: src/lib/compiler/toplevel/interact/read-eval-print-loop-g.pkg:  compile_and_eval_string_in_given_compiler_state:  More fiddling with api.  I think it is now more or less right.
+2015-09-07-10.52.13: src/lib/prettyprint/big/src/standard-prettyprint-mill.api:  Rename make_standard_prettyprint_mill -> make_standard_prettyprint_mill_into_file for parallelism with next:  Add  make_standard_prettyprint_mill_into_buffer.
+2015-09-07-00.07.03: src/lib/x-kit/widget/xkit-widget.sublib:  Switch from importing   /src/lib/core/viscomp/basics.lib + /src/lib/core/viscomp/core.lib  to importing just the higher-level   /src/lib/core/internal/interactive-system.lib, which seems like a more appropriate entrypoint into compiler-level stuff for widget-level stuff.
+2015-09-06-17.18.26: src/lib/x-kit/widget/edit/: eval-mode.pkg + eval-mill.pkg are now established, wired and plumbed:  You can start them up etc.  All they lack is any actual mode-specific functionality.  Which is the easy part. :-)
+2015-09-05-23.25.35: src/lib/core/internal/makelib.api: Added   compile_and_eval_string_in_given_compiler_state()   as support for interactive code evaluation in   src/lib/x-kit/widget/edit/eval-mode.pkg.
+2015-09-03-21.21.25: M-x eval  now starts up a pane+mill successfully.  That is better than the alternative! :-)
+2015-09-02-23.52.23: src/lib/x-kit/widget/edit/millboss-types.pkg:  Editfn_In: Add  mill_extension_state: Crypt  field.  Textmill_Extension.initialize_textmill_extension:  Add  mill_extension_state: Crypt  return val.  src/lib/x-kit/widget/edit/eval-mill.pkg:  Establish.
+2015-09-01-22.12.51: src/lib/compiler/front/typer-stuff/main/: For clarity (mostly contains support fns, not data) renamed per-compile-data.pkg -> per-compile-stuff.pkg
+2015-08-31-22.57.15: For clarity, pervasively renamed topwindow -> hostwindow.
+2015-08-31-22.45.50: Finished initial plumbing for drawpane.pkg.
+2015-08-30-21.56.21: More plumbing for drawpane.pkg.  mouse_click support looks complete end-to-end now.
+2015-08-30-19.17.40: drawpane.pkg plumbing.
+2015-08-28-21.55.35: src/lib/x-kit/widget/edit/: Delete millboss-to-screenline.pkg (no longer used) and its clone millboss-to-drawpane.pkg
+2015-08-27-21.03.03: src/lib/x-kit/widget/edit/: Establish drawpane-to-textpane.pkg, textpane-to-drawpane.pkg, millboss-to-drawpane.pkg.
+2015-08-27-20.24.46: src/lib/x-kit/widget/edit/: Establish drawpane.api, drawpane.pkg.
+2015-08-26-23.51.10: src/lib/x-kit/widget/edit/millboss-types.pkg (etc): Add support for Mill_To_Millboss.wake_me parallel  to that in guiboss-types.pkg.   src/lib/src/map.api:  Add difference_with, from_list.   src/lib/src/set.api:  Add preceding_member: (Set, Item) -> Null_Or(Item), following_member: (Set, Item) -> Null_Or(Item), from_list:  List(Item) -> Set
+2015-08-25-22.19.27: src/lib/src/map.api:  Add   preceding_key: (Map(X), key::Key) -> Null_Or(key::Key);    following_key: (Map(X), key::Key) -> Null_Or(key::Key);
+2015-08-24-01.48.38: Improve previous.
+2015-08-23-14.20.55: src/lib/x-kit/widget/edit/millgraph-mode.pkg: Add tweak to avoid possible deadlock.
+2015-08-23-13.39.21: src/lib/x-kit/widget/edit/millgraph-mode.pkg:  First-cut implementation complete.
+2015-08-22-00.40.36: src/lib/x-kit/widget/edit/millboss-types.pkg: Add counters to Millin + Millout to support debug/display of traffic in the millgraph.
+2015-08-19-21.40.04: src/lib/x-kit/widget/edit/millboss-types.pkg: Disentangle some millgraph port vs mill stuff which had gotten inappropriately interwined recently.
+2015-08-18-21.41.56: src/lib/x-kit/widget/edit/millgraph-mode.pkg: initialize_millmode_state:  Define a millgraph inport and publish it via parents App_To_Mill export.
+2015-08-17-18.59.58: Establish src/lib/x-kit/widget/edit/millgraph-mode.pkg
+2015-08-16-18.12.30: Replace int_map by the new id_map various places.
+2015-08-15-20.18.52: src/lib/x-kit/widget/edit/millboss-imp.pkg:  Re/wrote make_millgraph and added supporting tweaks, in principle millgraph streaming from millboss_imp should now be operational. (Untested.)
+2015-08-13-22.32.03: src/lib/x-kit/widget/edit/millboss-types.pkg: Mill_Info: Added millmode, millins, millouts fields.
+2015-08-13-21.05.59: src/lib/src/: digraph.api, digraphxy.api:  Add node_datum() and tag_datum().  *blush*
+2015-08-13-20.50.43: src/lib/x-kit/widget/edit/millboss-types.pkg: Added  Millgraph type with at its heart a digraphxy::Graph(Id,Portpair) as a value for millboss_imp to stream to watchers interested in tracking the set of running mills and their interconnections.
+2015-08-12-23.09.31: src/lib/x-kit/widget/edit/millboss-imp.pkg (etc): Take advantage of new id-map.pkg.
+2015-08-12-22.48.36: src/lib/src/:  Added id-key.pkg, id-map.pkg, id-set.pkg.
+2015-08-12-21.45.59: src/lib/src/: digraph.api, digraphxy.api:  Add support for Int and Id values on edges and nodes.
+2015-08-12-21.07.11: src/lib/x-kit/widget/edit/millboss-types.pkg (etc):  Various things establishing the infrastructure for millboss_imp to publish a Millgraph stream.
+2015-08-11-21.58.36: src/lib/x-kit/widget/edit/millboss-types.pkg:  Include App_To_Mill interface as a sub-interface of Gadget_To_Millboss so clients can subscribe to its Millgraph Outport as though it were a regular mill.  src/lib/x-kit/widget/edit/millboss-imp.pkg:  Sketch in first-cut support for added App_To_Mill interface.
+2015-08-11-20.00.46: src/lib/x-kit/widget/edit/textmill.pkg:  Implemented note__textmill_statechange().
+2015-08-11-10.39.55: Light commenting.
+2015-08-11-00.57.31: src/lib/x-kit/widget/edit/textmill.pkg:  Work on implementing textmill-statechange inport.
+2015-08-09-18.22.39: src/lib/x-kit/widget/edit/millboss-types.pkg:  Added  Millgraph  to represent the complete graph of running mills and their interconnects, to be streamed from millboss to plugboard and provide a view of the forest.
+2015-08-09-14.12.37: src/lib/x-kit/widget/edit/textmill.pkg: Implement get_millouts + pass_millouts.
+2015-08-09-01.17.13: More of the same.
+2015-08-09-00.46.28: src/lib/x-kit/widget/edit/millboss-types.pkg: More fiddling with mill interconnect support.
+2015-08-08-19.59.20: src/lib/x-kit/widget/edit/millboss-types.pkg:  Renamed Watchable -> Millout for brevity and clarity, added Millin.
+2015-08-08-14.09.25: src/lib/x-kit/widget/edit/millboss-types.pkg:  Change  Textlines = nl::Numbered_List(String);  ->  Textlines = nl::Numbered_List(Textline);  as part of putting infrastructure in place for eventual folding-mode(-ish) functionality.
+2015-08-07-21.26.33: src/lib/x-kit/widget/edit/millboss-types.pkg: New Watchables def replaces the Crypt-based one, to support separate outer_type and inner_type fields.
+2015-08-07-20.58.01: src/lib/core/init/pervasive.pkg:  Added  id: Id  field to Crypt because I reached the point where I needed it.  Most major record types get to that point sooner or later...
+2015-08-06-23.58.55: src/lib/x-kit/widget/edit/:  Did clone-and-mutate of watchable-floats.pkg to produce watchable-boolintfloatstrings.pkg.
+2015-08-06-23.17.21: src/lib/x-kit/widget/edit/:  Did clone-and-mutate of watchable-floats.pkg to produce watchable-bools.pkg, watchable-ints.pkg, watchable-strings.pkg.
+2015-08-06-23.10.04: src/lib/x-kit/widget/edit/:  Did clone-and-mutate of watchable-float.pkg to produce watchable-floats.pkg .
+2015-08-06-22.59.38: src/lib/x-kit/widget/edit/:  Did clone-and-mutate of watchable-float to produce watchable-bool.pkg.
+2015-08-06-22.54.09: src/lib/x-kit/widget/edit/:  Did clone-and-mutate of watchable-string.pkg to produce watchable-int.pkg + watchable-float.pkg.
+2015-08-06-22.41.11: src/lib/x-kit/widget/edit/: Renamed textmill-watchable.pkg -> watchable-textmill-statechange.pkg.  Did clone-and-mutate to produce watchable-string.pkg
+2015-08-06-19.58.50: src/lib/x-kit/widget/edit/: Delete textmill-types* + textmill-junk*: Proactively created files that did not get used.
+2015-08-05-21.36.28: Add shut_down_guiboss() to Millboss_To_Guiboss and Gadget_To_Guiboss.
+2015-08-05-19.12.05: src/lib/x-kit/widget/gui/run-guiplan-on-x.pkg:  Created, to hold the startup-busywork code formerly in mythryl-emacs script.
+2015-08-04-22.10.52: src/lib/x-kit/widget/edit/millboss-types.pkg:  App_To_Mill:  Added  get_watchables: Void -> List(Watchable)  +  pass_watchables: Replyqueue -> (List(Watchable) -> Void) -> Void  as part of setting up support for eventual runtime reconfiguration of mill networks.
+2015-08-04-21.43.42: src/lib/x-kit/widget/edit/textmill-subscription.pkg: Created and implemented.
+2015-08-04-19.16.24: src/lib/x-kit/widget/edit/millboss-types.pkg:  Move *dirty, *filespace and *file calls from Textpane_To_Textmill to App_To_Mill by way of establishing a reasonable base level of functionality across all mills (vs textmill-specific functionality).
+2015-08-02-22.43.24: Created  mythryl-emacs  from  src/lib/x-kit/widget/widget-unit-test.pkg  to allow running the editor outside of <<make check>>.
+2015-08-02-22.18.26: src/lib/x-kit/xkit.lib: Export all the new stuff from src/lib/x-kit/widget/xkit-widget.sublib (button, slider and emacsoid widgets etc).
+2015-08-01-21.09.18: src/lib/x-kit/widget/edit/fundamental-mode.pkg: Implemented  replace_string  by cutting down  query_replace.
+2015-08-01-15.13.28: src/lib/x-kit/widget/edit/fundamental-mode.pkg:  query_replace working.
+2015-07-30-23.14.01: src/lib/x-kit/widget/edit/fundamental-mode.pkg:  query_replace():  Mostly written now.
+2015-07-30-00.41.41: src/lib/x-kit/widget/edit/textpane.pkg: Infrastructure support for  fundamental_mode::query_replace__editfn.
+2015-07-28-10.40.26: src/lib/x-kit/widget/edit/fundamental-mode.pkg: self_insert_command: Support numeric prefix.
+2015-07-28-10.23.35: src/lib/x-kit/widget/edit/textpane.pkg: Support numeric prefix on  C-x e  (ACTIVATE_KMACRO).
+2015-07-27-22.11.30: src/lib/x-kit/widget/edit/fundamental-mode.pkg: Add stubs fro upcoming query_replace and replace_string editfns.
+2015-07-27-21.54.57: src/lib/x-kit/widget/edit/millboss-types.pkg (et al):  Laying groundwork for upcoming query_replace() in fundamental-mode.pkg.
+2015-07-27-00.29.16: src/lib/x-kit/widget/edit/textpane.pkg: kmacro_commence_macro, conclude_macro:  Post <<Defining keystroke macro...>>, <<Keystroke macro defined.>> messages to modeline.
+2015-07-27-00.02.57: Retry.
+2015-07-27-00.02.39: src/lib/x-kit/widget/edit/textpane.pkg: Execute macro keystrokes via  guiboss_to_widget.g.note_key_event()  rather than  default_key_event_fn()  so as to allow user to C-g out of a long macro.
+2015-07-26-22.35.49: Not sure previous commit completed, so retrying.
+2015-07-26-22.33.03: src/lib/x-kit/widget/edit/textpane.pkg: Two weeks of vacation work.
+2015-07-13-09.10.44: src/lib/x-kit/widget/edit/eval-mode.pkg: Created.
+2015-07-11-22.42.24: Cleanup after previous.
+2015-07-11-17.49.17: src/lib/x-kit/widget/edit/mode-junk.pkg: Add  Multistate = sm::Map(Crypt);  also in Millmode add  initialize_state: Multistate -> Multistate,  finalize_state: Multistate -> Void.
+2015-07-11-12.05.04: src/lib/core/init/pervasive.pkg: Fixed:  Had the names of  do_while  and  do_while_not  interchanged! *BLUSH*
+2015-07-11-01.33.35: src/lib/x-kit/widget/gui/guiboss-types.pkg:  Rg_Row, Rg_Col:  Add  first_cut: Ref(Null_Or(Float))  field.  Xi_Row, Xi_Col:  Add  first_cut: Null_Or(Float)  field.  src/lib/x-kit/widget/edit/fundamental-mode.pkg: enlarge_pane (C-x ^) now working.
+2015-07-10-21.38.53: src/lib/x-kit/widget/gui/guiboss-types.pkg:  Rg_Row, Rg_Col:  Add  first_cut: Ref(Null_Or(Float))  field.  Xi_Row, Xi_Col:  Add  first_cut: Ref(Null_Or(Float))  field.
+2015-07-10-01.03.09: src/lib/x-kit/widget/edit/fundamental-mode.pkg:  C-x 0 (delete_this_pane) and C-x 1 (delete_other_pane) now functional.
+2015-07-09-10.36.41: src/lib/x-kit/widget/edit/fundamental-mode.pkg: Implemented split_pane_horizontally using same logic as split_pane_vertically, just substituting gt::XI_ROW for gt::XI_COL.
+2015-07-09-10.09.01: src/lib/core/init/pervasive.pkg:  Added do_while_true, do_while_false: (Void -> Bool) -> Void.  These allow writing do-while loops like    do_while_true {. do_stuff(); termination_condition(); };
+2015-07-08-23.17.55: src/lib/x-kit/widget/edit/fundamental-mode.pkg:  split_pane_vertically:  Per emacs tradition, now splits textpane into two textpanes open on the same underlying textmill (==buffer).  Which is to say, it is basically functional now. :-) :-) :-)
+2015-07-07-22.19.23: src/lib/x-kit/widget/edit/textpane.api:  with:  Add   buffername: String  arg.   src/lib/x-kit/widget/edit/texteditor.pkg: Pass previously-unused  buffername  arg to textpane::with.   src/lib/x-kit/widget/edit/mode-junk.pkg: Gadget_To_Editboss: Add  make_textmill  to pre-existing  get_textmill, get_or_make_textmill, get_or_make_filebuffer.
+2015-07-06-20.46.25: src/lib/x-kit/widget/gui/guiboss-types.pkg: Guiboss_State:  Add  gui_update_count: Ref(Int)  field  to deal with attempts to concurrently updated the gui topology by different widgets.
+2015-07-06-11.57.42: src/lib/x-kit/widget/edit/mode-junk.pkg: Tidying.
+2015-07-06-11.57.13: src/lib/x-kit/widget/edit/mode-junk.pkg: Tidying.
+2015-07-06-01.17.18: src/lib/x-kit/widget/edit/textpane.pkg: Pass in minibuffermode also for same reason.
+2015-07-06-01.02.17: src/lib/x-kit/widget/edit/textpane.pkg: Eliminated dependency on fundamental-mode.pkg by passing in mode to use as an arg to textpane::with. (Was getting a package cycle between textpane.pkg <-> fundamental-mode.pkg.)
+2015-07-06-00.29.20: src/lib/x-kit/widget/edit/fundamental-mode.pkg: split_pane_vertically: Nearly have zeroth-order operation established.
+2015-07-05-20.06.08: src/lib/x-kit/widget/gui/guiboss-types-junk.pkg:  Guipith_Map_Option:  Added  XI_WIDGET_TYPE_MAP_FN (Xi_Widget_Type -> Xi_Widget_Type)  and  XI_GP_WIDGET_TYPE_MAP_FN (Gp_Widget_Type -> Gp_Widget_Type)  which I overlooked earlier *blush*.
+2015-07-05-17.42.53: src/lib/x-kit/widget/edit/mode-junk.pkg: Editfn_In:  Added  widget_to_guiboss: gt::Widget_To_Guiboss  field.
+2015-07-05-12.41.02: src/lib/x-kit/widget/edit/textpane.pkg:  Implemented mj::MODELINE_MESSAGE.
+2015-07-05-11.22.29: src/lib/x-kit/widget/edit/fundamental-mode.pkg:  For clarity, rename input mj::Editfn_In arg on each editfn from  was -> arg.
+2015-07-05-11.02.40: src/lib/core/init/pervasive.pkg:  Crypt:  Rename fields from  key,doc,val  ->   type,info,data  because the key/type field is in general not unique and thus not much of a key, but it does hold a text representation of the type of the val/data field.
+2015-07-05-10.47.43: src/lib/x-kit/widget/edit/textpane.pkg: Fixed: Dirty flag was not updating properly because textpane.pkg was not unsubscribing + resubscribing to statechanges from its mill when changing mills (visiting a different file/buffer).
+2015-07-04-17.24.40: src/lib/x-kit/widget/edit/editboss-imp.pkg:  Made this simpler and more generic. In particular it no longer knows anything about screenlines or their interfaces.  It would still be nice to make it more generic by abstracting away from textpanes and textmills to more abstract pane and mill interfaces.
+2015-07-04-12.26.50: src/lib/x-kit/widget/edit/:  Rename  editboss-to-textpane.pkg -> editboss-to-pane.pkg  as first step in making editboss simpler and more general.
+2015-07-04-11.48.56: src/lib/x-kit/widget/edit/: Got rid of textedit.pkg and its interfaces -- it was adding a lot of complexity (in particular to editboss-imp.pkg) and serving no purpose once minibuffer functionality got merged into modeline.
+2015-07-04-10.32.18: src/lib/x-kit/widget/edit/: Renamed  textpile* -> textmill*  because I want to generalize the pane/mill concept beyond text stuff, and in general the in general the pane (View/Controller) will be interfacing to a mill (Model) which is an active computation engine rather than a passive repository, making 'mill' more apropos than 'pile'.
+2015-07-03-23.33.40: src/lib/x-kit/widget/edit/mode-junk.pkg:  To support informative editfn error messages on modeline, switched Editfn_Out from Null_Or() to Fail_Or():   Editfn_Out=Fail_Or(List(Editfn_Out_Option))  instead of     Editfn_Out=Null_Or(List(Editfn_Out_Option)).
+2015-07-03-23.01.50: src/lib/core/init/pervasive.pkg: Added  Fail_Or(X) = FAIL String | WORK X;  as an alternative to Null_Or(X) that allows returning a diagnostic String in the failure case.
+2015-07-03-22.46.45: Renamed exception FAIL to DIE mostly to free up FAIL for Fail_Or(X) = FAIL String | WORK(X);  but also for brevity and analogy with the Perl die operator.
+2015-07-03-13.37.06: Various stuff to make readonly work, in particular implementing  C-x C-q (toggle_readonly)  in  src/lib/x-kit/widget/edit/fundamental-mode.pkg.
+2015-07-03-01.37.21: src/lib/x-kit/widget/edit/textpane.pkg: startup_fn: Subscribe to statechanges from our mainbuffer textpile-imp.pkg instance.
+2015-07-02-21.47.14: src/lib/x-kit/widget/edit/:  Renamed  textbuffer -> textpile  for brevity and increased parallelism with  textpane  and because <<buffer>> is a bit over-used in programming, which <<pile>> is not.  The downside is that <<buffer>> is standardard emacs nomenclature, but I am willing to live with that deviation. :-)
+2015-07-02-00.00.00: src/lib/x-kit/widget/edit/fundamental-mode.pkg:  Tweak various editfns to respect new readonly arg.
+2015-07-01-23.50.46: src/lib/x-kit/widget/edit/mode-junk.pkg:  Editfn_In:  Add   readonly: Bool   field.
+2015-07-01-23.39.56: src/lib/x-kit/widget/edit/mode-junk.pkg:  Textpane_To_Textbuffer:  Add  set_readonly, get_readonly, pass_readonly.
+2015-07-01-23.27.29: src/lib/x-kit/widget/edit/textpane.pkg, src/lib/x-kit/widget/leaf/textentry.pkg: shutdown_fn():  Oops, almost forgot:  If we hold keyboard_focus, release it before exiting.
+2015-07-01-23.05.53: src/lib/x-kit/widget/gui/guiboss-event-dispatch.pkg:  Switch keystroke delivery over to new keyboard_focus mechanism.  This basically changes the widget system from keyboard-focus-follows-mouse to click-to-type.  (Click-to-type is more compatible with the traditional emacs use of C-x o (other-window) to switch keyboard focus between textpanes, since under click-to-type there is no invariant that keystrokes always go to the widget under the mouse cursor.)
+2015-07-01-16.16.53: src/lib/x-kit/widget/: edit/, leaf/:  Commenting.
+2015-06-29-23.37.05: guiboss-imp.pkg: Add logic to track which gadget holds the keyboard focus, to accept requests to change it, and to notify gadgets when it changes. widget-imp.pkg: Add logic to propagate the change-of-keyboard-focus notifications.  textpane.pkg: Add state variable to track whether we hold the keyboard focus, updated appropriately by notifications from guiboss-imp.pkg.
+2015-06-29-15.08.11: src/lib/x-kit/widget/edit/fundamental-mode.pkg: Establish stubs for next batch of editfns to implement.
+2015-06-29-13.53.20: src/lib/x-kit/widget/edit/fundamental-mode.pkg: Establish stubs for next batch of editfns to implement.
+2015-06-28-22.42.18: src/lib/x-kit/widget/edit/: Established tab-completion.api, tab-completion.pkg.
+2015-06-28-22.21.00: src/lib/std/src/string-guts.pkg: Change safe_set* used for debugging back to unsafe_set* used for production.  Also verified that display code for multibyte utf8 chars is in fact correct, just looks awful because my font is so incomplete.
+2015-06-28-12.07.00: src/lib/x-kit/widget/edit/screenline.pkg:  Fix previous fix:  Forgot to update  charlen  in one conditional path.
+2015-06-27-23.51.42: src/lib/std/src/string-guts.pkg:  prefix_length_in_bytes:  count_chars:  Fixed:  Had  byteoffset+1  return value where  byteoffset  was needed.
+2015-06-27-19.14.04: src/lib/std/src/string-guts.pkg:  utf8_to_ucs2:  Fixed:  First heap-corruption bug in several years.  Cause: (1) utf8_to_ucs2() using unsafe_set_byte().  (2) utf8_to_ucs2() overrunning output buffer on utf8-invalid input.  (3) screenline.pkg incorrectly truncating scrolled text, resulting in utf8-invalid string.
+2015-06-27-10.56.48: src/lib/x-kit/widget/edit/fundamental-mode.pkg: Added beginning_of_buffer(), end_of_buffer(), bound to M-< and M->.
+2015-06-27-05.09.52: src/lib/x-kit/widget/edit/mode-junk.pkg:  keystring_to_modemap_key:  Add   modifier_keys_state: evt::Modifier_Keys_State  arg, radically expand it to supply S- (shift) M- (Meta) C- (Ctrl) and s- (Super) prefixes in canonical order and form
+2015-06-26-23.45.56: src/lib/x-kit/widget/edit/textpane.pkg:  Process ^U etc to generate numeric_prefix arg for editfns.  src/lib/x-kit/widget/edit/mode-junk.pkg:  Editfn_In, Edit_Arg:  Pass numeric_prefix through to editfns.
+2015-06-26-20.49.31: src/lib/x-kit/widget/edit/textpane.pkg:  Basic horizontal scrolling now works.
+2015-06-26-11.41.27: src/lib/std/src/string.api:  Add   "prefix_length_in_bytes: (String, Int) -> Int; # Given string and prefix length in chars, return prefix length in bytes."   because screenline.pkg needs it.
+2015-06-23-21.35.18: src/lib/x-kit/widget/edit/textpane.pkg:  Basic vertical scrolling now works.
+2015-06-21-18.22.15: src/lib/x-kit/widget/edit/fundamental-mode.pkg:  Added isearch_backward.  Seems to be working.
+2015-06-21-17.05.03: src/lib/std/src/string.api:  Add  find_substring_backward  (plus prime version) to support backward string searching in general and  isearch_backward  in particular in   src/lib/x-kit/widget/edit/fundamental-mode.pkg.
+2015-06-21-10.56.36: src/lib/x-kit/widget/edit/: fundamental-mode.pkg, textpane.pkg:  Strip out debug stuff.
+2015-06-20-23.31.13: src/lib/x-kit/widget/edit/fundamental-mode.pkg:  isearch_forward() starting to show signs of life.
+2015-06-20-16.35.25: src/lib/std/src/string.api:  Add   find_substring: String -> (String, Int, Int) -> Null_Or( Int );   to provide client access to knuth_morris_pratt_string_match from src/lib/core/init/protostring.pkg.
+2015-06-20-16.07.04: src/lib/core/init/protostring.pkg:  For clarity, renamed  kmp() -> knuth_morris_pratt_string_match().
+2015-06-19-22.32.00: src/lib/x-kit/widget/edit/fundamental-mode.pkg: Added save_buffer(), bound it to C-x C-s.
+2015-06-19-00.38.59: src/lib/x-kit/widget/edit/fundamental-mode.pkg:  find_file:  C-x C-f  successfully loaded a small textfile, redisplayed via textpane.pkg, screenline.pkg etc.
+2015-06-17-18.53.31: src/lib/x-kit/widget/edit/mode-junk.pkg:  Editfn_In:  Add   gadget_to_editboss: Gadget_To_Editboss  field.  (This is what required mutual recursion in the file.)
+2015-06-17-17.39.28: src/lib/x-kit/widget/edit/: Merged textpane-to-textbuffer.pkg + gadget-to-guiboss.pkg into mode-junk.pkg to facilitate mutual recursion.
+2015-06-16-23.05.41: src/lib/std/src/string-junk.pkg:  Established this package to host some utility fns which were in makelib-g.pkg but not makelib-specific. (atoi,atod,basename,dirname,trim.)
+2015-06-14-15.44.01: src/lib/std/src/io/winix-text-file-for-os-g.pkg:  Fix/workaround: as_lines was blocking on close_input(), now it returns expected result.
+2015-06-13-18.50.18: src/lib/x-kit/widget/edit/textpane.pkg:  Mechanism now working to read string (and filename) args via minibuffer and pass them to keystroke fns.
+2015-06-13-15.09.19: src/lib/x-kit/widget/edit/textpane.pkg: modeline now restores properly after reading a prompted string from minibuffer (which shares screen real estate with modeline). Problem was erroneously refreshing minibuffer one last time, after refreshing modeline.
+2015-06-13-13.21.54: src/lib/x-kit/widget/edit/screenline.pkg:  Fixed:  textpane_to_screenline.set_active_to and textpane_to_screenlineset_state_to  were modifying local state while running in callers microthread.  That mistake is too easy to make right now, alas.
+2015-06-12-21.44.56: src/lib/x-kit/widget/edit/textpane.pkg: Much progress toward reading editfn args interactively via minibuffer on modeline screenline.
+2015-06-10-00.49.03: src/lib/x-kit/widget/edit/textpane.pkg:  More preparation for interactively prompting for editfn string args in modeline/minibuffer.
+2015-06-09-23.51.39: src/lib/x-kit/widget/edit/:  Renamed ASCII -> UTF8 a few places as part of trying to move to the blanket presumption that strings are utf8 unless otherwise specified.
+2015-06-09-17.22.31: src/lib/src/numbered-list.api:  remove():  Change result to include only updated list, not removed value.  (Experience to date is that this is much more convenient to client code.)  Ditto for shift() and pop().
+2015-06-09-16.40.35: src/lib/x-kit/widget/edit/:  Eliminated editboss-to-textbuffer.pkg and textbuffer-to-editboss.pkg -- empty and unused interfaces.
+2015-06-08-22.09.58: src/lib/x-kit/widget/edit/mode-junk.pkg:  Editfn_In:  Add  args: List(Prompted_Arg)  field to support editfns which need args interactively read from user (e.g., filenames, search strings).
+2015-06-08-22.02.20: src/lib/x-kit/widget/edit/mode-junk.pkg:  Plain_Editfn:  Add  args: List(Promptfor)  field to support editfns which need args interactively read from user (e.g., filenames, search strings).
+2015-06-08-20.26.00: src/lib/x-kit/widget/edit/textpane-to-screenline.pkg: Linestate:  Add  prompt: String  field to support prompted string entry on modelines.
+2015-06-07-22.04.38: src/lib/x-kit/widget/edit/textpane.pkg:  Rename STATUSLINE/statusline -> MODELINE/modeline for compatibility with emacs nomenclature.  Implement first-cut modeline display logic.
+2015-06-07-18.53.51: src/lib/x-kit/widget/edit/textpane.api: Option:  Add   | STATUSLINE_FN Statusline_Fn  case to support statusline display customization.
+2015-06-07-17.43.14: src/lib/x-kit/widget/edit/: Eliminated minibuffer.pkg (and its interfaces) in favor of using screenline.pkg as a generic solution.
+2015-06-07-17.22.22: src/lib/x-kit/widget/edit/: Eliminated statusline.pkg (and its interfaces) in favor of using screenline.pkg as a generic solution.
+2015-06-07-16.42.40: src/lib/x-kit/widget/edit/: Renamed lineeditor -> screenline because it does not do any editing, and is evolving from a textpane-specific widget into a fairly generic line-of-text display widget.
+2015-06-07-13.15.16: src/lib/x-kit/widget/edit/fundamental-mode.pkg:  yank:  ct::ct::MULTILINE  pastes implemented and apparently working.
+2015-06-07-11.56.54: src/lib/std/src/string.api: Minor tweaks to resultfield names.   src/lib/x-kit/widget/edit/lineeditor.pkg: Better display of cursor when overlapping region.   src/lib/x-kit/widget/edit/fundamental-mode.pkg:  Multiline cut appears to be working now.
+2015-06-06-13.48.47: src/lib/std/src/string-guts.pkg:  expand_tabs_and_control_chars: Reworked to add trailing blanks to output sufficient to encompass screencol1 and screencol2, to reduce number of cases in (e.g.) lineeditor.   src/lib/x-kit/widget/edit/lineeditor.pkg: default_redraw_fn:  Simplified by taking advantage of preceding.
+2015-06-03-23.55.58: src/lib/x-kit/widget/edit/: lineeditor.pkg, fundamental-mode.pkg:  Tweak code so cursor is reverse video but selected region is black-on-cyan(ish).
+2015-06-02-00.19.04: src/lib/x-kit/widget/edit/fundamental-mode.pkg:  Added  kill_region  editfn, bound it to C-w.
+2015-06-01-22.37.19: src/lib/x-kit/widget/edit/textpane.pkg:  Complete support for prefix keys by introducing and using subkeymap__global.  src/lib/x-kit/widget/edit/fundamental-mode.pkg:  Added  exchange_point_and_mark  editfn, bound it to  C-x C-x.
+2015-06-01-21.56.36: src/lib/std/src/string.api:  expand_tabs_and_control_chars:  Rename  cursorcol -> querycol1,  add similar querycol2 arg.   src/lib/x-kit/widget/edit/: lineeditor.pkg, textpane.pkg:  Add support for displaying selected region in reverse video.
+2015-05-31-15.58.23: src/lib/x-kit/widget/edit/fundamental-mode.pkg:  Added  set_mark_command  editfn, bound it to C-@, C-SPC.
+2015-05-31-12.09.12: src/lib/x-kit/widget/edit/mode-junk.pkg:  Add empty_keymap, add_editfn_to_keymap.
+2015-05-30-22.53.33: src/lib/x-kit/widget/edit/fundamental-mode.pkg:  Added  yank  editfn, bound it to C-y.
+2015-05-30-22.39.20: src/lib/x-kit/widget/edit/fundamental-mode.pkg:  Added  kill_whole_line  editfn, bound it to C-o.
+2015-05-30-19.57.28: src/lib/x-kit/widget/edit/gadget-to-editboss.pkg:  Gadget_To_Editboss:  Add  get_cutbuffer_contents, set_cutbuffer_contents  calls.
+2015-05-30-16.15.50: src/lib/x-kit/widget/edit/fundamental-mode.pkg:  Added  newline  editfn, bound it to RET.
+2015-05-30-14.33.57: src/lib/x-kit/widget/edit/fundamental-mode.pkg:  Added  self_insert_command  editfn, bound it to SPC..~.
+2015-05-30-12.42.45: src/lib/x-kit/widget/edit/fundamental-mode.pkg:  Added  delete_backward_char  editfn, bound it to <backspace>.
+2015-05-29-21.47.01: src/lib/x-kit/widget/edit/fundamental-mode.pkg:  Added  delete_char  editfn, bound it to <delete> and C-d.
+2015-05-29-20.39.22: src/lib/x-kit/widget/edit/fundamental-mode.pkg:  Add  move_beginning_of_line, move_end_of_line, bind them to  ^A, ^E respectively. Also <home> and <end> keys.
+2015-05-29-20.07.24: src/lib/x-kit/widget/edit/fundamental-mode.pkg:  previous_char, forward_char:  More work on clean cursor motion, especially end-of-line wrapping.
+2015-05-29-16.28.01: src/lib/std/src/string.api:  expand_tabs_and_control_chars:  Add  textlen_in_screencols: Int  return value.
+2015-05-29-15.09.55: src/lib/x-kit/widget/edit/fundamental-mode.pkg: forward_char and previous_char:  Leverage preceding for better cursor motion.
+2015-05-29-14.16.18: src/lib/std/src/string.api:  expand_tabs_and_control_chars:  Also return byte-offsets of cursor in input and output strings.   src/lib/x-kit/widget/edit/lineeditor.pkg: default_redraw_fn: Leverage preceding for better cursor display.
+2015-05-28-22.43.23: src/lib/x-kit/widget/edit/lineeditor.pkg: default_redraw_fn: Render control chars and tabs sanely using string::expand_tabs_and_control_chars.
+2015-05-28-22.13.28: src/lib/std/src/string.api: Add  byte_offset_of_ith_char: (String, Int) -> Null_Or(Int);
+2015-05-28-21.09.29: src/lib/std/src/string.api: Change  get_char_as_int  from  (String, Int) -> Int  to  (String, Int) -> (Int, Int)  so it can also return next offset to read a char from.  Add  expand_tabs_and_control_chars: String -> String  to expand tabs into blank sequences and control chars into ^A form.
+2015-05-27-22.52.41: src/lib/std/src/string.api:  Add  utf8_to_ucs2:  String -> String;   # Return a string in which each char is encoded using exactly two bytes, most-significant first.  Intended primarily for use with  w2x::x::POLY_TEXT16  in  src/lib/x-kit/widget/xkit/app/guishim-imp-for-x.pkg
+2015-05-27-22.21.10: src/lib/std/src/string.api:  Add  get_char_as_int: (String, Int) -> Int;  to decode UTF-8 encoded chars.  Add  get_char_bytecount: (String, Int) -> Int;  giving number of bytes used to encode char at given byte offset in string.
+2015-05-27-20.35.57: src/lib/std/src/string.api: Add get_byte as Int-valued alternative to get_byte_as_char.
+2015-05-27-18.05.40: src/lib/std/src/string.api:  Rename  get -> get_byte_as_char, as more groundwork for utf8 support.
+2015-05-27-01.36.26: src/lib/core/init/built-in.pkg:  package vector_of_chars:  As groundwork for UTF-8 support, renamed  get -> get_byte_as_char,  get_with_boundscheck -> get_byte_as_char_with_boundscheck,  set -> set_char_as_byte,  and added new  get_byte, get_byte_with_boundscheck, set_byte fns (which take Int instead of Char args).
+2015-05-26-23.38.40: src/lib/std/src/string.api:  Another bit of UTF-8 support:  Added  length_in_chars: String -> Int;
+2015-05-26-23.10.41: src/lib/std/src/string.api:  Another bit of incipient utf8 support:  Add  is_ascii: String -> Bool; # TRUE iff all bytes in string have high bit equal to zero.
+2015-05-26-12.12.01: src/lib/std/src/string.api: Renamed  length -> length_in_bytes  as a first step toward utf8 support.
+2015-05-25-23.38.19: src/lib/x-kit/widget/edit/lineeditor.pkg:  default_redraw_fn:  Fixed:  Had   if (cursor_col > textlen)   where   if (cursor_col >= textlen)   was needed.
+2015-05-25-18.05.41: src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp-types.pkg:  Key_Event_Fn_Arg:  Renamed  string -> keystring, char -> keychar for better symmetry with keycode and keysym fieldnames.
+2015-05-25-14.11.40: src/lib/x-kit/widget/edit/mode-junk.pkg: Revise editfn interface.
+2015-05-24-20.38.44: src/lib/x-kit/xclient/src/window/font-index.pkg:  make_font:  Support returning either FINFO8 or FINFO16 as appropriate. Now (some?) UTF-8 fonts work! :-) (Previously code returned only FINFO8 and otherwise errored out. Not sure why.   src/lib/x-kit/widget/xkit/theme/widget/default/widget-theme-imp.pkg: Switch default normal/bold/italic fonts to   misc-fixed-medium-[...]-*-*-%d-75-75-c-*-iso10646-1   family.  Increase default size from 8 to 13, which seems to look better with these fonts.
+2015-05-23-11.46.59: src/lib/x-kit/widget/edit/: lineeditor.pkg; Disabled cursor blinking -- slows down typing when cursor is invisible half the time.  Established keymap-types.pkg + keymap-fns.pkg. Basic cursor motion now working.
+2015-05-23-01.38.01: src/lib/x-kit/widget/edit/textpane.pkg: First-cut cursor motion driven by ^F/^P/^B/^N keystrokes should be ready to test.
+2015-05-22-12.14.21: src/lib/x-kit/widget/edit/: Establish textbuffer-junk.pkg, textbuffer-junk.api, textbuffer-types.pkg.
 2015-05-21-22.37.47: src/lib/x-kit/widget/edit/lineeditor.pkg:  default_redraw_fn:  First-cut cursor display logic working.
 2015-05-21-17.39.08: src/lib/std/src/string.api: Added   repeat: (String, Int) -> String;   where   repeat ("abc", 2)  -->  "abcabc".
 2015-05-20-21.30.12: src/lib/x-kit/widget/edit/textpane.pkg: Implemented  refresh_lineeditors  to display textbuffer contents.

@@ -107,7 +107,7 @@ herein
 
         package out =  plain_file_prettyprint_output_stream_avoiding_pointless_file_rewrites;	# plain_file_prettyprint_output_stream_avoiding_pointless_file_rewrites	is from   src/lib/prettyprint/big/src/out/plain-file-prettyprint-output-stream-avoiding-pointless-file-rewrites.pkg
 	package p   =  prettyprint;								# prettyprint									is from   src/app/c-glue-maker/prettyprint.pkg
-	package pp  =  plain_file_prettyprint_mill_avoiding_pointless_file_rewrites;		# plain_file_prettyprint_mill_avoiding_pointless_file_rewrites			is from   src/lib/prettyprint/big/src/plain-file-prettyprint-mill-avoiding-pointless-file-rewrites.pkg
+	package pp  =  plain_file_prettyprinter_avoiding_pointless_file_rewrites;		# plain_file_prettyprinter_avoiding_pointless_file_rewrites			is from   src/lib/prettyprint/big/src/plain-file-prettyprinter-avoiding-pointless-file-rewrites.pkg
 	package ss  =  string_set;								# string_set									is from   src/lib/src/string-set.pkg
 	package sm  =  string_map;								# string_map									is from   src/lib/src/string-map.pkg
 	package im  =  int_red_black_map;							# int_red_black_map								is from   src/lib/src/int-red-black-map.pkg
@@ -153,11 +153,11 @@ herein
 	fun estring s =   evar (cat ["\"", string::to_string s, "\""]);
 
 	fun warn m =   fil::write (fil::stderr, "warning: " + m);
-	fun err  m =   raise exception FAIL (cat ("gen: " ! m));
+	fun err  m =   raise exception DIE (cat ("gen: " ! m));
 
-	fun unimp     what =   raise exception FAIL ("unimplemented type: " + what);
-	fun unimp_arg what =   raise exception FAIL ("unimplemented argument type: " + what);
-	fun unimp_res what =   raise exception FAIL ("unimplemented result type: " + what);
+	fun unimp     what =   raise exception DIE ("unimplemented type: " + what);
+	fun unimp_arg what =   raise exception DIE ("unimplemented argument type: " + what);
+	fun unimp_res what =   raise exception DIE ("unimplemented result type: " + what);
 
 	writeto = "write'to";
 
@@ -770,7 +770,7 @@ herein
 		    stem s::FLOAT     => "Float";
 		    stem s::DOUBLE    => "Double";
 		    stem s::VOIDPTR   => "Voidptr";
-		    stem _            => raise exception FAIL "bad stem";
+		    stem _            => raise exception DIE "bad stem";
 		end;
 
 		fun insert_name (c_name, string_set)
@@ -962,7 +962,7 @@ herein
 		    \\ n
                         =
 		        if (n >= 0)   dim_ty n;
-		        else          raise exception FAIL "negative dimension";
+		        else          raise exception DIE "negative dimension";
                         fi;
 
 		fun suchunk'rw p sut =   type_constructor ("Su_Chunk" + p, [sut, typ "Rw"]);
@@ -1194,7 +1194,7 @@ herein
 
 				 case (%? (fptr_types, cfth))
 				     THE (_, i) =>   evar (fptr_rtti_struct_id_cc_type i);
-				     NULL       =>   raise exception FAIL "fptr type missing";
+				     NULL       =>   raise exception DIE "fptr type missing";
 				 esac;
 			     };
 
@@ -1222,7 +1222,7 @@ herein
 
 			case (%? (fptr_types, h))
 			    THE (_, i) =>  fptr_rtti_struct_id_cc_makecall  i;
-			    NULL       =>  raise exception FAIL "missing fptr_type (makecall)";
+			    NULL       =>  raise exception DIE "missing fptr_type (makecall)";
 			esac;
 		    };
 
@@ -1245,7 +1245,7 @@ herein
                     where
 		        output_stream  =  out::make_plain_file_prettyprinter_output_stream_avoiding_pointless_file_rewrites  f;
 			#
-			pp  =  pp::make_plain_file_prettyprint_mill_avoiding_pointless_file_rewrites  output_stream;
+			pp  =  pp::make_plain_file_prettyprinter_avoiding_pointless_file_rewrites  output_stream;
 
 			fun nl ()      =  pp::newline pp;
 			fun str s      =  pp::lit pp s;
@@ -1318,7 +1318,7 @@ herein
 
 			fun close_pp ()
 			    =
-			    {   pp::close_prettyprint_mill       pp;
+			    {   pp::close_prettyprinter       pp;
 				out::close  output_stream;
 			    };
 
@@ -1505,7 +1505,7 @@ herein
 
 			    encode (s::ARR _)
                                 =>
-                                raise exception FAIL "unexpected rw_vector";
+                                raise exception DIE "unexpected rw_vector";
 
 			    encode (s::ENUM _)
                                 =>
@@ -1588,7 +1588,7 @@ herein
 
 			    mlty (s::ENUM _)             => typ "c_memory::cc_sint";
 			    mlty (s::UNIMPLEMENTED what) => unimp what;
-			    mlty (s::ARR _)              => raise exception FAIL "unexpected type";
+			    mlty (s::ARR _)              => raise exception DIE "unexpected type";
 			end;
 
 			fun wrap (e, n)
@@ -1651,7 +1651,7 @@ herein
 					 s::FPTR _  =>  sel (fwrap p);
 
 					 s::UNIMPLEMENTED what =>  unimp_arg what;
-					 s::ARR _              =>  raise exception FAIL "unexpected rw_vector argument";
+					 s::ARR _              =>  raise exception DIE "unexpected rw_vector argument";
                                      esac;
 				 };
 			end;
@@ -1719,7 +1719,7 @@ herein
 
 						(s::STRUCT _ | s::UNION _ | s::ARR _)
 						     =>
-						     raise exception FAIL "unexpected result type";
+						     raise exception DIE "unexpected result type";
 					    esac;
 
 					(mlty t, [], [], [], res_wrap);
@@ -2561,7 +2561,7 @@ herein
 				    one_arg (e, s::VOIDPTR) =>  e;
 
 				    one_arg (e, s::UNIMPLEMENTED what) =>  unimp_arg what;
-				    one_arg (e, s::ARR _)              =>  raise exception FAIL "rw_vector argument type";
+				    one_arg (e, s::ARR _)              =>  raise exception DIE "rw_vector argument type";
 				end;
 
 				c_exps =   paired_lists::map  one_arg  (ml_vars, args);
@@ -2602,7 +2602,7 @@ herein
 					THE (s::ENUM ta)     => eapp (evar "convert::c2i_enum", call);
 					THE (t as s::PTR _)  => heavy ("ptr", t, call);
 					THE (t as s::FPTR _) => heavy ("fptr", t, call);
-					THE (s::ARR _)       => raise exception FAIL "rw_vector result type";
+					THE (s::ARR _)       => raise exception DIE "rw_vector result type";
 
 					THE (s::UNIMPLEMENTED what) => unimp_res what;
 					(NULL | THE s::VOIDPTR)     => call;

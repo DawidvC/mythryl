@@ -51,11 +51,11 @@ stipulate
 #   package xt  =  xtypes;					# xtypes			is from   src/lib/x-kit/xclient/src/wire/xtypes.pkg
 #   package xtr =  xlogger;					# xlogger			is from   src/lib/x-kit/xclient/src/stuff/xlogger.pkg
 
-    package o2c =  object_to_objectspace;			# object_to_objectspace		is from   src/lib/x-kit/widget/space/widget/object-to-objectspace.pkg
+    package o2c =  object_to_objectspace;			# object_to_objectspace		is from   src/lib/x-kit/widget/space/object/object-to-objectspace.pkg
 
     package gt  =  guiboss_types;				# guiboss_types			is from   src/lib/x-kit/widget/gui/guiboss-types.pkg
 
-    package pp  =  standard_prettyprint_mill;			# standard_prettyprint_mill	is from   src/lib/prettyprint/big/src/standard-prettyprint-mill.pkg
+    package pp  =  standard_prettyprinter;			# standard_prettyprinter	is from   src/lib/prettyprint/big/src/standard-prettyprinter.pkg
     #
     tracefile   =  "widget-unit-test.trace.log";
 herein
@@ -63,9 +63,6 @@ herein
     package objectspace_imp
     :       Objectspace_Imp											# Objectspace_Imp		is from   src/lib/x-kit/widget/space/object/objectspace-imp.api
     {
-	#
-#	include package   guiboss_to_objectspace;								# guiboss_to_objectspace	is from   src/lib/x-kit/widget/space/object/guiboss-to-objectspace.pkg
-	#
 	Objectspace_State											# Holds all nonephemeral mutable state maintained by shape.
 	  =
 	  { id:		Id,
@@ -93,7 +90,7 @@ herein
                             );
 
 	Runstate =  {													# These values will be statically globally visible throughout the code body for the imp.
-		      me:		Objectspace_State,								# State which is preserved across imp shutdown/restart cycles.
+		      me:		Objectspace_State,								# 
 		      options:		List(gt::Objectspace_Option),
 		      imports:		Imports,									# Imps to which we send requests.
 		      to:		Replyqueue,									# The name makes   foo::pass_something(imp) to {. ... }   syntax read well.
@@ -117,7 +114,7 @@ herein
 		  #
 		  runstate as
 		  {													# These values will be statically globally visible throughout the code body for the imp.
-		    me:			Objectspace_State,								# State which is preserved across imp shutdown/restart cycles.
+		    me:			Objectspace_State,								# 
 		    options:		List(gt::Objectspace_Option),
 		    imports:		Imports,									# Imps to which we send requests.
 		    to:			Replyqueue,									# The name makes   foo::pass_something(imp) to {. ... }   syntax read well.

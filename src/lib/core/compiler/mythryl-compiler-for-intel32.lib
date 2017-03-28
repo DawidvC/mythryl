@@ -36,11 +36,11 @@ LIBRARY_EXPORTS
 	api Compiledfile
 	api Anormcode_Form
 
-	api Base_Prettyprint_Mill
-	pkg base_prettyprint_mill
+	api Base_Prettyprinter
+	pkg base_prettyprinter
 
-	api Standard_Prettyprint_Mill
-	pkg standard_prettyprint_mill
+	api Standard_Prettyprinter
+	pkg standard_prettyprinter
 
 	api Type_Declaration_Types
         pkg type_declaration_types
@@ -96,7 +96,7 @@ LIBRARY_EXPORTS
 	pkg compiledfile
 	pkg print_hooks
 	pkg mythryl_compiler_version
-	pkg per_compile_data
+	pkg per_compile_stuff
 	pkg compilation_exception
 	pkg core_symbol
 	pkg anormcode_form
@@ -115,6 +115,9 @@ LIBRARY_EXPORTS
         pkg prettyprint_type
         pkg varhome
         pkg unify_typoids
+        pkg import_tree
+        pkg highcode_codetemp
+        pkg code_segment
 
 	# The intel32 compiler versions:
 	#
@@ -130,4 +133,4 @@ LIBRARY_COMPONENTS
 	$ROOT/src/lib/core/viscomp/execute.lib
 	$ROOT/src/lib/core/viscomp/core.lib
 	$ROOT/src/lib/compiler/mythryl-compiler-support-for-intel32.lib
-	$ROOT/src/lib/prettyprint/big/prettyprint-mill.lib
+	$ROOT/src/lib/prettyprint/big/prettyprinter.lib

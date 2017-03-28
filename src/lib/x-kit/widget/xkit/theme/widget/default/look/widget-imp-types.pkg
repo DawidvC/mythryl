@@ -1,8 +1,9 @@
 # widget-imp-types.pkg
 #
-# Moved these types here from
-#     src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp.pkg
-# to avoid a package cycle.
+# Here we define the hook functions which a client may supply
+# in order to customize the behavior of a widget.  This is the
+# interface used by specialized widgets to define their behavior
+# layered on top of the basic services supplied by widget-imp.pkg.
 
 # Compiled by:
 #     src/lib/x-kit/widget/xkit-widget.sublib
@@ -15,7 +16,7 @@ stipulate
 
     package gd  =  gui_displaylist;				# gui_displaylist		is from   src/lib/x-kit/widget/theme/gui-displaylist.pkg
 
-    package pp  =  standard_prettyprint_mill;			# standard_prettyprint_mill	is from   src/lib/prettyprint/big/src/standard-prettyprint-mill.pkg
+    package pp  =  standard_prettyprinter;			# standard_prettyprinter	is from   src/lib/prettyprint/big/src/standard-prettyprinter.pkg
     package r8  =  rgb8;					# rgb8				is from   src/lib/x-kit/xclient/src/color/rgb8.pkg
     #
     package g2d =  geometry2d;					# geometry2d			is from   src/lib/std/2d/geometry2d.pkg
@@ -27,7 +28,6 @@ stipulate
     package gt  =  guiboss_types;				# guiboss_types			is from   src/lib/x-kit/widget/gui/guiboss-types.pkg
     package wt  =  widget_theme;				# widget_theme			is from   src/lib/x-kit/widget/theme/widget/widget-theme.pkg
 
-    package iuw =  issue_unique_widget_id;			# issue_unique_widget_id	is from   src/lib/x-kit/widget/gui/issue-unique-widget-id.pkg
     package g2p =  gadget_to_pixmap;				# gadget_to_pixmap		is from   src/lib/x-kit/widget/theme/gadget-to-pixmap.pkg
 
     #
@@ -44,33 +44,30 @@ herein
 	#
 	Widget												# This turns out not to get used in practice, and probably should be dropped if no use turns up for it.
 	  =
-	  { id:					iuw::Id,						# Unique id to facilitate storing node_state instances in indexed datastructures like red-black trees.
+	  { id:					Id,							# Unique id to facilitate storing node_state instances in indexed datastructures like red-black trees.
 	    pass_something:			Replyqueue -> (Int -> Void) -> Void,
 	    do_something:			Int -> Void,
 	    do:					(Void -> Void) -> Void					# Used by widget subthreads to run code in main widget microthread.
 	  };
 
-	Startup_Fn
+	Startup_Fn_Arg
 	  =
-	  { id:					iuw::Id,						# Unique id.
-	    doc:				String,
+	  { id:					Id,							# Unique id of this widget.
+	    doc:				String,							# Text description of this widget for debug/display purposes.
 	    widget_to_guiboss:			gt::Widget_To_Guiboss,
-	    do:					(Void -> Void) -> Void					# Used by widget subthreads to run code in main widget microthread.
-	  }
-	  ->
-	  Void;
+	    do:					(Void -> Void) -> Void,					# Used by widget subthreads to run code in main widget microthread.
+	    to:					Replyqueue
+	  };
+	Startup_Fn = Startup_Fn_Arg -> Void;
 
-	Shutdown_Fn
-	  =
-	  Void
-	  ->
-	  Void;												# 
+	Shutdown_Fn_Arg =  Void;
+	Shutdown_Fn     =  Shutdown_Fn_Arg -> Void;
 
 	Initialize_Gadget_Fn_Arg
 	  =
 	  {
-	    id:					iuw::Id,						# Unique id.
-	    doc:				String,
+	    id:					Id,							# Unique id of this widget.
+	    doc:				String,							# Text description of this widget for debug/display purposes.
 	    site:				g2d::Box,						# Window rectangle in which to draw.
 	    widget_to_guiboss:			gt::Widget_To_Guiboss,
 	    theme:				wt::Widget_Theme,
@@ -87,8 +84,8 @@ herein
 	Redraw_Request_Fn_Arg
 	  =
 	  {
-	    id:					iuw::Id,						# Unique id.
-	    doc:				String,
+	    id:					Id,							# Unique id of this widget.
+	    doc:				String,							# Text description of this widget for debug/display purposes.
 	    frame_number:			Int,							# 1,2,3,... Purely for convenience of widget, guiboss-imp makes no use of this.
 	    site:				g2d::Box,						# Window rectangle in which to draw.
 	    frame_indent_hint:			gt::Frame_Indent_Hint,
@@ -105,10 +102,10 @@ herein
 	Mouse_Click_Fn_Arg
 	  =
 	  {
-	    id:					iuw::Id,						# Unique id.
-	    doc:				String,
-	    event:				gt::Mousebutton_Event,					# MOUSEBUTTON_PRESS or MOUSEBUTTON_RELEASE.
+	    id:					Id,							# Unique id of this widget.
+	    doc:				String,							# Text description of this widget for debug/display purposes.
 	    button:				evt::Mousebutton,
+	    event:				gt::Mousebutton_Event,					# MOUSEBUTTON_PRESS or MOUSEBUTTON_RELEASE.
 	    point:				g2d::Point,
 	    widget_layout_hint:			gt::Widget_Layout_Hint,
 	    frame_indent_hint:			gt::Frame_Indent_Hint,
@@ -125,16 +122,16 @@ herein
 	Mouse_Drag_Fn_Arg
 	  =
 	  {
-	    id:					iuw::Id,						# Unique id.
-	    doc:				String,
+	    id:					Id,							# Unique id of this widget.
+	    doc:				String,							# Text description of this widget for debug/display purposes.
+	    button:				evt::Mousebutton,
 	    event_point:			g2d::Point,
 	    start_point:			g2d::Point,
 	    last_point:				g2d::Point,
+	    phase:				gt::Drag_Phase,	
 	    widget_layout_hint:			gt::Widget_Layout_Hint,
 	    frame_indent_hint:			gt::Frame_Indent_Hint,
 	    site:				g2d::Box,						# Widget's assigned area in window coordinates.
-	    phase:				gt::Drag_Phase,	
-	    button:				evt::Mousebutton,
 	    modifier_keys_state:	        evt::Modifier_Keys_State,				# State of the modifier keys (shift, ctrl...).
 	    mousebuttons_state:		        evt::Mousebuttons_State,				# State of mouse buttons as a bool record.
 	    widget_to_guiboss:			gt::Widget_To_Guiboss,
@@ -147,13 +144,13 @@ herein
 	Mouse_Transit_Fn_Arg										# Note that buttons are always all up in a mouse-transit event -- otherwise it is a mouse-drag event.
 	  =
 	  {
-	    id:					iuw::Id,						# Unique id.
-	    doc:				String,
+	    id:					Id,							# Unique id of this widget.
+	    doc:				String,							# Text description of this widget for debug/display purposes.
+	    transit:				gt::Gadget_Transit,					# Mouse is entering (CAME) or leaving (LEFT) widget, or moving (MOVE) across it.
 	    event_point:			g2d::Point,
 	    widget_layout_hint:			gt::Widget_Layout_Hint,
 	    frame_indent_hint:			gt::Frame_Indent_Hint,
 	    site:				g2d::Box,						# Widget's assigned area in window coordinates.
-	    transit:				gt::Gadget_Transit,					# Mouse is entering (CAME) or leaving (LEFT) widget, or moving (MOVE) across it.
 	    modifier_keys_state:	        evt::Modifier_Keys_State,				# State of the modifier keys (shift, ctrl...).
 	    widget_to_guiboss:			gt::Widget_To_Guiboss,
 	    theme:				wt::Widget_Theme,
@@ -165,30 +162,37 @@ herein
 	Key_Event_Fn_Arg
 	  =
 	  {
-	    id:					iuw::Id,						# Unique id.
-	    doc:				String,
-	    key_event:				gt::Key_Event,						# KEY_PRESS or KEY_RELEASE
-	    keycode:				evt::Keycode,						# Keycode of the depressed key. (Is this of any conceivable use?)
-	    keysym:				evt::Keysym,						# Keysym  of the depressed key.  See Note[1].  See Note[1] in src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp.api
-	    string:				String,							# Ascii  for the depressed key.  See Note[1].  See Note[1] in src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp.api
-	    char:				Char,							# First char of 'string' ('\0' if string-length != 1).
-	    event_point:			g2d::Point,
+	    id:					Id,							# Unique id of this widget.
+	    doc:				String,							# Text description of this widget for debug/display purposes.
+	    keystroke:				gt::Keystroke_Info,					# Keystring etc for event.
 	    widget_layout_hint:			gt::Widget_Layout_Hint,
 	    frame_indent_hint:			gt::Frame_Indent_Hint,
 	    site:				g2d::Box,						# Widget's assigned area in window coordinates.
-	    modifier_keys_state:	        evt::Modifier_Keys_State,				# State of the modifier keys (shift, ctrl...).
-	    mousebuttons_state:		        evt::Mousebuttons_State,				# State of mouse buttons as a bool record.
 	    widget_to_guiboss:			gt::Widget_To_Guiboss,
+	    guiboss_to_widget:			gt::Guiboss_To_Widget,					# Used by textpane.pkg keystroke-macro stuff to synthesize fake keystroke events to widget.
 	    theme:				wt::Widget_Theme,
 	    do:					(Void -> Void) -> Void,					# Used by widget subthreads to run code in main widget microthread.
 	    to:					Replyqueue						# Used to call 'pass_*' methods in other imps.
 	  };
 	Key_Event_Fn = Key_Event_Fn_Arg -> Void;
 
+	Note_Keyboard_Focus_Fn_Arg
+	  =
+	  {
+	    id:					Id,							# Unique id of this widget.
+	    doc:				String,							# Text description of this widget for debug/display purposes.
+	    have_keyboard_focus:		Bool,							# 
+	    widget_to_guiboss:			gt::Widget_To_Guiboss,
+	    theme:				wt::Widget_Theme,
+	    do:					(Void -> Void) -> Void,					# Used by widget subthreads to run code in main widget microthread.
+	    to:					Replyqueue						# Used to call 'pass_*' methods in other imps.
+	  };
+	Note_Keyboard_Focus_Fn = Note_Keyboard_Focus_Fn_Arg -> Void;
+
 	Widget_Option
 	    #
 	    = MICROTHREAD_NAME			String							# 
-	    | ID				iuw::Id							# Unique ID for imp, issued by issue_unique_id::issue_unique_id().
+	    | ID				Id							# Unique ID for imp, issued by issue_unique_id::issue_unique_id().
 	    | DOC				String							# Documentation string for widget, for debugging purposes.
 	    #
 	    | WIDGET_CONTROL_CALLBACK		( gt::Guiboss_To_Widget -> Void )			# Gui boss registers this maildrop to get a port to us once we start up.
@@ -206,6 +210,7 @@ herein
 	    | MOUSE_TRANSIT_FN			Mouse_Transit_Fn					# Application-specific handler for mouse motions.       Fn should call gadget_to_guiboss.needs_redraw_gadget_request() if widget needs to redraw in response to user input.
 	    #
 	    | KEY_EVENT_FN			Key_Event_Fn						# Application-specific handler for keyboard input.      Fn should call gadget_to_guiboss.needs_redraw_gadget_request() if widget needs to redraw in response to user input.
+	    | NOTE_KEYBOARD_FOCUS_FN		Note_Keyboard_Focus_Fn
 	    #
 	    | PIXELS_HIGH_MIN			Int							# Widget is guaranteed this many vertical   pixels (but may get pushed out of sight on bottom of the COL it is in).
 	    | PIXELS_WIDE_MIN			Int							# Widget is guaranteed this many horizontal pixels (but may get pushed out of sight on right  of the ROW it is in).
@@ -243,5 +248,5 @@ end;
 ##########################################################################
 
 
-## Original code by Jeff Prothero Copyright (c) 2014-2014,
+## Original code by Jeff Prothero Copyright (c) 2014-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

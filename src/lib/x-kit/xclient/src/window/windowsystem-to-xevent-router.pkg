@@ -38,7 +38,7 @@ herein
 	Windowsystem_To_Xevent_Router
 	  =
 	  {
-	    note_new_topwindow
+	    note_new_hostwindow
 	      :
 	      ( xt::Window_Id,
 		g2d::Window_Site,
@@ -117,5 +117,5 @@ end;
 
 
 ## COPYRIGHT (c) 1990, 1991 by John H. Reppy.  See SMLNJ-COPYRIGHT file for details.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

@@ -16,6 +16,9 @@
 # Ocaml lacks it and as a result must have (for example)
 # a separate multiply op for every numeric type (ick!).
 
+# Compiled by:
+#     src/lib/compiler/front/typer/typer.sublib
+
 
 # Compiled by:
 #     src/lib/compiler/front/typer/typer.sublib
@@ -66,7 +69,7 @@ stipulate
     package ip  =  inverse_path;					# inverse_path				is from   src/lib/compiler/front/typer-stuff/basics/symbol-path.pkg
     package mtt =  more_type_types;					# more_type_types			is from   src/lib/compiler/front/typer/types/more-type-types.pkg
     package pds =  prettyprint_deep_syntax;				# prettyprint_deep_syntax		is from   src/lib/compiler/front/typer/print/prettyprint-deep-syntax.pkg
-    package pp  =  standard_prettyprint_mill;				# standard_prettyprint_mill		is from   src/lib/prettyprint/big/src/standard-prettyprint-mill.pkg
+    package pp  =  standard_prettyprinter;				# standard_prettyprinter		is from   src/lib/prettyprint/big/src/standard-prettyprinter.pkg
     package ppt =  prettyprint_type;					# prettyprint_type			is from   src/lib/compiler/front/typer/print/prettyprint-type.pkg
     package rol =  resolve_overloaded_literals;				# resolve_overloaded_literals		is from   src/lib/compiler/front/typer/types/resolve-overloaded-literals.pkg
     package rov =  resolve_overloaded_variables;			# resolve_overloaded_variables		is from   src/lib/compiler/front/typer/types/resolve-overloaded-variables.pkg
@@ -162,7 +165,7 @@ herein
 																#       o Instead of assigning 'swap' a normal		# In fp jargon this is called a "type scheme".
 																#	  type, we assign it a "typescheme"		# We represent them using TYPESCHEME records and
 																#         (template) for a type, with holes		# we represent the 'holes' with TYPESCHEME_ARG,
-																#	  where all the type variables should be.	# both from    src/lib/compiler/front/typer-stuff/types/types.pkg
+																#	  where all the type variables should be.	# both from    ssrc/lib/compiler/front/typer-stuff/types/type-declaration-types.pkg
 																#     
 																#       o Each time we come to a call to 'swap'		# This copy-and-complete is implemented by
 																#         we generate a fresh type for it by		#     tyj::instantiate_if_typescheme()
@@ -352,7 +355,7 @@ internals   =   log::debugging;
 																#
 																#     src/lib/compiler/front/typer-stuff/types/type-junk.pkg
 																#
-																# We get called from two spots in type_declaration'() in
+																# We are called (only) from type_declaration'() in
 																#
 																#     src/lib/compiler/front/typer/main/type-package-language-g.pkg
 																#
@@ -1961,7 +1964,7 @@ internals   =   log::debugging;
 																 if_debugging_say "\ncompute_expression_type/ds::VARIABLE_IN_EXPRESSION/vac::PLAIN_VARIABLE/TOP.   [type-core-language-declaration-g.pkg]";
 																 if_debugging_unparse_typoid("\ncompute_expression_type/ds::VARIABLE_IN_EXPRESSION/vac::PLAIN_VARIABLE unparse [type-core-language-declaration-g.pkg]: *vartypoid_ref == ", *vartypoid_ref);
 																 if_debugging_prprint_typoid("\ncompute_expression_type/ds::VARIABLE_IN_EXPRESSION/vac::PLAIN_VARIABLE prprint [type-core-language-declaration-g.pkg]: *vartypoid_ref == ", *vartypoid_ref);
-					case (inlining_data_to_my_type  inlining_data)						# For builtins like string::get, inlining_data was set up from   all_primops   in   src/lib/compiler/front/semantic/symbolmapstack/base-types-and-ops.pkg
+					case (inlining_data_to_my_type  inlining_data)						# For builtins like string::get_byte_as_char, inlining_data was set up from   all_primops   in   src/lib/compiler/front/semantic/symbolmapstack/base-types-and-ops.pkg
 					    #
 					    THE inl_typoid
 						=>
@@ -2370,20 +2373,31 @@ internals   =   log::debugging;
 						   error_function source_code_region err::ERROR
 						       (message("Operator and operand do not agree", mode))
 						       (\\ pp
-							   =
-							   {   pp.newline();
-							       pp.lit "operator domain: ";
-							       unparse_typoid pp  (mtt::domain reduced_operator_type);
-							       pp.newline();
+							    =
+							    {
+#								pp.newline();
+								pp::break pp { blanks=>1, indent_on_wrap=>2 };
+								pp.box' 0 0 {.
+								    pp.lit "operator domain: ";
+								    unparse_typoid pp  (mtt::domain reduced_operator_type);
+								};
+								pp::break pp { blanks=>1, indent_on_wrap=>2 };
+#								pp.newline();
 
-							       pp.lit "operand:         ";
-							       unparse_typoid pp  operand_type;
-							       pp.newline();
+								pp.box' 0 0 {.
+								    pp.lit "operand:         ";
+								    unparse_typoid pp  operand_type;
+								};
+								pp::break pp { blanks=>1, indent_on_wrap=>2 };
+#								pp.newline();
 
-							       pp.lit "in expression:";
-							       pp::break pp { blanks=>1, indent_on_wrap=>2 };
-							       unparse_expression pp (given_expression, *print_depth);
-							   }
+								pp.box' 0 0 {.
+								    pp.lit "in expression:";
+								    pp::break pp { blanks=>1, indent_on_wrap=>2 };
+								    unparse_expression pp (given_expression, *print_depth);
+								};
+								pp::break pp { blanks=>1, indent_on_wrap=>2 };
+							    }
 						       );
 
 						    (given_expression, tdt::WILDCARD_TYPOID);
@@ -3873,5 +3887,5 @@ end;
 
 
 ## Copyright 1996 by Bell Laboratories 
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

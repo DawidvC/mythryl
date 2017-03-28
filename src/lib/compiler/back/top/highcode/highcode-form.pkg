@@ -30,7 +30,7 @@ stipulate
     package hct =  highcode_type;				# highcode_type			is from   src/lib/compiler/back/top/highcode/highcode-type.pkg
     package hut =  highcode_uniq_types;				# highcode_uniq_types		is from   src/lib/compiler/back/top/highcode/highcode-uniq-types.pkg
     package lms =  list_mergesort;				# list_mergesort		is from   src/lib/src/list-mergesort.pkg
-    package pp  =  standard_prettyprint_mill;			# standard_prettyprint_mill	is from   src/lib/prettyprint/big/src/standard-prettyprint-mill.pkg
+    package pp  =  standard_prettyprinter;			# standard_prettyprinter	is from   src/lib/prettyprint/big/src/standard-prettyprinter.pkg
     package tmp =  highcode_codetemp;				# highcode_codetemp		is from   src/lib/compiler/back/top/highcode/highcode-codetemp.pkg
 			#
 			# Really should not refer to this.
@@ -2383,5 +2383,5 @@ end;											#  top-level stipulate
 
 
 ## Copyright (c) 1997 YALE FLINT PROJECT 
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

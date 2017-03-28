@@ -52,6 +52,9 @@
 #	because one can simply choose a different ray that is not coincident
 #	with a segment.
 
+# Compiled by:
+#     src/lib/x-kit/xclient/xclient-internals.sublib
+
 
 # Compiled by:
 #     src/lib/x-kit/xclient/xclient-internals.sublib
@@ -345,5 +348,5 @@ end;
 
 
 ## COPYRIGHT (c) 1990, 1991 by John H. Reppy.  See SMLNJ-COPYRIGHT file for details.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

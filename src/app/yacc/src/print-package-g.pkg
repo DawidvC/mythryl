@@ -268,11 +268,11 @@ generic package print_package_g (
 		  \    string_to_int = \\\\ () = \n\
 		  \    {    i = *index;\n\
 		  \         index := i+2;\n\
-		  \         char::to_int (string::get(*s, i)) + char::to_int (string::get(*s, i+1)) * 256;\n\
+		  \         string::get_byte(*s, i) + string::get_byte(*s, i+1) * 256;\n\
 		  \    };\n\
 		  \\n\
 		  \    string_to_list = \\\\ s' =\n\
-		  \    {   len = string::length s';\n\
+		  \    {   len = string::length_in_bytes s';\n\
 		  \        fun f () =\n\
 		  \           if (*index < len)\n\
 		  \           string_to_int() ! f();\n\
@@ -302,7 +302,7 @@ generic package print_package_g (
 		  \   };\n\
 		  \\n\
 		  \    string_to_table = \\\\ (convert_row, s') =\n\
-		  \    {   len = string::length s';\n\
+		  \    {   len = string::length_in_bytes s';\n\
 		  \        fun f ()\n\
 		  \            =\n\
 		  \           if (*index < len)\n\

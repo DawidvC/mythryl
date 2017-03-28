@@ -69,7 +69,7 @@ herein
 	# Generate code for transitions: generate a hard-coded binary
 	# search on accepting characters
 
-	fun mk_trans ([ ], _) =>  raise exception FAIL "(BUG) SMLFunOutput: alphabet not covered";
+	fun mk_trans ([ ], _) =>  raise exception DIE "(BUG) SMLFunOutput: alphabet not covered";
 	    mk_trans ([t], _) =>  action_of t;
 
 	    mk_trans ([t1, t2], _)
@@ -106,7 +106,7 @@ herein
 		    #
 		    fun split (    ls,  0,  l1) =>  (list::reverse l1, ls);
 			split (l ! ls, count, l1) =>  split (ls, count - 1, l ! l1);
-			split _                 =>  raise exception FAIL "(BUG) SMLFunOutput: split failed";
+			split _                 =>  raise exception DIE "(BUG) SMLFunOutput: split failed";
 		    end;
 
 		    my (ts1, ts2)
@@ -384,7 +384,7 @@ herein
 
 		lexer_expression =   vector::keyed_fold_backward mk_action states_expression actions;
 
-		prettyprint_stream =   plain_file_prettyprint_mill::make_plain_file_prettyprint_mill { output_stream => stream };
+		prettyprint_stream =   plain_file_prettyprinter::make_plain_file_prettyprinter { output_stream => stream };
 
 		ml::prettyprint_ml (prettyprint_stream, lexer_expression);
 	    };
@@ -416,7 +416,7 @@ herein
 	    =
 	    {   spec ->  lo::SPEC { arg, ... };
 		#
-		arg' =  if (string::length arg == 0)
+		arg' =  if (string::length_in_bytes arg == 0)
 			    #
 			    "(yyarg as ())";
 		        else
@@ -473,7 +473,7 @@ end;
 ## Aaron Turon (adrassi@gmail.com)
 ## All rights reserved.
 ## COPYRIGHT (c) 2005 
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.
 
 

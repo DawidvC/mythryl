@@ -104,11 +104,11 @@ in
 		end
 	end
 		    
-	fun isIn pd = raise exception FAIL("isIn: "$noPolling)
-	fun isOut pd = raise exception FAIL("isOut: "$noPolling)
-	fun isPri pd = raise exception FAIL("isPri: "$noPolling)
+	fun isIn pd = raise exception DIE("isIn: "$noPolling)
+	fun isOut pd = raise exception DIE("isOut: "$noPolling)
+	fun isPri pd = raise exception DIE("isPri: "$noPolling)
 
-	fun infoToPollDesc (POLL_RESULT pd) = pd #  raise exception FAIL("infoToPollDesc: "$noPolling) 
+	fun infoToPollDesc (POLL_RESULT pd) = pd #  raise exception DIE("infoToPollDesc: "$noPolling) 
     };
 end
 
@@ -116,5 +116,5 @@ end
 
 ## COPYRIGHT (c) 1996 Bell Laboratories.
 ## COPYRIGHT (c) 1998 Bell Labs, Lucent Technologies.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

@@ -56,7 +56,7 @@ stipulate
 
     package gd  =  gui_displaylist;				# gui_displaylist		is from   src/lib/x-kit/widget/theme/gui-displaylist.pkg
 
-    package pp  =  standard_prettyprint_mill;			# standard_prettyprint_mill	is from   src/lib/prettyprint/big/src/standard-prettyprint-mill.pkg
+    package pp  =  standard_prettyprinter;			# standard_prettyprinter	is from   src/lib/prettyprint/big/src/standard-prettyprinter.pkg
     package r8  =  rgb8;					# rgb8				is from   src/lib/x-kit/xclient/src/color/rgb8.pkg
     #
     package w2p =  object_to_objectspace;			# object_to_objectspace		is from   src/lib/x-kit/widget/space/object/object-to-objectspace.pkg
@@ -68,8 +68,6 @@ stipulate
 
     package gt  =  guiboss_types;				# guiboss_types			is from   src/lib/x-kit/widget/gui/guiboss-types.pkg
     package wt  =  widget_theme;				# widget_theme			is from   src/lib/x-kit/widget/theme/widget/widget-theme.pkg
-
-    package iuw =  issue_unique_widget_id;			# issue_unique_widget_id	is from   src/lib/x-kit/widget/gui/issue-unique-widget-id.pkg
 
     package g2p =  gadget_to_pixmap;				# gadget_to_pixmap		is from   src/lib/x-kit/widget/theme/gadget-to-pixmap.pkg
 
@@ -87,7 +85,7 @@ herein
     {
 	Object												# This turns out not to get used in practice, and probably should be dropped if no use turns up for it.
 	  =
-	  { id:					iuw::Id,						# Unique id to facilitate storing node_state instances in indexed datastructures like red-black trees.
+	  { id:					Id,							# Unique id to facilitate storing node_state instances in indexed datastructures like red-black trees.
 	    pass_something:			Replyqueue -> (Int -> Void) -> Void,
 	    do_something:			Int -> Void,
 	    do:					(Void -> Void) -> Void					# Used by widget subthreads to run code in main widget microthread.
@@ -112,7 +110,7 @@ herein
 	Initialize_Gadget_Fn
 	  =
 	  {
-	    id:					iuw::Id,						# Unique id.
+	    id:					Id,							# Unique id.
 	    doc:				String,
 	    site:				g2d::Box,						# Window rectangle in which to draw.
 	    gadget_to_guiboss:			gt::Gadget_To_Guiboss,
@@ -131,7 +129,7 @@ herein
 	Redraw_Request_Fn
 	  =
 	  {
-	    id:					iuw::Id,						# Unique id.
+	    id:					Id,							# Unique id.
 	    doc:				String,
 	    frame_number:			Int,							# 1,2,3,... Purely for convenience of widget, guiboss-imp makes no use of this.
 	    site:				g2d::Box,						# Window rectangle in which to draw.
@@ -151,7 +149,7 @@ herein
 	Mouse_Click_Fn
 	  =
 	  {
-	    id:					iuw::Id,						# Unique id.
+	    id:					Id,							# Unique id.
 	    doc:				String,
 	    event:				gt::Mousebutton_Event,					# MOUSEBUTTON_PRESS or MOUSEBUTTON_RELEASE.
 	    button:				evt::Mousebutton,
@@ -169,7 +167,7 @@ herein
 	Mouse_Transit_Fn										# Note that buttons are always all up in a mouse-transit event -- otherwise it is a mouse-drag event.
 	  =
 	  {
-	    id:					iuw::Id,						# Unique id.
+	    id:					Id,							# Unique id.
 	    doc:				String,
 	    event_point:			g2d::Point,
 	    site:				g2d::Box,						# Widget's assigned area in window coordinates.
@@ -186,7 +184,7 @@ herein
 	Mouse_Drag_Fn
 	  =
 	  {
-	    id:					iuw::Id,						# Unique id.
+	    id:					Id,							# Unique id.
 	    doc:				String,
 	    event_point:			g2d::Point,
 	    start_point:			g2d::Point,
@@ -207,17 +205,10 @@ herein
 	Key_Event_Fn
 	  =
 	  {
-	    id:					iuw::Id,						# Unique id.
+	    id:					Id,							# Unique id.
 	    doc:				String,
-	    key_event:				gt::Key_Event,						# KEY_PRESS or KEY_RELEASE
-	    keycode:				evt::Keycode,						# Keycode of the depressed key.
-	    keysym:				evt::Keysym,						# Keysym  of the depressed key.  See Note[1] in src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp.api
-	    string:				String,							# Ascii  for the depressed key.  See Note[1] in src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp.api
-	    char:				Char,							# First char of 'string' ('\0' if string-length != 1).
-	    event_point:			g2d::Point,
+	    keystroke:				gt::Keystroke_Info,					# Keystring etc for event.
 	    site:				g2d::Box,						# Widget's assigned area in window coordinates.
-	    modifier_keys_state:	        evt::Modifier_Keys_State,				# State of the modifier keys (shift, ctrl...).
-	    mousebuttons_state:			evt::Mousebuttons_State,				# State of mouse buttons as a bool record.
 	    gadget_to_guiboss:			gt::Gadget_To_Guiboss,
 	    object_to_objectspace:		w2p::Object_To_Objectspace,
 	    theme:				wt::Widget_Theme
@@ -225,10 +216,23 @@ herein
 	  ->
 	  Void;
 
+	Note_Keyboard_Focus_Fn_Arg
+	  =
+	  {
+	    id:					Id,							# Unique id.
+	    doc:				String,
+	    have_keyboard_focus:		Bool,							# 
+	    gadget_to_guiboss:			gt::Gadget_To_Guiboss,
+	    object_to_objectspace:		w2p::Object_To_Objectspace,
+	    theme:				wt::Widget_Theme,
+	    do:					(Void -> Void) -> Void					# Used by widget subthreads to run code in main widget microthread.
+	  };
+	Note_Keyboard_Focus_Fn = Note_Keyboard_Focus_Fn_Arg -> Void;
+
 	Object_Option
 	    #
 	    = MICROTHREAD_NAME			String							# 
-	    | ID				iuw::Id							# Unique ID for imp, issued by issue_unique_id::issue_unique_id().
+	    | ID				Id							# Unique ID for imp, issued by issue_unique_id::issue_unique_id().
 	    | DOC				String							# Documentation string for widget, for debugging purposes.
 	    #
 	    | WIDGET_CONTROL_CALLBACK		( p2w::Objectspace_To_Object -> Void	)		# Gui boss registers this maildrop to get a port to us once we start up.
@@ -246,19 +250,20 @@ herein
 	    | MOUSE_TRANSIT_FN			Mouse_Transit_Fn					# Application-specific handler for mouse motions.
 	    #
 	    | KEY_EVENT_FN			Key_Event_Fn						# Application-specific handler for keyboard key-press and key-release events.
+	    | NOTE_KEYBOARD_FOCUS_FN		Note_Keyboard_Focus_Fn
 	    ;
 
 	Object_Arg	  =  List(Object_Option);							# No required components at present.
 
 
 
-# 	pprint_object_arg:	pp::Prettyprint_Mill -> Object_Arg -> Void;
+# 	pprint_object_arg:	pp::Prettyprinter -> Object_Arg -> Void;
 # 
 
 
 	Runstate =  {											# These values will be statically globally visible throughout the code body for the imp.
 		      to:				Replyqueue,					# The name makes   foo::pass_something(imp) to {. ... }   syntax read well.
-		      id:				iuw::Id,
+		      id:				Id,
 		      doc:				String,	
 		      #
 		      startup_fn:			Startup_Fn,					# 
@@ -273,6 +278,7 @@ herein
 		      mouse_transit_fn:			Mouse_Transit_Fn,
 		      #
 		      key_event_fn:			Key_Event_Fn,
+		      note_keyboard_focus_fn:		Note_Keyboard_Focus_Fn,
 
 		      wants_keystrokes:			Bool,
 		      wants_mouseclicks:		Bool,
@@ -304,7 +310,7 @@ herein
 
 	fun default_initialize_gadget_fn
 	      {
-		id:				iuw::Id,						# Unique id.
+		id:				Id,							# Unique id.
 		doc:				String,
 		site:				g2d::Box,						# Window rectangle in which to draw.
 		gadget_to_guiboss:		gt::Gadget_To_Guiboss,
@@ -323,7 +329,7 @@ herein
 
 	fun default_redraw_request_fn
 	      {
-		id:				iuw::Id,						# Unique id.
+		id:				Id,							# Unique id.
 		doc:				String,
 		frame_number:			Int,							# 1,2,3,... Purely for convenience of widget-imp, guiboss-imp makes no use of this.
 		site:				g2d::Box,						# Window rectangle in which to draw.
@@ -343,7 +349,7 @@ herein
 
 	fun default_mouse_click_fn
 	      {
-		id:				iuw::Id,						# Unique id.
+		id:				Id,							# Unique id.
 		doc:				String,
 		event:				gt::Mousebutton_Event,					# MOUSEBUTON_PRESS or MOUSEBUTTON_RELEASE.
 		button:				evt::Mousebutton,
@@ -360,7 +366,7 @@ herein
 
 	fun default_mouse_drag_fn
 	      {
-		id:				iuw::Id,						# Unique id.
+		id:				Id,							# Unique id.
 		doc:				String,
 		event_point:			g2d::Point,
 		start_point:			g2d::Point,
@@ -380,7 +386,7 @@ herein
 
 	fun default_mouse_transit_fn									# Note that buttons are always all up in a mouse motion -- otherwise it is a mouse-drag event.
 	      {
-		id:				iuw::Id,						# Unique id.
+		id:				Id,							# Unique id.
 		doc:				String,
 		event_point:			g2d::Point,
 	        site:				g2d::Box,						# Widget's assigned area in window coordinates.
@@ -396,20 +402,26 @@ herein
 
 	fun default_key_event_fn
 	      {
-		id:				iuw::Id,						# Unique id.
+		id:				Id,							# Unique id.
 		doc:				String,
-		key_event:			gt::Key_Event,						# KEY_PRESS or KEY_RELEASE.
-		keycode:			evt::Keycode,						# Keycode of the depressed key.
-		keysym:				evt::Keysym,						# Keysym  of the depressed key.
-		string:				String,							# Ascii  for the depressed key.
-		char:				Char,							# First char of 'string' ('\0' if string-length != 1).
-		event_point:			g2d::Point,
+		keystroke:			gt::Keystroke_Info,					# Keystring etc for event.
 	        site:				g2d::Box,						# Widget's assigned area in window coordinates.
-		modifier_keys_state:	        evt::Modifier_Keys_State,				# State of the modifier keys (shift, ctrl...).
-		mousebuttons_state:		evt::Mousebuttons_State,				# State of mouse buttons as a bool record.
 		gadget_to_guiboss:		gt::Gadget_To_Guiboss,
 		object_to_objectspace:		w2p::Object_To_Objectspace,
 		theme:				wt::Widget_Theme
+	      }
+	    =
+	    ();	
+
+	fun default_note_keyboard_focus_fn
+	      {
+		id:				Id,							# Unique id.
+		doc:				String,
+		have_keyboard_focus:		Bool,							# 
+		gadget_to_guiboss:		gt::Gadget_To_Guiboss,
+	        object_to_objectspace:		w2p::Object_To_Objectspace,
+		theme:				wt::Widget_Theme,
+	        do:				(Void -> Void) -> Void					# Used by widget subthreads to run code in main widget microthread.
 	      }
 	    =
 	    ();	
@@ -429,7 +441,7 @@ herein
 		  runstate as
 		  {											# These values will be statically globally visible throughout the code body for the imp.
 		    to:				Replyqueue,						# The name makes   foo::pass_something(imp) to {. ... }   syntax read well.
-		    id:				iuw::Id,
+		    id:				Id,
 		    doc:			String,
 		    #
 		    startup_fn:			Startup_Fn,						# 
@@ -444,6 +456,7 @@ herein
 		    mouse_transit_fn:		Mouse_Transit_Fn,
 		    #
 		    key_event_fn:		Key_Event_Fn,
+		    note_keyboard_focus_fn:	Note_Keyboard_Focus_Fn,
 		    #
 		    wants_keystrokes:		Bool,
 		    wants_mouseclicks:		Bool,
@@ -483,7 +496,7 @@ herein
 	    end;	
 
 	fun startup												# Root fn of imp microthread.
-	      { id:				iuw::Id,
+	      { id:				Id,
 		doc:				String,
 		reply_oneshot:			Oneshot_Maildrop( gt::Object_Exports ),
 		#
@@ -502,6 +515,7 @@ herein
 		mouse_transit_fn:		Mouse_Transit_Fn,
 		#
 		key_event_fn:			Key_Event_Fn,
+		note_keyboard_focus_fn:		Note_Keyboard_Focus_Fn,
 		#
 		wants_keystrokes:		Bool,
 		wants_mouseclicks:		Bool,
@@ -527,6 +541,7 @@ herein
 						initialize_gadget,
 						redraw_gadget_request,
 						#
+						note_keyboard_focus,
 						note_key_event,
 						#
 						note_mousebutton_event,
@@ -576,6 +591,7 @@ herein
 			      mouse_transit_fn,
 			      #
 			      key_event_fn,
+			      note_keyboard_focus_fn,
 			      #
 			      wants_keystrokes,
 			      wants_mouseclicks,
@@ -685,19 +701,42 @@ herein
 
 		fun wakeup											# These calls are scheduled via gadget_to_guiboss.wake_me.
 		      {
-			frame_number:		Int,								# 1,2,3,... Purely for convenience of widget, guiboss-imp makes no use of this.
-			site:			g2d::Box,							# Window rectangle in which to draw.
-			duration_in_seconds:	Float,								# If state has changed look-imp should call redraw_gadget() before this time is up. Also useful for motionblur.
-			gadget_mode:		gt::Gadget_Mode,						# is_active/has_keyboard_focus/has_mouse_focus flags.
-			wakeup_fn:		gt::Wakeup_Arg -> Void
+			wakeup_arg:	gt::Wakeup_Arg,								# 
+			wakeup_fn:	gt::Wakeup_Arg -> Void
 		      }
 		    =
 		    put_in_mailqueue  (mailq,
 			#
 			\\ ({ id, gadget_to_guiboss, ... }: Runstate)
 			    =
-			    wakeup_fn { frame_number, site, duration_in_seconds, gadget_mode }
+			    wakeup_fn  wakeup_arg
 		    );
+
+		fun note_keyboard_focus
+                      (
+			have_keyboard_focus:		Bool, 							# TRUE means we now have keyboard focus, FALSE means we no longer have it.  Allows gadget to visually display focus locus, typically via a black outline and/or dis/abling cursor. See also Gadget_To_Guiboss.request_keyboard_focus
+			theme:				wt::Widget_Theme
+		      )
+		    =
+		    {
+			put_in_mailqueue  (mailq,
+			    #
+			    \\ ({ id, gadget_to_guiboss, object_to_objectspace, ... }: Runstate)
+				=
+				note_keyboard_focus_fn
+				  {
+				    id,
+				    doc,
+				    have_keyboard_focus,
+				    gadget_to_guiboss,
+				    object_to_objectspace,
+				    theme,
+				    do
+				  }
+			);
+
+			();
+		    };
 
 		fun note_mouse_transit										# Note that buttons are always all up in a mouse-transit event -- otherwise it is a mouse-drag event.
                       {
@@ -773,22 +812,21 @@ herein
 
 		fun note_key_event
                       {
-			key_event:			gt::Key_Event,						# KEY_PRESS or KEY_RELEASE.
-			keycode:			evt::Keycode,						# Keycode of the key.
-			keysym:				evt::Keysym,						# Keysym  of the key.
-			string:				String,							# Ascii  for the key.
-			modifier_keys_state:	        evt::Modifier_Keys_State,				# State of the modifier keys (shift, ctrl...).
-			mousebuttons_state:		evt::Mousebuttons_State,				# State of mouse buttons as a bool record.
-			event_point:			g2d::Point,
+			keystroke
+			  as
+			  { key_event:			gt::Key_Event,						# KEY_PRESS or KEY_RELEASE.
+			    keycode:			evt::Keycode,						# Keycode of the key.
+			    keysym:			evt::Keysym,						# Keysym  of the key.
+			    keystring:			String,							# Ascii  for the key.
+			    keychar:		    	Char,							# First char of 'string' ('\0' if string-length != 1).
+			    modifier_keys_state:	evt::Modifier_Keys_State,				# State of the modifier keys (shift, ctrl...).
+			    mousebuttons_state:		evt::Mousebuttons_State					# State of mouse buttons as a bool record.
+			}:				gt::Keystroke_Info,
 			site:				g2d::Box,						# Widget's assigned area in window coordinates.
 			theme:				wt::Widget_Theme
 		      }				# Note  keyboard keypress at 'point'.
 		    =				#	^							# 'point'  ise the click point the window's coordinate system.
 		    {				#	Keyboard key just pressed down.				#
-			char = (string::length string == 1)
-				?? string::get(string, 0)
-				:: '\0';
-
 			put_in_mailqueue  (mailq,
 			    #
 			    \\ ({ id, gadget_to_guiboss, object_to_objectspace, ... }: Runstate)
@@ -797,15 +835,8 @@ herein
 				  {
 				    id,
 				    doc,
-				    key_event,
-				    keycode,
-				    keysym,
-				    string,
-				    char,
-				    event_point,
+				    keystroke,
 				    site,
-				    modifier_keys_state,
-				    mousebuttons_state,
 				    gadget_to_guiboss,
 				    object_to_objectspace,
 				    theme
@@ -915,6 +946,7 @@ herein
 		mouse_transit_fn,
 		#
 		key_event_fn,
+		note_keyboard_focus_fn,
 		#
 		wants_keystrokes,
 		wants_mouseclicks
@@ -940,6 +972,7 @@ herein
 		my_mouse_transit_fn		=  REF mouse_transit_fn; 
 		#
 		my_key_event_fn			=  REF key_event_fn; 
+		my_note_keyboard_focus_fn	=  REF note_keyboard_focus_fn; 
 		#
 		my_wants_keystrokes		=  REF wants_keystrokes;
 		my_wants_mouseclicks		=  REF wants_mouseclicks; 
@@ -965,6 +998,7 @@ herein
 			do_option (MOUSE_TRANSIT_FN		fn) => {  my_mouse_transit_fn		:=  fn;						 };
 			#
 			do_option (KEY_EVENT_FN			fn) => {  my_key_event_fn		:=  fn;		my_wants_keystrokes  := TRUE;	 };
+			do_option (NOTE_KEYBOARD_FOCUS_FN	fn) => {  my_note_keyboard_focus_fn	:=  fn;						 };
 		    end;
 		end;
 
@@ -987,6 +1021,7 @@ herein
 		  mouse_transit_fn	    =>  *my_mouse_transit_fn,
 		  #
 		  key_event_fn		    =>  *my_key_event_fn,
+		  note_keyboard_focus_fn    =>  *my_note_keyboard_focus_fn,
 		  #
 		  wants_keystrokes	    =>  *my_wants_keystrokes,
 		  wants_mouseclicks	    =>  *my_wants_mouseclicks
@@ -1008,7 +1043,7 @@ herein
 	        (process_options
 		  ( widget_options,
 		    { name			=>  "object",
-		      id			=>  iuw::id_zero,
+		      id			=>  id_zero,
 		      doc			=>  "",
 		      #
 		      object_callbacks		=>  [],
@@ -1026,6 +1061,7 @@ herein
 		      mouse_transit_fn		=>  default_mouse_transit_fn,
 		      #
 		      key_event_fn		=>  default_key_event_fn,
+		      note_keyboard_focus_fn	=>  default_note_keyboard_focus_fn,
 		      #
 		      wants_keystrokes		=>  FALSE,
 		      wants_mouseclicks		=>  FALSE
@@ -1051,12 +1087,13 @@ herein
 		      mouse_transit_fn,
 		      #
 		      key_event_fn,
+		      note_keyboard_focus_fn,
 		      #
 		      wants_keystrokes,
 		      wants_mouseclicks
 		    };
 
-		id  =	if (iuw::id_to_int(id) == 0)	iuw::issue_unique_id();						# Allocate unique imp id.
+		id  =	if (id_to_int(id) == 0)	issue_unique_id();						# Allocate unique imp id.
 			else				id;
 			fi;
 
@@ -1092,6 +1129,7 @@ herein
 					mouse_transit_fn,
 					#
 					key_event_fn,
+					note_keyboard_focus_fn,
 					#
 					wants_keystrokes,
 					wants_mouseclicks,
@@ -1114,7 +1152,7 @@ herein
 
 
 	fun pprint_object_arg
-	      (pp:		pp::Prettyprint_Mill)
+	      (pp:		pp::Prettyprinter)
 	      (object_arg:	Object_Arg)
 	    =
 	    {
@@ -1139,7 +1177,7 @@ herein
 		    case option
 			#
 			MICROTHREAD_NAME name		=>  {  pp.lit (sprintf "MICROTHREAD_NAME \"%s\"" name);		};
-			ID			id	=>  {  pp.lit (sprintf "ID %d" (iuw::id_to_int id)        );	};
+			ID			id	=>  {  pp.lit (sprintf "ID %d" (id_to_int id)        );	};
 			DOC		 docstring	=>  {  pp.lit (sprintf "DOC \"%s\"" docstring		  );	};
 			#
 			WIDGET_CONTROL_CALLBACK _	=>  {  pp.lit          "WIDGET_CONTROL_CALLBACK (callback)";	};
@@ -1157,6 +1195,7 @@ herein
 			MOUSE_TRANSIT_FN _		=>  {  pp.lit          "MOUSE_TRANSIT_FN _";			};
 			#
 			KEY_EVENT_FN	_		=>  {  pp.lit          "KEY_EVENT_FN _";			};
+			NOTE_KEYBOARD_FOCUS_FN	_	=>  {  pp.lit          "NOTE_KEYBOARD_FOCUS_FN _";		};
 		    esac;
 	    end;
     };
@@ -1184,5 +1223,5 @@ end;
 ##########################################################################
 
 
-## Original code by Jeff Prothero Copyright (c) 2014-2014,
+## Original code by Jeff Prothero Copyright (c) 2014-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

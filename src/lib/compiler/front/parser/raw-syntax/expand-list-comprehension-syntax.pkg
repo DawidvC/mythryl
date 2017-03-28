@@ -375,7 +375,7 @@ package   expand_list_comprehension_syntax
 	    # should always end the 'clauses'
 	    # arg, and we don't recurse on that case:
 	    #
-	    raise exception FAIL "Compiler bug";
+	    raise exception DIE "Compiler bug";
     end;
 
 
@@ -449,5 +449,5 @@ package   expand_list_comprehension_syntax
 };
 
 
-## Code by Jeff Prothero Copyright (c) 2010-2014,
+## Code by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

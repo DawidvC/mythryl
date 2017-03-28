@@ -17,9 +17,9 @@ herein
 
 
     package   binarytree_ximp
-    : (weak)  Binarytree_Ximp												# Binarytree_Ximp			is from   src/lib/x-kit/xclient/src/wire/binarytree-ximp.api
+    : (weak)  Binarytree_Ximp												# Binarytree_Ximp			is from   src/lib/src/lib/thread-kit/src/core-thread-kit/binarytree-ximp.api
     {
-	include package   binarytree_port;										# binarytree_ximp_clientport		is from   src/lib/src/lib/thread-kit/src/core-thread-kit/binarytree-ximp-clientport.pkg
+	include package   binarytree_port;										# binarytree_port			is from   src/lib/src/lib/thread-kit/src/core-thread-kit/binarytree-port.pkg
 	#
 	Binarytree_Ximp_State = Ref( Int );										# Holds all nonephemeral mutable state maintained by ximp.
 
@@ -48,7 +48,7 @@ herein
 
 
 	fun run {													# These values will be statically globally visible throughout the code body for the imp.
-		  me:			Binarytree_Ximp_State,								# State which is preserved across imp shutdown/restart cycles.
+		  me:			Binarytree_Ximp_State,								# 
 		  imports:		Imports,									# Ximps to which we send requests.
 		  to:			Replyqueue,									# The name makes   foo::pass_something(imp) to {. ... }   syntax read well.
 		  end_gun':		End_Gun,									# We shut down the microthread when this fires.
@@ -237,5 +237,5 @@ end;
 
 
 ## COPYRIGHT (c) 1990, 1991 by John H. Reppy.  See SMLNJ-COPYRIGHT file for details.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

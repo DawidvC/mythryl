@@ -61,8 +61,9 @@ stipulate
     package g2d =  geometry2d;					# geometry2d			is from   src/lib/std/2d/geometry2d.pkg
     package xj  =  xsession_junk;				# xsession_junk			is from   src/lib/x-kit/xclient/src/window/xsession-junk.pkg
 #   package xtr =  xlogger;					# xlogger			is from   src/lib/x-kit/xclient/src/stuff/xlogger.pkg
+    package idm =  id_map;					# id_map			is from   src/lib/src/id-map.pkg
     package im  =  int_red_black_map;				# int_red_black_map		is from   src/lib/src/int-red-black-map.pkg
-    package pp  =  standard_prettyprint_mill;			# standard_prettyprint_mill	is from   src/lib/prettyprint/big/src/standard-prettyprint-mill.pkg
+    package pp  =  standard_prettyprinter;			# standard_prettyprinter	is from   src/lib/prettyprint/big/src/standard-prettyprinter.pkg
     package agx =  app_to_guishim_xspecific;			# app_to_guishim_xspecific	is from   src/lib/x-kit/widget/theme/app-to-guishim-xspecific.pkg
 
     package xet =  xevent_types;				# xevent_types			is from   src/lib/x-kit/xclient/src/wire/xevent-types.pkg
@@ -115,7 +116,7 @@ herein
 	  =
 	  { id:			Id,
 	    state:		Ref( Windowsystem_Needs ),
-	    rw_pixmaps:		Ref (im::Map( xj::Rw_Pixmap ))								# We'll use this to track all currently-existing Xserver-side Rw_Pixmaps. These are created in
+	    rw_pixmaps:		Ref (idm::Map( xj::Rw_Pixmap ))								# We'll use this to track all currently-existing Xserver-side Rw_Pixmaps. These are created in
 	  };														# response to guiboss requests and used as backing store for windows and scrollable subwindows.
 
 	Me_Slot = Mailslot( { imports:			Imports,
@@ -135,7 +136,7 @@ herein
 
 
 	Runstate = {													# These values will be statically globally visible throughout the code body for the imp.
-		    me:				Appwindow_State,							# State which is preserved across imp shutdown/restart cycles.
+		    me:				Appwindow_State,							# 
 		    options:			List(Windowsystem_Option),
 		    imports:			Imports,								# Imps to which we send requests.
 		    to:				Replyqueue,								# The name makes   foo::pass_something(imp) to {. ... }   syntax read well.
@@ -321,7 +322,7 @@ herein
 					    )
 					    seen_first_expose_event_for__window_id := TRUE;
 
-					    put_in_oneshot (window_has_received_first_expose_xevent_oneshot, ());	# Unblock ourself (below): When we return, new topwindow will be ready to accept draw commands.
+					    put_in_oneshot (window_has_received_first_expose_xevent_oneshot, ());	# Unblock ourself (below): When we return, new hostwindow will be ready to accept draw commands.
 					fi;
 				    };
 
@@ -338,7 +339,7 @@ herein
 
 		    };
 
-		windowsystem_to_xevent_router.note_new_topwindow
+		windowsystem_to_xevent_router.note_new_hostwindow
 		  (
 		    window_id,
 		    site,
@@ -443,23 +444,24 @@ herein
                         =>
                         {   printf      "This code assumes root visual has depth=24 red_mask=0xff0000 green_mask=0x00ff00 blue_mask=0x0000ff\n\
 					\but actually the  root visual has depth=%d red_mask=0x%06x green_mask=0x%06x blue_mask=0x%06x  -- guishim-imp-for-x.pkg\n"  depth  (unt::to_int red_mask)  (unt::to_int green_mask)  (unt::to_int blue_mask);
-			    raise exception FAIL "Unsupported X visual. -- guishim-imp-for-x.pkg";
+			    raise exception DIE "Unsupported X visual. -- guishim-imp-for-x.pkg";
 			};
 
 		    xt::NO_VISUAL_FOR_THIS_DEPTH int
                         =>
                         {   # This case should never happen.
-			    raise exception FAIL "root_visual is NO_VISUAL_FOR_THIS_DEPTH?! -- guishim-imp-for-x.pkg";
+			    raise exception DIE "root_visual is NO_VISUAL_FOR_THIS_DEPTH?! -- guishim-imp-for-x.pkg";
 			};
 		esac;
 	    };
 	#
+lastfont = REF [ "fixed" ];
 	fun convert_displaylist_to_drawoplist
 	      (
 		to:		xt::Window_Id,										# This will currently be either   window.window_id   or   (the window.subwindow_or_view).pixmap_id.
 		root_window:	rw::Root_Window,
 		ops:		gd::Gui_Displaylist,
-		rw_pixmaps:	im::Map( xj::Rw_Pixmap )								# All currently-existing Xserver-side Rw_Pixmaps.
+		rw_pixmaps:	idm::Map( xj::Rw_Pixmap )								# All currently-existing Xserver-side Rw_Pixmaps.
 
 	      )
 	    =
@@ -572,9 +574,9 @@ herein
 				#
 				NULL     => result;									# No font found, ignore.  Probably should log a warning here, but X server is required to have "fixed", so the probability of arriving here is very low. XXX SUCKO FIXME.
 				#
-				THE font => {   fun do_text (text, result)						# Break 'text' up into a list of   w2x::t::TEXT(0,text)   elements, where each 'text' has length <= 254.
-						    =
-						    if (string::length text < 255)					# Max allowed w2x::t::TEXT length for X protocol is 254, see check in   encode_poly_text8/encode  in   src/lib/x-kit/xclient/src/wire/value-to-wire-pith.pkg
+				THE finf => {   fun do_text (text, result)						# Break 'text' up into a list of   w2x::t::TEXT(0,text)   elements, where each 'text' has length <= 254.
+						    =									# [LATER:] This text breakup is probably not necessary here, because 'encode' does this anyhow in  src/lib/x-kit/xclient/src/window/xserver-ximp.pkg
+						    if (string::length_in_bytes text < 255)				# Max allowed w2x::t::TEXT length for X protocol is 254, see check in   encode_poly_text8/encode  in   src/lib/x-kit/xclient/src/wire/value-to-wire-pith.pkg
 							#
 							reverse (w2x::t::TEXT (0, text) ! result);			# The 'reverse' returns the parts of the string to original order.
 						    else								# The '0' is 'delta', extra space inserted before text:  See PolyText8 page in  http://mythryl.org/pub/exene/X-protocol-R6.pdf
@@ -584,18 +586,48 @@ herein
 							do_text (rest, (w2x::t::TEXT (0, first)) ! result);
 						    fi;
 
-						textlen =  fb::text_width  font  text;
+						need_to_do_polytext16							# If 'text' includes multibyte UTF-8 chars and if font supports     16-bit chars (FINFO16), we should   use   w2x::x::POLY_TEXT16.
+						    =									# If 'text' includes multibyte UTF-8 chars and if font supports only 8-bit chars (FINFO8) , we're stuck using w2x::x::POLY_TEXT8 even though some chars won't render.
+						    case (string::is_ascii text, finf.info)				# 
+							#								# NB: Even if we have FINFO16, we can render UTF-8 char values only up through 64K, even though UTF-8 chars can be up to 31 bits. This appears to be a fixed limitation of the X wire protocol.
+							(FALSE, fb::FINFO16 _)	=>  TRUE;				#     See, e.g., http://mythryl.org/pub/exene/X-protocol-R7.pdf
+							_			=>  FALSE;
+						    esac;
 
-						point -> { row, col };
-
-						point = case draw_text
+						op =	if (not need_to_do_polytext16)
 							    #
-							    gd::TO_RIGHT_OF_POINT => { row, col                    };	
-							    gd::CENTERED_ON_POINT => { row, col => col - textlen/2 };
-							    gd::TO_LEFT_OF_POINT  => { row, col => col - textlen   };	
-							esac;
+							    textlen =  fb::text_width  finf  text;
 
-						op =   w2x::x::POLY_TEXT8 (font.id, point, do_text(text,[]));
+							    point -> { row, col };
+
+							    point = case draw_text
+									#
+									gd::TO_RIGHT_OF_POINT => { row, col                    };	
+									gd::CENTERED_ON_POINT => { row, col => col - textlen/2 };
+									gd::TO_LEFT_OF_POINT  => { row, col => col - textlen   };	
+								    esac;
+
+							    op =   w2x::x::POLY_TEXT8 (finf.id, point, do_text(text,[]));
+
+							    op;
+							else
+							    text = string::utf8_to_ucs2  text;				# Convert UTF8 text to text where each char is 16 bits, most-significant byte first.  (This is what the X protocol wants.)
+
+							    textlen =  fb::text_width  finf  text;			# Will this work with ucs2 (16-bit) text?
+
+							    point -> { row, col };					#
+
+							    point = case draw_text
+									#
+									gd::TO_RIGHT_OF_POINT => { row, col                    };	
+									gd::CENTERED_ON_POINT => { row, col => col - textlen/2 };
+									gd::TO_LEFT_OF_POINT  => { row, col => col - textlen   };	
+								    esac;
+
+							    op =   w2x::x::POLY_TEXT16 (finf.id, point, do_text(text,[]));
+
+							    op;
+							fi;
 						#
 
 						{ to, pen, op }  ! result;
@@ -608,7 +640,7 @@ herein
 
 			gd::COPY_FROM_RW_PIXMAP { to_point: g2d::Point, from_box: g2d::Box, from_id: Id }
 			    =>
-			    case (im::get (rw_pixmaps, id_to_int from_id))
+			    case (idm::get (rw_pixmaps, from_id))
 				    #
 				    THE r =>    { to,  pen,  op => w2x::x::COPY_AREA (to_point, r.pixmap_id, from_box) }   !   result;
 				    #
@@ -663,7 +695,7 @@ herein
 		  #
 		  runstate as
 		    {													# These values will be statically globally visible throughout the code body for the imp.
-		      me:			Appwindow_State,							# State which is preserved across imp shutdown/restart cycles.
+		      me:			Appwindow_State,							# 
 		      options:			List(Windowsystem_Option),
 		      imports:			Imports,								# Imps to which we send requests.
 		      to:			Replyqueue,								# The name makes   foo::pass_something(imp) to {. ... }   syntax read well.
@@ -721,7 +753,7 @@ herein
 		guiboss_to_guishim
 		  =
 		  { id,
-		    make_topwindow,
+		    make_hostwindow,
 		    make_rw_pixmap,
 		    root_window_size
 		  };
@@ -774,12 +806,12 @@ herein
 			root_window,
 			key_mapping => REF (NULL: Null_Or( k2k::Key_Mapping ) )						# It would be nice to generate 'key_mapping' right after above start_xession,
 		      }													# but that leads to odd circularity issues centering on xevent_sink(),
-		    );													# so we settle for generating it later in make_topwindow().
+		    );													# so we settle for generating it later in make_hostwindow().
 	    }
 	    where
 		appwindow_q     =  make_mailqueue (get_current_microthread()):  Appwindow_Q;
 		#
-		fun list_extensions ()											# Note that gadget_to_rw_pixmap and guiboss_to_topwindow interfaces write to the same appwindow_q, so
+		fun list_extensions ()											# Note that gadget_to_rw_pixmap and guiboss_to_hostwindow interfaces write to the same appwindow_q, so
 		    =													# we should have no race conditions if guiboss writes to both in sequence: they will draw in sequence.
 		    {
 			reply_oneshot =  make_oneshot_maildrop():  Oneshot_Maildrop( List(String) );
@@ -872,7 +904,7 @@ herein
 			    else
 				msg = "get_pixel_rectangle: rw-pixmap has been free_rw_pixmap()'d! -- guishim-imp-for-x.pkg";
 				log::fatal msg;
-				raise exception FAIL msg;
+				raise exception DIE msg;
 			    fi;
 
 			fun pass_pixel_rectangle
@@ -897,12 +929,12 @@ herein
 				#
 				rwp::destroy_rw_pixmap  rw_pixmap;							# Destroy the X-server side pixmap.
 
-				me.rw_pixmaps :=  im::drop  (*me.rw_pixmaps,  id_to_int id);				# Drop the gadget_to_rw_pixmap instance from our index.
+				me.rw_pixmaps :=  idm::drop  (*me.rw_pixmaps,  id);					# Drop the gadget_to_rw_pixmap instance from our index.
 			    };
 
 
 			{ id,												# We want every guiboss_to_rw_pixmap.id value to be unique within the running Mythryl process (address space).
-			  #												# Consequently we don't use our microthread 'id' here because we will typically have multiple topwindows per windowsystem imp.
+			  #												# Consequently we don't use our microthread 'id' here because we will typically have multiple hostwindows per windowsystem imp.
 			  #												# Similarly    We don't use window.window_id here because we might have multiple windowsystem imps talking to different
 			  #												# X servers, two of which might issue identical window.window_id values.
 			  size,
@@ -915,7 +947,7 @@ herein
 		    };
 
 		#
-		fun make_rw_pixmap (size: g2d::Size)									# Note that gadget_to_rw_pixmap and guiboss_to_topwindow interfaces write to the same appwindow_q, so
+		fun make_rw_pixmap (size: g2d::Size)									# Note that gadget_to_rw_pixmap and guiboss_to_hostwindow interfaces write to the same appwindow_q, so
 		    =													# we should have no race conditions if guiboss writes to both in sequence: they will draw in sequence.
 		    {
 			reply_oneshot =  make_oneshot_maildrop():  Oneshot_Maildrop( g2p::Gadget_To_Rw_Pixmap );
@@ -935,7 +967,7 @@ herein
 					=
 					make__gadget_to_rw_pixmap (me, size, depth, root_window, rw_pixmap);
 
-				    me.rw_pixmaps :=  im::set  (*me.rw_pixmaps,  id_to_int gadget_to_rw_pixmap.id,  rw_pixmap);
+				    me.rw_pixmaps :=  idm::set  (*me.rw_pixmaps,  gadget_to_rw_pixmap.id,  rw_pixmap);
 				    
 				    put_in_oneshot (reply_oneshot, gadget_to_rw_pixmap);
 				}
@@ -983,9 +1015,9 @@ herein
 		    };
 
 		#
-		fun make_topwindow
+		fun make_hostwindow
 		      (
-			topwindow_hints:	gtg::Topwindow_Hints,
+			hostwindow_hints:	gtg::Hostwindow_Hints,
 			guievent_sink:		(a2r::Envelope_Route, evt::x::Event) -> Void
 
 		      )
@@ -993,7 +1025,7 @@ herein
 		    {
 			stipulate
 			    #
-			    fun process_hints (hints: List(gtg::Topwindow_Hint), { site, background_pixel, border_pixel })
+			    fun process_hints (hints: List(gtg::Hostwindow_Hint), { site, background_pixel, border_pixel })
 				=
 				{   my_site			=  REF site;
 				    my_background_pixel		=  REF background_pixel;
@@ -1016,7 +1048,7 @@ herein
 
 			    (process_hints
 			      (
-			        topwindow_hints,
+			        hostwindow_hints,
 				#
 				{ site => { upperleft		=>  { col =>    0, row  =>   0 },
 					    size		=>  { wide => 800, high => 600 },
@@ -1036,7 +1068,7 @@ herein
 
 
 
-			reply_oneshot =  make_oneshot_maildrop():  Oneshot_Maildrop( gtg::Guiboss_To_Topwindow );
+			reply_oneshot =  make_oneshot_maildrop():  Oneshot_Maildrop( gtg::Guiboss_To_Hostwindow );
 			#
 			put_in_mailqueue  (appwindow_q,
 			    #
@@ -1065,7 +1097,7 @@ herein
 
 				    (create_x_window (site, background_pixel, border_pixel, root_window, guievent_sink, key_mapping'))
 					->
-					(window:	xj::Window);									# New topwindow.
+					(window:	xj::Window);									# New hostwindow.
 
 
 				    depth     =  24;
@@ -1076,7 +1108,7 @@ herein
 					=
 					make__gadget_to_rw_pixmap (me, size, depth, root_window, rw_pixmap);
 
-				    me.rw_pixmaps :=  im::set  (*me.rw_pixmaps,  id_to_int gadget_to_rw_pixmap.id,  rw_pixmap);
+				    me.rw_pixmaps :=  idm::set  (*me.rw_pixmaps,  gadget_to_rw_pixmap.id,  rw_pixmap);
 
 
 				    # The following fns are defined here so that
@@ -1108,14 +1140,16 @@ herein
 						  font:			List(String)
 						)
 					    =
-					    {   make_thread														# We spin off a microthread to do the rest because we may wind up doing multiple
+					    {
+						make_thread														# We spin off a microthread to do the rest because we may wind up doing multiple
 						    "find_font"														# round-trips to the X server, and we don't want to lock up caller for that long.
 						    {.
 							id = issue_unique_id ();
 							#
 							result =    case (find_or_open_font (font @ [ "fixed" ]))							# X server is required to have "fixed" so appending it saves us from dealing with "none of listed fonts are available" situations.
 									#
-									THE font => {   (fb::font_high font) ->   font_height as { ascent, descent };
+									THE font => {
+											(fb::font_high font) ->   font_height as { ascent, descent };
 											#
 											fun string_length_in_pixels (string: String)
 											    =
@@ -1124,7 +1158,8 @@ herein
 											{ id, font_height, string_length_in_pixels };
 										    };
 
-									NULL     => {   font_height = { ascent => 0, descent => 0 };					# No font found, return nonsense.  Should maybe log a warning, but since X is required to have "fixed", chance of getting here is very low. XXX SUCKO FIXME.
+									NULL     => {
+											font_height = { ascent => 0, descent => 0 };					# No font found, return nonsense.  Should maybe log a warning, but since X is required to have "fixed", chance of getting here is very low. XXX SUCKO FIXME.
 											#
 											fun string_length_in_pixels (string: String)
 											    =
@@ -1141,7 +1176,8 @@ herein
 					#
 					fun get_font (font: List(String))								# PUBLIC.
 					    =
-					    {   reply_oneshot   =  make_oneshot_maildrop ()
+					    {
+						reply_oneshot   =  make_oneshot_maildrop ()
 								:  Oneshot_Maildrop( evt::Font );
 
 						find_font (reply_oneshot, font);
@@ -1181,7 +1217,7 @@ herein
 
 # XXX BUGGO FIXME Currently we return the requested site for the window,
 # which may be totally different from that actually assigned by the window manager.
-# Also, it should be passed to make_topwindow(), see comments there. 
+# Also, it should be passed to make_hostwindow(), see comments there. 
 				    #
 				    fun get_window_site (): g2d::Window_Site								# PUBLIC.
 					=
@@ -1384,10 +1420,10 @@ herein
 						sink_fn;
 					};
 
-				    guiboss_to_topwindow
+				    guiboss_to_hostwindow
 					=
-					{ id	=> issue_unique_id(),									# We want every guiboss_to_topwindow.id value to be unique within the running Mythryl process (address space).
-					  #												# Consequently we don't use our microthread 'id' here because we will typically have multiple topwindows per windowsystem imp.
+					{ id	=> issue_unique_id(),									# We want every guiboss_to_hostwindow.id value to be unique within the running Mythryl process (address space).
+					  #												# Consequently we don't use our microthread 'id' here because we will typically have multiple hostwindows per windowsystem imp.
 					  #												# Similarly    We don't use window.window_id here because we might have multiple windowsystem imps talking to different
 					  #												# X servers, two of which might issue identical window.window_id values.
 					  subscribe_to_changes,
@@ -1414,7 +1450,7 @@ herein
 					};
 
 				    
-				    put_in_oneshot (reply_oneshot, guiboss_to_topwindow);
+				    put_in_oneshot (reply_oneshot, guiboss_to_hostwindow);
 				}
 			);
 
@@ -1489,7 +1525,7 @@ herein
 
 		me =  { id,
 			state      =>  REF needs,
-			rw_pixmaps =>  REF (im::empty:  im::Map( xj::Rw_Pixmap ))
+			rw_pixmaps =>  REF (idm::empty:  idm::Map( xj::Rw_Pixmap ))
 		      };
 
 		\\ () = {   reply_oneshot = make_oneshot_maildrop():  Oneshot_Maildrop( (Me_Slot, Exports) );		# PUBLIC. PHASE 2: Start our microthread and return our Exports to caller.
@@ -1537,5 +1573,5 @@ end;
 ##########################################################################
 
 
-## Original code by Jeff Prothero Copyright (c) 2014-2014,
+## Original code by Jeff Prothero Copyright (c) 2014-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

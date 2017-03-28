@@ -51,7 +51,7 @@ herein
 				 syx::Symbolmapstack,
 				 ip::Inverse_Path,
 				 lnd::Source_Code_Region,
-				 trs::Per_Compile_Data
+				 trs::Per_Compile_Stuff
 			       )
 			       ->
 			       ( ds::Declaration,
@@ -69,7 +69,7 @@ herein
 				     (tdt::Type -> Bool),
 				     ip::Inverse_Path, 
 				     lnd::Source_Code_Region,
-				     trs::Per_Compile_Data
+				     trs::Per_Compile_Stuff
 				   )
 				   ->
 				   ( List( tdt::Type ),
@@ -84,5 +84,5 @@ herein
 end;
 
 ## COPYRIGHT (c) 1998 Bell Laboratories 
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

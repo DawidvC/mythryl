@@ -450,14 +450,14 @@ herein
 			    (v ! vs)	=>  {   vars := vs;
 						v;
 					    };
-			    []		=>  raise exception FAIL "Not enough variables! -- replace_overloaded_variables_in_core_declaration in deep-syntax-junk.pkg";
+			    []		=>  raise exception DIE "Not enough variables! -- replace_overloaded_variables_in_core_declaration in deep-syntax-junk.pkg";
 			esac;
 
 		    fun checkvars ()
 			= 
 			case *vars
 			    #
-			    (v ! vs)	=>  raise exception FAIL "Too many variables! -- replace_overloaded_variables_in_core_declaration in deep-syntax-junk.pkg";
+			    (v ! vs)	=>  raise exception DIE "Too many variables! -- replace_overloaded_variables_in_core_declaration in deep-syntax-junk.pkg";
 			    []		=>  ();
 			esac;
 		end;
@@ -659,6 +659,6 @@ end;
 ##########################################################################
 
 ## (C) 2001 Lucent Technologies, Bell Labs
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.
 

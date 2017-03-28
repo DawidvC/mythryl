@@ -82,7 +82,7 @@ herein
 	      (quark::quark "gray",      standard_clientside_pixmaps::gray      )
 	    ];
 
-	fun make_root_window						# Called (mainly) from   make_root_window  in   src/lib/x-kit/widget/old/lib/run-in-x-window.pkg
+	fun make_root_window						# Called (mainly) from   make_root_window  in   src/lib/x-kit/widget/lib/run-in-x-window.pkg
 	      {								# also from					src/lib/x-kit/xclient/src/stuff/xclient-unit-test.pkg
 		display_name:         	String,				# Typically from DISPLAY environment variable.
 		xauthentication:	Null_Or( xt::Xauthentication ),	# Ultimately from ~/.Xauthority.
@@ -135,7 +135,7 @@ herein
 			THE tile => tile;
 			NULL     => {   msg = (sprintf "make_tile: failed to find tile '%s'  -- root-window.pkg" name);
 					log::fatal msg;
-					raise exception FAIL msg;
+					raise exception DIE msg;
 				    };
 		    esac;
 
@@ -147,7 +147,7 @@ herein
 			#
 			NULL       =>   {   msg = "make_shade: failed to create shades  -- root-window.pkg";
 					    log::fatal msg;
-					    raise exception FAIL msg;
+					    raise exception DIE msg;
 				        };
 		    esac;
 
@@ -228,7 +228,7 @@ herein
 	Opt_Spec = wy::Opt_Spec;
 	Opt_Db   = wy::Opt_Db;
 
-						    # widget_attribute	is from   src/lib/x-kit/widget/old/lib/widget-attribute-old.pkg
+						    # widget_attribute	is from   src/lib/x-kit/widget/lib/widget-attribute.pkg
 	Value = wa::Value;
 
 
@@ -280,5 +280,5 @@ end;
 
 
 ## COPYRIGHT (c) 1994 by AT&T Bell Laboratories.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

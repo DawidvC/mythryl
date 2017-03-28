@@ -1,0 +1,608 @@
+## hostwindow.pkg -- Pre-packaged management for the top-level window of an application.
+#
+#
+#
+# TODO: Allow mapping/unmapping of hostwindows
+#       Cleanup and complete hostwindow resource usage	XXX BUGGO FIXME
+
+# Compiled by:
+#     src/lib/x-kit/widget/xkit-widget.sublib
+
+# See also:
+#     src/lib/x-kit/xclient/src/window/window-old.api
+
+
+
+
+
+###      "You think you know when you learn,
+###       are more sure when you can write,
+###       even more when you can teach,
+###       but certain when you can program."
+###
+###                            -- Alan Perlis
+
+
+stipulate
+    include package   threadkit;		# threadkit		is from   src/lib/src/lib/thread-kit/src/core-thread-kit/threadkit.pkg
+    #
+    package cmd =  commandline;			# commandline		is from   src/lib/std/commandline.pkg
+    #
+    package g2d =  geometry2d;			# geometry2d		is from   src/lib/std/2d/geometry2d.pkg
+    package xc  =  xclient;			# xclient		is from   src/lib/x-kit/xclient/xclient.pkg
+    #
+    package xtr =  xlogger;			# xlogger		is from   src/lib/x-kit/xclient/src/stuff/xlogger.pkg
+    #
+    package wg  =  widget;			# widget		is from   src/lib/x-kit/widget/old/basic/widget.pkg
+    package wa  =  widget_attribute_old;	# widget_attribute_old	is from   src/lib/x-kit/widget/old/lib/widget-attribute-old.pkg
+    package mr  =  xevent_mail_router;		# xevent_mail_router	is from   src/lib/x-kit/widget/old/basic/xevent-mail-router.pkg
+    #
+    tracing     =  logger::make_logtree_leaf { parent => xlogger::xkit_logging, name => "hostwindow::tracing", default => FALSE };
+    trace       =  xtr::log_if  tracing 0;	# Conditionally write strings to tracing.log or whatever.
+        #
+        # To debug via tracelogging, annotate the code with lines like
+	#
+        #	trace {. sprintf "foo/top: bar d=%d" bar; };
+herein
+
+    package   hostwindow
+    : (weak)  Hostwindow				# Hostwindow		is from   src/lib/x-kit/widget/old/basic/hostwindow.api
+    {
+	Window_Manager_Hints
+	    =
+	    {    size_hints:  List( xc::Window_Manager_Size_Hint    ),
+	      nonsize_hints:  List( xc::Window_Manager_Nonsize_Hint )
+		  #
+#	        class_hints:  Null_Or  { resource_class:  String, resource_name:  String }
+	    };
+
+	fun make_window_manager_hints a
+            =
+            a;
+
+	Plea_Mail = START
+                  | DESTROY
+                  | MAP       Bool
+                  | WM_HINTS  Window_Manager_Hints
+                  | WINDOW_OF (Mailslot( xc::Window ))
+                  ;
+
+	Hostwindow
+	    =
+	    HOSTWINDOW
+	      ( Mailslot( Plea_Mail ),
+		Mailslot( Void )		# wm_window_delete_slot. Set when user clicks on windowframe close button.
+              );
+
+	fun set_size_hints
+            {
+              col_preference  as  wg::INT_PREFERENCE  xdim,
+              row_preference  as  wg::INT_PREFERENCE  ydim
+            }
+	    =
+	    do_inc() @ do_max() @ do_min()
+	    where
+		fun min_size ()
+                    =
+                    {   minx =  wg::minimum_length  col_preference;
+			miny =  wg::minimum_length  row_preference;
+
+			{ wide => int::max (1, minx),
+                          high => int::max (1, miny)
+                        };
+		    };
+
+		fun max_size ()
+		    =
+		    ( wg::maximum_length  col_preference,
+                      wg::maximum_length  row_preference
+                    );
+
+		fun inc_size ()
+		    =
+		    ( xdim.step_by,
+                      ydim.step_by
+                    );
+
+		maxx = 65535;
+
+		fun do_inc ()
+		    =
+		    case (inc_size ())   
+			#
+			(1, 1) => [];
+		        (x, 1) => [xc::HINT_PRESIZE_INC ({ wide=>x, high=>1 } )];
+		        (1, y) => [xc::HINT_PRESIZE_INC ({ wide=>1, high=>y } )];
+		        (x, y) => [xc::HINT_PRESIZE_INC ({ wide=>x, high=>y } )];
+		    esac;
+
+		fun do_min ()
+                    =
+                    {   minsz = min_size ();
+
+			[ xc::HINT_PMIN_SIZE   minsz,
+                          xc::HINT_PBASE_SIZE  minsz
+                        ];
+		    };
+
+		fun do_max ()
+		    =
+		    case (max_size ())
+			#
+			(NULL,  NULL ) =>  [];
+			(THE x, NULL ) =>  [ xc::HINT_PMAX_SIZE ({ wide=>x,    high => maxx } )];
+			(NULL,  THE y) =>  [ xc::HINT_PMAX_SIZE ({ wide=>maxx, high => y    } )];
+			(THE x, THE y) =>  [ xc::HINT_PMAX_SIZE ({ wide=>x,    high => y    } )];
+		    esac;
+
+	    end;
+
+    /* DEBUG
+	setSizeHints = \\ arg => let
+	      pr = xlogger::pr1
+	      arglist = setSizeHints arg
+	      fun pritem (xc::HINT_PRESIZE_INC size) = pr("inc = "$(Db::sztos size)$"\n")
+		| pritem (xc::HINT_PMAX_SIZE size) = pr("max = "$(Db::sztos size)$"\n")
+		| pritem (xc::HINT_PMIN_SIZE size) = pr("min = "$(Db::sztos size)$"\n")
+		| pritem _ = ()
+	      in
+		apply pritem arglist;
+		arglist
+	      end
+    */
+
+	Window_And_Icon_Names
+	    =
+            { window_name:   Null_Or( String ),
+	      icon_name:     Null_Or( String )
+	    };
+
+
+	fun pick_window_site (NULL, size)
+		=>
+		(g2d::point::zero, size);
+
+	    pick_window_site (THE ({ col, row, wide, high } ), { wide=>default_wide, high=>default_high } )
+		=>
+		( { col, row },
+
+	          { wide => if (wide > 0)  wide;  else default_wide;  fi,
+		    high => if (high > 0)  high;  else default_high;  fi
+                  }
+                );
+	end;
+
+
+	fun make_hostwindow'
+                make_simple_vs_transient_window				# window creation fn, one of either 'simple' or 'transient' (see below).
+                null_or_box						# Pixel size for window.
+                ( widgettree:               wg::Widget,
+                  null_or_background_rgb:   Null_Or( xc::Rgb ),		# Background color for window
+                  wm_args:		    Window_And_Icon_Names
+                )
+	    =
+	    {   root_window =  wg::root_window_of  widgettree;
+
+		plea_slot = make_mailslot ();
+
+		screen =  wg::screen_of  root_window;
+
+
+		# Default window background color to white:
+		#
+		background_rgb
+		    =
+		    case null_or_background_rgb
+			#
+			THE rgb =>  rgb;
+			NULL    =>  xc::white;
+		    esac;
+
+
+		wm_window_delete_slot = make_mailslot ();		# This will be set when user clicks windowframe close button.
+
+
+		# Advertise that we support the ICCCM WM_DELETE_WINDOW protocol.
+		# This way, when a user clicks on the windowframe close button,
+		# the window manager will send us a WM_DELETE_WINDOW ClientMessage
+		# X event instead of just summarily killing our window and our
+		# X connection;  this gives us time to close down gracefully
+		# via our get_''close_window''_mailop facility.
+		#
+		fun set_protocols window
+		    = 
+		    xc::set_window_manager_protocols
+			#
+                        window
+			#
+                        [ (xc::make_atom (wg::xsession_of root_window) "WM_DELETE_WINDOW") ];
+
+
+		fun create_window_and_enter_main_loop (hintlist, mapped, window_requestors)
+		    =
+		    {
+		        (wg::size_preference_of  widgettree)
+			    ->
+			    size_preference as { col_preference, row_preference };
+
+			default_size
+			    =
+			    { wide =>  wg::preferred_length  col_preference,
+                              high =>  wg::preferred_length  row_preference
+                            };
+
+			my (upperleft, size) =   pick_window_site (null_or_box, default_size);
+
+			my (hostwindow, in_kidplug, null_or_wm_delete_window_slot)
+			    =
+                            make_simple_vs_transient_window  widgettree
+                              {
+                                site =>  { upperleft, size, border_thickness=>0 }: g2d::Window_Site,
+				#
+			        background_color =>  (xc::rgb8_from_rgb  background_rgb),
+			        border_color     =>  background_rgb   			#  not used 
+			      };
+
+			fun give_hint { size_hints, nonsize_hints }
+                            =
+			    xc::set_window_manager_properties  hostwindow
+			      {
+				size_hints,
+				nonsize_hints,
+				#
+				commandline_arguments =>  [],
+				window_name           =>  NULL,
+				icon_name             =>  NULL,
+				class_hints           =>  NULL
+			      };
+
+											# commandline		is from   src/lib/std/commandline.pkg
+			xc::set_window_manager_properties  hostwindow
+                          {
+			    commandline_arguments =>  cmd::get_commandline_arguments(),
+			    #
+			    window_name           =>  wm_args.window_name,
+			    icon_name             =>  wm_args.icon_name,
+			    #
+			    size_hints            =>  set_size_hints  size_preference,
+			    #
+			    nonsize_hints         =>  [],
+			    class_hints           =>  NULL
+			  };
+
+			apply give_hint (reverse hintlist);
+
+			set_protocols hostwindow;
+
+			(xc::make_widget_cable ())
+			    ->
+			    { kidplug =>  my_kidplug,
+                              momplug =>  my_momplug
+                            };
+
+			child_window
+			    =
+			    wg::make_child_window
+			      ( hostwindow,
+				g2d::box::make (g2d::point::zero, size),
+				wg::args_of  widgettree
+			      );
+
+                        (xc::make_widget_cable ())
+			    ->
+			    { kidplug =>  ckidplug,
+                              momplug =>  cmomplug as xc::MOMPLUG { from_kid', ... }
+                            };
+
+			from_kid' =  wg::wrap_queue  from_kid';
+
+                        (xc::ignore_mouse_and_keyboard  my_kidplug)
+			    ->
+			    xc::KIDPLUG { from_other', ... };
+
+			# A loop ignoring all input forever.
+			# We run this after we've officially died,
+			# to soak up any left-over input:
+			# 
+			fun zombie ()
+                            =
+			    for (;;) {
+				#
+                                do_one_mailop [
+				    from_other'       ==>  (\\ _ = ()),
+				    take_from_mailslot'  plea_slot  ==>  (\\ _ = ()),
+				    from_kid'         ==>  (\\ _ = ())
+				];
+                            };
+
+			fun do_kid  xc::REQ_RESIZE
+				=>
+				{   (wg::size_preference_of  widgettree)
+					->
+					bounds as { col_preference,
+                                                    row_preference
+                                                  };
+
+				    xc::set_window_manager_properties hostwindow
+				      {
+					size_hints =>  set_size_hints  bounds,
+					#
+					nonsize_hints         =>  [],
+					commandline_arguments =>  [],
+					window_name           =>  NULL,
+					icon_name             =>  NULL,
+					class_hints           =>  NULL
+				      };                
+
+				      xc::resize_window
+                                        hostwindow
+                                        ( { wide =>  wg::preferred_length  col_preference,
+                                            high =>  wg::preferred_length  row_preference
+                                          }
+                                        );
+				};
+
+			   do_kid  xc::REQ_DESTRUCTION
+			       =>
+			       {    xc::destroy_window hostwindow;
+				    zombie ();				# Never returns.
+			       };
+			end;
+
+
+			fun do_other (xc::ETC_RESIZE ({ wide, high, ... }: g2d::Box))
+                                => 
+			        xc::resize_window child_window ({ wide, high } );
+
+			    do_other  xc::ETC_OWN_DEATH      =>  zombie ();			# Never returns.
+			    do_other (xc::ETC_CHILD_DEATH _) =>  zombie ();			# Never returns.
+			    #
+			    do_other (xc::ETC_REDRAW _)      =>  ();
+			    do_other _                       =>  ();
+			end;
+
+			# First arg is un/mapped state;
+			# Second arg is un/map request:
+			# Return value is updated un/mapped state.
+			#
+#			fun map_top_window (FALSE, TRUE) => { xc::show_window     hostwindow;  TRUE;  };
+#			    map_top_window (TRUE, FALSE) => { xc::withdraw_window hostwindow;  FALSE; };
+#			    map_top_window (_, b) => b;								# No-op.
+#			end;
+			fun map_top_window (FALSE, TRUE) => {
+                                                              xc::show_window     hostwindow;
+                                                              TRUE;
+                                                            };
+			    map_top_window (TRUE, FALSE) => {
+							      xc::withdraw_window hostwindow;
+							      FALSE;
+							    };
+			    map_top_window (_, b) => b;								# No-op.
+			end;
+
+			# Do plea, return possibly updated 'mapped' value:
+			#
+			fun do_plea mapped
+			    =
+			    {
+#				\\ START                =>                                             mapped;
+#				   DESTROY              => { xc::destroy_window hostwindow;  zombie (); mapped; };		# zombie() never returns; the 'mapped' is just for type-correctness.
+#				   WM_HINTS hint        => { give_hint hint;                           mapped; };
+#				   WINDOW_OF reply_slot => { put_in_mailslot (reply_slot, hostwindow);             mapped; }; 	
+#				   MAP arg              =>   map_top_window (mapped, arg);
+#				end;
+				\\ START                => {
+							                                               mapped;
+							   };
+				   DESTROY              => {
+                                                             xc::destroy_window hostwindow;  zombie (); mapped; };		# zombie() never returns; the 'mapped' is just for type-correctness.
+				   WM_HINTS hint        => { give_hint hint;                           mapped; };
+				   WINDOW_OF reply_slot => { put_in_mailslot (reply_slot, hostwindow);             mapped; }; 	
+				   MAP arg              => {
+							     map_top_window (mapped, arg);
+							   }; 	
+				end;
+			    };
+
+			# Handle requests from four directions:
+			#
+			#    o Resize commands etc from parent, ultimately from X server.
+			#    o WINDOW_DELETE       from parent, ultimately from X server.
+			#    o Resize requests etc from child.
+			#    o Pleas from client threads.
+			#
+			fun main_loop  mapped
+			    =
+			    {   do_one_mailop [
+				    #
+				    from_other'
+					 ==>
+					 do_other  o  xc::get_contents_of_envelope,
+
+				    case null_or_wm_delete_window_slot
+					#
+					THE input_wm_window_delete_slot
+					    =>
+					    take_from_mailslot'  input_wm_window_delete_slot
+						==>
+						{.  put_in_mailslot (wm_window_delete_slot, ());  };
+							#
+							# input_wm_window_delete_slot   was created by   make_router   in
+							#
+							#     src/lib/x-kit/xclient/src/window/hostwindow-to-widget-router-old.pkg;
+							#
+							# which also 'set's it when a WM_DELETE_WINDOW ClientEvent is received.
+							#
+							# wm_window_delete_slot   was created in this file.
+							# It gets returned in the HOSTWINDOW values we return,
+							# and thus is the one made available via our   get_''close_window''_mailop
+							# call and ultimately used by the application programmer.
+							# Offhand, I do not see why we need both.	XXX BUGGO FIXME
+					NULL => never';
+				    esac, 
+
+
+				    take_from_mailslot'  plea_slot
+					==>
+					main_loop o (do_plea mapped),
+
+				    from_kid'
+					==>
+					do_kid
+				];
+
+				main_loop mapped; 
+			    };
+
+			mr::route_pair (in_kidplug, my_momplug, cmomplug);
+
+			wg::realize_widget
+			     widgettree
+			     {
+			       kidplug => ckidplug, 
+			       window  => child_window,
+			       window_size => size
+			     };
+
+			xc::show_window child_window;
+
+			apply {. put_in_mailslot (#reply_slot, hostwindow); }
+                              window_requestors;
+
+			main_loop (map_top_window (FALSE, mapped));
+		    };						# fun create_window_and_enter_main_loop
+
+
+		# Here we loop doing nothing much until sent our START
+		# command, at which point we actually create our window
+		# and enter the main loop:
+		#
+		fun ready_to_start_loop (state as (hintlist, mapped, window_requestors))
+		    =
+		    {
+			case (take_from_mailslot  plea_slot)
+			    #
+			    START                =>  create_window_and_enter_main_loop  state;
+			    DESTROY              =>  ready_to_start_loop                state;
+			    #
+			    WM_HINTS hint        =>  ready_to_start_loop (hint ! hintlist,   mapped,                window_requestors);
+			    MAP mapped           =>  ready_to_start_loop (       hintlist,   mapped,                window_requestors);
+			    WINDOW_OF reply_slot =>  ready_to_start_loop (       hintlist,   mapped,   reply_slot ! window_requestors);
+			esac;
+		    };
+
+		xlogger::make_thread  "hostwindow main_loop"  {. ready_to_start_loop ([], TRUE, []); };
+
+		HOSTWINDOW (plea_slot, wm_window_delete_slot);
+
+	    };					# fun make_hostwindow'
+
+	stipulate
+
+	    fun simple
+                    (widget: wg::Widget)
+		    #
+                    (g as { site:		g2d::Window_Site,
+			    border_color:	xc::Rgb,
+			    background_color:	xc::Rgb8
+			  }
+		    )
+		=
+		{
+		    (xc::make_simple_top_window  (wg::screen_of  (wg::root_window_of  widget))  g)
+			->
+			(window, in_kidplug, wm_window_delete_slot);
+
+		    (window, in_kidplug, THE wm_window_delete_slot);
+		};
+
+	    fun transient
+                   (window: xc::Window)
+                   (widget: wg::Widget)										# UNUSED in this fn.
+                   (g as { site: g2d::Window_Site,  border_color: xc::Rgb,  background_color:  xc::Rgb8 })
+		= 
+		{
+		    (xc::make_transient_window  window  g)
+			->
+			(window', in_kidplug);
+
+		    (window', in_kidplug, NULL);
+		};
+	herein
+
+	    fun make_hostwindow_at  box
+		=
+		make_hostwindow' simple (THE box);
+
+	    make_hostwindow = make_hostwindow' simple NULL;
+
+	    fun make_transient_hostwindow_at r w =  make_hostwindow' (transient w) (THE r);
+	    fun make_transient_hostwindow w      =  make_hostwindow' (transient w) NULL;
+
+	    attributes
+                =
+                [ (wa::title,        wa::STRING,    wa::NO_VAL),
+		  (wa::icon_name,    wa::STRING,    wa::NO_VAL),
+		  (wa::background,   wa::COLOR,     wa::NO_VAL)
+		];
+
+	    fun hostwindow (root_window, view, args) widgettree
+		=
+		{   attributes = wg::find_attribute (wg::attributes (view, attributes, args));
+
+		    window_name = wa::get_string_opt (attributes wa::title);
+		    icon_name   = wa::get_string_opt (attributes wa::icon_name);
+		    color       = wa::get_color_opt  (attributes wa::background);
+
+		    pos = NULL;			# Fix to look up geometry.  XXX BUGGO FIXME
+
+		    args = { window_name, icon_name };
+		    make_hostwindow' simple pos (widgettree, color, args);
+		}; 
+
+	end;
+
+	fun start_widgettree_running_in_hostwindow  (HOSTWINDOW (slot, wm_window_delete_slot))     =    put_in_mailslot (slot, START);
+	fun destroy                                (HOSTWINDOW (slot, wm_window_delete_slot))     =    put_in_mailslot (slot, DESTROY);
+	fun unmap                                  (HOSTWINDOW (slot, wm_window_delete_slot))     =    put_in_mailslot (slot, MAP FALSE);
+	fun map                                    (HOSTWINDOW (slot, wm_window_delete_slot))     =    put_in_mailslot (slot, MAP TRUE);
+	fun window_of                              (HOSTWINDOW (slot, wm_window_delete_slot))     =  {	reply_slot = make_mailslot ();
+													put_in_mailslot (slot, WINDOW_OF reply_slot);
+													take_from_mailslot reply_slot;
+												    };
+
+	fun set_window_manager_hints
+                (HOSTWINDOW (slot, wm_window_delete_slot))
+                arg
+	    =
+	    put_in_mailslot (slot, WM_HINTS arg);
+
+	fun get_''close_window''_mailop (HOSTWINDOW (slot, wm_window_delete_slot))
+	    =
+	    take_from_mailslot'  wm_window_delete_slot;
+
+    };			# package hostwindow 
+end;			# stipulate
+
+
+##########################################################################
+#   The following is support for outline-minor-mode in emacs.		 #
+#  ^C @ ^T hides all Text. (Leaves all headings.)			 #
+#  ^C @ ^A shows All of file.						 #
+#  ^C @ ^Q Quickfolds entire file. (Leaves only top-level headings.)	 #
+#  ^C @ ^I shows Immediate children of node.				 #
+#  ^C @ ^S Shows all of a node.						 #
+#  ^C @ ^D hiDes all of a node.						 #
+#  ^HFoutline-mode gives more details.					 #
+#  (Or do ^HI and read emacs:outline mode.)				 #
+#									 #
+# Local variables:							 #
+# mode: outline-minor							 #
+# outline-regexp: "[{ \t]*\\(fun \\)"			 		 #
+# End:									 #
+##########################################################################
+
+
+## COPYRIGHT (c) 1994 by AT&T Bell Laboratories  See SMLNJ-COPYRIGHT file for details.
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
+## released per terms of SMLNJ-COPYRIGHT.

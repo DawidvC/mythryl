@@ -26,7 +26,7 @@ stipulate
 herein
 
     package   ro_pixmap_cache_old
-    : (weak)  Ro_Pixmap_Cache_Old						# Ro_Pixmap_Cache_Old		is from   src/lib/x-kit/widget/lib/ro-pixmap-cache-old.api
+    : (weak)  Ro_Pixmap_Cache_Old						# Ro_Pixmap_Cache_Old		is from   src/lib/x-kit/widget/old/lib/ro-pixmap-cache-old.api
     {
 	exception BAD_NAME;
 
@@ -114,7 +114,7 @@ herein
 
 		fun make_window (arg as (name, q))
 		    = 
-		    if (string::get (name, 0) == '@')
+		    if (string::get_byte_as_char (name, 0) == '@')
 			#
 			make_window_from_file  arg;
 		    else

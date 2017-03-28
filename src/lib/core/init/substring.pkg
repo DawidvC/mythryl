@@ -48,7 +48,7 @@ herein
 	my (>=) = it::default_int::(>=);
     #   my (==) = it::(==);
 
-	unsafe_sub  = it::vector_of_chars::get;
+	unsafe_sub  = it::vector_of_chars::get_byte_as_char;
 	string_size = it::vector_of_chars::length;
 
 	# list reverse 
@@ -256,7 +256,7 @@ herein
 	    =
 	    search
 	    where
-	        stringsearch =  ps::kmp  s;
+	        stringsearch =  ps::knuth_morris_pratt_string_match  s;
 		#
 		fun search (SUBSTRING (s', i, n))
 		    =
@@ -365,11 +365,11 @@ herein
 
 
 
-	fun position s								# This is using the KMP (Knuth-Morris-Pratt) matcher from protostring. 
+	fun position s								# This is using the Knuth-Morris-Pratt matcher from protostring. 
 	    =
 	    search
 	    where
-	        stringsearch = ps::kmp s;
+	        stringsearch = ps::knuth_morris_pratt_string_match s;
 
 		fun search (ss as SUBSTRING (s', i, n))
 		    =
@@ -529,5 +529,5 @@ end;
 
 
 ## COPYRIGHT (c) 1995 AT&T Bell Laboratories.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

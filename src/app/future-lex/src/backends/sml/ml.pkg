@@ -63,7 +63,7 @@ package ml {
       ;
 
     stipulate
-        package pp  =  plain_file_prettyprint_mill;					# plain_file_prettyprint_mill	is from   src/lib/prettyprint/big/src/plain-file-prettyprint-mill.pkg
+        package pp  =  plain_file_prettyprinter;					# plain_file_prettyprinter	is from   src/lib/prettyprint/big/src/plain-file-prettyprinter.pkg
     herein
 
 	fun prettyprint_ml (pp, e)
@@ -494,5 +494,5 @@ package ml {
 ## COPYRIGHT (c) 1999 Bell Labs, Lucent Technologies
 ## (Used and modified with permission)
 ## Aaron Turon (http://www.cs.uchicago.edu/~adrassi)
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

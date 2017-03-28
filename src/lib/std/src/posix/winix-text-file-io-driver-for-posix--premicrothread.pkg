@@ -135,7 +135,7 @@ herein
 		    =
 		    if  *closed    raise exception iox::CLOSED_IO_STREAM;  fi;
 
-		len  =  str::length    src;
+		len  =  str::length_in_bytes    src;
 		plen =  pos::from_int  len;
 
 		fun avail ()
@@ -216,5 +216,5 @@ end;
 
 
 ## COPYRIGHT (c) 1995 AT&T Bell Laboratories.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

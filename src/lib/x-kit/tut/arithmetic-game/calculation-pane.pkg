@@ -262,9 +262,8 @@ herein
 
 				fun do_keyboard (xc::KEY_PRESS key, s)
 					=>
-					{
-					    c = string::get (to_ascii key, 0);
-
+					{   c = string::get_byte_as_char (to_ascii key, 0);
+					    #
 					    if (is_erase c)
 						#
 						erase s;
@@ -609,5 +608,5 @@ end;
 
 
 ## COPYRIGHT (c) 1996 AT&T Research.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

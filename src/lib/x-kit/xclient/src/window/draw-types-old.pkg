@@ -179,7 +179,7 @@ herein
 
 	# Make a drawable from a window 
 	#
-	fun drawable_of_window (w as { to_topwindow_drawimp => to_drawimp, ... }: Window )
+	fun drawable_of_window (w as { to_hostwindow_drawimp => to_drawimp, ... }: Window )
 	    =
 	    DRAWABLE { root => r::WINDOW w, to_drawimp };
 
@@ -285,5 +285,5 @@ end;
 
 
 ## COPYRIGHT (c) 1990, 1991 by John H. Reppy.  See SMLNJ-COPYRIGHT file for details.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

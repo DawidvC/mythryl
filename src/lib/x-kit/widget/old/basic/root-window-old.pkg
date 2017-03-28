@@ -172,7 +172,7 @@ herein
 	Opt_Spec = wy::Opt_Spec;
 	Opt_Db   = wy::Opt_Db;
 
-						    # widget_attribute	is from   src/lib/x-kit/widget/old/lib/widget-attribute-old.pkg
+						    # widget_attribute	is from   src/lib/x-kit/widget/lib/widget-attribute.pkg
 	Value = wa::Value;
 
 
@@ -224,5 +224,5 @@ end;
 
 
 ## COPYRIGHT (c) 1994 by AT&T Bell Laboratories.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

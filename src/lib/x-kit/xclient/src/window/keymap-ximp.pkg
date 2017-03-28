@@ -68,7 +68,7 @@ herein
     #     src/lib/x-kit/xclient/src/window/xsession-ximps.pkg
 
     package   keymap_ximp
-    : (weak)  Keymap_Ximp									# Keymap_Ximp					is from   src/lib/x-kit/xclient/src/wire/keymap-ximp.api
+    : (weak)  Keymap_Ximp									# Keymap_Ximp					is from   src/lib/x-kit/xclient/src/window/keymap-ximp.api
     {
 	(&) = unt::bitwise_and;
 
@@ -121,7 +121,7 @@ herein
 			  };
 
 	Runstate =  {													# These values will be statically globally visible throughout the code body for the imp.
-		      me:				Keymap_Ximp_State,						# State which is preserved across imp shutdown/restart cycles.
+		      me:				Keymap_Ximp_State,						# 
 		      imports:				Imports,							# Ximps to which we send requests.
 		      to:				Replyqueue,							# The name makes   foo::pass_something(imp) to {. ... }   syntax read well.
 		      end_gun':				End_Gun,							# We shut down the microthread when this fires.
@@ -174,7 +174,7 @@ herein
 		esac;
 
 	    convert_case  xt::NO_SYMBOL =>  {   msg = "Bug: Unsupported case in convert_case -- keymap-ximp.pkg";	# This will be caught below in translate_keycode_to_keysym
-						raise exception FAIL   msg;
+						raise exception DIE   msg;
 					    };
 	end;
 
@@ -420,7 +420,7 @@ herein
 		  #
 		  runstate as
 		  {													# These values will be statically globally visible throughout the code body for the imp.
-		    me:					Keymap_Ximp_State,						# State which is preserved across imp shutdown/restart cycles.
+		    me:					Keymap_Ximp_State,						# 
 		    imports:				Imports,							# Ximps to which we send requests.
 		    to:					Replyqueue,							# The name makes   foo::pass_something(imp) to {. ... }   syntax read well.
 		    end_gun':				End_Gun,							# We shut down the microthread when this fires.
@@ -641,5 +641,5 @@ end;
 
 
 ## COPYRIGHT (c) 1990, 1991 by John H. Reppy.  See SMLNJ-COPYRIGHT file for details.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

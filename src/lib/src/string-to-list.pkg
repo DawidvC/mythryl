@@ -45,8 +45,9 @@ package   string_to_list
 				   
 				     THE (c, stream)
 					 =>
-					 if (string::get (s, i) == c)   is_prefix (i+1, stream);
-					 else                           NULL;                fi;
+					 if (string::get_byte_as_char (s, i) == c)   is_prefix (i+1, stream);
+					 else                                        NULL;
+					 fi;
 
 				     NULL => NULL;
 				  esac;
@@ -134,5 +135,5 @@ package   string_to_list
 
 
 ## COPYRIGHT (c) 1993 by AT&T Bell Laboratories.  See SMLNJ-COPYRIGHT file for details.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

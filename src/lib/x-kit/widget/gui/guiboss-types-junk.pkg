@@ -15,26 +15,26 @@ stipulate
     package wt  =  widget_theme;							# widget_theme				is from   src/lib/x-kit/widget/theme/widget/widget-theme.pkg
     package evt =  gui_event_types;							# gui_event_types			is from   src/lib/x-kit/widget/gui/gui-event-types.pkg
 
-    package o2c =  object_to_objectspace;						# object_to_objectspace			is from   src/lib/x-kit/widget/space/object/object-to-objectspace.pkg   
+    package o2c =  object_to_objectspace;						# object_to_objectspace			is from   src/lib/x-kit/widget/space/object/object-to-objectspace.pkg
     package c2o =  objectspace_to_object;						# objectspace_to_object			is from   src/lib/x-kit/widget/space/object/objectspace-to-object.pkg
 
-    package s2b =  sprite_to_spritespace;						# sprite_to_spritespace			is from   src/lib/x-kit/widget/space/sprite/sprite-to-spritespace.pkg   
+    package s2b =  sprite_to_spritespace;						# sprite_to_spritespace			is from   src/lib/x-kit/widget/space/sprite/sprite-to-spritespace.pkg
     package b2s =  spritespace_to_sprite;						# spritespace_to_sprite			is from   src/lib/x-kit/widget/space/sprite/spritespace-to-sprite.pkg
 
     package g2p =  gadget_to_pixmap;							# gadget_to_pixmap			is from   src/lib/x-kit/widget/theme/gadget-to-pixmap.pkg
 
+    package idm =  id_map;								# id_map				is from   src/lib/src/id-map.pkg
     package im  =  int_red_black_map;							# int_red_black_map			is from   src/lib/src/int-red-black-map.pkg
-    package iuw =  issue_unique_widget_id;						# issue_unique_widget_id		is from   src/lib/x-kit/widget/gui/issue-unique-widget-id.pkg
     package gtg =  guiboss_to_guishim;							# guiboss_to_guishim			is from   src/lib/x-kit/widget/theme/guiboss-to-guishim.pkg
 
-    package pp  =  standard_prettyprint_mill;						# standard_prettyprint_mill		is from   src/lib/prettyprint/big/src/standard-prettyprint-mill.pkg
+    package pp  =  standard_prettyprinter;						# standard_prettyprinter		is from   src/lib/prettyprint/big/src/standard-prettyprinter.pkg
 
     package lms =  list_mergesort;							# list_mergesort			is from   src/lib/src/list-mergesort.pkg
 
-    package err =  error_message;							# error_message				is from   src/lib/compiler/front/basics/errormsg/error-message.pkg
+    package err =  compiler::error_message;						# compiler				is from   src/lib/core/compiler/compiler.pkg
+											# error_message				is from   src/lib/compiler/front/basics/errormsg/error-message.pkg
 
     package gd  =  gui_displaylist;							# gui_displaylist			is from   src/lib/x-kit/widget/theme/gui-displaylist.pkg
-    package t2t =  textpane_to_textbuffer;						# textpane_to_textbuffer		is from   src/lib/x-kit/widget/edit/textpane-to-textbuffer.pkg
 
 
     nb = log::note_on_stderr;								# log					is from   src/lib/std/src/log.pkg
@@ -102,7 +102,7 @@ herein
 		{ guiboss_to_gadget => guiboss_to_gadget2, ... }:	Gadget_Imp_Info
 	      )
 	    =
-	    iuw::same_id ( guiboss_to_gadget1.id,
+	    same_id ( guiboss_to_gadget1.id,
 			   guiboss_to_gadget2.id
 			 );
 
@@ -110,16 +110,16 @@ herein
 	fun get_gadget_imp_info
 	      (
 		gadget_imps:	Gadget_Imps,
-		id:		iuw::Id
+		id:		Id
 	      )
 	    =
-	    case (im::get (*gadget_imps,  iuw::id_to_int id))
+	    case (idm::get (*gadget_imps,  id))
 		#
 		THE gadget_imp_info =>    gadget_imp_info;
 
-		NULL =>     {   msg = sprintf "imp %d not found in gadget_imps?! -- get_gadget_imp_info in guiboss-types-junk.pkg" (iuw::id_to_int id);	# Should be impossible -- all widgets, sprites and objects should be in gadget_imps.
+		NULL =>     {   msg = sprintf "imp %d not found in gadget_imps?! -- get_gadget_imp_info in guiboss-types-junk.pkg" (id_to_int id);	# Should be impossible -- all widgets, sprites and objects should be in gadget_imps.
 				log::note_on_stderr {. msg; };												# [LATER:] But guis are getting more dynamic, we might be getting stale requests from recently-deceased widgets etc. Maybe we should silently ignore these.
-				raise exception FAIL msg;
+				raise exception DIE msg;
 			    };
 	    esac;
 
@@ -202,7 +202,7 @@ herein
 		=
 		{   msg = "arg should never be a SCROLLABLE_INFO! -- find_all_subwindow_infos_above_given_subwindow_info_in_stacking_order in guiboss-types.pkg";
 		    log::fatal msg;
-		    raise exception FAIL msg;
+		    raise exception DIE msg;
 		};
 
 	herein
@@ -487,7 +487,7 @@ herein
 	### widgetspace-imp code
 
 	fun pprint_widgetspace_arg
-	      (pp:		pp::Prettyprint_Mill)
+	      (pp:		pp::Prettyprinter)
 	      (widgetspace_arg:	Widgetspace_Arg)
 	    =
 	    {
@@ -526,7 +526,7 @@ herein
 
 
 	fun pprint_objectspace_arg
-	      (pp:			pp::Prettyprint_Mill)
+	      (pp:			pp::Prettyprinter)
 	      (objectspace_arg:	Objectspace_Arg)
 	    =
 	    {
@@ -562,7 +562,7 @@ herein
 	### spritespace-imp code
 
 	fun pprint_spritespace_arg
-	      (pp:			pp::Prettyprint_Mill)
+	      (pp:			pp::Prettyprinter)
 	      (spritespace_arg:		Spritespace_Arg)
 	    =
 	    {
@@ -1286,11 +1286,11 @@ herein
 
 	fun pprint_guiplan (guiplan: Guiplan)							# "pprint" == "prettyprint".
 	    =
-	    pp::with_standard_prettyprint_mill
+	    pp::with_standard_prettyprinter
 		#
 		(err::default_plaint_sink ())	[]
 		#
-		(\\ pp:   pp::Prettyprint_Mill
+		(\\ pp:   pp::Prettyprinter
 		    =
 		    do_guiplan  guiplan
 		    where
@@ -1623,20 +1623,20 @@ herein
 		RG_NULL_WIDGET		=>  g2d::box::zero;
 	    esac;
 
-	fun rg_widget_id (rg_widget: Rg_Widget_Type)									# For debugging.  NOTE THAT this fn confutes Id and iuw::Id values, so uniqueness is not assured!
+	fun rg_widget_id (rg_widget: Rg_Widget_Type)									# For debugging.  NOTE THAT this fn confutes Id and Id values, so uniqueness is not assured!
 	    =
 	    case rg_widget
 		#
-		RG_ROW 		r	=>       id_to_int r.id;
-		RG_COL 		r	=>       id_to_int r.id;
-		RG_GRID 	r	=>       id_to_int r.id;
-		RG_MARK 	r	=>       id_to_int r.id;
-		RG_SCROLLPORT	r	=>       id_to_int r.id;
-		RG_TABPORT 	r	=>       id_to_int r.id;
-		RG_FRAME 	r	=>       id_to_int r.id;
-		RG_WIDGET 	r	=>  iuw::id_to_int r.guiboss_to_widget.id;
-		RG_OBJECTSPACE  r	=>       id_to_int r.guiboss_to_objectspace.id;
-		RG_SPRITESPACE  r	=>       id_to_int r.guiboss_to_spritespace.id;
+		RG_ROW 		r	=>  id_to_int r.id;
+		RG_COL 		r	=>  id_to_int r.id;
+		RG_GRID 	r	=>  id_to_int r.id;
+		RG_MARK 	r	=>  id_to_int r.id;
+		RG_SCROLLPORT	r	=>  id_to_int r.id;
+		RG_TABPORT 	r	=>  id_to_int r.id;
+		RG_FRAME 	r	=>  id_to_int r.id;
+		RG_WIDGET 	r	=>  id_to_int r.guiboss_to_widget.id;
+		RG_OBJECTSPACE  r	=>  id_to_int r.guiboss_to_objectspace.id;
+		RG_SPRITESPACE  r	=>  id_to_int r.guiboss_to_spritespace.id;
 		#
 		RG_NULL_WIDGET		=>  0;
 	    esac;
@@ -1672,7 +1672,7 @@ herein
 				    guiboss_to_widgetspace: 	Guiboss_To_Widgetspace,
 				    widget_to_guiboss:	 	Widget_To_Guiboss,
 				    space_to_gui:		Space_To_Gui,
-				    topwindow:			gtg::Guiboss_To_Topwindow,				# The topwindow on which to draw our widgets.
+				    hostwindow:			gtg::Guiboss_To_Hostwindow,				# The hostwindow on which to draw our widgets.
 				    subwindow_info:		Subwindow_Data,						# Holds toplevel SUBWINDOW_DATA for gui.
 				    needs_layout_and_redraw:	Ref( Bool )
 				  };
@@ -1684,7 +1684,7 @@ herein
 				    guiboss_to_widgetspace,
 				    widget_to_guiboss,
 				    space_to_gui,
-				    topwindow,
+				    hostwindow,
 				    subwindow_info,
 				    needs_layout_and_redraw								# Should we allocate a new refcell here?  Seems more likely to hurt than help us.
 				  };
@@ -1764,7 +1764,8 @@ herein
 			    {   arg ->	  { id:				Id,
 					    widgets:			List( Rg_Widget_Type ),								# The list of widgets to be laid out and displayed in this row.
 					    widget_layout_hint:		Ref( Widget_Layout_Hint ),
-					    site:			Ref(g2d::Box)									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					    site:			Ref(g2d::Box),									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					    first_cut:			Null_Or(Float)
 					  };
 
 				widgets =  map do_rg_widget widgets;
@@ -1772,7 +1773,8 @@ herein
 				arg =	  { id,
 					    widgets,
 					    widget_layout_hint,
-					    site
+					    site,
+					    first_cut
 					  };
 
 				RG_ROW (options.row_fn  arg);
@@ -1783,7 +1785,8 @@ herein
 			    {   arg ->	  { id:				Id,
 					    widgets:			List( Rg_Widget_Type ),								# The list of widgets to be laid out and displayed in this row.
 					    widget_layout_hint:		Ref( Widget_Layout_Hint ),
-					    site:			Ref(g2d::Box)									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					    site:			Ref(g2d::Box),									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					    first_cut:			Null_Or(Float)
 					  };
 
 				widgets =  map do_rg_widget widgets;
@@ -1791,7 +1794,8 @@ herein
 				arg =	  { id,
 					    widgets,
 					    widget_layout_hint,
-					    site
+					    site,
+					    first_cut
 					  };
 
 				RG_COL (options.col_fn  arg);
@@ -2105,7 +2109,7 @@ herein
 				    guiboss_to_widgetspace: 	Guiboss_To_Widgetspace,
 				    widget_to_guiboss:	 	Widget_To_Guiboss,
 				    space_to_gui:		Space_To_Gui,
-				    topwindow:			gtg::Guiboss_To_Topwindow,					# The topwindow on which to draw our widgets.
+				    hostwindow:			gtg::Guiboss_To_Hostwindow,					# The hostwindow on which to draw our widgets.
 				    subwindow_info:		Subwindow_Data,							# Holds toplevel SUBWINDOW_DATA for gui.
 				    needs_layout_and_redraw:	Ref( Bool )
 				  };
@@ -2183,7 +2187,8 @@ herein
 			    {   arg ->	  { id:				Id,
 					    widgets:			List( Rg_Widget_Type ),								# The list of widgets to be laid out and displayed in this row.
 					    widget_layout_hint:		Ref( Widget_Layout_Hint ),
-					    site:			Ref(g2d::Box)									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					    site:			Ref(g2d::Box),									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					    first_cut:			Null_Or(Float)
 					  };
 
 				apply  do_rg_widget widgets;
@@ -2196,7 +2201,8 @@ herein
 			    {   arg ->	  { id:				Id,
 					    widgets:			List( Rg_Widget_Type ),								# The list of widgets to be laid out and displayed in this row.
 					    widget_layout_hint:		Ref( Widget_Layout_Hint ),
-					    site:			Ref(g2d::Box)									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					    site:			Ref(g2d::Box),									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					    first_cut:			Null_Or(Float)
 					  };
 
 				apply do_rg_widget widgets;
@@ -2392,13 +2398,13 @@ herein
 		    esac;	
 	    end;
 
-	fun all_guipanes_on_topwindow_apply														# Apply guipane_fn to all Guipane instances on this topwindow.
+	fun all_guipanes_on_hostwindow_apply														# Apply guipane_fn to all Guipane instances on this hostwindow.
 	      #
-	      (topwindow_info:		Topwindow_Info)
+	      (hostwindow_info:		Hostwindow_Info)
 	      #
 	      (guipane_fn:		Guipane -> Void)
 	    =
-	    case *topwindow_info.subwindow_info
+	    case *hostwindow_info.subwindow_info
 		#
 		THE subwindow_data
 		    =>
@@ -2427,7 +2433,7 @@ herein
 	      (
 		me:		Guiboss_State,
 		guipane:	Guipane,
-		pp:		pp::Prettyprint_Mill
+		pp:		pp::Prettyprinter
 	      )
 	    =
 	    do_guipane  guipane
@@ -2439,7 +2445,7 @@ herein
 					    guiboss_to_widgetspace: 	Guiboss_To_Widgetspace,
 					    widget_to_guiboss:	 	Widget_To_Guiboss,
 					    space_to_gui:		Space_To_Gui,
-					    topwindow:			gtg::Guiboss_To_Topwindow,					# The topwindow on which to draw our widgets.
+					    hostwindow:			gtg::Guiboss_To_Hostwindow,					# The hostwindow on which to draw our widgets.
 					    subwindow_info:		Subwindow_Data,							# Holds toplevel SUBWINDOW_DATA for gui.
 					    needs_layout_and_redraw:	Ref( Bool )
 					  };
@@ -2458,7 +2464,8 @@ herein
 				arg ->	  { id:				Id,
 					    widgets:			List( Rg_Widget_Type ),						# The list of widgets to be laid out and displayed in this row.
 					    widget_layout_hint:		Ref( Widget_Layout_Hint ),
-					    site:			Ref(g2d::Box)							# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					    site:			Ref(g2d::Box),							# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					    first_cut:			Null_Or(Float)
 					  };
 
 				pp.box' 0 -1 {.
@@ -2487,9 +2494,10 @@ herein
 			    =>
 			    {
 				arg ->	  { id:				Id,
-					    widgets:			List( Rg_Widget_Type ),								# The list of widgets to be laid out and displayed in this row.
+					    widgets:			List( Rg_Widget_Type ),						# The list of widgets to be laid out and displayed in this row.
 					    widget_layout_hint:		Ref( Widget_Layout_Hint ),
-					    site:			Ref(g2d::Box)									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					    site:			Ref(g2d::Box),							# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					    first_cut:			Null_Or(Float)
 					  };
 
 				pp.box' 0 -1 {.
@@ -2518,9 +2526,9 @@ herein
 			    =>
 			    {
 				arg ->	  { id:				Id,
-					    widgets => widget_lists:	List(	List( Rg_Widget_Type )   ),							# The list lists of widgets to be laid out and displayed in this grid.
+					    widgets => widget_lists:	List(	List( Rg_Widget_Type )   ),				# The list lists of widgets to be laid out and displayed in this grid.
 					    widget_layout_hint:		Ref( Widget_Layout_Hint ),
-					    site:			Ref(g2d::Box)									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					    site:			Ref(g2d::Box)							# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
 					  };
 
 				pp.box' 0 -1 {.
@@ -2695,11 +2703,11 @@ herein
 					    site:			Ref(g2d::Box)									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
 					  };
 
-				key =  iuw::id_to_int  guiboss_to_widget.id;
+				key =  id_to_int  guiboss_to_widget.id;
 
 				widget_layout_hint
 				    =
-				    case (im::get (*me.widget_layout_hints, key))
+				    case (idm::get (*me.widget_layout_hints, guiboss_to_widget.id))
 					#
 					THE h =>  widget_layout_hint__to__string  h;
 
@@ -2798,7 +2806,7 @@ herein
 					    shutdown_oneshot:		Once( Void )									# The sprite-imp will fire this one-shot when shutting down due to die(). Used by guiboss-imp.
 					  };
 
-				key =  iuw::id_to_int  guiboss_to_gadget.id;
+				key =  id_to_int  guiboss_to_gadget.id;
 
 				pp.box' 0 -1 {.
 				    pp.lit  (sprintf "RG_OBJECT id=%d <" key);
@@ -2824,7 +2832,7 @@ herein
 					    shutdown_oneshot:		Once( Void ) 									# The sprite-imp will fire this one-shot when shutting down due to die(). Used by guiboss-imp.
 					  };
 
-				key =  iuw::id_to_int  guiboss_to_gadget.id;
+				key =  id_to_int  guiboss_to_gadget.id;
 
 				pp.box' 0 -1 {.
 				    pp.lit  (sprintf "RG_SPRITE id=%d <" key);
@@ -2845,40 +2853,40 @@ herein
 		guipane:	Guipane
 	      )
 	    =
-	    pp::with_standard_prettyprint_mill
+	    pp::with_standard_prettyprinter
 		#
 		(err::default_plaint_sink ())	[]
 		#
-		(\\ pp:   pp::Prettyprint_Mill
+		(\\ pp:   pp::Prettyprinter
 		    =
 		    pprint_guipane' (me, guipane, pp)
 		);
 
-	fun pprint_topwindows
+	fun pprint_hostwindows
 	      (
 		me:		Guiboss_State,
-		topwindows:	im::Map( Topwindow_Info )
+		hostwindows:	idm::Map( Hostwindow_Info )
 	      )
 	    =
-	    pp::with_standard_prettyprint_mill
+	    pp::with_standard_prettyprinter
 		#
 		(err::default_plaint_sink ())	[]
 		#
-		(\\ pp:   pp::Prettyprint_Mill
+		(\\ pp:   pp::Prettyprinter
 		    =
 		    {
 			pp.box' 0 -1 {.
-			    pp.lit  "topwindows [";
+			    pp.lit  "hostwindows [";
 			    pp.ind 2;
 			    pp.txt " ";
 
-			    fun do_topwindow
+			    fun do_hostwindow
 				  (
-				    arg:	Topwindow_Info
+				    arg:	Hostwindow_Info
 				  )
 				=
 				{
-				    arg ->  { guiboss_to_topwindow:			gtg::Guiboss_To_Topwindow,
+				    arg ->  { guiboss_to_hostwindow:			gtg::Guiboss_To_Hostwindow,
 					      current_frame_number:			Ref(Int),							# We count frames for convenience of widgets and debugging.
 					      seconds_per_frame:			Ref(Float),							# Primarily so widgets can do motion blurring if they wish.
 					      done_extra_redraw_request_this_frame:	Ref(Bool),							# See Note[3].
@@ -2886,7 +2894,7 @@ herein
 					      subwindow_info:				Ref( Null_Or( Subwindow_Data ) )
 					    };
 
-				    pp.lit  (sprintf "topwindow %d ["  (id_to_int  guiboss_to_topwindow.id));
+				    pp.lit  (sprintf "hostwindow %d ["  (id_to_int  guiboss_to_hostwindow.id));
 				    pp.ind 2;
 				    pp.txt " ";
 
@@ -2968,8 +2976,8 @@ herein
 
 			    pp::seqx
 				{.   pp.endlit ",";   pp.txt " ";   }	# Inter-element separator.
-				do_topwindow				# Print one list element.
-				(im::vals_list  topwindows);		# List of elements.
+				do_hostwindow				# Print one list element.
+				(idm::vals_list  hostwindows);		# List of elements.
 
 			    pp.ind 0;
 			    pp.txt " ";
@@ -2995,7 +3003,9 @@ herein
 	  | XI_WIDGET_MAP_FN		(Xi_Widget		-> Xi_Widget		)				# Call this fn on XI_WIDGET          nodes in Guipith. Defaults to null fn.
 	  | XI_GUIPLAN_MAP_FN		(Guiplan		-> Guiplan		)				# Call this fn on XI_WIDGET          nodes in Guipith. Defaults to null fn.
 	  #
-	  | XI_TOPWINDOW_INFO_MAP_FN	(Xi_Topwindow_Info	-> Xi_Topwindow_Info	)
+	  | XI_WIDGET_TYPE_MAP_FN	(Xi_Widget_Type		-> Xi_Widget_Type	)				# This was an afterthought. Should do the same thing for the other rewritors. XXX SUCKO FIXME
+	  #
+	  | XI_HOSTWINDOW_INFO_MAP_FN	(Xi_Hostwindow_Info	-> Xi_Hostwindow_Info	)
 	  | XI_SUBWINDOW_INFO_MAP_FN	(Xi_Subwindow_Info	-> Xi_Subwindow_Info	)
 	  | XI_GUIPANE_MAP_FN		(Xi_Guipane		-> Xi_Guipane		)
 	  #
@@ -3011,17 +3021,19 @@ herein
 	  | XI_GP_TABPORT_MAP_FN	(Gp_Tabport		-> Gp_Tabport		)
 	  | XI_GP_FRAME_MAP_FN		(Gp_Frame		-> Gp_Frame		)
 	  | XI_GP_WIDGET_MAP_FN		(Gp_Widget		-> Gp_Widget		)
+	  #
+	  | XI_GP_WIDGET_TYPE_MAP_FN	(Gp_Widget_Type		-> Gp_Widget_Type	)				# This was an afterthought. Should do the same thing for the other rewritors. XXX SUCKO FIXME
 	  ;
 
 
 	fun guipith_map
 	      (
-		guipiths:	im::Map( Xi_Topwindow_Info ),
+		guipiths:	idm::Map( Xi_Hostwindow_Info ),
 		#
 		options:	List( Guipith_Map_Option )
 	      )
 	    =
-	    {   guipiths =  do_topwindows  guipiths;
+	    {   guipiths =  do_hostwindows  guipiths;
 		#
 		guipiths;
 	    }
@@ -3042,9 +3054,11 @@ herein
 			my_widget_fn			=  REF  null_fn;
 			my_guiplan_fn			=  REF  null_fn;
 			#
-			my_topwindow_info_fn		=  REF  null_fn;
+			my_hostwindow_info_fn		=  REF  null_fn;
 			my_subwindow_info_fn		=  REF  null_fn;
 			my_guipane_fn			=  REF  null_fn;
+
+			my_widget_type_fn		=  REF  null_fn;
 
 			my_gp_row_fn			=  REF  null_fn;
 			my_gp_col_fn			=  REF  null_fn;
@@ -3058,6 +3072,8 @@ herein
 			my_gp_tabport_fn		=  REF  null_fn;
 			my_gp_frame_fn			=  REF  null_fn;
 			my_gp_widget_fn			=  REF  null_fn;
+
+			my_gp_widget_type_fn		=  REF  null_fn;
 
 			apply  do_option  options
 			where
@@ -3073,9 +3089,11 @@ herein
 				do_option (XI_GUIPLAN_MAP_FN		fn) =>  my_guiplan_fn			:=  fn;
 				#
 				#
-				do_option (XI_TOPWINDOW_INFO_MAP_FN	fn) =>  my_topwindow_info_fn		:=  fn;
+				do_option (XI_HOSTWINDOW_INFO_MAP_FN	fn) =>  my_hostwindow_info_fn		:=  fn;
 				do_option (XI_SUBWINDOW_INFO_MAP_FN	fn) =>  my_subwindow_info_fn		:=  fn;
 				do_option (XI_GUIPANE_MAP_FN		fn) =>  my_guipane_fn			:=  fn;
+
+				do_option (XI_WIDGET_TYPE_MAP_FN	fn) =>  my_widget_type_fn		:=  fn;
 
 				do_option (XI_GP_ROW_MAP_FN		fn) =>  my_gp_row_fn			:=  fn;
 				do_option (XI_GP_COL_MAP_FN		fn) =>  my_gp_col_fn			:=  fn;
@@ -3089,6 +3107,8 @@ herein
 				do_option (XI_GP_TABPORT_MAP_FN		fn) =>  my_gp_tabport_fn		:=  fn;
 				do_option (XI_GP_FRAME_MAP_FN		fn) =>  my_gp_frame_fn			:=  fn;
 				do_option (XI_GP_WIDGET_MAP_FN		fn) =>  my_gp_widget_fn			:=  fn;
+
+				do_option (XI_GP_WIDGET_TYPE_MAP_FN	fn) =>  my_gp_widget_type_fn		:=  fn;
 			    end;
 			end;
 
@@ -3103,9 +3123,11 @@ herein
 			  widget_fn			=>  *my_widget_fn,
 			  guiplan_fn			=>  *my_guiplan_fn,
 			  #
-			  topwindow_info_fn		=>  *my_topwindow_info_fn,
+			  hostwindow_info_fn		=>  *my_hostwindow_info_fn,
 			  subwindow_info_fn		=>  *my_subwindow_info_fn,
 			  guipane_fn			=>  *my_guipane_fn,
+
+			  widget_type_fn		=>  *my_widget_type_fn,
 
 			  gp_row_fn			=>  *my_gp_row_fn,
 			  gp_col_fn			=>  *my_gp_col_fn,
@@ -3118,7 +3140,9 @@ herein
 			  gp_scrollport_fn		=>  *my_gp_scrollport_fn,
 			  gp_tabport_fn			=>  *my_gp_tabport_fn,
 			  gp_frame_fn			=>  *my_gp_frame_fn,
-			  gp_widget_fn			=>  *my_gp_widget_fn
+			  gp_widget_fn			=>  *my_gp_widget_fn,
+
+			  gp_widget_type_fn		=>  *my_gp_widget_type_fn
 			};
 		    };
 
@@ -3135,7 +3159,9 @@ herein
 				#
 				row =  map  do_gp_widget  row;
 
-				ROW (options.gp_row_fn  row);
+				val =  ROW (options.gp_row_fn  row);
+
+				options.gp_widget_type_fn  val;
 			    };
 
 			COL (arg:	Gp_Col)
@@ -3144,7 +3170,9 @@ herein
 				#
 				col =  map  do_gp_widget  col;
 				#
-				COL (options.gp_col_fn  col);
+				val =  COL (options.gp_col_fn  col);
+
+				options.gp_widget_type_fn  val;
 			    };
 
 			GRID (arg:	Gp_Grid)
@@ -3160,7 +3188,9 @@ herein
 
 				arg = grid;
 
-				GRID (options.gp_grid_fn  arg);
+				val = GRID (options.gp_grid_fn  arg);
+
+				options.gp_widget_type_fn  val;
 			    };
 
 			MARK (arg:	Gp_Mark)
@@ -3171,7 +3201,9 @@ herein
 
 				arg = widget;
 
-				MARK (options.gp_mark_fn  arg);
+				val = MARK (options.gp_mark_fn  arg);
+
+				options.gp_widget_type_fn  val;
 			    };
 
 			ROW' (arg:	Gp_Row')
@@ -3184,7 +3216,9 @@ herein
 
 				arg = (id, widgets);
 
-				ROW' (options.gp_row'_fn  arg);
+				val = ROW' (options.gp_row'_fn  arg);
+
+				options.gp_widget_type_fn  val;
 			    };
 
 			COL' (arg:	Gp_Col')
@@ -3197,7 +3231,9 @@ herein
 
 				arg = (id, widgets);
 
-				COL' (options.gp_col'_fn  arg);
+				val = COL' (options.gp_col'_fn  arg);
+
+				options.gp_widget_type_fn  val;
 			    };
 
 			GRID' (arg:	Gp_Grid')
@@ -3215,7 +3251,9 @@ herein
 
 				arg = (id, grid);
 
-				GRID' (options.gp_grid'_fn  arg);
+				val = GRID' (options.gp_grid'_fn  arg);
+
+				options.gp_widget_type_fn  val;
 			    };
 
 			MARK' (arg:	Gp_Mark')
@@ -3229,7 +3267,9 @@ herein
 
 				arg = (id, doc, widget);
 
-				MARK' (options.gp_mark'_fn  arg);
+				val = MARK' (options.gp_mark'_fn  arg);
+
+				options.gp_widget_type_fn  val;
 			    };
 
 			SCROLLPORT (arg:  Gp_Scrollport)
@@ -3244,7 +3284,9 @@ herein
 #					  widget
 #					};
 
-				SCROLLPORT (options.gp_scrollport_fn  arg);
+				val = SCROLLPORT (options.gp_scrollport_fn  arg);
+
+				options.gp_widget_type_fn  val;
 			    };
 
 			TABPORT (arg:  Gp_Tabport)
@@ -3261,7 +3303,9 @@ herein
 					  tabs
 					);
 
-				TABPORT (options.gp_tabport_fn  arg);
+				val  = TABPORT (options.gp_tabport_fn  arg);
+
+				options.gp_widget_type_fn  val;
 			    };
 
 			FRAME (arg:  Gp_Frame)
@@ -3274,7 +3318,9 @@ herein
 
 				arg ->  ( frame_options, gp_widget);
 
-				FRAME (options.gp_frame_fn  arg);
+				val = FRAME (options.gp_frame_fn  arg);
+
+				options.gp_widget_type_fn  val;
 			    };
 
 			WIDGET (arg:	Gp_Widget)
@@ -3283,7 +3329,9 @@ herein
 					  widget:		Widget_Start_Fn
 					);
 				#
-				WIDGET (options.gp_widget_fn  arg);
+				val = WIDGET (options.gp_widget_fn  arg);
+
+				options.gp_widget_type_fn  val;
 			    };
 
 			OBJECTSPACE (arg:	Gp_Objectspace)
@@ -3296,7 +3344,9 @@ herein
 					  objects
 					);
 
-				OBJECTSPACE arg;										# Eventually we'll have to do the full subrecursion here but for the moment none of that stuff is really operational.
+				val = OBJECTSPACE arg;										# Eventually we'll have to do the full subrecursion here but for the moment none of that stuff is really operational.
+
+				options.gp_widget_type_fn  val;
 			    };
 
 			SPRITESPACE   (arg:	Gp_Spritespace)
@@ -3309,13 +3359,16 @@ herein
 					  sprites
 					);
 
-				SPRITESPACE arg;										# Eventually we'll have to do the full subrecursion here but for the moment none of that stuff is really operational.
+				val = SPRITESPACE arg;										# Eventually we'll have to do the full subrecursion here but for the moment none of that stuff is really operational.
+
+				options.gp_widget_type_fn  val;
 			    };
 
 			NULL_WIDGET
 			    =>
-			    {
-				gp_widget;
+			    {	val = gp_widget;
+				#
+				options.gp_widget_type_fn  val;
 			    };
 		    esac;
 
@@ -3326,24 +3379,28 @@ herein
 			#
 			XI_ROW (arg:	Xi_Row)
 			    =>
-			    {   arg -> 	{ id, widgets };
+			    {   arg -> 	{ id, widgets, first_cut };
 				#
 				widgets =  map  do_xi_widget  widgets;
 
-				arg = 	{ id, widgets };
+				arg = 	{ id, widgets, first_cut };
 
-				XI_ROW  (options.row_fn  arg);
+				val = XI_ROW  (options.row_fn  arg);
+
+				options.widget_type_fn  val;
 			    };
 
 			XI_COL (arg:	Xi_Col)
 			    =>
-			    {   arg -> 	{ id, widgets };
+			    {   arg -> 	{ id, widgets, first_cut };
 				#
 				widgets =  map  do_xi_widget  widgets;
 
-				arg = 	{ id, widgets };
+				arg = 	{ id, widgets, first_cut };
 
-				XI_COL (options.row_fn  arg);
+				val = XI_COL (options.row_fn  arg);
+
+				options.widget_type_fn  val;
 			    };
 
 
@@ -3362,7 +3419,9 @@ herein
 
 				arg =  { id, widgets };
 
-				XI_GRID (options.grid_fn  arg);
+				val = XI_GRID (options.grid_fn  arg);
+
+				options.widget_type_fn  val;
 			    };
 
 			XI_MARK (arg:	Xi_Mark)
@@ -3376,7 +3435,9 @@ herein
 
 				arg =  { id, doc, widget };
 
-				XI_MARK (options.mark_fn  arg);
+				val = XI_MARK (options.mark_fn  arg);
+
+				options.widget_type_fn  val;
 			    };
 
 			XI_SCROLLPORT (arg:	Xi_Scrollport)
@@ -3391,7 +3452,9 @@ herein
 					    xi_widget
 					  };
 
-				XI_SCROLLPORT (options.scrollport_fn  arg);
+				val = XI_SCROLLPORT (options.scrollport_fn  arg);
+
+				options.widget_type_fn  val;
 			    };
 
 			XI_TABPORT (arg:	Xi_Tabport)
@@ -3404,7 +3467,9 @@ herein
 
 				arg =   {  id, widgets };
 
-				XI_TABPORT (options.tabport_fn  arg);
+				val = XI_TABPORT (options.tabport_fn  arg);
+
+				options.widget_type_fn  val;
 			    };
 
 			XI_FRAME (arg:		Xi_Frame)
@@ -3422,12 +3487,14 @@ herein
 					  widget
 					};
 
-				XI_FRAME (options.frame_fn  arg);
+				val = XI_FRAME (options.frame_fn  arg);
+
+				options.widget_type_fn  val;
 			    };
 
 			XI_WIDGET (arg:		Xi_Widget)
 			    =>
-			    {   arg -> 	{ widget_id:		iuw::Id,
+			    {   arg -> 	{ widget_id:		Id,
 					  widget_layout_hint:	Widget_Layout_Hint,
 					  doc:			String
 					};
@@ -3437,7 +3504,9 @@ herein
 					  doc
 					};
 
-				XI_WIDGET (options.widget_fn  arg);
+				val = XI_WIDGET (options.widget_fn  arg);
+
+				options.widget_type_fn  val;
 			    };
 
 			XI_OBJECTSPACE (arg:	Xi_Objectspace)
@@ -3451,7 +3520,9 @@ herein
 					 xi_objects
 				       };
 
-				XI_OBJECTSPACE arg;												# Eventually we'll have to do the full subrecursion here but for the moment none of that stuff is really operational.
+				val = XI_OBJECTSPACE arg;												# Eventually we'll have to do the full subrecursion here but for the moment none of that stuff is really operational.
+
+				options.widget_type_fn  val;
 			    };
 
 			XI_SPRITESPACE (arg:	Xi_Spritespace)
@@ -3464,13 +3535,16 @@ herein
 					  xi_sprites
 					};
 
-				XI_SPRITESPACE arg;												# Eventually we'll have to do the full subrecursion here but for the moment none of that stuff is really operational.
+				val = XI_SPRITESPACE arg;												# Eventually we'll have to do the full subrecursion here but for the moment none of that stuff is really operational.
+
+				options.widget_type_fn  val;
 			    };
 
 			XI_NULL_WIDGET
 			    =>
-			    {
-				xi_widget;
+			    {	val = xi_widget;
+				#
+				options.widget_type_fn  val;
 			    };
 
 			XI_GUIPLAN (arg:	Guiplan)
@@ -3481,7 +3555,9 @@ herein
 
 				arg =  (gp_widget);
 
-				XI_GUIPLAN (options.guiplan_fn  arg);
+				val = XI_GUIPLAN (options.guiplan_fn  arg);
+
+				options.widget_type_fn  val;
 			    };
 		    esac;
 
@@ -3526,17 +3602,17 @@ herein
 			options.subwindow_info_fn  arg;
 		    };
 
-		fun do_topwindows (topwindows:	im::Map( Xi_Topwindow_Info ))
+		fun do_hostwindows (hostwindows:	idm::Map( Xi_Hostwindow_Info ))
 		    =
-		    {	topwindows = REF topwindows;
+		    {	hostwindows = REF hostwindows;
 			#
-			fun do_topwindow
+			fun do_hostwindow
 			      (
-				i:	Int,
-				arg:	Xi_Topwindow_Info
+				id':	Id,
+				arg:	Xi_Hostwindow_Info
 			      )
 			    =
-			    {   arg ->  { id:			Id,										# From topwindow_info.guiboss_to_topwindow.id
+			    {   arg ->  { id:			Id,										# From hostwindow_info.guiboss_to_hostwindow.id
 					  subwindow_info:	Null_Or( Xi_Subwindow_Data )
 					};
 
@@ -3553,21 +3629,37 @@ herein
 
 				arg =   { id, subwindow_info };
 
-				arg =   options.topwindow_info_fn  arg;
+				arg =   options.hostwindow_info_fn  arg;
 
-				topwindows :=  im::set (*topwindows, i, arg);
+				hostwindows :=  idm::set (*hostwindows, id', arg);
 			    };
 
-			apply do_topwindow (im::keyvals_list *topwindows);
+			apply do_hostwindow (idm::keyvals_list *hostwindows);
 			#
-			*topwindows;
+			*hostwindows;
 		    };
 	    end;
 
+	fun xi_widget_id (w: Xi_Widget_Type):	Null_Or( Id )
+	    =
+	    case w
+		#
+		XI_ROW		    x => THE x.id;
+		XI_COL		    x => THE x.id;
+		XI_GRID		    x => THE x.id;
+		XI_MARK		    x => THE x.id;
+		XI_SCROLLPORT  	    x => THE x.id;
+		XI_TABPORT	    x => THE x.id;
+		XI_FRAME	    x => THE x.id;
+		XI_WIDGET	    x => THE x.widget_id;
+		XI_OBJECTSPACE	    x => THE x.guiboss_to_objectspace_id;
+		XI_SPRITESPACE	    x => THE x.guiboss_to_spritespace_id;
+		XI_NULL_WIDGET	      => NULL;
+		XI_GUIPLAN	    _ => NULL;
+	    esac;
 
 
-
-	Guipith_Apply_Option												# The following guipith_apply() facility allows clients to rewrite an Guipith tree without having to write out the whole recursion.
+	Guipith_Apply_Option														# The following guipith_apply() facility allows clients to rewrite an Guipith tree without having to write out the whole recursion.
 	  #
 	  = XI_ROW_FN			(Xi_Row	 		-> Void)								# Call this fn on XI_ROW    	     nodes in Guipith. Defaults to null fn.
 	  | XI_COL_FN			(Xi_Col	 		-> Void)								# Call this fn on XI_COL    	     nodes in Guipith. Defaults to null fn.
@@ -3579,7 +3671,7 @@ herein
 	  | XI_WIDGET_FN		(Xi_Widget		-> Void)								# Call this fn on XI_WIDGET          nodes in Guipith. Defaults to null fn.
 	  | XI_GUIPLAN_FN		(Guiplan		-> Void)								# Call this fn on XI_WIDGET          nodes in Guipith. Defaults to null fn.
 	  #
-	  | XI_TOPWINDOW_INFO_FN	(Xi_Topwindow_Info	-> Void)
+	  | XI_HOSTWINDOW_INFO_FN	(Xi_Hostwindow_Info	-> Void)
 	  | XI_SUBWINDOW_INFO_FN	(Xi_Subwindow_Info	-> Void)
 	  | XI_GUIPANE_FN		(Xi_Guipane		-> Void)
 	  #
@@ -3600,12 +3692,12 @@ herein
 
 	fun guipith_apply
 	      (
-		topwindows:	im::Map( Xi_Topwindow_Info ),
+		hostwindows:	idm::Map( Xi_Hostwindow_Info ),
 		#
 		options:	List( Guipith_Apply_Option )
 	      )
 	    =
-	    do_topwindows topwindows
+	    do_hostwindows hostwindows
 	    where
 
 		fun process_options  (options:  List(Guipith_Apply_Option))
@@ -3623,7 +3715,7 @@ herein
 			my_widget_fn			=  REF  null_fn;
 			my_guiplan_fn			=  REF  null_fn;
 			#
-			my_topwindow_info_fn		=  REF  null_fn;
+			my_hostwindow_info_fn		=  REF  null_fn;
 			my_subwindow_info_fn		=  REF  null_fn;
 			my_guipane_fn			=  REF  null_fn;
 
@@ -3653,7 +3745,7 @@ herein
 				do_option (XI_WIDGET_FN		fn) =>  my_widget_fn			:=  fn;
 				do_option (XI_GUIPLAN_FN	fn) =>  my_guiplan_fn			:=  fn;
 				#
-				do_option (XI_TOPWINDOW_INFO_FN	fn) =>  my_topwindow_info_fn		:=  fn;
+				do_option (XI_HOSTWINDOW_INFO_FN	fn) =>  my_hostwindow_info_fn		:=  fn;
 				do_option (XI_SUBWINDOW_INFO_FN	fn) =>  my_subwindow_info_fn		:=  fn;
 				do_option (XI_GUIPANE_FN	fn) =>  my_guipane_fn			:=  fn;
 				#
@@ -3683,7 +3775,7 @@ herein
 			  widget_fn			=>  *my_widget_fn,
 			  guiplan_fn			=>  *my_guiplan_fn,
 			  #
-			  topwindow_info_fn		=>  *my_topwindow_info_fn,
+			  hostwindow_info_fn		=>  *my_hostwindow_info_fn,
 			  subwindow_info_fn		=>  *my_subwindow_info_fn,
 			  guipane_fn			=>  *my_guipane_fn,
 			  #
@@ -3873,7 +3965,7 @@ herein
 			#
 			XI_ROW (arg:	Xi_Row)
 			    =>
-			    {   arg -> 	{ id, widgets };
+			    {   arg -> 	{ id, widgets, first_cut };
 				#
 				apply  do_xi_widget  widgets;
 
@@ -3882,7 +3974,7 @@ herein
 
 			XI_COL (arg:	Xi_Col)
 			    =>
-			    {   arg -> 	{ id, widgets };
+			    {   arg -> 	{ id, widgets, first_cut };
 				#
 				apply  do_xi_widget  widgets;
 
@@ -3955,7 +4047,7 @@ herein
 
 			XI_WIDGET (arg:		Xi_Widget)
 			    =>
-			    {   arg -> 	{ widget_id:		iuw::Id,
+			    {   arg -> 	{ widget_id:		Id,
 					  widget_layout_hint:	Widget_Layout_Hint,
 					  doc:			String
 					};
@@ -4031,13 +4123,13 @@ herein
 			options.subwindow_info_fn  arg;
 		    };
 
-		fun do_topwindows (topwindows:	im::Map( Xi_Topwindow_Info ))
+		fun do_hostwindows (hostwindows:	idm::Map( Xi_Hostwindow_Info ))
 		    =
-		    apply do_topwindow (im::vals_list topwindows)
+		    apply do_hostwindow (idm::vals_list hostwindows)
 			where
-			    fun do_topwindow (arg:	 Xi_Topwindow_Info)
+			    fun do_hostwindow (arg:	 Xi_Hostwindow_Info)
 				=
-				{   arg ->  { id:			Id,										# From topwindow_info.guiboss_to_topwindow.id
+				{   arg ->  { id:			Id,										# From hostwindow_info.guiboss_to_hostwindow.id
 					      subwindow_info:		Null_Or( Xi_Subwindow_Data )
 					    };
 
@@ -4050,21 +4142,78 @@ herein
 					NULL => ();
 				    esac;
 
-				    options.topwindow_info_fn  arg;
+				    options.hostwindow_info_fn  arg;
 				};
 			end;
 	    end;
 
 
+	fun xi_widget_parent						# This fn is not yet used.  The interface might not be right yet.
+	      (
+		given_id:	Id,					# Search for parent of this widget
+		hostwindows:	idm::Map( Xi_Hostwindow_Info )		# throughout these guipiths.
+	      )
+	    : Null_Or( Id )
+	    =
+	    {   result = REF (NULL: Null_Or(Id));
+		#
+		fun check_widget
+		      (
+			parent_id:	Id,
+			w:		Xi_Widget_Type
+		      )
+		    = 
+		    case (xi_widget_id(w))
+			#
+			THE id => if (same_id( id, given_id))   result := THE parent_id;  fi;
+			NULL   => ();
+		    esac;
 
+		options
+		  =
+		  [ XI_ROW_FN		(\\ (x: Xi_Row)		=   apply do_widget x.widgets where fun do_widget (w: Xi_Widget_Type) = check_widget(x.id, w); end),
+		    XI_ROW_FN		(\\ (x: Xi_Row)		=   apply do_widget x.widgets where fun do_widget (w: Xi_Widget_Type) = check_widget(x.id, w); end),
+		    XI_GRID_FN		(\\ (x: Xi_Grid)	=   apply do_widget x.widgets where fun do_widget (w: List(Xi_Widget_Type)) = apply do_widget' w where fun do_widget' (w: Xi_Widget_Type) = check_widget (x.id, w); end; end),
+		    XI_MARK_FN		(\\ (x: Xi_Mark)	=   check_widget (x.id, x.widget)),
+		    XI_SCROLLPORT_FN	(\\ (x: Xi_Scrollport)	=   check_widget (x.id, x.xi_widget)),
+		    XI_TABPORT_FN	(\\ (x: Xi_Tabport)	=   apply do_widget x.widgets where fun do_widget (w: Xi_Widget_Type) = check_widget(x.id, w); end),
+		    XI_FRAME_FN		(\\ (x: Xi_Frame)	=   {   check_widget (x.id, x.frame_widget);   check_widget (x.id, x.widget);   })
+		    #
+		    # NB: We omit 
+		    #   XI_GUIPLAN_FN		(Guiplan		-> Void)								# Call this fn on XI_WIDGET          nodes in Guipith. Defaults to null fn.
+		    #	XI_GP_ROW_FN		(Gp_Row			-> Void)
+		    #   XI_GP_COL_FN		(Gp_Col			-> Void)
+		    #   XI_GP_GRID_FN		(Gp_Grid 		-> Void)
+		    #   XI_GP_MARK_FN		(Gp_Mark 		-> Void)
+		    #   XI_GP_ROW'_FN		(Gp_Row'		-> Void)
+		    #   XI_GP_COL'_FN		(Gp_Col'		-> Void)
+		    #   XI_GP_GRID'_FN		(Gp_Grid' 		-> Void)
+		    #   XI_GP_MARK'_FN		(Gp_Mark' 		-> Void)
+		    #   XI_GP_SCROLLPORT_FN	(Gp_Scrollport		-> Void)
+		    #   XI_GP_TABPORT_FN	(Gp_Tabport		-> Void)
+		    #   XI_GP_FRAME_FN		(Gp_Frame		-> Void)
+		    #   XI_GP_WIDGET_FN		(Gp_Widget		-> Void)
+		    # because their args lack 'id' fields we can check. 
+		    # We omit 
+		    #   XI_HOSTWINDOW_INFO_FN	(Xi_Hostwindow_Info	-> Void)
+		    #	XI_SUBWINDOW_INFO_FN	(Xi_Subwindow_Info	-> Void)
+		    #   XI_GUIPANE_FN		(Xi_Guipane		-> Void)
+		    # because they don't seem germane at the moment -- possibly
+		    # we should revisit this at some future time.
+		  ];  
+
+		guipith_apply (hostwindows, options);
+
+		*result;
+	    };
 
 	fun pprint_subwindow_info (subwindow_info: Subwindow_Data)
 	    =
-	    pp::with_standard_prettyprint_mill
+	    pp::with_standard_prettyprinter
 		#
 		(err::default_plaint_sink ())	[]
 		#
-		(\\ pp:   pp::Prettyprint_Mill
+		(\\ pp:   pp::Prettyprinter
 		    =
 		    do_subwindow_info subwindow_info
 		    where
@@ -4076,7 +4225,7 @@ herein
 				  guiboss_to_widgetspace: 	Guiboss_To_Widgetspace,
 				  widget_to_guiboss:	 	Widget_To_Guiboss,
 				  space_to_gui:			Space_To_Gui,
-				  topwindow:			gtg::Guiboss_To_Topwindow,				# The topwindow on which to draw our widgets.
+				  hostwindow:			gtg::Guiboss_To_Hostwindow,				# The hostwindow on which to draw our widgets.
 				  subwindow_info:		Subwindow_Data,						# Holds toplevel SUBWINDOW_DATA for gui.
 				  needs_layout_and_redraw:	Ref( Bool )
 				}
@@ -4094,7 +4243,7 @@ herein
 				    pp.lit  (sprintf "guiboss_to_widgetspace.id => %d" (id_to_int guiboss_to_widgetspace.id));
 				    pp.endlit ",";
 				    
-				    pp.lit  (sprintf "topwindow => { id => %d, subwindow_or_view:Gadget_To_Rw_Pixmap => { id => %d, size => %s... }" (id_to_int topwindow.id) (id_to_int topwindow.subwindow_or_view.id) (g2j::size_to_string topwindow.subwindow_or_view.size));
+				    pp.lit  (sprintf "hostwindow => { id => %d, subwindow_or_view:Gadget_To_Rw_Pixmap => { id => %d, size => %s... }" (id_to_int hostwindow.id) (id_to_int hostwindow.subwindow_or_view.id) (g2j::size_to_string hostwindow.subwindow_or_view.size));
 				    pp.endlit ",";
 
 				    pp.box {.
@@ -4189,7 +4338,8 @@ herein
 			        RG_ROW	{ id:			Id,
 					  widgets:		List( Rg_Widget_Type ),
 					  widget_layout_hint:	Ref( Widget_Layout_Hint ),
-					  site:			Ref(g2d::Box)							# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					  site:			Ref(g2d::Box),							# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					  first_cut:		Null_Or(Float)
 					}
 				    =>
 				    {
@@ -4224,7 +4374,8 @@ herein
 			        RG_COL	{ id:			Id,
 					  widgets:		List( Rg_Widget_Type ),
 					  widget_layout_hint:	Ref( Widget_Layout_Hint ),
-					  site:			Ref(g2d::Box)							# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					  site:			Ref(g2d::Box),							# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+					  first_cut:		Null_Or(Float)
 					}
 				    =>
 				    {
@@ -4374,7 +4525,7 @@ herein
 					pp.box {.
 					    pp.lit (sprintf "RG_WIDGET guiboss_to_widget.doc=\"%s\" {"  guiboss_to_widget.doc);
 
-					    pp.lit (sprintf "guiboss_to_widget.id => %d" (iuw::id_to_int guiboss_to_widget.id));
+					    pp.lit (sprintf "guiboss_to_widget.id => %d" (id_to_int guiboss_to_widget.id));
 					    pp.endlit ",";
 
 					    pp.lit (sprintf "site => %s" (g2j::box_to_string *site));
@@ -4439,18 +4590,18 @@ herein
 
 	fun pprint_gadget_imp_info (gadget_imp_info: Gadget_Imp_Info)
 	    =
-	    pp::with_standard_prettyprint_mill
+	    pp::with_standard_prettyprinter
 		#
 		(err::default_plaint_sink ())	[]
 		#
-		(\\ pp:   pp::Prettyprint_Mill
+		(\\ pp:   pp::Prettyprinter
 		    =
 		    do_gadget_imp_info gadget_imp_info
 		    where
 			fun do_gadget_imp_info
 			      (
 				{
-				  site:				Site,										# Where to draw this gadget, in topwindow coordinates.
+				  site:				Site,										# Where to draw this gadget, in hostwindow coordinates.
 				  subwindow_or_view:		Ref(Subwindow_Or_View),
 				  #
 				  guiboss_to_gadget:		Guiboss_To_Gadget,								# We use this to make requests of visible gadgets.
@@ -4489,7 +4640,7 @@ herein
 				    pp.lit  (sprintf "subwindow_or_view => %s" (subwindow_or_view_id *subwindow_or_view));
 				    pp.endlit ",";
 				    
-				    pp.lit (sprintf "id => %d" (iuw::id_to_int guiboss_to_gadget.id));
+				    pp.lit (sprintf "id => %d" (id_to_int guiboss_to_gadget.id));
 
 				    pp.ind 0;
 				    pp.txt " ";
@@ -4550,6 +4701,6 @@ end;
 ##########################################################################
 
 
-## Original code by Jeff Prothero Copyright (c) 2014-2014,
+## Original code by Jeff Prothero Copyright (c) 2014-2015,
 ## released per terms of SMLNJ-COPYRIGHT.
 

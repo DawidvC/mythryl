@@ -119,7 +119,7 @@ package Transform2D:  TRANSFORM_2D =
 		    r21 = -sinTheta, r22 = cosTheta,
 		    tx  = 0.0,       ty  = 0.0
 		  }
-	      | _ => raise exception FAIL "rotations not implemented yet"
+	      | _ => raise exception DIE "rotations not implemented yet"
 	    #  end case 
 	  end
 
@@ -228,5 +228,5 @@ package Transform2D:  TRANSFORM_2D =
 
 
 ## COPYRIGHT (c) 1998 Bell Labs, Lucent Technologies.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

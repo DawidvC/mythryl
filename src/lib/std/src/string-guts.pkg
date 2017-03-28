@@ -1,4 +1,10 @@
 ## string-guts.pkg
+#
+# Basic string ops.
+#
+# See also:
+#
+#     src/lib/std/src/string-junk.pkg
 
 # Compiled by:
 #     src/lib/std/src/standard-core.sublib
@@ -14,9 +20,14 @@
 stipulate
     package chr =  char;				# char			is from   src/lib/std/src/char.pkg
     package it  =  inline_t;				# inline_t		is from   src/lib/core/init/built-in.pkg
+    package c   =  it::char;				# inline_t		is from   src/lib/core/init/built-in.pkg
     package ps  =  protostring;				# protostring		is from   src/lib/std/src/protostring.pkg
     package rt  =  runtime;				# runtime		is from   src/lib/core/init/runtime.pkg
     package g2d =  exceptions_guts;			# exceptions_guts	is from   src/lib/std/src/exceptions-guts.pkg
+
+    nb = log::note_on_stderr;				# log			is from   src/lib/std/src/log.pkg
+							# Note: sprintf etc are not available at this level, so if you need to debug this file try stuff like
+							#     nb {. (cat [ "utf8_to_ucs2/LUP: i=", (tagged_int_guts::to_string i) ]); };
 herein
 
     package  string_guts
@@ -28,13 +39,45 @@ herein
 	(<=) =  it::default_int::(<=);
 	(>)  =  it::default_int::(>);
 	(>=) =  it::default_int::(>=);
+        (&)  =  it::default_int::bitwise_and;
 
-    #     (==) = it::(==);
+#	(==) = it::(==);
 
-	unsafe_get =  it::vector_of_chars::get;
-	unsafe_set =  it::vector_of_chars::set;
+	unsafe_get =  it::vector_of_chars::get_byte_as_char;
+	unsafe_set =  it::vector_of_chars::set_char_as_byte;
 
-	# List reverse 
+	unsafe_get_byte =  it::vector_of_chars::get_byte;
+	unsafe_set_byte =  it::vector_of_chars::set_byte;
+
+	# These are not used in production code, but it is a
+	# good idea to test new code with them before switching
+	# over to the above 'unsafe_set' ops:
+	#
+	fun safe_set_byte  (s: String,  i: Int,  b: Int): Void
+	    =
+	    {   len =  it::vector_of_chars::length  s;
+		#
+		if (i < 0 or i >= len)
+		    #
+		    nb {. (cat [ "safe_set_byte: error: i=",  (tagged_int_guts::to_string i), " len=", (tagged_int_guts::to_string len), " s='", s, "'\n" ]); };
+		else
+		    unsafe_set_byte (s, i, b);
+		fi;
+	    };
+	fun safe_set  (s: String,  i: Int,  c: Char): Void
+	    =
+	    {   len =  it::vector_of_chars::length  s;
+		#
+		if (i < 0 or i >= len)
+		    #
+		    nb {. (cat [ "safe_set: error: i=", (tagged_int_guts::to_string i), " len=", (tagged_int_guts::to_string len), " s='", s, "'\n" ]); };
+		else
+		    unsafe_set (s, i, c);
+		fi;
+	    };
+
+
+	# List reverse 											# A local copy may run faster than the global one, due inlining currently not worrking cross-package.
 	#
 	fun reverse ([],     l) =>   l;
 	    reverse (x ! r,  l) =>   reverse (r, x ! l);
@@ -45,9 +88,63 @@ herein
 
 	maximum_vector_length =  core::maximum_vector_length;
 
-	# The length of a string:
+	# The lengths of a string:
 	#
-	length =  it::vector_of_chars::length;
+	length_in_bytes =  it::vector_of_chars::length;
+	
+	fun length_in_chars string									# Intended for use on 7-bit ascii and UTF-8. Counts number of bytes not matching 10xxxxxx.
+	    =
+	    {   len = length_in_bytes string;
+		#
+		count_chars (0, 0)									# Over all bytes in string
+		where
+		    fun count_chars  (i: Int,  charcount: Int)
+			=
+			if (i == len)   charcount;							# If we've checked all bytes, return result.
+			else
+			    c = unsafe_get (string, i);							# Get i-th byte as a char.
+			    c = char::to_int c;								# Convert char to int.
+			    if (c & 0xC0 == 0x80)   count_chars (i+1, charcount  );			# This is a non-initial byte in a utf-8 multibyte char sequence, so do not increment charcount.
+			    else	            count_chars (i+1, charcount+1);			# This is the first byte of monobyte or multibyte char sequence, so increment charcount.
+			    fi;
+			fi;
+		end;
+	    };
+
+	fun prefix_length_in_bytes									# Given string and prefix length in chars, return prefix length in bytes.
+	      (
+		string:				String,
+		prefix_length_in_chars:		Int
+	      )
+	    =
+	    {   bytelen = length_in_bytes string;
+		#
+		count_chars (0, 0)									# Over all bytes in string
+		where
+		    fun count_chars
+			  (
+			    byteoffset:		Int,							# Current byte offset into 'string'.
+			    chars_so_far:	Int							# Number chars in string for which we have seen at least the first byte.
+			  )
+			=
+			if (byteoffset == bytelen)  bytelen;						# Caller may have specified a prefix-length-in-chars longer than the string?  Anyhow, just return the string length-in-bytes.
+			else
+			    c = unsafe_get (string, byteoffset);					# Get our byte as a char.
+			    c = char::to_int c;								# Convert char to int.
+
+			    if (c & 0xC0 == 0x80)							# If this is a continuation byte in a utf-8 multibyte char,
+				#									# then
+				count_chars (byteoffset+1, chars_so_far);				# do not increment count of chars seen.
+
+			    elif (chars_so_far == prefix_length_in_chars)				# This is not a continuation byte of a multibyte char,
+				#									# so if we've seen the required number of chars, then
+				byteoffset;								# we're at the end of the requested prefix -- return its length-in-bytes.  Since 'byteoffset' points to first byte of next char, it is the length-in-bytes of the required prefix.
+			    else
+				count_chars (byteoffset+1, chars_so_far+1);				# This is the first byte of monobyte or multibyte char sequence, so increment count of chars seen.
+			    fi;
+			fi;
+		end;
+	    };
 
 	unsafe_create
 	    =
@@ -70,20 +167,202 @@ herein
 	    =
 	    it::poly_vector::get (ps::chars, it::cast c);
 
-	# Get a character from a string 
+	# Get a byte from a string and return it as a character:
 	#
-	get =  it::vector_of_chars::get_with_boundscheck:  (String, Int) -> Char;
-
-
-	# The (_[])   enables   'vec[index]'           notation;
-	#
-	my (_[]):  (String, Int) -> Char
+	get_byte_as_char
 	    =
-	    it::vector_of_chars::get_with_boundscheck;
+	    it::vector_of_chars::get_byte_as_char_with_boundscheck:  (String, Int) -> Char;
+
+	# Get a byte from a string:
+	#
+	get_byte
+	    =
+	    it::vector_of_chars::get_byte_with_boundscheck:  (String, Int) -> Int;
+
+	# Get a (possibly UTF-8 encoded) char from a string.
+	#
+	# Currently we return this as an int because in
+	#     src/lib/core/init/built-in.pkg
+	# we have
+	#   package char {
+	#	#
+	#	max_ord = 255;
+	# and changing that will be nontrivial, so returning
+	# values > 255 as a Char is currently problematic:
+	#
+	fun get_char_as_int (s: String, i: Int): (Int, Int)				# For UTF-8 background see (e.g.)  http://www.cl.cam.ac.uk/~mgk25/ucs/man-utf-8.html
+	    =
+	    {   len = length_in_bytes s;
+		#
+		if (i >= len)  raise exception core::INDEX_OUT_OF_BOUNDS; fi;
+
+		c = unsafe_get_byte (s, i);
+
+		if (c & 0x80 == 0)							# Single-byte case?
+		    #
+		    (c, i+1);		
+		    #					
+		elif (c & 0xE0 == 0xC0)							# Two-byte case?
+		    #					
+		    if (i+1 >= len) raise exception core::INDEX_OUT_OF_BOUNDS; fi;
+		    #					
+ 		    c = ((c & 0x1F) << 6)
+			 + (unsafe_get_byte(s, i+1) & 0x3F);				# Second byte should have form 10xxxxx -- we don't check this.
+
+		    (c, i+2);
+
+		elif (c & 0xF0 == 0xE0)							# Three-byte case?
+		    #					
+		    if (i+2 >= len) raise exception core::INDEX_OUT_OF_BOUNDS; fi;
+		    #					
+ 		    c = ((c & 0x0F) << 12)
+			 + ((unsafe_get_byte(s, i+1) & 0x3F) << 6)			# Second byte should have form 10xxxxx -- we don't check this.
+			 + ((unsafe_get_byte(s, i+2) & 0x3F)     );			# Third  byte should have form 10xxxxx -- we don't check this.
+
+		    (c, i+3);
+
+		elif (c & 0xF8 == 0xF0)							# Four-byte case?
+		    #					
+		    if (i+3 >= len) raise exception core::INDEX_OUT_OF_BOUNDS; fi;
+		    #					
+ 		    c = ((c & 0x07) << 18)
+			 + ((unsafe_get_byte(s, i+1) & 0x3F) << 12)			# Second byte should have form 10xxxxx -- we don't check this.
+			 + ((unsafe_get_byte(s, i+2) & 0x3F) <<  6)			# Third  byte should have form 10xxxxx -- we don't check this.
+			 + ((unsafe_get_byte(s, i+3) & 0x3F)      );			# Fourth byte should have form 10xxxxx -- we don't check this.
+
+		    (c, i+4);
+
+		elif (c & 0xFC == 0xF8)							# Five-byte case?
+		    #					
+		    if (i+4 >= len) raise exception core::INDEX_OUT_OF_BOUNDS; fi;
+		    #					
+ 		    c = ((c & 0x03) << 24)
+			 + ((unsafe_get_byte(s, i+1) & 0x3F) << 18)			# Second byte should have form 10xxxxx -- we don't check this.
+			 + ((unsafe_get_byte(s, i+2) & 0x3F) << 12)			# Third  byte should have form 10xxxxx -- we don't check this.
+			 + ((unsafe_get_byte(s, i+3) & 0x3F) <<  6)			# Fourth byte should have form 10xxxxx -- we don't check this.
+			 + ((unsafe_get_byte(s, i+4) & 0x3F)      );			# Fifth  byte should have form 10xxxxx -- we don't check this.
+
+		    (c, i+5);
+
+		elif (c & 0xFE == 0xFC)							# Six-byte case?
+		    #					
+		    if (i+5 >= len) raise exception core::INDEX_OUT_OF_BOUNDS; fi;
+		    #					
+ 		    c = ((c & 0x01) << 30)
+			 + ((unsafe_get_byte(s, i+1) & 0x3F) << 24)			# Second byte should have form 10xxxxx -- we don't check this.
+			 + ((unsafe_get_byte(s, i+2) & 0x3F) << 18)			# Third  byte should have form 10xxxxx -- we don't check this.
+			 + ((unsafe_get_byte(s, i+3) & 0x3F) << 12)			# Fourth byte should have form 10xxxxx -- we don't check this.
+			 + ((unsafe_get_byte(s, i+4) & 0x3F) <<  6)			# Fifth  byte should have form 10xxxxx -- we don't check this.
+			 + ((unsafe_get_byte(s, i+5) & 0x3F)      );			# Six h  byte should have form 10xxxxx -- we don't check this.
+
+		    (c, i+6);
+		else
+		    (c, i+1);								# Not a legal UTF-8 encoding. Should maybe log an error or raise an exception or something, but it's probably just some old 8-bit ascii encoding -- kinder to just accept it.
+		fi;
+	    };
+
+	# Return number of bytes (1-6) used to encode char at given byte offset in string.
+	# This is just a dumbed-down version of the previous.
+	#
+	fun get_char_bytecount (s: String, i: Int): Int					# For UTF-8 background see (e.g.)  http://www.cl.cam.ac.uk/~mgk25/ucs/man-utf-8.html
+	    =
+	    {   len = length_in_bytes s;
+		#
+		if (i >= len)  raise exception core::INDEX_OUT_OF_BOUNDS; fi;
+
+		c = unsafe_get_byte (s, i);
+
+		if (c & 0x80 == 0)							# Single-byte case?
+		    #
+		    1;
+
+		elif (c & 0xE0 == 0xC0)							# Two-byte case?
+		    #					
+		    2;
+
+		elif (c & 0xF0 == 0xE0)							# Three-byte case?
+		    #					
+		    3;
+
+		elif (c & 0xF8 == 0xF0)							# Four-byte case?
+		    #					
+		    4;
+
+		elif (c & 0xFC == 0xF8)							# Five-byte case?
+		    #					
+		    5;
+
+		elif (c & 0xFE == 0xFC)							# Six-byte case?
+		    #					
+		    6;
+
+		else
+		    1;									# Not a legal UTF-8 encoding. Should maybe log an error or raise an exception or something, but it's probably just some old 8-bit ascii encoding, probably kinder to just accept it.
+		fi;
+	    };
+
+	fun byte_offset_of_ith_char (s: String, i: Int)					# Intended for use on 7-bit ascii and UTF-8.
+	    =
+	    {   len = length_in_bytes s;
+		#
+		walk_string (0, 0)							# Over all bytes in string
+		where
+		    fun walk_string (byte_offset: Int,  charcount: Int)
+			=
+			if   (charcount == i)       THE byte_offset;			# Found desired char.
+			elif (byte_offset == len)   NULL;				# String has less than 'i' chars, cannot fulfill request.
+			else
+			    bytes = get_char_bytecount (s, byte_offset);
+			    walk_string (byte_offset + bytes,  charcount + 1);
+			fi;
+		end;
+	    };
+
+	fun utf8_to_ucs2 (input: String): String					# Return a string in which each char is encoded using exactly two bytes, most-significant first.  Intended primarily for use with  w2x::x::POLY_TEXT16  in  src/lib/x-kit/widget/xkit/app/guishim-imp-for-x.pkg
+	    =
+	    {   charlen  =  length_in_chars  input;
+		bytelen  =  length_in_bytes  input;
+		#
+		outbytes =  charlen * 2;
+		result   =  rt::asm::make_string   outbytes;
+
+		lup (0, 0, 0)
+		where
+		    fun lup  (from: Int,  to: Int,  i: Int)				# 'i' is just for debugging.
+			=
+			if (from < bytelen) 						# Make sure we have input remaining.
+			    #
+			    bytecount = get_char_bytecount (input, from);		# sprintf etc are not available at this level, so if you need to debug this file try stuff like
+			    if (to + 2 <= outbytes) 					# This is the safest termination condition -- we won't overrun our output buffer no matter how corrupt the input is.
+#			    and from + bytecount <= bytelen)				# We could check this too if we were being totally anal.
+				#
+				(get_char_as_int (input, from))
+				    ->
+				    (char, from);
+
+				lobyte = (char     ) & 0xFF;
+				hibyte = (char >> 8) & 0xFF;
+
+				unsafe_set_byte (result, to,   hibyte);
+				unsafe_set_byte (result, to+1, lobyte);
+
+				lup  (from,  to + 2,  i + 1); 				# Note that 'from' was updated by 'get_char_as_int' above.
+			    fi;
+			fi;
+		end;
+
+		result;
+	    };
+
+	# The (_[])   enables   'vec[index]'           notation;			# Gave up on this because with utf8 we need to distinguish clearly between bytes and chars, which this notation does not do.	-- 2015-05-27 CrT
+	#
+#  	my (_[]):  (String, Int) -> Char
+#	    =
+#	    it::vector_of_chars::get_byte_as_char_with_boundscheck;
 
 
 	# Return the n-character substring of s starting at position i.
-	# NOTE: we use words to check the right bound so as to avoid
+	# NOTE: we use unts to check the right bound so as to avoid
 	# raising overflow.
 	#
 	stipulate
@@ -287,7 +566,7 @@ herein
 		0   => "";
 		#
 		len =>  {   new_vec =  rt::asm::make_string  len;
-
+			    #
 			    mapf 0
 			    where	
 				fun mapf i
@@ -314,8 +593,8 @@ herein
 
 
 
-	fun tokens  is_delimiter  s			# Tokenize a string using the given predicate
-	    =						# to define the delimiter characters.
+	fun tokens  is_delimiter  s				# Tokenize a string using the given predicate
+	    =							# to define the delimiter characters.
 	    reverse (scan_token (0, 0, []), [])
 	    where
 		n =   size s;
@@ -376,7 +655,7 @@ herein
 	    };
 
 
-	fun lines s
+	fun lines s										# Split 's' into lines at '\n' chars and return resulting list of strings. We leave the '\n's at the ends of the lines, so doing a 'cat' on the result recreates our input. (You can use 'map chomp lines' to remove the newlines.)
 	    =
 	    {   n =   size s;
 		#
@@ -396,13 +675,13 @@ herein
 			    fun substr (i, j, lines)
 				=
 				if (i < j)	ps::unsafe_substring(s, i, j-i)  !  lines;
-				else						    lines;			# This case avoids an unwanted empty string if input terminates with a newline.
+				else						    lines;	# This case avoids an unwanted empty string if input terminates with a newline.
 				fi;
 			end;
 		end;
 	    };
 
-	fun repeat  (s: String,  i: Int)
+	fun repeat  (s: String,  i: Int)							# Return result of concatenating 'i' copies of 's'.
 	    =
 	    repeat' (i, [""])
 	    where
@@ -412,6 +691,437 @@ herein
 		    else	  repeat' (i - 1,  s ! result);
 		    fi;	
 	    end;
+
+
+	fun expand_tabs_and_control_chars							# Expands tabs (on 8-char tabstops) into blanks and control chars (and DEL) into ^A notation.
+	      {
+		utf8text:				String,					# String to be expanded, assumed to be utf8-encoded.
+		startcol:				Int,					# Screen col to assume for first char in 'text'.  Normally 0 for left-justified text.  Useful when expanding multiple strings within a single screen line.
+		screencol1:				Int,					# Query byte-extent of this screeen column in input and output strings.
+		screencol2:				Int,					# Query byte-extent of this screeen column in input and output strings.  Having both screencol1 and screencol2 is helpful when displaying the selected region in  src/lib/x-kit/widget/edit/screenline.pkg
+		utf8byte:				Int					# Query screen-column of this byte offset into 'utfxtext'.
+	      }
+	    : {	screentext:				String,					# Resulting tab-expanded string.
+		startcol:				Int,					# Screen col to assume for first char in any text following 'text'.
+		#
+		screentext_length_in_screencols:	Int,
+
+
+		screencol1_byteoffset_in_utf8text:	Int,
+		screencol1_bytescount_in_utf8text:	Int,
+		#
+		screencol1_byteoffset_in_screentext:	Int,
+		screencol1_bytescount_in_screentext:	Int,
+		#
+		screencol1_firstcol_on_screen:		Int,
+		screencol1_colcount_on_screen:		Int,
+
+
+		screencol2_byteoffset_in_utf8text:	Int,
+		screencol2_bytescount_in_utf8text:	Int,
+		#
+		screencol2_byteoffset_in_screentext:	Int,
+		screencol2_bytescount_in_screentext:	Int,
+		#
+		screencol2_firstcol_on_screen:		Int,
+		screencol2_colcount_on_screen:		Int,
+
+		utf8byte_firstcol_on_screen:		Int,
+		utf8byte_colcount_on_screen:		Int
+	      }
+	    =
+	    {   utf8_len_in_bytes = length_in_bytes utf8text;
+
+		screentext_length_in_screencols		= REF 0;
+
+
+		screencol1_byteoffset_in_utf8text	= REF 0;
+		screencol1_bytescount_in_utf8text	= REF 0;
+
+		screencol1_byteoffset_in_screentext	= REF 0;
+		screencol1_bytescount_in_screentext	= REF 0;
+
+		screencol1_firstcol_on_screen		= REF 0;
+		screencol1_colcount_on_screen		= REF 0;
+
+
+		screencol2_byteoffset_in_utf8text	= REF 0;
+		screencol2_bytescount_in_utf8text	= REF 0;
+
+		screencol2_byteoffset_in_screentext	= REF 0;
+		screencol2_bytescount_in_screentext	= REF 0;
+
+		screencol2_firstcol_on_screen		= REF 0;
+		screencol2_colcount_on_screen		= REF 0;
+
+
+		utf8byte_firstcol_on_screen		= REF 0;
+		utf8byte_colcount_on_screen		= REF 0;
+
+
+		screentext_len_in_bytes
+		    =
+		    outlen (0, startcol, 0)
+		    where
+			fun outlen								# Compute number of bytes needed for output string.  Tabs expand into 1-8 blanks, control chars (and DEL) into ^A ^B ^C ... and everything else gets copied over unchanged, including multibyte UTF-8 chars.
+			      (
+				from:	Int,							# Byte offset in input string.
+				col:	Int,							# Visual column on output string.
+				to:	Int							# Byte offset in result string.
+			      )
+			    =
+			    if (from >= utf8_len_in_bytes)
+				#
+				my (to, col)							# If needed, add enough trailing blanks to 'screentext' to ensure that 'screencol1_byteoffset_in_screentext' will be a valid offset.
+				    =
+				    if (col > screencol1)  (to, col);
+				    else		   (to + (screencol1 - col) + 1, screencol1 + 1);
+				    fi;
+
+				my (to, col)							# If needed, add enough trailing blanks to 'screentext' to ensure that 'screencol2_byteoffset_in_screentext' will be a valid offset.
+				    =
+				    if (col > screencol2)  (to, col);
+				    else		   (to + (screencol2 - col) + 1, screencol2 + 1);
+				    fi;
+
+				screentext_length_in_screencols := col;
+
+			        to;
+			    else
+				charlen =   get_char_bytecount (utf8text, from);
+				#
+				charlen =   if (from + charlen > utf8_len_in_bytes)	utf8_len_in_bytes - from;			# Invalid UTF-8 encoding: requires more bytes than remain. Silently copy only as many as actually available.
+					    else					charlen;					# Normal case.
+					    fi;	
+
+				my { from_bump, col_bump, to_bump }
+				    =
+				    if (charlen > 1)
+					#
+					{ from_bump =>  charlen,
+					  col_bump  =>  1,
+					  to_bump   =>  charlen
+					};
+				    else
+					cols =  case (get_byte_as_char (utf8text, from))
+						    #
+						    '\^@' => 2;					# We could code this more cleverly, but I like simple and easy to understand at a glance.
+						    '\^A' => 2;
+						    '\^B' => 2;
+						    '\^C' => 2;
+						    '\^D' => 2;
+						    '\^E' => 2;
+						    '\^F' => 2;
+						    '\^G' => 2;
+						    '\^H' => 2;
+						    '\^I' => 8 - (col & 7);
+						    '\^J' => 2;
+						    '\^K' => 2;
+						    '\^L' => 2;
+						    '\^M' => 2;
+						    '\^N' => 2;
+						    '\^O' => 2;
+						    '\^P' => 2;
+						    '\^Q' => 2;
+						    '\^R' => 2;
+						    '\^S' => 2;
+						    '\^T' => 2;
+						    '\^U' => 2;
+						    '\^V' => 2;
+						    '\^W' => 2;
+						    '\^X' => 2;
+						    '\^Y' => 2;
+						    '\^Z' => 2;
+						    '\^[' => 2;
+						    '\^\' => 2;
+						    '\^]' => 2;
+						    '\^_' => 2;
+						    '\x7F'=> 2;					# DEL char.
+						    #
+						    _     => 1;
+						esac;
+
+					{ from_bump =>  1,
+					  col_bump  =>  cols,
+					  to_bump   =>  cols
+					};
+				    fi;
+
+				outlen (from + from_bump,  col + col_bump,  to + to_bump);
+			    fi;
+		    end;
+
+		
+
+		fun n_blanks (result, to, count)						# Write 'count' blanks into string 'result' starting at offset 'to'.
+		    =
+		    if (count > 0)
+			#
+			unsafe_set (result, to, ' ');
+
+			n_blanks   (result,  to + 1,  count - 1); 
+		    fi;
+
+		screentext = rt::asm::make_string  screentext_len_in_bytes;
+
+		col = 	fillstring (0, startcol, 0)						# Copy 'utf8text' string to 'screentext' string, expanding tabs and control chars as we go.
+			    where
+				fun fillstring
+				      (
+					from:	Int,			# Byte offset in utf8text string.
+					col:	Int,			# Visual column on output string.
+					to:	Int			# Byte offset in result string.
+				      )
+				    =
+
+				    if (to >= screentext_len_in_bytes)
+					#
+					col;
+				    else
+					my (charlen, input, fromoffset)
+					    =
+					    if (from < utf8_len_in_bytes)
+						#
+						charlen =   get_char_bytecount (utf8text, from);
+
+						charlen =   if (from + charlen > utf8_len_in_bytes)	utf8_len_in_bytes - from;		# Invalid UTF-8 encoding: requires more bytes than remain. Silently copy only as many as actually available.
+							    else					charlen;				# Normal case.
+							    fi;	
+
+						(charlen, utf8text, 0);
+					    else
+						(1, " ", -from);										# We're past the actual end of 'utf8text', but adding trailing blanks as padding to 'screentext' to ensure that screencol1 and screencol2 correspond to chars in 'screentext'.
+					    fi;
+
+
+					my  { from_bump, col_bump, to_bump }
+					    =
+					    if (charlen > 1)											# For now at least we'll copy multibyte utf8 chars through unchanged.
+						#
+						case charlen
+						    #
+						    2 =>    {   unsafe_set_byte (screentext, to  , unsafe_get_byte (input, from   + fromoffset));
+								unsafe_set_byte (screentext, to+1, unsafe_get_byte (input, from+1 + fromoffset));
+							    };
+						    3 =>    {   unsafe_set_byte (screentext, to  , unsafe_get_byte (input, from   + fromoffset));
+								unsafe_set_byte (screentext, to+1, unsafe_get_byte (input, from+1 + fromoffset));
+								unsafe_set_byte (screentext, to+2, unsafe_get_byte (input, from+2 + fromoffset));
+							    };
+						    4 =>    {   unsafe_set_byte (screentext, to  , unsafe_get_byte (input, from   + fromoffset));
+								unsafe_set_byte (screentext, to+1, unsafe_get_byte (input, from+1 + fromoffset));
+								unsafe_set_byte (screentext, to+2, unsafe_get_byte (input, from+2 + fromoffset));
+								unsafe_set_byte (screentext, to+3, unsafe_get_byte (input, from+3 + fromoffset));
+							    };
+						    5 =>    {   unsafe_set_byte (screentext, to  , unsafe_get_byte (input, from   + fromoffset));
+								unsafe_set_byte (screentext, to+1, unsafe_get_byte (input, from+1 + fromoffset));
+								unsafe_set_byte (screentext, to+2, unsafe_get_byte (input, from+2 + fromoffset));
+								unsafe_set_byte (screentext, to+3, unsafe_get_byte (input, from+3 + fromoffset));
+								unsafe_set_byte (screentext, to+4, unsafe_get_byte (input, from+4 + fromoffset));
+							    };
+						    6 =>    {   unsafe_set_byte (screentext, to  , unsafe_get_byte (input, from   + fromoffset));
+								unsafe_set_byte (screentext, to+1, unsafe_get_byte (input, from+1 + fromoffset));
+								unsafe_set_byte (screentext, to+2, unsafe_get_byte (input, from+2 + fromoffset));
+								unsafe_set_byte (screentext, to+3, unsafe_get_byte (input, from+3 + fromoffset));
+								unsafe_set_byte (screentext, to+4, unsafe_get_byte (input, from+4 + fromoffset));
+								unsafe_set_byte (screentext, to+5, unsafe_get_byte (input, from+5 + fromoffset));
+							    };
+						    _ =>	();											# Impossible -- UTF-8 encodings are only defined for lengths 1-6.
+						esac;
+
+						{ from_bump =>  charlen,
+						  col_bump  =>  1,
+						  to_bump   =>  charlen
+						};
+
+					    else
+						c	 =  get_byte_as_char (input, from + fromoffset);
+						#
+						cols =  case c
+							    #
+							    '\^@' =>    {   unsafe_set (screentext, to, '^');	unsafe_set (screentext, to+1, '@');	2;	};
+							    '\^A' =>    {   unsafe_set (screentext, to, '^');	unsafe_set (screentext, to+1, 'A');	2;	};
+							    '\^B' =>    {   unsafe_set (screentext, to, '^');	unsafe_set (screentext, to+1, 'B');	2;	};
+							    '\^C' =>    {   unsafe_set (screentext, to, '^');	unsafe_set (screentext, to+1, 'C');	2;	};
+							    '\^D' =>    {   unsafe_set (screentext, to, '^');	unsafe_set (screentext, to+1, 'D');	2;	};
+							    '\^E' =>    {   unsafe_set (screentext, to, '^');	unsafe_set (screentext, to+1, 'E');	2;	};
+							    '\^F' =>    {   unsafe_set (screentext, to, '^');	unsafe_set (screentext, to+1, 'F');	2;	};
+							    '\^G' =>    {   unsafe_set (screentext, to, '^');	unsafe_set (screentext, to+1, 'G');	2;	};
+							    '\^H' =>    {   unsafe_set (screentext, to, '^');	unsafe_set (screentext, to+1, 'H');	2;	};
+							    '\^I' =>    {   blanks = 8 - (col & 7);		n_blanks   (screentext, to,blanks); blanks;	}; 
+							    '\^J' =>    {   unsafe_set (screentext, to, '^');	unsafe_set (screentext, to+1, 'J');	2;	};
+							    '\^K' =>    {   unsafe_set (screentext, to, '^');	unsafe_set (screentext, to+1, 'K');	2;	};
+							    '\^L' =>    {   unsafe_set (screentext, to, '^');	unsafe_set (screentext, to+1, 'L');	2;	};
+							    '\^M' =>    {   unsafe_set (screentext, to, '^');	unsafe_set (screentext, to+1, 'M');	2;	};
+							    '\^N' =>    {   unsafe_set (screentext, to, '^');	unsafe_set (screentext, to+1, 'N');	2;	};
+							    '\^O' =>    {   unsafe_set (screentext, to, '^');	unsafe_set (screentext, to+1, 'O');	2;	};
+							    '\^P' =>    {   unsafe_set (screentext, to, '^');	unsafe_set (screentext, to+1, 'P');	2;	};
+							    '\^Q' =>    {   unsafe_set (screentext, to, '^');	unsafe_set (screentext, to+1, 'Q');	2;	};
+							    '\^R' =>    {   unsafe_set (screentext, to, '^');	unsafe_set (screentext, to+1, 'R');	2;	};
+							    '\^S' =>    {   unsafe_set (screentext, to, '^');	unsafe_set (screentext, to+1, 'S');	2;	};
+							    '\^T' =>    {   unsafe_set (screentext, to, '^');	unsafe_set (screentext, to+1, 'T');	2;	};
+							    '\^U' =>    {   unsafe_set (screentext, to, '^');	unsafe_set (screentext, to+1, 'U');	2;	};
+							    '\^V' =>    {   unsafe_set (screentext, to, '^');	unsafe_set (screentext, to+1, 'V');	2;	};
+							    '\^W' =>    {   unsafe_set (screentext, to, '^');	unsafe_set (screentext, to+1, 'W');	2;	};
+							    '\^X' =>    {   unsafe_set (screentext, to, '^');	unsafe_set (screentext, to+1, 'X');	2;	};
+							    '\^Y' =>    {   unsafe_set (screentext, to, '^');	unsafe_set (screentext, to+1, 'Y');	2;	};
+							    '\^Z' =>    {   unsafe_set (screentext, to, '^');	unsafe_set (screentext, to+1, 'Z');	2;	};
+							    '\^[' =>    {   unsafe_set (screentext, to, '^');	unsafe_set (screentext, to+1, '[');	2;	};
+							    '\^\' =>    {   unsafe_set (screentext, to, '^');	unsafe_set (screentext, to+1, '\\');	2;	};
+							    '\^]' =>    {   unsafe_set (screentext, to, '^');	unsafe_set (screentext, to+1, ']');	2;	};
+							    '\^_' =>    {   unsafe_set (screentext, to, '^');	unsafe_set (screentext, to+1, '_');	2;	};
+							    '\x7F'=>    {   unsafe_set (screentext, to, '^');	unsafe_set (screentext, to+1, '?');	2;	};	# DEL char.  ^? seems to be as standard a representation as any.
+							    #
+							    _     =>    {   unsafe_set (screentext, to,  c );					1;	};
+							esac;
+
+						{ from_bump =>  1,
+						  col_bump  =>  cols,
+						  to_bump   =>  cols
+						};
+					    fi;
+
+
+					if (col            <= screencol1					# If we're crossing over screen column where screencol1 is, note its location in utf8text and screentext strings.
+					and col + col_bump >  screencol1)
+					    #
+					    screencol1_byteoffset_in_utf8text	:= from;
+					    screencol1_bytescount_in_utf8text	:= from_bump;
+
+					    screencol1_byteoffset_in_screentext := to;
+					    screencol1_bytescount_in_screentext  := to_bump;
+
+					    screencol1_firstcol_on_screen	:= col;
+					    screencol1_colcount_on_screen	:= col_bump;
+					fi;
+
+					if (col            <= screencol2					# If we're crossing over screen column where screencol2 is, note its location in utf8text and screentext strings.
+					and col + col_bump >  screencol2)
+					    #
+					    screencol2_byteoffset_in_utf8text	:= from;
+					    screencol2_bytescount_in_utf8text	:= from_bump;
+
+					    screencol2_byteoffset_in_screentext	:= to;
+					    screencol2_bytescount_in_screentext	:= to_bump;
+
+					    screencol2_firstcol_on_screen	:= col;
+					    screencol2_colcount_on_screen	:= col_bump;
+					fi;
+
+					if (from 	     <= utf8byte
+					and from + from_bump >  utf8byte)
+					    #
+					    utf8byte_firstcol_on_screen		:= col;
+					    utf8byte_colcount_on_screen		:= col_bump;
+					fi;
+
+					fillstring ( from + from_bump,
+						     col  +  col_bump,
+						     to   +   to_bump
+						   );
+				    fi;
+			    end;
+
+		{ screentext,
+		  startcol   => col,
+		  #
+		  screentext_length_in_screencols	=> *screentext_length_in_screencols,
+
+		  screencol1_byteoffset_in_utf8text	=> *screencol1_byteoffset_in_utf8text,
+		  screencol1_bytescount_in_utf8text	=> *screencol1_bytescount_in_utf8text,
+		  #
+		  screencol1_byteoffset_in_screentext	=> *screencol1_byteoffset_in_screentext,
+		  screencol1_bytescount_in_screentext	=> *screencol1_bytescount_in_screentext,
+		  #
+		  screencol1_firstcol_on_screen		=> *screencol1_firstcol_on_screen,
+		  screencol1_colcount_on_screen		=> *screencol1_colcount_on_screen,
+
+
+		  screencol2_byteoffset_in_utf8text	=> *screencol2_byteoffset_in_utf8text,
+		  screencol2_bytescount_in_utf8text	=> *screencol2_bytescount_in_utf8text,
+		  #
+		  screencol2_byteoffset_in_screentext	=> *screencol2_byteoffset_in_screentext,
+		  screencol2_bytescount_in_screentext	=> *screencol2_bytescount_in_screentext,
+		  #
+		  screencol2_firstcol_on_screen		=> *screencol2_firstcol_on_screen,
+		  screencol2_colcount_on_screen		=> *screencol2_colcount_on_screen,
+
+		  utf8byte_firstcol_on_screen		=> *utf8byte_firstcol_on_screen,
+		  utf8byte_colcount_on_screen		=> *utf8byte_colcount_on_screen
+		};
+	    };
+
+
+	fun longest_common_prefix
+	      (
+		s1:	String,
+		s2:	String
+	      )
+	    =
+	    {   len1 =  length_in_bytes  s1;
+		len2 =  length_in_bytes  s2;
+
+		len  =  min (len1, len2);
+
+		prefix_len =    scan 0
+				where
+				    fun scan i
+					=
+					if   (i == len)
+					    #
+					    len;
+					elif (   unsafe_get_byte (s1, i)
+                                              == unsafe_get_byte (s2, i)
+					     )
+					    scan (i+1);
+					else
+					    i;
+					fi;
+				end;
+
+		substring (s1, 0, prefix_len);
+	    };
+
+	fun drop_leading_whitespace  (s:  String)
+	    =
+	    {   len =  length_in_bytes  s;
+		#
+		prefix_len =    scan 0
+				where
+				    fun scan i
+					=
+					if   (i == len)
+					    #
+					    len;
+					elif (char::is_space( unsafe_get(s, i) ))
+					    scan (i+1);
+					else
+					    i;
+					fi;
+				end;
+
+		extract (s, prefix_len, NULL);
+	    };
+
+	fun drop_trailing_whitespace  (s:  String)
+	    =
+	    {   len =  length_in_bytes  s;
+		#
+		prefix_len =    scan (len - 1)
+				where
+				    fun scan i
+					=
+					if   (i == -1)
+					    #
+					    0;
+					elif (char::is_space( unsafe_get(s, i) ))
+					    scan (i - 1);
+					else
+					    i+1;
+					fi;
+				end;
+
+		substring (s, 0, prefix_len);
+	    };
 
 
 	#  String comparisons 
@@ -429,13 +1139,85 @@ herein
 
 	fun is_substring s
 	    =
-	    {   stringsearch =   ps::kmp s;
+	    {   stringsearch =   ps::knuth_morris_pratt_string_match  s;
 		#
 		fun search s'
 		    =
-		    {   epos =   size s';
+		    {   endpos =   size s';
+			#
+			stringsearch (s', 0, endpos) < endpos;
+		    };
 
-			stringsearch (s', 0, epos) < epos;
+		search;
+	    };
+
+	fun find_substring s
+	    =
+	    {   stringsearch =   ps::knuth_morris_pratt_string_match  s;
+		#
+		fun search s'
+		    =
+		    {   endpos =  size s';
+			#
+			result =  stringsearch (s', 0, endpos);
+
+			if (result < endpos)	THE result;
+			else			NULL;
+			fi;
+		    };
+
+		search;
+	    };
+
+	fun find_substring' s
+	    =
+	    {   stringsearch =   ps::knuth_morris_pratt_string_match  s;
+		#
+		fun search (s', start)
+		    =
+		    {   endpos =  size s';
+			#
+			result =  stringsearch (s', start, endpos);
+			#
+			if (result < endpos)	THE result;
+			else			NULL;
+			fi;
+		    };
+
+		search;
+	    };
+
+	fun find_substring_backward s
+	    =
+	    {   stringsearch =   ps::knuth_morris_pratt_string_match_backward  s;
+		#
+		fun search s'
+		    =
+		    {   endpos =  size s';
+			#
+			result =  stringsearch (s', endpos - 1, -1);
+
+			if (result >= 0)	THE result;
+			else			NULL;
+			fi;
+		    };
+
+		search;
+	    };
+
+	fun find_substring_backward' s
+	    =
+	    {   stringsearch =   ps::knuth_morris_pratt_string_match_backward  s;
+		#
+		fun search (s', start)
+		    =
+		    {   endpos =  size s';
+			#
+			result =  stringsearch (s', start, -1);
+			#
+			if (result >= 0)	THE result;
+			else			NULL;
+			fi;
 		    };
 
 		search;
@@ -454,11 +1236,30 @@ herein
 	fun has_upper string =   list::exists  chr::is_upper  (explode string);
 	fun has_lower string =   list::exists  chr::is_lower  (explode string);
 
-	fun is_alpha  string =   length string > 0   and   list::all  chr::is_alpha  (explode string);
-	fun is_upper  string =   length string > 0   and   list::all  chr::is_upper  (explode string);
-	fun is_lower  string =   length string > 0   and   list::all  chr::is_lower  (explode string);
+	fun is_alpha  string =   length_in_bytes string > 0   and   list::all  chr::is_alpha  (explode string);
+	fun is_upper  string =   length_in_bytes string > 0   and   list::all  chr::is_upper  (explode string);
+	fun is_lower  string =   length_in_bytes string > 0   and   list::all  chr::is_lower  (explode string);
 	fun is_mixed  string =   is_alpha string  and  has_upper string  and  has_lower string;
 
+
+	fun is_ascii string										# TRUE iff all bytes have high bit equal to zero.
+	    =
+	    {   len = length_in_bytes string;
+		#
+		check_bytes 0										# Over all bytes in string
+		where
+		    fun check_bytes (i: Int)
+			=
+			if (i == len)   TRUE;								# If we've checked all bytes, is_ascii is TRUE.
+			else
+			    c = unsafe_get (string, i);							# Get i-th byte as a char.
+			    c = char::to_int c;								# Convert char to int.
+			    if (c & 0x80 == 0x80)   FALSE;						# If high bit of byte is 1, is_ascii is FALSE.
+			    else	            check_bytes (i+1);					# Check rest of bytes in string.
+			    fi;
+			fi;
+		end;
+	    };
 
 	#  String greater or equal 
 	#
@@ -572,16 +1373,16 @@ herein
 
 	    chomp string
 		=>
-		{   len = length string;
-
-		    if (get (string, len - 1) != '\n')   string;
-		    else                                 extract (string, 0, THE (len - 1));
+		{   len = length_in_bytes string;
+		    #
+		    if (get_byte_as_char (string, len - 1) != '\n')   string;
+		    else                                              extract (string, 0, THE (len - 1));
 		    fi;
 		};
 	end; 
 	    # There's a shorter definition of this fn in   src/lib/compiler/toplevel/interact/read-eval-print-loop-g.pkg
-	    # -- should we use it instead?  XXX BUGGO FIXME
-
+	    # -- should we use it instead?  XXX QUERO FIXME
+	    # [2015-06-15 CrT: This should probably move to (just-created)  src/lib/std/src/string-junk.pkg
 
 
 	to_lower =   map chr::to_lower;
@@ -597,7 +1398,7 @@ herein
 
 		    to_mixed' (last, this ! rest, chars)
 			=> 
-			if   (not (chr::is_alpha this))		to_mixed' (this, rest,                this ! chars);
+			if   (not (chr::is_alpha this))		to_mixed' (this, rest,               this ! chars);
 			elif (not (chr::is_alpha last))		to_mixed' (this, rest, chr::to_upper this ! chars);
 			else					to_mixed' (this, rest, chr::to_lower this ! chars);
 			fi;
@@ -634,5 +1435,5 @@ end;
 
 
 ## COPYRIGHT (c) 1995 AT&T Bell Laboratories.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

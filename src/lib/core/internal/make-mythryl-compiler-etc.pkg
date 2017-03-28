@@ -53,7 +53,7 @@
 stipulate
     package mli =  makelib_internal;					# makelib_internal		is from   src/lib/core/internal/makelib-internal.pkg
     package ph  =  picklehash;						# picklehash			is from   src/lib/compiler/front/basics/map/picklehash.pkg
-    package lt  =  linking_mapstack;					# linking_mapstack			is from   src/lib/compiler/execution/linking-mapstack/linking-mapstack.pkg
+    package lt  =  linking_mapstack;					# linking_mapstack		is from   src/lib/compiler/execution/linking-mapstack/linking-mapstack.pkg
     package mc  =  mythryl_compiler;					# mythryl_compiler		is from   src/lib/core/compiler/set-mythryl_compiler-to-mythryl_compiler_for_intel32_posix.pkg
     package un  =  unsafe;						# unsafe			is from   src/lib/std/src/unsafe/unsafe.pkg
 herein
@@ -104,9 +104,11 @@ herein
 
 		fun errorwrap treat_as_user f x
 		    =
-		    mc::rpl::with_error_handling
+		    mc::rpl::with_exception_trapping
 			#
-			{ treat_as_user }
+			{ treat_as_user,
+			  pp => NULL
+			}
 			#
 			{ thunk =>  \\ () =  f x,
 			  flush =>  \\ () =  (),
@@ -137,6 +139,10 @@ herein
 			root_dir_of_mythryl_source_distro,
 			linking_mapstack,
 
+			mc::rpl::parse_string_to_raw_declarations,
+			mc::rpl::compile_raw_declaration_to_package_closure,
+			mc::rpl::link_and_run_package_closure,
+
 			mc::rpl::read_eval_print_from_user,
 			mc::rpl::read_eval_print_from_stream,
 
@@ -151,5 +157,5 @@ herein
 end;
 
 ## Copyright 1998 by Lucent Technologies
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

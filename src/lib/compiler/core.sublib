@@ -403,11 +403,11 @@ SUBLIBRARY_COMPONENTS
 #	$ROOT/src/lib/core/internal/lib7-version.lib
 	$ROOT/src/lib/core/internal/mythryl-compiler-version.pkg	# Above is broken, this is a work-around. See comments in 
 
-	$ROOT/src/lib/prettyprint/big/prettyprint-mill.lib
+	$ROOT/src/lib/prettyprint/big/prettyprinter.lib
 
 
 ## Copyright YALE FLINT PROJECT 1997
 ## and
 ## (C) 2001 Lucent Technologies, Bell labs
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

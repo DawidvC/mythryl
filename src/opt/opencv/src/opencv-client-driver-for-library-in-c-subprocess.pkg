@@ -65,12 +65,12 @@ herein
 	#
 	fun get_int_suffix (prefix, string)
 	    =
-	    {   suffix =  string::extract (string, string::length  prefix, NULL);
+	    {   suffix =  string::extract (string, string::length_in_bytes  prefix, NULL);
 		#
 		case (int::from_string  suffix)
 		    #
 		    THE i =>  i;
-		    NULL  =>  raise exception FAIL ("get_int_suffix:  Bad " + prefix + " value: " + string);
+		    NULL  =>  raise exception DIE ("get_int_suffix:  Bad " + prefix + " value: " + string);
 		esac;
 	    };
 
@@ -78,7 +78,7 @@ herein
 	#
 	fun get_suffix (prefix, string)
 	    =
-	    string::extract (string, string::length  prefix, NULL);
+	    string::extract (string, string::length_in_bytes  prefix, NULL);
 
 
 	# A line like
@@ -144,7 +144,7 @@ herein
 			case (string::tokens  char::is_space  callback_line)
 			    #
 			    _ ! arg ! NIL => the (f8b::from_string arg);
-			    _             => raise exception FAIL "bad FLOAT_CALLBACK arg";
+			    _             => raise exception DIE "bad FLOAT_CALLBACK arg";
 			esac;
 
 		    case (int_map::get (*session.callback_map.float, callback_id))
@@ -159,7 +159,7 @@ herein
 	#
 	fun string_to_string   string
 	    =
-	    sprintf "\"%d\"%s\"" (string::length string) string;
+	    sprintf "\"%d\"%s\"" (string::length_in_bytes string) string;
 
 
 	#
@@ -187,7 +187,7 @@ herein
 #			maybe_run_callback (session, line);
 #		    };
 #		#
-#		NULL =>   raise exception FAIL "EOF from mythryl-opencv-library-in-c-subprocess subprocess.";
+#		NULL =>   raise exception DIE "EOF from mythryl-opencv-library-in-c-subprocess subprocess.";
 #	    esac;
 
 	# Read lines from mythryl-opencv-library-in-c-subprocess until
@@ -235,7 +235,7 @@ herein
  			    };
  			#
  			NULL => {
- 				    raise exception FAIL "EOF from mythryl-opencv-library-in-c-subprocess subprocess.";	
+ 				    raise exception DIE "EOF from mythryl-opencv-library-in-c-subprocess subprocess.";	
  			};
  		    esac;
  	    end;
@@ -249,7 +249,7 @@ herein
 	      command
 	    )
 	    =
-	    {   fil::write (session.to_stream, (sprintf "%d" (string::length command + 1)) + "\n");	# Write length of next line.
+	    {   fil::write (session.to_stream, (sprintf "%d" (string::length_in_bytes command + 1)) + "\n");	# Write length of next line.
 		fil::write (session.to_stream, command+"\n");
 		fil::flush session.to_stream;
 #   fil::write (session.logstream, "    sent: do_void_command: " + command + "\n");     fil::flush session.logstream;
@@ -266,7 +266,7 @@ herein
  	    )
  	    =
  	    {
- 		fil::write (session.to_stream, (sprintf "%d" (string::length command + 1)) + "\n");	# Write length of next line.
+ 		fil::write (session.to_stream, (sprintf "%d" (string::length_in_bytes command + 1)) + "\n");	# Write length of next line.
 
  		fil::write (session.to_stream, command+"\n");		fil::flush session.to_stream;
 
@@ -286,7 +286,7 @@ herein
  	      command
  	    )
  	    =
- 	    {   fil::write (session.to_stream, (sprintf "%d" (string::length command + 1)) + "\n");	# Write length of next line.
+ 	    {   fil::write (session.to_stream, (sprintf "%d" (string::length_in_bytes command + 1)) + "\n");	# Write length of next line.
  
  		fil::write (session.to_stream, command+"\n");		fil::flush session.to_stream;
  
@@ -350,7 +350,7 @@ herein
 # 			  /* high => */  the (int::from_string  high)
 # 			);
 # 
-# 		     _  => raise exception FAIL ("get_widget_allocation: invalid result from child: " + result);
+# 		     _  => raise exception DIE ("get_widget_allocation: invalid result from child: " + result);
 # 		esac;
 # 	    };
 # 
@@ -376,7 +376,7 @@ herein
 # 			  string_to_widget  action_area
 # 			);
 # 
-# 		     _  => raise exception FAIL ("make_dialog: invalid result from child: " + result);
+# 		     _  => raise exception DIE ("make_dialog: invalid result from child: " + result);
 # 		esac;
 # 	    };
 # 

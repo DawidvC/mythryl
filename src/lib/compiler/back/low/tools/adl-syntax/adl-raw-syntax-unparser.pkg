@@ -94,7 +94,7 @@ herein
 	fun alsos   elements =                  spp::LIST { elements, leftbracket => nop,            rightbracket => nop,           separator => nl ++ nl ++ indent ++ alpha "also"                                              };
 
 	fun is_alpha "" =>  TRUE;
-	    is_alpha s  =>  char::is_alpha (string::get (s, 0));
+	    is_alpha s  =>  char::is_alpha (string::get_byte_as_char (s, 0));
 	end;
 
 	fun is_mlsym '\'' =>  FALSE;
@@ -105,7 +105,7 @@ herein
 
 	fun is_complex s
 	    = 
-	    loop (string::length s - 1, FALSE, FALSE)
+	    loop (string::length_in_bytes s - 1, FALSE, FALSE)
 	    where
 		fun loop (-1, alpha, symbol)
 			=>
@@ -113,7 +113,7 @@ herein
 
 		    loop (i, alpha, symbol)
 			=>
-			{   c = string::get (s, i);
+			{   c = string::get_byte_as_char (s, i);
 			    loop (i - 1, alpha or char::is_alphanumeric c,
 			    symbol   or is_mlsym c);
 			};
@@ -448,7 +448,7 @@ herein
 	also
 	fun rtlterm (raw::LITRTL       s) =>  string s;
 	    rtlterm (raw::IDRTL        x) =>  alpha x;
-	    rtlterm (raw::COMPOSITERTL x) =>  raise exception FAIL "Unsupported case COMPOSITERTL in rtlterm";		# Added 2011-10-06 CrT just to suppress the "nonexhaustive-match" compiler warning.
+	    rtlterm (raw::COMPOSITERTL x) =>  raise exception DIE "Unsupported case COMPOSITERTL in rtlterm";		# Added 2011-10-06 CrT just to suppress the "nonexhaustive-match" compiler warning.
 	end 
 
 	also
@@ -458,7 +458,7 @@ herein
 		#
 		\\  "default" =>  list (map appexp es);
 		    "code"    =>  codelonglistexp es;
-		    other     =>  raise exception FAIL ("Unsupported case '" + other + "' in longlistexp");		# Added 2011-10-06 CrT just to suppress the "nonexhaustive-match" compiler warning.
+		    other     =>  raise exception DIE ("Unsupported case '" + other + "' in longlistexp");		# Added 2011-10-06 CrT just to suppress the "nonexhaustive-match" compiler warning.
 		end
 
 	also

@@ -12,8 +12,9 @@
 
 
 # This api is implemented in:
-#     src/lib/x-kit/widget/lib/list-indexing.pkg
-
+#
+#     src/lib/x-kit/widget/old/lib/list-indexing.pkg
+#
 api List_Indexing {
 
     exception BAD_INDEX;
@@ -36,5 +37,5 @@ api List_Indexing {
 
 
 ## COPYRIGHT (c) 1992 by AT&T Bell Laboratories  See SMLNJ-COPYRIGHT file for details.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

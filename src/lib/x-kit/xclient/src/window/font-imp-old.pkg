@@ -89,7 +89,7 @@ herein
 		plea_slot  =  make_mailslot ();
 		reply_slot =  make_mailslot ();
 
-		font_map   =  sht::make_hashtable  { size_hint => 32,  not_found_exception => FAIL "FontMap" };
+		font_map   =  sht::make_hashtable  { size_hint => 32,  not_found_exception => DIE "FontMap" };
 
 		insert     =  sht::set   font_map;
 		find       =  sht::find  font_map;
@@ -149,9 +149,9 @@ herein
 							  =>
 							  NULL;
 
-						      per_compile_data
+						      per_compile_stuff
 							  =>
-							  THE per_compile_data;
+							  THE per_compile_stuff;
 						  esac;
 					      else
 						  NULL;
@@ -278,5 +278,5 @@ end;
 
 
 ## COPYRIGHT (c) 1990, 1991 by John H. Reppy.  See SMLNJ-COPYRIGHT file for details.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

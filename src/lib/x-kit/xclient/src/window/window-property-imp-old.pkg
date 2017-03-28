@@ -93,7 +93,7 @@ herein
 	#
 	fun make_prop_table () :  aht::Hashtable( List( Property_Info ) )
 	    =
-	    aht::make_hashtable  { size_hint => 16,  not_found_exception => FAIL "PropTable" };
+	    aht::make_hashtable  { size_hint => 16,  not_found_exception => DIE "PropTable" };
 
 
 	fun find_prop (table, window, name)
@@ -370,5 +370,5 @@ end;
 
 
 ## COPYRIGHT (c) 1994 by AT&T Bell Laboratories.  See SMLNJ-COPYRIGHT file for details.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

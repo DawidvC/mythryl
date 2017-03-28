@@ -106,8 +106,8 @@ stipulate
                     # 
                     ashort;
 		else
-		    ai = cv::get (a, i);
-		    bi = cv::get (b, i);
+		    ai = cv::get_byte_as_char (a, i);
+		    bi = cv::get_byte_as_char (b, i);
 
 		    it::char::(<) (ai, bi) or
 		    (it::(==) (ai, bi) and compare (di::(+) (i, 1)));
@@ -174,7 +174,7 @@ herein
           it::rw_vector_of_eight_byte_floats::get,
           it::poly_rw_vector::get,
           it::poly_vector::get,
- 	  it::vector_of_chars::get,					# == string::get;
+ 	  it::vector_of_chars::get_byte_as_char,					# == string::get_byte_as_char;
 	  #
 	  it::poly_rw_matrix::get,
 	  it::rw_matrix_of_eight_byte_floats::get,
@@ -685,13 +685,7 @@ herein
 
     String = bt::String;
 
-    exception FAIL  String;
-
-    Crypt =   {							# 'crypt' as in 'cryptic," "hidden".  Type for passing values while hiding their types.  See Note[2].
-		key:	String,					# Text string used as key to store Crypt in keyed datastructures.  The part up to the first whitespace should be the fully qualified name of the exception used, e.g. "gadget_to_editboss::GADGET_TO_EDITBOSS". After first whitespace additional text may be added as needed for key uniqueness.
-		doc:	String,					# Text string describing hidden value, for diagnostic purposes.  This compensates for Crypt's lack of typesafety; it should include any information useful when debugging "Whoops, we got the wrong Crypt here" bugs. Often just the empty string.
-		val:	Exception				# The hidden value packed in an exception, taking advantage of the fact that Exception is Mythryl's only extensible datatype.
-	      };
+    exception DIE  String;
 
     # exception SPAN
     # enum order
@@ -706,6 +700,10 @@ herein
     include package   proto_pervasive;				# proto_pervasive	is from   src/lib/core/init/proto-pervasive.pkg
 
     Null_Or(X) = Null_Or(X);
+
+    Fail_Or(X) =  FAIL String
+	       |  WORK X
+	       ;	
 
     (*_)  = it::deref;
     deref = it::deref;						# Synonym, handy when doing 'map' or such.
@@ -891,8 +889,8 @@ herein
 		rt::asm::make_string  n;						# "rt" == "runtime" -- from   src/lib/core/init/built-in.pkg
 	    };
 
-	unsafe_get =  cv::get;
-	unsafe_set =  cv::set;
+	unsafe_get =  cv::get_byte_as_char;
+	unsafe_set =  cv::set_char_as_byte;
     herein
 
 	size = cv::length:  String -> Int;
@@ -1056,8 +1054,8 @@ herein
     dotslashets__op  = identity;	# ./foo/
     dothashets__op   = identity;	# .#foo#
     dotbackticks__op = identity;	# .`foo`
-       backticks__op = \\ _ = raise exception FAIL "`foo` op not defined; to define it do   backticks__op = somefn;";		# Initialized to 'words' in   src/app/makelib/main/makelib-g.pkg
-      dotqquotes__op = \\ _ = raise exception FAIL ".\"foo\" op not defined; to define it   do dotqquotes__op = somefn;";	# Initialized to 'words' in   src/app/makelib/main/makelib-g.pkg
+       backticks__op = \\ _ = raise exception DIE "`foo` op not defined; to define it do   backticks__op = somefn;";		# Initialized to 'words' in   src/app/makelib/main/makelib-g.pkg
+      dotqquotes__op = \\ _ = raise exception DIE ".\"foo\" op not defined; to define it   do dotqquotes__op = somefn;";	# Initialized to 'words' in   src/app/makelib/main/makelib-g.pkg
 
     # NB: We also have symbols |i| <i> /i/ {i} <i| |i>.
     # These are X -> Y.	
@@ -1107,6 +1105,26 @@ herein
     end;
 
 
+    Crypt								# 'crypt' as in 'cryptic," "hidden".  Type for passing values while hiding their types.  See Note[2].
+      =									#
+      {	id:	Id,							# A globally unique id which can be used (e.g.) as a key to store the Crypt in indexed datastructures.
+	type:	String,							# Type of the contents of the data field, for debugging/inspection.
+	info:	String,							# Any added info about the data field,    for debugging/inspection.  This compensates for Crypt's lack of typesafety; it should include any information useful when debugging "Whoops, we got the wrong Crypt here" bugs. Often just the empty string.
+	data:	Exception						# The hidden value packed in an exception, taking advantage of the fact that Exception is Mythryl's only extensible datatype.
+      };
+
+    fun do_while (fn: Void -> Bool): Void				# This little hack lets programmers write stuff like
+	=								#     do_while {.
+	if (fn ())  do_while  fn;					#         do_some_stuff ();
+	else	    ();							#         continuation_condition ();
+	fi;								#     };
+
+    fun do_while_not (fn: Void -> Bool): Void				# This little hack lets programmers write stuff like
+	=								#     do_while_not {.
+	if (fn ())  ();							#         do_some_stuff ();
+	else	    do_while_not fn;					#         termination_condition ();
+	fi;								#     };
+
 end;		# stipulate
 
 
@@ -1131,31 +1149,31 @@ end;		# stipulate
 # Note [2]
 # ========
 #
-# The 'Cryptic' type facilitates passing and storing values in a form
+# The 'Crypt' type facilitates passing and storing values in a form
 # where the intermediate packages handling the information flow and
 # storage don't need to know the relevant types.
 #
 # The motivating example for this was publishing 
-#     gadget_to_editboss::Gadget_To_Editboss				# gadget_to_editboss	is from   src/lib/x-kit/widget/edit/gadget-to-editboss.pkg
+#     millboss_types::Mill_To_Millboss				# millboss_types	is from   src/lib/x-kit/widget/edit/millboss-types.pkg
 # values in 
 #     guiboss_types::Gadget_To_Guiboss					# guiboss_types		is from   src/lib/x-kit/widget/gui/guiboss-types.pkg
-# without having to expose the entire editboss type complex to
+# without having to expose the entire millboss type complex to
 # guiboss -- which was resulting in package dependency cycles,
 # aside from being messy.
 #
-# The idea is that a resource like editboss_imp can be placed in a
+# The idea is that a resource like millboss_imp can be placed in a
 # central registry like guiboss_imp as an anonymous Crypt, after
-# which editboss_imp clients can retrieve the value via code like
+# which millboss_imp clients can retrieve the value via code like
 #     
-#	case editboss_crypt.val
+#	case millboss_crypt.val
 #	    #
-#	    g2b::GADGET_TO_EDITBOSS gadget_to_editboss
+#	    g2b::MILL_TO_MILLBOSS mill_to_millboss
 #		=>
 #		{
-#		    ...							# Code using the gadget_to_editboss port.
+#		    ...							# Code using the mill_to_millboss port.
 #		};
 #
-#	    _ =>    log::fatal (sprintf "Expected Crypt of g2b::GADGET_TO_EDITBOSS but got Crypt of key=>\"%s\" doc\"=%s\"" editboss_crypt.key editboss_crypt.doc);
+#	    _ =>    log::fatal (sprintf "Expected Crypt of g2b::MILL_TO_MILLBOSS but got Crypt of key=>\"%s\" doc\"=%s\"" millboss_crypt.key millboss_crypt.doc);
 #	esac;
 #
 # Here we're giving up some typesafety for the sake of improved modularity.
@@ -1194,5 +1212,5 @@ package xcore = core;
 
 
 ##  (C) 1999 Lucent Technologies, Bell Laboratories 
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

@@ -1,0 +1,101 @@
+## prettyprinter-debug-g.pkg
+#
+# A wrapper for prettyprinter_g which
+# dumps the state prior to each operation.
+
+# Compiled by:
+#     src/lib/prettyprint/big/prettyprinter.lib
+
+
+stipulate
+    package fil =  file__premicrothread;						# file__premicrothread		is from   src/lib/std/src/posix/file--premicrothread.pkg
+herein
+
+    generic package prettyprinter_debug_g (
+	#
+	pp: api {   include api Base_Prettyprinter;					# Base_Prettyprinter		is from   src/lib/prettyprint/big/src/base-prettyprinter.api
+		    #		
+		    dump:  (fil::Output_Stream,  Prettyprinter)  ->  Void;
+	        }
+    )
+    : (weak)
+    api {
+	include api Base_Prettyprinter;						# Base_Prettyprinter		is from   src/lib/prettyprint/big/src/base-prettyprinter.api
+	#
+	debug_stream:  Ref(  fil::Output_Stream );
+    }
+    {
+	package typ = pp::typ;
+
+	Prettyprint_Output_Stream		=  pp::Prettyprint_Output_Stream;
+	Prettyprinter			=  pp::Prettyprinter;
+	Pp					=  pp::Pp;				# Synonym for          Prettyprinter  .
+	Npp					=  pp::Npp;				# Synonym for Null_Or( Prettyprinter ).
+	Traitful_Text				=  pp::Traitful_Text;
+	Texttraits				=  pp::Texttraits;
+	Prettyprinter_Configuration_Args	== pp::typ::Prettyprinter_Configuration_Args;
+	Left_Margin_Is				== pp::typ::Left_Margin_Is;
+
+	horizontal				=  pp::horizontal;			# The four precoded box-formatting routines.
+	vertical				=  pp::vertical;
+	normal					=  pp::normal;
+	ragged_right				=  pp::ragged_right;
+	process_mill_options			=  pp::process_mill_options;
+
+	debug_stream
+	    =
+	    REF fil::stderr;
+
+	fun debug name f stream arg
+	    =
+	    {   fil::write(*debug_stream, cat ["*** ", name, ": "]);
+		pp::dump (*debug_stream, stream);
+		fil::flush *debug_stream;
+		f stream arg;
+	    };
+
+	fun debug' name f stream
+	    =
+	    {   fil::write(*debug_stream, cat ["*** ", name, ": "]);
+		pp::dump  (*debug_stream, stream);
+		fil::flush  *debug_stream;
+		f stream;
+	    };
+
+	get_prettyprint_output_stream	=  pp::get_prettyprint_output_stream;
+	push_texttraits			=  pp::push_texttraits;
+	pop_texttraits			=  pp::pop_texttraits;
+	make_prettyprinter		=  pp::make_prettyprinter;
+	nblanks				=  pp::nblanks;
+	set_rulename_for_current_box	=  pp::set_rulename_for_current_box;
+
+	open_box					= 							pp::open_box;
+	break'						= 							pp::break';
+	indent						= 							pp::indent;
+
+	flush_prettyprinter				= debug' "flush_stream"					pp::flush_prettyprinter;
+	close_prettyprinter				= debug' "close_stream"					pp::close_prettyprinter;
+
+	shut_box					= debug' "shut_box"					pp::shut_box;
+
+	traitful_text					= debug "traitful_text"					pp::traitful_text;
+	lit						= debug "lit"						pp::lit;
+	endlit						= debug "endlit"					pp::endlit;
+
+	break						= debug "break"						pp::break;
+	blank						= debug "blank"						pp::blank;
+	cut						= debug' "cut"						pp::cut;
+	newline						= debug' "newline"					pp::newline;
+	nonbreakable_blanks				= debug "nonbreakable_blanks"				pp::nonbreakable_blanks;
+	tab						= debug "tab"						pp::tab;
+
+	control						= debug "control"					pp::control;
+
+    };
+end;
+
+
+## COPYRIGHT (c) 2005 John Reppy (http://www.cs.uchicago.edu/~jhr)
+## All rights reserved.
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
+## released per terms of SMLNJ-COPYRIGHT.

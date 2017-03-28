@@ -563,7 +563,7 @@ end
 
 	fun stripOffBorder ([], _) = []
 	  | stripOffBorder (str . str_list, num_of_indentations) = 
-		(implode (nthtail (explode str, (string::length s::indentation) 
+		(implode (nthtail (explode str, (string::length_in_bytes s::indentation) 
 				 * num_of_indentations))) .
 		(stripOffBorder (str_list, num_of_indentations))
  
@@ -1128,5 +1128,5 @@ end
 
 
 ## COPYRIGHT (c) 1992 by AT&T Bell Laboratories.  See SMLNJ-COPYRIGHT file for details.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

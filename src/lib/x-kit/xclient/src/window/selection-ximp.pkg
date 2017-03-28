@@ -153,7 +153,7 @@ herein
 	Xevent_Q    = Mailqueue( xet::x::Event );
 
 	Runstate =  {													# These values will be statically globally visible throughout the code body for the imp.
-		      me:				Selection_Ximp_State,						# State which is preserved across imp shutdown/restart cycles.
+		      me:				Selection_Ximp_State,						# 
 		      imports:				Imports,							# Ximps to which we send requests.
 		      to:				Replyqueue,							# The name makes   foo::pass_something(imp) to {. ... }   syntax read well.
 		      end_gun':				End_Gun,							# We shut down the microthread when this fires.
@@ -329,7 +329,7 @@ herein
 		  #
 		  runstate as
 		  {													# These values will be statically globally visible throughout the code body for the imp.
-		    me:					Selection_Ximp_State,						# State which is preserved across imp shutdown/restart cycles.
+		    me:					Selection_Ximp_State,						# 
 		    imports:				Imports,							# Ximps to which we send requests.
 		    to:					Replyqueue,							# The name makes   foo::pass_something(imp) to {. ... }   syntax read well.
 		    end_gun':				End_Gun,							# We shut down the microthread when this fires.
@@ -769,8 +769,8 @@ herein
 		    ->
 		    { name };
 	
-		me = 	{ selection_table	=>  aht::make_hashtable  { size_hint => 32,  not_found_exception => FAIL "SelectionTable" },
-			  plea_table	=>  aht::make_hashtable  { size_hint => 32,  not_found_exception => FAIL "RequestTable"	  }
+		me = 	{ selection_table	=>  aht::make_hashtable  { size_hint => 32,  not_found_exception => DIE "SelectionTable" },
+			  plea_table	=>  aht::make_hashtable  { size_hint => 32,  not_found_exception => DIE "RequestTable"	  }
 			};
 
 		\\ () = {   reply_oneshot = make_oneshot_maildrop():  Oneshot_Maildrop( (Me_Slot, Exports) );		# PUBLIC. PHASE 2: Start our microthread and return our Exports to caller.
@@ -817,5 +817,5 @@ end;
 
 
 ## COPYRIGHT (c) 1994 by AT&T Bell Laboratories.  See SMLNJ-COPYRIGHT file for details.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

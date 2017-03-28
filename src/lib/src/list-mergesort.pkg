@@ -4,10 +4,7 @@
 # Taken from, ML for the Working Programmer, LCPaulson. pg 99-100
 
 # Compiled by:
-#     src/lib/std/standard.lib
-
-
-
+#     src/lib/std/src/standard-core.sublib
 
 ###            "The middle way cannot be achieved
 ###             by dividing two extremes in half."
@@ -49,7 +46,7 @@ package   list_mergesort
 
 	        merge_pairs _
                     =>
-                    raise exception FAIL "ListSort::sort";
+                    raise exception DIE "ListSort::sort";
             end;
 
 	    fun next_run (run,[])      =>  (reverse run,[]);
@@ -107,7 +104,7 @@ package   list_mergesort
 
 		merge_pairs _
                     =>
-                    raise exception FAIL "ListSort::uniqueSort";
+                    raise exception DIE "ListSort::uniqueSort";
 	    end;
 
 	    fun next_run (run, [])
@@ -186,5 +183,5 @@ package   list_mergesort
 
 
 ## COPYRIGHT (c) 1993 by AT&T Bell Laboratories.  See SMLNJ-COPYRIGHT file for details.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

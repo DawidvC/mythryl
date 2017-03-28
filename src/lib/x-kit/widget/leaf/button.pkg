@@ -39,10 +39,8 @@ stipulate
     package g2d =  geometry2d;							# geometry2d			is from   src/lib/std/2d/geometry2d.pkg
     package g2j =  geometry2d_junk;						# geometry2d_junk		is from   src/lib/std/2d/geometry2d-junk.pkg
     package mtx =  rw_matrix;							# rw_matrix			is from   src/lib/std/src/rw-matrix.pkg
-    package pp  =  standard_prettyprint_mill;					# standard_prettyprint_mill	is from   src/lib/prettyprint/big/src/standard-prettyprint-mill.pkg
+    package pp  =  standard_prettyprinter;					# standard_prettyprinter	is from   src/lib/prettyprint/big/src/standard-prettyprinter.pkg
     package gtg =  guiboss_to_guishim;						# guiboss_to_guishim		is from   src/lib/x-kit/widget/theme/guiboss-to-guishim.pkg
-
-    package iuw =  issue_unique_widget_id;					# issue_unique_widget_id	is from   src/lib/x-kit/widget/gui/issue-unique-widget-id.pkg
 
     nb =  log::note_on_stderr;							# log				is from   src/lib/std/src/log.pkg
 herein
@@ -67,7 +65,7 @@ herein
 
 	App_To_Button
 	  =
-	  { id:				iuw::Id,
+	  { id:				Id,
 	    # 
 	    get_active:			Void -> Bool,
 	    get_state:			Void -> Bool,
@@ -101,8 +99,8 @@ herein
 	    =
 	    REDRAW_FN_ARG
 	      {
-		id:				iuw::Id,			# Unique id.
-		doc:				String,
+		id:				Id,				# Unique Id for widget.
+		doc:				String,				# Human-readable description of this widget, for debug and inspection.
 		frame_number:			Int,				# 1,2,3,... Purely for convenience of widget, guiboss-imp makes no use of this.
 		frame_indent_hint:		gt::Frame_Indent_Hint,
 		site:				g2d::Box,			# Window rectangle in which to draw.
@@ -155,8 +153,8 @@ herein
 	Mouse_Click_Fn_Arg
 	    =
 	    MOUSE_CLICK_FN_ARG							# Needs to be a sumtype because of recursive reference in default_mouse_click_fn.
-	      { id:				iuw::Id,			# Unique id.
-		doc:				String,
+	      { id:				Id,				# Unique Id for widget.
+		doc:				String,				# Human-readable description of this widget, for debug and inspection.
 		event:				gt::Mousebutton_Event,		# MOUSEBUTTON_PRESS or MOUSEBUTTON_RELEASE.
 		button:				evt::Mousebutton,		# Which mousebutton was pressed/released.
 		point:				g2d::Point,			# Where the mouse was.
@@ -189,8 +187,8 @@ herein
 	    =
 	    MOUSE_DRAG_FN_ARG
 	      {
-		id:				iuw::Id,			# Unique id.
-		doc:				String,
+		id:				Id,				# Unique Id for widget.
+		doc:				String,				# Human-readable description of this widget, for debug and inspection.
 		event_point:			g2d::Point,
 		start_point:			g2d::Point,
 		last_point:			g2d::Point,
@@ -225,8 +223,8 @@ herein
 	    =
 	    MOUSE_TRANSIT_FN_ARG
 	      {
-		id:				iuw::Id,			# Unique id.
-		doc:				String,
+		id:				Id,				# Unique Id for widget.
+		doc:				String,				# Human-readable description of this widget, for debug and inspection.
 		event_point:			g2d::Point,
 		widget_layout_hint:		gt::Widget_Layout_Hint,
 		frame_indent_hint:		gt::Frame_Indent_Hint,
@@ -257,20 +255,14 @@ herein
 	    =
 	    KEY_EVENT_FN_ARG
 	      {
-		id:				iuw::Id,			# Unique id.
-		doc:				String,
-		key_event:			gt::Key_Event,			# KEY_PRESS or KEY_RELEASE
-		keycode:			evt::Keycode,			# Keycode of the depressed key.
-		keysym:				evt::Keysym,			# Keysym  of the depressed key.  See Note[1] in src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp.api
-		string:				String,				# Ascii  for the depressed key.  See Note[1] in src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp.api
-		char:				Char,				# First char of 'string' ('\0' if string-length != 1).
-		event_point:			g2d::Point,
+		id:				Id,				# Unique Id for widget.
+		doc:				String,				# Human-readable description of this widget, for debug and inspection.
+		keystroke:			gt::Keystroke_Info,		# Keystring etc for event.
 		widget_layout_hint:		gt::Widget_Layout_Hint,
 		frame_indent_hint:		gt::Frame_Indent_Hint,
 		site:				g2d::Box,			# Widget's assigned area in window coordinates.
-		modifier_keys_state:	        evt::Modifier_Keys_State,	# State of the modifier keys (shift, ctrl...).
-		mousebuttons_state:		evt::Mousebuttons_State,	# State of mouse buttons as a bool record.
 		widget_to_guiboss:		gt::Widget_To_Guiboss,
+		guiboss_to_widget:		gt::Guiboss_To_Widget,		# Used by textpane.pkg keystroke-macro stuff to synthesize fake keystroke events to widget.
 		theme:				wt::Widget_Theme,
 		do:				(Void -> Void) -> Void,		# Used by widget subthreads to execute code in main widget microthread.
 		to:				Replyqueue,			# Used to call 'pass_*' methods in other imps.
@@ -310,7 +302,7 @@ herein
 		| BODY_COLOR_WHEN_ON			rgb::Rgb
 		| BODY_COLOR_WHEN_ON_WITH_MOUSEFOCUS	rgb::Rgb
 		#
-		| ID			iuw::Id
+		| ID			Id
 		| DOC			String
 		#
 		| RELIEF		wt::Relief				# Should button boundary be drawn flat, raised, sunken, ridged or grooved?
@@ -345,7 +337,7 @@ herein
 		#
 		| BOOL_OUT		(Bool -> Void)				# Widget's current state              will be sent to these fns each time state changes.
 		| PORTWATCHER		(Null_Or(App_To_Button) -> Void)	# Widget's app port                   will be sent to these fns at widget startup.
-		| SITEWATCHER		(Null_Or((iuw::Id,g2d::Box)) -> Void)	# Widget's site in window coordinates will be sent to these fns each time it changes.
+		| SITEWATCHER		(Null_Or((Id,g2d::Box)) -> Void)	# Widget's site in window coordinates will be sent to these fns each time it changes.
 		;								# To help prevent deadlock, watcher fns should be fast and nonblocking, typically just setting a var or entering something into a mailqueue.
 		
 	fun process_options
@@ -668,7 +660,7 @@ herein
 
 		fun get_text_dimensions (text: String)
 		    =
-		    {   g =  wti::get__guiboss_to_topwindow  theme;
+		    {   g =  wti::get__guiboss_to_hostwindow  theme;
 			#
 			font = g.get_font (get_fontnames ());
 
@@ -864,7 +856,7 @@ herein
 		_	     =>  ();
 	    esac;
 
-	fun with (options: List(Option))								# PUBLIC
+	fun with (options: List(Option))								# PUBLIC.  The point of the 'with' name is that GUI coders can write 'button::with { this => that, foo => bar, ... }.'
 	    =
 	    {
 		widget_oneshot	= make_oneshot_maildrop():  Oneshot_Maildrop( wi::Widget );
@@ -989,7 +981,7 @@ herein
 
 		widget_to_guiboss__global
 		    =
-		    REF (NULL:  Null_Or((gt::Widget_To_Guiboss, iuw::Id)));
+		    REF (NULL:  Null_Or((gt::Widget_To_Guiboss, Id)));
 
 		fun note_changed_gadget_activity (is_active: Bool)
 		    =
@@ -1029,7 +1021,7 @@ herein
 				      };	
 
 
-		fun note_site  (id: iuw::Id,  site: g2d::Box)
+		fun note_site  (id: Id,  site: g2d::Box)
 		    =
 		    if(*last_known_site != site)
 			last_known_site := site;
@@ -1134,10 +1126,11 @@ herein
 
 		fun startup_fn
 		    { 
-		      id:				iuw::Id,						# Unique id.
-		      doc:				String,
+		      id:				Id,							# Unique Id for widget.
+		      doc:				String,							# Human-readable description of this widget, for debug and inspection.
 		      widget_to_guiboss:		gt::Widget_To_Guiboss,
-		      do:				(Void -> Void) -> Void					# Used by widget subthreads to execute code in main widget microthread.
+		      do:				(Void -> Void) -> Void,					# Used by widget subthreads to execute code in main widget microthread.
+		      to:				Replyqueue
 		    }
 		    =
 		    {	widget_to_guiboss__global
@@ -1204,8 +1197,8 @@ herein
 	
 		fun initialize_gadget_fn
 		    {
-		      id:				iuw::Id,						# Unique id.
-		      doc:				String,
+		      id:				Id,							# Unique Id for widget.
+		      doc:				String,							# Human-readable description of this widget, for debug and inspection.
 		      site:				g2d::Box,						# Window rectangle in which to draw.
 		      widget_to_guiboss:		gt::Widget_To_Guiboss,
 		      theme:				wt::Widget_Theme,
@@ -1225,8 +1218,8 @@ herein
 
 		fun redraw_request_fn_wrapper
 		    {
-		      id:				iuw::Id,			# Unique id.
-		      doc:				String,
+		      id:				Id,				# Unique Id for widget.
+		      doc:				String,				# Human-readable description of this widget, for debug and inspection.
 		      frame_number:			Int,				# 1,2,3,... Purely for convenience of widget-imp, guiboss-imp makes no use of this.
 		      frame_indent_hint:		gt::Frame_Indent_Hint,
 		      site:				g2d::Box,			# Window rectangle in which to draw.
@@ -1321,8 +1314,8 @@ herein
 
 		fun mouse_click_fn_wrapper									# This a callback we hand to   src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp.pkg
 		      {
-			id:				iuw::Id,						# Unique id.
-			doc:				String,
+			id:				Id,							# Unique Id for widget.
+			doc:				String,							# Human-readable description of this widget, for debug and inspection.
 			event:				gt::Mousebutton_Event,					# MOUSEBUTTON_PRESS or MOUSEBUTTON_RELEASE.
 			button:				evt::Mousebutton,
 			point:				g2d::Point,
@@ -1374,8 +1367,8 @@ herein
 
 		fun mouse_drag_fn_wrapper									# This a callback we hand to   src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp.pkg
 		    (
-		      {	id:				iuw::Id,						# Unique id.
-			doc:				String,
+		      {	id:				Id,							# Unique Id for widget.
+			doc:				String,							# Human-readable description of this widget, for debug and inspection.
 			event_point:			g2d::Point,
 			start_point:			g2d::Point,
 			last_point:			g2d::Point,
@@ -1438,8 +1431,8 @@ herein
 		      #
 		      ( arg as
 			{
-			  id:				iuw::Id,						# Unique id.
-			  doc:				String,
+			  id:				Id,							# Unique Id for widget.
+			  doc:				String,							# Human-readable description of this widget, for debug and inspection.
 			  event_point:			g2d::Point,
 			  widget_layout_hint:		gt::Widget_Layout_Hint,
 			  frame_indent_hint:		gt::Frame_Indent_Hint,
@@ -1490,20 +1483,14 @@ herein
 
 		fun key_event_fn_wrapper
 		      {
-			id:				iuw::Id,						# Unique id.
-			doc:				String,
-			key_event:			gt::Key_Event,						# KEY_PRESS or KEY_RELEASE.
-			keycode:			evt::Keycode,						# Keycode of the depressed key.
-			keysym:				evt::Keysym,						# Keysym  of the depressed key.
-			string:				String,							# Ascii  for the depressed key.
-			char:				Char,							# First char of 'string' ('\0' if string-length != 1).
-			event_point:			g2d::Point,
+			id:				Id,							# Unique Id for widget.
+			doc:				String,							# Human-readable description of this widget, for debug and inspection.
+			keystroke:			gt::Keystroke_Info,					# Keystring etc for event.
 			widget_layout_hint:		gt::Widget_Layout_Hint,
 			frame_indent_hint:		gt::Frame_Indent_Hint,
 			site:		 		g2d::Box,						# Widget's assigned area in window coordinates.
-			modifier_keys_state:	        evt::Modifier_Keys_State,				# State of the modifier keys (shift, ctrl...).
-			mousebuttons_state:		evt::Mousebuttons_State,				# State of mouse buttons as a bool record.
 			widget_to_guiboss:		gt::Widget_To_Guiboss,
+			guiboss_to_widget:		gt::Guiboss_To_Widget,					# Used by textpane.pkg keystroke-macro stuff to synthesize fake keystroke events to widget.
 			theme:				wt::Widget_Theme,
 			do:				(Void -> Void) -> Void,					# Used by widget subthreads to execute code in main widget microthread.
 			to:				Replyqueue						# Used to call 'pass_*' methods in other imps.
@@ -1517,18 +1504,12 @@ herein
 			      {
 				id,
 				doc,
-				key_event,
-				keycode,
-				keysym,
-				string,
-				char,
-				event_point,
+				keystroke,
 				widget_layout_hint,
 				frame_indent_hint,
 				site,
-				modifier_keys_state,
-				mousebuttons_state,
 				widget_to_guiboss,
+				guiboss_to_widget,
 				theme,
 				do,
 				to,
@@ -1634,5 +1615,5 @@ end;
 
 
 ## COPYRIGHT (c) 1994 by AT&T Bell Laboratories  See SMLNJ-COPYRIGHT file for details.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

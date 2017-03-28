@@ -6,7 +6,7 @@
 # This file contains a great recursive black hole:  					# Originally this was a flock of separate files, but the natural recursive
 # No type or function which enters it can ever escape.					# relationships proved just too difficult to avoid, so they all moved into
 #											# this file where they can recursively refer to each other to their heart's
-# We use four representations for a GUI with transition diagram				# content.  Sometimes it is best to just accept the inevitable...
+# We use three representations for a GUI with transition diagram			# content.  Sometimes it is best to just accept the inevitable...
 #
 #     Guiplan										# Public definition of GUI constructed by client and then passed to guiboss_imp via Client_To_Guiboss.start_gui or Gadget_To_Guiboss.make_popup.
 #         |										#
@@ -17,22 +17,31 @@
 #     Guipith										# Public summary of a running gui.  Its purpose is to allow client code to morph Guipane(s) by generating a Guipith (Gadget_To_Guiboss.get_guipiths), editing it, and submitting it (Gadget_To_Guiboss.install_updated_guipiths).
 #
 # The application programmers passes guiboss_imp a Guiplan
-# to define the GUI, which is then converted to a Paused_Gui
-# and at GUI startup time to a Guipane.
+# to define the GUI, which is then converted to a running
+# Guipane which is then abstracted on request into a Guipith
+# via Gadget_To_Guiboss.get_guipiths for application massaging and
+# via Gadget_To_Guiboss.install_updated_guipiths conversion back
+# into running-GUI form:  This is the main application tool for
+# restructing a running GUI.
 #
 # In addition to defining the three GUI representations, this
 # file defines most (but not all) of the major ports between
 # guiboss_imp and other imps:								# "gadget" refers to any of "widget", "sprite" or "object".  (Most frequently, "widget".)
 #
-#	guiboss_to_gadget								# The general guiboss_imp -> gadget interface, used for forwarding user mouseclicks etc.  Most frequently used guiboss_imp -> widget_imp, but also to sprite_imp and object_imp.
-#	gadget_to_guiboss								# The general gadget -> guiboss_imp interface, used for forwarding draw operations  etc.
-#	guiboss_to_widgetspace								# The guiboss_imp -> widgetspace_imp, used to manage layout of widgets on windows.
-#	guiboss_to_objectspace								# The guiboss_imp -> objectspace_imp, used to manage layout of objects on windows.
-#	guiboss_to_spritespace								# The guiboss_imp -> spritespace_imp, used to manage layout of sprites on windows.
+#	Guiboss_To_Gadget								# The general guiboss_imp -> gadget interface, used for forwarding user mouseclicks etc.  Most frequently used guiboss_imp -> widget_imp, but also to sprite_imp and object_imp.
+#	Gadget_To_Guiboss								# The general gadget -> guiboss_imp interface, used for forwarding draw operations  etc.
+#       #
+#	Guiboss_To_Widgetspace								# The guiboss_imp -> widgetspace_imp, used to manage layout of widgets on windows.  Not yet of much importance in practice.
+#	Guiboss_To_Objectspace								# The guiboss_imp -> objectspace_imp, used to manage layout of objects on windows.  Not yet of much importance in practice.
+#	Guiboss_To_Spritespace								# The guiboss_imp -> spritespace_imp, used to manage layout of sprites on windows.  Not yet of much importance in practice.
 #     
 # Support code including iterators over these datastructures may be found in:
 #
 #     src/lib/x-kit/widget/gui/guiboss-types-junk.pkg
+#
+# See also:
+#
+#     src/lib/x-kit/widget/edit/millboss-types.pkg
 
 # Compiled by:
 #     src/lib/x-kit/widget/xkit-widget.sublib
@@ -47,29 +56,30 @@ stipulate
     package wt  =  widget_theme;							# widget_theme				is from   src/lib/x-kit/widget/theme/widget/widget-theme.pkg
     package evt =  gui_event_types;							# gui_event_types			is from   src/lib/x-kit/widget/gui/gui-event-types.pkg
 
-    package o2c =  object_to_objectspace;						# object_to_objectspace			is from   src/lib/x-kit/widget/space/object/object-to-objectspace.pkg   
+    package o2c =  object_to_objectspace;						# object_to_objectspace			is from   src/lib/x-kit/widget/space/object/object-to-objectspace.pkg
     package c2o =  objectspace_to_object;						# objectspace_to_object			is from   src/lib/x-kit/widget/space/object/objectspace-to-object.pkg
 
-    package s2b =  sprite_to_spritespace;						# sprite_to_spritespace			is from   src/lib/x-kit/widget/space/sprite/sprite-to-spritespace.pkg   
+    package s2b =  sprite_to_spritespace;						# sprite_to_spritespace			is from   src/lib/x-kit/widget/space/sprite/sprite-to-spritespace.pkg
     package b2s =  spritespace_to_sprite;						# spritespace_to_sprite			is from   src/lib/x-kit/widget/space/sprite/spritespace-to-sprite.pkg
 
     package g2p =  gadget_to_pixmap;							# gadget_to_pixmap			is from   src/lib/x-kit/widget/theme/gadget-to-pixmap.pkg
 
+    package idm =  id_map;								# id_map				is from   src/lib/src/id-map.pkg
     package im  =  int_red_black_map;							# int_red_black_map			is from   src/lib/src/int-red-black-map.pkg
     package sm  =  string_map;								# string_map				is from   src/lib/src/string-map.pkg
 
-    package iuw =  issue_unique_widget_id;						# issue_unique_widget_id		is from   src/lib/x-kit/widget/gui/issue-unique-widget-id.pkg
     package gtg =  guiboss_to_guishim;							# guiboss_to_guishim			is from   src/lib/x-kit/widget/theme/guiboss-to-guishim.pkg
 
-    package pp  =  standard_prettyprint_mill;						# standard_prettyprint_mill		is from   src/lib/prettyprint/big/src/standard-prettyprint-mill.pkg
+    package pp  =  standard_prettyprinter;						# standard_prettyprinter		is from   src/lib/prettyprint/big/src/standard-prettyprinter.pkg
 
     package lms =  list_mergesort;							# list_mergesort			is from   src/lib/src/list-mergesort.pkg
 
-    package err =  error_message;							# error_message				is from   src/lib/compiler/front/basics/errormsg/error-message.pkg
+    package err =  compiler::error_message;						# compiler				is from   src/lib/core/compiler/compiler.pkg
+											# error_message				is from   src/lib/compiler/front/basics/errormsg/error-message.pkg
 
     package gd  =  gui_displaylist;							# gui_displaylist			is from   src/lib/x-kit/widget/theme/gui-displaylist.pkg
-#    package t2t =  textpane_to_textbuffer;						# textpane_to_textbuffer		is from   src/lib/x-kit/widget/edit/textpane-to-textbuffer.pkg
 
+    package a2c =  app_to_compileimp;							# app_to_compileimp			is from   src/lib/x-kit/widget/edit/app-to-compileimp.pkg
 
     nb = log::note_on_stderr;								# log					is from   src/lib/std/src/log.pkg
 
@@ -94,7 +104,7 @@ herein
 	    set_scrollport_upperleft: g2d::Point -> Void								# Shouldn't this be 'pass_scrollport_upperleft'?
 	  };
 
-	Scroller_Callback												# Used in Gp_Widget_Type.SCROLLPORT	in   src/lib/x-kit/widget/gui/running-gui.pkg
+	Scroller_Callback												# Used in Gp_Widget_Type.SCROLLPORT	in   src/lib/x-kit/widget/gui/guiboss-types.pkg
 	  =
 	  Null_Or( Scroller ) -> Void;
 
@@ -105,9 +115,10 @@ herein
 	    set_active_tab: Int -> Void
 	  };
 
-	Tab_Picker_Callback												# Used in Gp_Widget_Type.TABBED_VIEWS	in   src/lib/x-kit/widget/gui/running-gui.pkg
+	Tab_Picker_Callback												# Used in Gp_Widget_Type.TABBED_VIEWS	in   src/lib/x-kit/widget/gui/guiboss-types.pkg
 	  =
 	  Null_Or( Tab_Picker ) -> Void;
+
 
 	#########################################################################################
 	### Preliminary running-gui types
@@ -145,10 +156,7 @@ herein
 
 	Wakeup_Arg
 	  =
-	  { frame_number:			Int,									# 1,2,3,... Purely for convenience of widget, guiboss-imp makes no use of this.
-	    site:				g2d::Box,								# Window rectangle in which to draw.
-	    duration_in_seconds:		Float,									# If state has changed look-imp should call redraw_gadget() before this time is up. Also useful for motionblur.
-	    gadget_mode:			Gadget_Mode								# is_active/has_keyboard_focus/has_mouse_focus flags.
+	  { frame_number:			Int									# 1,2,3,... Purely for convenience of widget, guiboss-imp makes no use of this.
 	  };
 
 	Wake_Me_Option
@@ -223,7 +231,7 @@ herein
 	    | OBJECT		Object_Start_Fn
 
 	also
-	Gp_Widget_Type													# "_Type" because for consistency we need "Gg_Widget" for WIDGET.
+	Gp_Widget_Type													# "_Type" because for consistency we need "Gp_Widget" for WIDGET.
 	    #
 	    = ROW		Gp_Row											# Horizontal row of widgets. A ROW of less than two widgets may be optimized away.
 	    | COL		Gp_Col											# Vertical   col of widgets. A COL of less than two widgets may be optimized away.
@@ -420,7 +428,7 @@ herein
 
 
 	also														# 
-	Subwindow_Data													# This is used in Topwindow_Info and Guipane because they are always located directly on a subwindow, not on a scrollport within a subwindow.
+	Subwindow_Data													# This is used in Hostwindow_Info and Guipane because they are always located directly on a subwindow, not on a scrollport within a subwindow.
 	  #														# Unfortunately we can NOT just replace Subwindow_Data everywhere by Subwindow_Info because then Subwindow_Info contains fields of type Subwindow_Info, which is not allowed by the type system.
 	  = SUBWINDOW_DATA  Subwindow_Info										# 
 
@@ -428,27 +436,33 @@ herein
 	#########################################################################################
 	### Guipith datatypes												# Nomenclature: "Xi_" and "XI_" are mnemonic for "eXport/Import".
 	###
-	### A Guipith is a public summary of a running gui.  Its purpose is to allow
-	### client code to morph Guipane(s) by generating Guipith summaries of running
-	### Guipanes via Gadget_To_Guiboss.get_guipiths, editing them, and submitting
-	### them back to guiboss_imp via Gadget_To_Guiboss.install_updated_guipiths, which
-	### which converts them back into a full Guipanes using information from the
-	### pre-existing Guipanes and then installs ttem as the new running Guipanes,
-	### doing re-sites + re-draws as needed to appropriately update the visible screen
-	### image of the affected running GUIs.
+	### A Guipith is a public summary of a running gui.  Its purpose is to
+	### allow client code to morph Guipane(s) by generating Guipith
+	### summaries of running Guipanes via Gadget_To_Guiboss.get_guipiths,
+	### editing them (often via the guiboss_types_junk::guipith_map							# guiboss_types_junk	is from   src/lib/x-kit/widget/gui/guiboss-types-junk.pkg
+	### facility), and submitting them back to guiboss_imp via
+	### Gadget_To_Guiboss.install_updated_guipiths, which which converts
+	### them back into a full Guipanes using information from the
+	### pre-existing Guipanes and then installs ttem as the new running
+	### Guipanes, doing re-sites + re-draws as needed to appropriately
+	### update the visible screen image of the affected running GUIs.
 	###
-	### This facility is motivated by a desire to allow (for example) emacs-style editors
-	### to add new (sub)windows onto new files without having to completely shut down the
-	### existing GUI, together with a desire to keep the Guipane types private to guiboss_imp
-	### for implementation hiding / separation of concerns, and also to minimize the amount
-	### of validation needed in Gadget_To_Guiboss.install_updated_guipiths by minimizing the amount
-	### of superfluous information passed to      install_updated_guipiths.
+	### This facility is motivated by a desire to allow (for example)
+	### emacs-style editors to add new (sub)windows onto new files without
+	### having to completely shut down the existing GUI, together with a
+	### desire to keep the Guipane types private to guiboss_imp for
+	### implementation hiding / separation of concerns, and also to
+	### minimize the amount of validation needed in
+	###     Gadget_To_Guiboss.install_updated_guipiths
+	### by minimizing the amount of superfluous information passed
+	### to install_updated_guipiths.
+
 															# 
 	also
 	Xi_Sprite													# This datatype has only one alternative, but will presumably eventually have multiple variants just like Rg_Object_Type and Rg_Widget_Type, so converting it to a simple type is probably a bad idea.
 	    #
 	    = XI_SPRITE	      {
-				sprite_id:		iuw::Id
+				sprite_id:		Id
 			      }
 			
 	also
@@ -458,7 +472,7 @@ herein
 				xi_widget:		Xi_Widget_Type
 			      }
 	    | XI_OBJECT	      {
-				object_id:		iuw::Id
+				object_id:		Id
 			      }
 
 	also
@@ -496,11 +510,68 @@ herein
 
 
 	withtype
+	Keystroke_Info
+	  =
+	  { key_event:		    Key_Event,										# KEY_PRESS or KEY_RELEASE.
+	    keycode:		    evt::Keycode,									# Keyboard key just pressed/released.
+	    keysym:		    evt::Keysym,									# Keysym  of the key.  This is not present in the X version of Key_Kevtinfo; added for widget-code convenience.
+	    keystring:		    String,										# Ascii  for the key.  This is not present in the X version of Key_Kevtinfo; added for widget-code convenience.
+	    keychar:		    Char,										# First char of 'string' ('\0' if string-length != 1).
+	    modifier_keys_state:    evt::Modifier_Keys_State,								# State of the modifier keys (shift, ctrl...).
+	    mousebuttons_state:     evt::Mousebuttons_State								# State of mouse buttons as a bool record.
+	  }
+
+	also
+	Note_Mouse_Drag_Event_Arg
+	  =
+	  { phase:		    Drag_Phase,										# We guarantee that the gadget that sees the OPEN (downclick) for a drag also sees all the DRAGs and the DONE for that drag, and that no other gadget sees drag or transit events during that time period.
+	    button:	  	    evt::Mousebutton,									# Mouse button lack clicked down. Range is 1-13 or more.  Typically 1=left, 2=middle, 3=right, 4=mousewheel-forward, 5=mousewheel-back.
+	    modifier_keys_state:    evt::Modifier_Keys_State,								# State of the modifier keys (shift, ctrl...).
+	    mousebuttons_state:	    evt::Mousebuttons_State,								# State of mouse buttons as a bool record.
+	    event_point:	    g2d::Point,										# 'event_point' is the current   point the window's coordinate system.
+	    start_point:	    g2d::Point,										# 'start_point' is the downclick point the window's coordinate system.
+	    last_point:		    g2d::Point,										# 'last_point'  is the event_point from the preceding ntoe_mouse_drag_event call.
+	    site:		    g2d::Box,										# Gadget's assigned area in window coordinates.
+	    theme:		    wt::Widget_Theme									#
+	  }														# DONE is sent when last mousebutton is released, no matter where that happnes.
+
+	also
+	Note_Mouse_Transit_Arg
+	  =
+	  { transit:		    Gadget_Transit,
+	    modifier_keys_state:  evt::Modifier_Keys_State,								# State of the modifier keys (shift, ctrl...).
+	    event_point:	    g2d::Point,										# 'event_point'  is the click point the window's coordinate system.
+	    site:		    g2d::Box,										# Gadget's assigned area in window coordinates.
+	    theme:		    wt::Widget_Theme									#
+	  }														# CAME/MOVE/LEFT are never sent during drag operations.
+
+	also
+	Note_Key_Event_Arg
+	  =
+	  { keystroke:		    Keystroke_Info,
+	    site:		    g2d::Box,										# Gadget's assigned area in window coordinates.
+	    theme:		    wt::Widget_Theme
+	  }
+
+	also
+	Note_Mousebutton_Event_Arg
+	  =
+	  { mousebutton_event:      Mousebutton_Event,									# MOUSEBUTTON_PRESS or MOUSEBUTTON_RELEASE. These go to the gadget under the mouse pointer, hence a gadget may not see both if the pointer moves between them. Use note_mouse_drag_event if this is a problem.
+	    mouse_button:	    evt::Mousebutton,									# Mouse button just clicked down. Range is 1-13 or more.  Typically 1=left, 2=middle, 3=right, 4=mousewheel-forward, 5=mousewheel-back.
+	    modifier_keys_state:    evt::Modifier_Keys_State,								# State of the modifier keys (shift, ctrl...).
+	    mousebuttons_state:     evt::Mousebuttons_State,								# State of mouse buttons as a bool record, BEFORE THE EVENT -- so a MOUSEBUTTON_RLEASE will always show at least one button down.
+	    event_point:	    g2d::Point,										# 'point'  is the click point the window's coordinate system.
+	    site:		    g2d::Box,										# Gadget's assigned area in window coordinates.
+	    theme:		    wt::Widget_Theme									#
+	  }														# Normally MOUSEBUTTON_PRESS or MOUSEBUTTON_RELEASE are sent if they occur within the gadget's assigned site.
+
+	also
 	Xi_Row														# Used in XI_ROW
 	  =
 	  {														# A horizontal row of widget widgets.
 	    id:				Id,
-	    widgets:			List( Xi_Widget_Type )								# The list of widgets to be laid out and displayed in this row.
+	    widgets:			List( Xi_Widget_Type ),								# The list of widgets to be laid out and displayed in this row.
+	    first_cut:			Null_Or( Float )								# Normally NULL; if non-NULL (and at least two widgets in row/col), gives fraction of row/col space to allocate to first widget, overriding the regular bottom-up sizing mechanism.
 	  }
 
 	also
@@ -514,7 +585,7 @@ herein
 	  }
 
 	also
-	Xi_Mark														# Used in XI_GRID
+	Xi_Mark														# Used inX I_GRID
 	  =
 	  { id:				Id,										# A widget.
 	    doc:			String,
@@ -546,7 +617,7 @@ herein
 	also
 	Xi_Widget													# An actual leaf widget like an arrowbutton or label or text-entry box. These are all customizations of src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp.pkg
 	  =														# Used in XI_WIDGET
-	  { widget_id:			iuw::Id,
+	  { widget_id:			Id,
 	    widget_layout_hint:		Widget_Layout_Hint,
 	    doc:			String										# Debugging support: Allow XI_WIDGETs to be distinguishable for debug-display purposes.
 	  }
@@ -568,9 +639,9 @@ herein
 	  }
 
 	also
-	Xi_Topwindow_Info
+	Xi_Hostwindow_Info
 	  =
-	  { id:				Id,										# From topwindow_info.guiboss_to_topwindow.id
+	  { id:				Id,										# From hostwindow_info.guiboss_to_hostwindow.id
 	    subwindow_info:		Null_Or( Xi_Subwindow_Data )
 	  }
 
@@ -601,7 +672,7 @@ herein
 	  =														# so it can be mutually recursive with everything else there, but for the moment it is working as a standalone definition.
 	  { id:				Id,										# Unique id to facilitate storing space_to_gui ports in indexed datastructures like red-black trees.
 	    #
-	    note_widget_site:	      { id:			iuw::Id,
+	    note_widget_site:	      { id:			Id,
 					site:			g2d::Box,
 					subwindow_or_view:	Subwindow_Or_View
 				      }
@@ -615,8 +686,8 @@ herein
 	    kill_gui:			Void -> Void									# Stop gui and recycle  its state and Xserver-side resources.  This invokes exactly the same code as Gadget_To_Guiboss.kill_popup.
 	  }
 
-	also	Guiplan =  Gp_Widget_Type
-	also	Guipith =  Xi_Widget_Type										# Synonym for improved readability;
+	also	Guiplan =  Gp_Widget_Type										# Synonym for improved readability.
+#	also	Guipith =  Xi_Widget_Type										# Synonym for improved readability.
 
 	also
 	Make_Popup_Fn 													# Create popup pane on given window in given site.  Given site is adjusted to lie entirely within parent (if necessary) and returned.
@@ -667,12 +738,12 @@ herein
 	    =
 	      { id:				Id,									# Unique id to facilitate storing Gadget_To_Guiboss ports in indexed datastructures like red-black trees.
 		#
-		needs_redraw_gadget_request:	iuw::Id	-> Void,							# Inform guiboss_imp that the gadget's appearance needs refreshing. Without this, it may not get a redraw_gadget_request call.
+		needs_redraw_gadget_request:	Id	-> Void,							# Inform guiboss_imp that the gadget's appearance needs refreshing. Without this, it may not get a redraw_gadget_request call.
 															# This should be called any time the gadget's state changes in a way that would visibly affect its appearance. See Note[3] in   src/lib/x-kit/widget/gui/guiboss-imp.pkg
 															# 
 		redraw_gadget												# Update gadget appearance in response to a guiboss_to_gadget.redraw_gadget_request {...} call.
 		  :													# This can also be called spontaneously in the absence of a redraw_gadget_request call,
-		  { id:				iuw::Id,								# but if the gadget state gets updated frequently (say, 10,000 times/sec) this may overwhelm the display subsystem.
+		  { id:				Id,									# but if the gadget state gets updated frequently (say, 10,000 times/sec) this may overwhelm the display subsystem.
 		    site:			g2d::Box,								# This should be the 'site' value handed to Guiboss_To_Gadget.redraw_gadget_request: guiboss_imp uses this value to detect (and discard) stale redraw_gadget messages.
 		    displaylist:		gd::Gui_Displaylist,
 		    point_in_gadget:		Null_Or( g2d::Point -> Bool )						# Optional fn to decide if a mouseclick actually hit the gadget itself, or just somewhere near it in the screenspace assigned to it.
@@ -680,35 +751,58 @@ herein
 		  ->
 		  Void,
 
-		note_changed_gadget_activity:	{ id: iuw::Id, is_active:  Bool } -> Void,				# is_active is FALSE if gadget should be insensitive to input and perhaps drawn grayed-out.  Controlled by application logic.
+		request_keyboard_focus:		Id -> Void,								# This should result in us getting Guiboss_To_Gadget.note_keyboard_focus(TRUE)  from  src/lib/x-kit/widget/gui/guiboss-imp.pkg
+		release_keyboard_focus:		Id -> Void,								# This should result in us getting Guiboss_To_Gadget.note_keyboard_focus(FALSE) from  src/lib/x-kit/widget/gui/guiboss-imp.pkg
 
-		wake_me:			{ id: iuw::Id, options:	List(Wake_Me_Option) } -> Void,			# Used to schedule guiboss_to_gadget.wakeup calls.
+		note_changed_gadget_activity:	{ id: Id, is_active:  Bool } -> Void,					# is_active is FALSE if gadget should be insensitive to input and perhaps drawn grayed-out.  Controlled by application logic.
+
+		wake_me:			{ id: Id, options:	List(Wake_Me_Option) } -> Void,			# Used to schedule guiboss_to_gadget.wakeup calls.
+
 		make_popup:			Make_Popup_Fn,								# Create popup pane at given site.  Given site is adjusted to lie entirely within parent (if necessary) and returned.
 		kill_popup:			Void -> Void,								# Stop guipane containing this gadget (and all its descendent popups) and recycle  its state and Xserver-side resources.  This invokes exactly the same code as Client_To_Guiwindow.kill_gui.
 
 		note_global:			Crypt  -> Void,								# These three implement a general registry which gadget and app code can use as a blackboard for communication and coordination.
-		find_global:			String -> Null_Or(Crypt),
-		drop_global:			Crypt  -> Void,
+		find_global:			String -> Null_Or(Crypt),						# 'String' should be the Crypt.type field for the desired Crypt.
+		drop_global:			String -> Void,								# 'String' should be the Crypt.type field for the desired Crypt.  This is a no-op if no such Crypt is registered.
 
-		set_guipane_upperleft:	       (iuw::Id,   g2d::Point)   -> Void,					# Ask guiboss-imp to  change  value of Subwindow_Info.upperleft for guipane containing gadget.
-		pass_guipane_upperleft:	        iuw::Id									# Ask guiboss-imp to  pass    value of Subwindow_Info.upperleft for guipane containing gadget to given handler.
+		set_guipane_upperleft:	       (Id,   g2d::Point)   -> Void,						# Ask guiboss-imp to  change  value of Subwindow_Info.upperleft for guipane containing gadget.
+		pass_guipane_upperleft:	        Id									# Ask guiboss-imp to  pass    value of Subwindow_Info.upperleft for guipane containing gadget to given handler.
 						 -> Replyqueue								#
 						 -> (g2d::Point -> Void)						#
 						 -> Void,								# 
 
-		set_guipane_size:	       (iuw::Id,   g2d::Size)   -> Void,					# Ask guiboss-imp to  change  value of Subwindow_Info.size for guipane containing gadget.
-		pass_guipane_size:	        iuw::Id									# Ask guiboss-imp to  pass    value of Subwindow_Info.size for guipane containing gadget to given handler.
+		set_guipane_size:	       (Id,   g2d::Size)   -> Void,						# Ask guiboss-imp to  change  value of Subwindow_Info.size for guipane containing gadget.
+		pass_guipane_size:	        Id									# Ask guiboss-imp to  pass    value of Subwindow_Info.size for guipane containing gadget to given handler.
 						 -> Replyqueue								#
 						 -> (g2d::Size -> Void)							#
 						 -> Void,								# 
 
-		get_guipiths:			Void -> im::Map( Xi_Topwindow_Info ),					# Export abstract version of guiboss_imp's current set of running guis (Guipane instances).
-		install_updated_guipiths:	im::Map( Xi_Topwindow_Info ) -> Void					# Update guiboss_imp's running gui per supplied Guipith instances, which should be a suitably edited version of return value from get_guipiths.  See Note[1] in src/lib/x-kit/widget/gui/translate-guipane-to-guipith.pkg
-															# install_updated_guipiths limitations:
+		shut_down_guiboss:		Void -> Void,								# Set Client_To_Guiboss.guiboss_done' and then terminate guiboss_imp microthread.  Nothing else.
+
+		app_to_compileimp:		a2c::App_To_Compileimp,
+
+		get_guipiths:			Void -> (Int, idm::Map( Xi_Hostwindow_Info )),				# Export abstract version of guiboss_imp's current set of running guis (Guipane instances). 'Int' is gui version, needed to trap bad concurrent updates.  
+		install_updated_guipiths:	(Int, idm::Map( Xi_Hostwindow_Info )) -> Bool				# Update guiboss_imp's running gui per supplied Guipith instances, which should be a suitably edited version of return value from get_guipiths.  See Note[1] in src/lib/x-kit/widget/gui/translate-guipane-to-guipith.pkg
+															#
+															# The Int values are Guiboss_State.gui_update_count: If the value supplied with install_updated_guipiths does not match, guiboss returns FALSE and does nothing, and client must
+															# start the get_guipiths -> mutate -> install_updated_guipiths.  This is insurance against two concurrent clients attempting overlapping updates to the GUI topology.
+															#
+															# The idiom to use here is:
+															#
+															#     do_while_not {.
+															#         (get_guipiths ()) -> (gui_version, guipiths);			# Get current GUI layout.
+															#         guipiths =  gtj::guipith_map (guipiths, options);		# Modify it to produce new GUI layout.
+															#         install_updated_guipiths (gui_version, guipiths);		# Install new GUI layout.
+															#     };								# If someone else modified the current GUI layout out from under us, retry.
+															#
+															# Worked examples of doing this may be found in (e.g.)
+															#     src/lib/x-kit/widget/edit/fundamental-mode.pkg
+															#
+															# Limitations of install_updated_guipiths:
 															#  o  Revised guipane may move widgets around but no individual widget may be present more than once. (Ditto for all other guipith entities.)  This restruction is fundamental to the design.
 															#  o  Popup hierarchy may not be modified.  Use make_popup()/kill_popup() for that.  This restriction is pure implementation laziness: we'll presumbly lift it eventually.
 															#  o  Tabports and Scrollports may not be modified beyond substituting widgets.      This restriction is pure implementation laziness: we'll presumbly lift it eventually.
-															# As a convenience, XI_ROW, XI_COL and XI_GRID instances may be freely created and inserted. (In general guipith values may be only re-arranged, outside of XI_GUIPLAN.)
+															# As a convenience, XI_ROW, XI_COL and XI_GRID instances may be freely created and inserted. (In general guipith values may be only re-arranged or dropped, outside of XI_GUIPLAN.)
 # XXX QUERO FIXME I think maybe we should have call(s) here to subscribe to events like garbage collection, disk-full, low-on-ram etc.
 # Having method(s) here to register a fn to be called for a given event is a simple, effective way to implement that functionality.
 # One could argue that such events have little to do with GUIs and hence should not be the purvue of guiboss-imp, but guiboss-imp
@@ -731,7 +825,7 @@ herein
 	    #
 	    g:				Gadget_To_Guiboss,
 
-	    note_widget_layout_hint:	{ id:			iuw::Id,
+	    note_widget_layout_hint:	{ id:			Id,
 					  widget_layout_hint:	Widget_Layout_Hint
 					}
 					-> Void										# 
@@ -742,7 +836,7 @@ herein
 	also
 	Guiboss_To_Gadget												# 
 	  =
-	    {   id:			iuw::Id,									# Unique id to facilitate storing Guiboss_To_Gadget ports in indexed datastructures like red-black trees.
+	    {   id:			Id,										# Unique id to facilitate storing Guiboss_To_Gadget ports in indexed datastructures like red-black trees.
 		doc:			String,
 		#
 # These two may be a mistake,
@@ -753,7 +847,7 @@ herein
 
 		#
 		initialize_gadget: {											# Before the first redraw_gadget_request call every widget-imp/sprite-imp/object-imp gets this call from   src/lib/x-kit/widget/gui/guiboss-imp.pkg
-				      #											# If its appearance has changed it should call note_changed_gadget_foreground() from   src/lib/x-kit/widget/gui/gadget-to-guiboss.pkg
+				      #											# If its appearance has changed it should call needs_redraw_gadget_request().
 				      site:		g2d::Box,							# Window rectangle in which to draw.
 				      theme:		wt::Widget_Theme,
 				      #
@@ -781,64 +875,18 @@ herein
 					    Void,
 
 		wakeup:			    {										# These calls are set up by calling gadget_to_guiboss.wake_me[].
-					      #										# 
-					      frame_number:		Int,						# 1,2,3,... Purely for convenience of widget, guiboss-imp makes no use of this.
-					      site:			g2d::Box,					# Window rectangle in which to draw.
-					      duration_in_seconds:	Float,						# If state has changed look-imp should call redraw_gadget() before this time is up. Also useful for motionblur.
-					      gadget_mode:		Gadget_Mode,
+					      wakeup_arg:		Wakeup_Arg,					# 
 					      wakeup_fn:		Wakeup_Arg -> Void 				# Gadget thunk registered via gadget_to_guiboss.wake_me[].
 					    }
 					    ->
 					    Void,
 
 
-		note_mouse_drag_event:	    {										# Intended to support dragging sliders and scrollbar thumbs etc.  Not intended for drag-and-drop.
-					      phase:		    Drag_Phase,						# We guarantee that the gadget that sees the OPEN (downclick) for a drag also sees all the DRAGs and the DONE for that drag, and that no other gadget sees drag or transit events during that time period.
-					      button:	  	    evt::Mousebutton,					# Mouse button lack clicked down. Range is 1-13 or more.  Typically 1=left, 2=middle, 3=right, 4=mousewheel-forward, 5=mousewheel-back.
-					      modifier_keys_state:  evt::Modifier_Keys_State,				# State of the modifier keys (shift, ctrl...).
-					      mousebuttons_state:   evt::Mousebuttons_State,				# State of mouse buttons as a bool record.
-					      event_point:	    g2d::Point,						# 'event_point' is the current   point the window's coordinate system.
-					      start_point:	    g2d::Point,						# 'start_point' is the downclick point the window's coordinate system.
-					      last_point:	    g2d::Point,						# 'last_point'  is the event_point from the preceding ntoe_mouse_drag_event call.
-					      site:		    g2d::Box,						# Gadget's assigned area in window coordinates.
-					      theme:		    wt::Widget_Theme					#
-					    }										# DONE is sent when last mousebutton is released, no matter where that happnes.
-					    -> Void,									# Normally OPEN and DRAG are sent if they occur within the gadget's assigned site.
-															# This can be restricted to a sub-area of the site using point_in_gadget -- src/lib/x-kit/widget/gui/gadget-to-guiboss.pkg
-
-		note_mouse_transit:	    {										# Mouse entering or leaving window site assigned to gadget.  Intended to support tooltips, active-widget highlighting etc. Note that buttons are always all up in a mouse transit -- otherwise it is a mouse-drag event.
-					      transit:		    Gadget_Transit,
-					      modifier_keys_state:  evt::Modifier_Keys_State,				# State of the modifier keys (shift, ctrl...).
-					      event_point:	    g2d::Point,						# 'event_point'  is the click point the window's coordinate system.
-					      site:		    g2d::Box,						# Gadget's assigned area in window coordinates.
-					      theme:		    wt::Widget_Theme					#
-					    }										# CAME/MOVE/LEFT are never sent during drag operations.
-					    -> Void,									# Normally CAME/MOVE  are sent if they occur within the gadget's assigned site.
-															# This can be restricted to a sub-area of the site using point_in_gadget -- src/lib/x-kit/widget/gui/gadget-to-guiboss.pkg
-
-		note_key_event:	    	   {										# Note keyboard KEY_PRESS or KEY_RELEASE at 'point'. Intended for textfield text entry etc.
-					      key_event:	    Key_Event,						# KEY_PRESS or KEY_RELEASE.
-					      keycode:		    evt::Keycode,					# Keyboard key just pressed/released.
-					      keysym:		    evt::Keysym,					# Keysym  of the key.  This is not present in the X version of Key_Kevtinfo; added for widget-code convenience.
-					      string:		    String,						# Ascii  for the key.  This is not present in the X version of Key_Kevtinfo; added for widget-code convenience.
-					      modifier_keys_state:  evt::Modifier_Keys_State,				# State of the modifier keys (shift, ctrl...).
-					      mousebuttons_state:   evt::Mousebuttons_State,				# State of mouse buttons as a bool record.
-					      event_point:	    g2d::Point,						# 'point'  is the click point the window's coordinate system.
-					      site:		    g2d::Box,						# Gadget's assigned area in window coordinates.
-					      theme:		    wt::Widget_Theme
-					    }
-					    -> Void,
-
-		note_mousebutton_event:	    {										# Note mousebutton click at 'point'.  Intended for pushbuttons etc.
-					      mousebutton_event:    Mousebutton_Event,					# MOUSEBUTTON_PRESS or MOUSEBUTTON_RELEASE. These go to the gadget under the mouse pointer, hence a gadget may not see both if the pointer moves between them. Use note_mouse_drag_event if this is a problem.
-					      mouse_button:	    evt::Mousebutton,					# Mouse button just clicked down. Range is 1-13 or more.  Typically 1=left, 2=middle, 3=right, 4=mousewheel-forward, 5=mousewheel-back.
-					      modifier_keys_state:  evt::Modifier_Keys_State,				# State of the modifier keys (shift, ctrl...).
-					      mousebuttons_state:   evt::Mousebuttons_State,				# State of mouse buttons as a bool record, BEFORE THE EVENT -- so a MOUSEBUTTON_RLEASE will always show at least one button down.
-					      event_point:	    g2d::Point,						# 'point'  is the click point the window's coordinate system.
-					      site:		    g2d::Box,						# Gadget's assigned area in window coordinates.
-					      theme:		    wt::Widget_Theme					#
-					    }										# Normally MOUSEBUTTON_PRESS or MOUSEBUTTON_RELEASE are sent if they occur within the gadget's assigned site.
-					    -> Void,									# This can be restricted to a sub-area of the site using point_in_gadget -- src/lib/x-kit/widget/gui/gadget-to-guiboss.pkg
+		note_keyboard_focus:	    (Bool, wt::Widget_Theme)	-> Void, 					# TRUE means we now have keyboard focus, FALSE means we no longer have it.  Allows gadget to visually display focus locus, typically via a black outline and/or dis/abling cursor. See also Gadget_To_Guiboss.request_keyboard_focus
+		note_mouse_drag_event:	    Note_Mouse_Drag_Event_Arg	-> Void,					# Intended to support dragging sliders and scrollbar thumbs etc.  Not intended for drag-and-drop.
+		note_mouse_transit:	    Note_Mouse_Transit_Arg	-> Void,					# Mouse entering or leaving window site assigned to gadget.  Intended to support tooltips, active-widget highlighting etc. Note that buttons are always all up in a mouse transit -- otherwise it is a mouse-drag event.
+		note_key_event:	    	    Note_Key_Event_Arg		-> Void,					# Note keyboard KEY_PRESS or KEY_RELEASE at 'point'. Intended for textfield text entry etc.
+		note_mousebutton_event:	    Note_Mousebutton_Event_Arg	-> Void,					# Note mousebutton click at 'point'.  Intended for pushbuttons etc.
 
 		die:			    Void -> Void								# Equivalent to firing end_gun', but affects only one gadget.
 	      }
@@ -846,7 +894,7 @@ herein
 	also
 	Guiboss_To_Widget
 	  =
-	  { id:				iuw::Id,									# Unique id to facilitate storing guiboss_to_widget instances in indexed datastructures like red-black trees.
+	  { id:				Id,										# Unique id to facilitate storing guiboss_to_widget instances in indexed datastructures like red-black trees.
 	    doc:			String,
 	    g:				Guiboss_To_Gadget,								# We're extending this generic widget/sprite/object interface with widget-specific functionality.
 	    #
@@ -896,7 +944,7 @@ herein
 	also
 	Gadget_Imp_Info													# The per-gadget information we track.  (This is private to guiboss-imp.)
 	  =														# Here 'gadget' refers indifferently to widget-imps, sprite-imps and object-imps.
-	  { site:			Ref( g2d::Box ),								# Where to draw this gadget, in topwindow coordinates.
+	  { site:			Ref( g2d::Box ),								# Where to draw this gadget, in hostwindow coordinates.
 	    subwindow_or_view:		Ref(Subwindow_Or_View),
 	    #
 	    guiboss_to_gadget:		Guiboss_To_Gadget,								# We use this to make requests of gadgets.
@@ -922,11 +970,11 @@ herein
 					    )
 	  }  
 
-	also	Spritespace_Imps    = Ref( im::Map( Spritespace_Imp_Info    ) )						# 
-	also	Objectspace_Imps    = Ref( im::Map( Objectspace_Imp_Info    ) )						#
-	also	Widgetspace_Imps    = Ref( im::Map( Widgetspace_Imp_Info    ) )						#
-	also	Gadget_Imps         = Ref( im::Map(      Gadget_Imp_Info    ) )						# Index is  (iuw::id_to_int guiboss_to_gadget.id).
-	also	Widget_Layout_Hints = Ref( im::Map( Widget_Layout_Hint	    ) )						# Index is  (iuw::id_to_int guiboss_to_gadget.id).
+	also	Spritespace_Imps    = Ref( idm::Map( Spritespace_Imp_Info    ) )					# 
+	also	Objectspace_Imps    = Ref( idm::Map( Objectspace_Imp_Info    ) )					#
+	also	Widgetspace_Imps    = Ref( idm::Map( Widgetspace_Imp_Info    ) )					#
+	also	Gadget_Imps         = Ref( idm::Map(      Gadget_Imp_Info    ) )					# Index is  guiboss_to_gadget.id.
+	also	Widget_Layout_Hints = Ref( idm::Map( Widget_Layout_Hint	     ) )					# Index is  guiboss_to_gadget.id.
 
 	also
 	Guipane =	      { id:				Id,
@@ -934,8 +982,8 @@ herein
 				guiboss_to_widgetspace: 	Guiboss_To_Widgetspace,
 				widget_to_guiboss:	 	Widget_To_Guiboss,
 				space_to_gui:			Space_To_Gui,
-				topwindow:			gtg::Guiboss_To_Topwindow,				# The topwindow on which to draw our widgets. This represents the X-server window holding our tree of running guis.
-				subwindow_info:			Subwindow_Data,						# The subwindow on which this running gui is drawn. This will be a sub-rectangle of the topwindow, except for the root running gui of the popups tree. It hosts the actual backing pixmap on which rg_widget will be drawn first.
+				hostwindow:			gtg::Guiboss_To_Hostwindow,				# The hostwindow on which to draw our widgets. This represents the X-server window holding our tree of running guis.
+				subwindow_info:			Subwindow_Data,						# The subwindow on which this running gui is drawn. This will be a sub-rectangle of the hostwindow, except for the root running gui of the popups tree. It hosts the actual backing pixmap on which rg_widget will be drawn first.
 				needs_layout_and_redraw:	Ref( Bool )
 			      }
 	also
@@ -964,7 +1012,7 @@ herein
  	    #
 	    is_visible:			Ref( Bool )									# 
 															# This value is implied by *Rg_Tabport.visible_tab but as a convenience we maintain this redundant explicit version.
-															# We need this so that   update_offscreen_parent_pixmaps_and_then_topwindow()   in   src/lib/x-kit/widget/gui/guiboss-imp.pkg
+															# We need this so that   update_offscreen_parent_pixmaps_and_then_hostwindow()   in   src/lib/x-kit/widget/gui/guiboss-imp.pkg
 															# can know when to stop propagating widget updates up the tabport tree.
 	  }
 
@@ -1015,7 +1063,8 @@ herein
 	  { id:				Id,
 	    widgets:			List( Rg_Widget_Type ),								# The list of widgets to be laid out and displayed in this row.
 	    widget_layout_hint:		Ref( Widget_Layout_Hint ),							# Derived ultimately from Rg_Widget layout hints.  This gets computed and set in   src/lib/x-kit/widget/gui/guiboss-widget-layout.pkg
-	    site:			Ref(g2d::Box)									# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+	    site:			Ref( g2d::Box ),								# Current assigned site on pixmap.  Set by  assign_sites_to_all_widgets()     in   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+	    first_cut:			Null_Or( Float )								# Normally NULL; if non-NULL (and at least two widgets in row/col), gives fraction of row/col space to allocate to first widget, overriding the regular bottom-up sizing mechanism.
 	  }
 
 	also
@@ -1217,9 +1266,9 @@ herein
 	      }
 	  ;
 
-	Topwindow_Info
+	Hostwindow_Info
 	  =
-	  { guiboss_to_topwindow:			gtg::Guiboss_To_Topwindow,
+	  { guiboss_to_hostwindow:			gtg::Guiboss_To_Hostwindow,
 	    current_frame_number:			Ref(Int),							# We count frames for convenience of widgets and debugging.
 	    seconds_per_frame:				Ref(Float),							# Primarily so widgets can do motion blurring if they wish.
 
@@ -1235,22 +1284,20 @@ herein
 	    subwindow_info:				Ref( Null_Or( Subwindow_Data ) )
 	  };
 
-	Globals =  Ref( sm::Map(Crypt) );
-
-	Guiboss_State													# Holds all nonephemeral mutable state maintained by package.
+	Guiboss_State													# 
 	  =
 	  {
-	    topwindows:				Ref( im::Map( Topwindow_Info ) ),					# Each call to client_to_guiboss.make_topwindow() adds one entry to this.  Indexed by guiboss_to_topwindow.id.
+	    gui_update_count:			Ref( Int ),								# Counts the number of times that install_updated_guipiths() has been called (or gui topology otherwise modified).
+	    hostwindows:				Ref( idm::Map( Hostwindow_Info ) ),					# Each call to client_to_guiboss.make_hostwindow() adds one entry to this.  Indexed by guiboss_to_hostwindow.id.
 	    mouse_is:				Ref( Mouse_Is ),							# Support for mouse drag operations.
 	    last_button_changed:		Ref( evt::Mousebutton ),						# So we can tell drag_fn clients which button is dragging. (evt::Motion_Xevtinfo values do not include a 'button' arg, unlike evt::Button_Xevtinfo values.)
+	    keyboard_focus:			Ref( Null_Or( Gadget_Imp_Info ) ),					# Gadget currently holding keyboard focus, if any.
 	    #
-	    gadget_imps:			Gadget_Imps,								# Holds info on our Gadget_Imp_Info        instances -- basically, all running widgets, sprites and objects in topwindow.
-	    widget_layout_hints:		Widget_Layout_Hints,							# Holds         our Widget_Layout_Hint     instances for all widget-imp.pkg instances     for this topwindow.
-	    spritespace_imps:			Spritespace_Imps,							# Holds info on our Guiboss_To_Spritespace instances -- all spritespace-imp.pkg instances for this topwindow.
-	    objectspace_imps:			Objectspace_Imps,							# Holds info on our Guiboss_To_Objectspace instances -- all objectspace-imp.pkg instances for this topwindow.
-	    widgetspace_imps:			Widgetspace_Imps,							# Holds info on our Guiboss_To_Widgetspace instances -- all widgetspace-imp.pkg instances for this topwindow.
-	    #
-	    globals:				Globals									# For Gadget_To_Guiboss.note_global, .find_global and .drop_global.   Holds  gadget_to_editboss::GADGET_TO_EDITBOSS  and other global values whose types we don't want to import into guiboss_imp.
+	    gadget_imps:			Gadget_Imps,								# Holds info on our Gadget_Imp_Info        instances -- basically, all running widgets, sprites and objects in hostwindow.
+	    widget_layout_hints:		Widget_Layout_Hints,							# Holds         our Widget_Layout_Hint     instances for all widget-imp.pkg instances     for this hostwindow.
+	    spritespace_imps:			Spritespace_Imps,							# Holds info on our Guiboss_To_Spritespace instances -- all spritespace-imp.pkg instances for this hostwindow.
+	    objectspace_imps:			Objectspace_Imps,							# Holds info on our Guiboss_To_Objectspace instances -- all objectspace-imp.pkg instances for this hostwindow.
+	    widgetspace_imps:			Widgetspace_Imps							# Holds info on our Guiboss_To_Widgetspace instances -- all widgetspace-imp.pkg instances for this hostwindow.
 	  };
     };
 end;
@@ -1302,6 +1349,6 @@ end;
 ##########################################################################
 
 
-## Original code by Jeff Prothero Copyright (c) 2014-2014,
+## Original code by Jeff Prothero Copyright (c) 2014-2015,
 ## released per terms of SMLNJ-COPYRIGHT.
 

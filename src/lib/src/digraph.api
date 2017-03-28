@@ -1,6 +1,26 @@
 ## digraph.api
 #
 # API for simple, general-purpose fully-persistent graphs.
+#
+# Digraph differs from Digraphxy mainly by supporting subgraphs
+# at the cost of not supporting type variables on Node and Tag
+# -- instead we use "the Exception hack" to store arbitrary
+# values on nodes and edges.
+#
+# Each Node and Tag is issued a unique Int id when created.
+# Two Nodes are equal iff they have the same 'id'.
+# Two Tags  are equal iff they have the same 'id'.
+# Two Edges are equal iff their Nodes and Tags are equal.
+#
+# NB: We could avoid the Exception hack by making digraph.pkg
+# a generic, but then every graph algorithm would need to be
+# a generic too, and in general we'd need to re-instantiate
+# them all for each new instantiation of digraph-g.pkg.
+#     That sounds like a continuing pain in the ass which
+# would discourage use of graphs.
+#     I'd much rather have a couple of generic digraph types
+# (digraph.pkg + digraphxy.pkg) so that all the relevant graph
+# algorithms can be precompiled and ready to go.
 
 # Compiled by:
 #     src/lib/std/standard.lib
@@ -11,39 +31,59 @@
 #     src/lib/graph/oop-digraph.api
 
 # This api is implemented in:
+#
 #     src/lib/src/digraph.pkg
-
+#
 api Digraph {
     #
-    Other = Exception;								# We support the usual hack of using Exception as an extensible datatype to associate arbitrary values with Edges and Tags.
+    Other = Exception;							# We support the usual hack of using Exception as an extensible datatype to associate arbitrary values with Edges and Tags.
 
     Graph;
     Node;
     Tag;
 
-    Tagless_Edge  = (Node, Node);
+    Datum = NONE
+	  | INT    Int
+	  | ID     Id
+	  | FLOAT  Float
+	  | STRING String
+	  | OTHER  Other
+	  | TBASE  Exception						# Making Datum and Graph mutually recursive would be messy, so we use the exception hack instead.
+	  ;
+
+    Tagless_Edge  = (Node,      Node);
     Edge 	  = (Node, Tag, Node);
 
     package ts: Set;							# Sets of Tagless_Edges.	Set is from   src/lib/src/set.api
     package es: Set;							# Sets of Edges.		Set is from   src/lib/src/set.api
 
     make_node:		Void	-> Node;				# Create an Node.
+    make_int_node:	Int	-> Node;				# Create an Node with an associated Int    value, retrievable via node_int.
+    make_id_node:	Id	-> Node;				# Create an Node with an associated Id     value, retrievable via node_id.
     make_string_node:	String	-> Node;				# Create an Node with an associated String value, retrievable via node_string.
     make_float_node:	Float	-> Node;				# Create an Node with an associated Float  value, retrievable via node_float.
-    make_graph_node:	Graph	-> Node;				# Create an Node with an associated Other  value, retrievable via node_graph.
+    make_graph_node:	Graph	-> Node;				# Create an Node with an associated Graph  value, retrievable via node_graph.
     make_other_node:	Other	-> Node;				# Create an Node with an associated Other  value, retrievable via node_other. This allows arbitrary values to be associated with the Node.
 
-    node_string:	Node   -> Null_Or(String);			# Return String associated with given Node, if any, else NULL.
-    node_float:		Node   -> Null_Or(Float);			# Return Float  associated with given Node, if any, else NULL.
-    node_graph:		Node   -> Null_Or(Graph);			# Return Graph  associated with given Node, if any, else NULL.
-    node_other:		Node   -> Null_Or(Other);			# Return Other  associated with given Node, if any, else NULL.
+    node_datum:		Node	-> Datum; 				# Return Datum  associated with given Node.
+    node_int:		Node	-> Null_Or(Int);			# Return Int    associated with given Node, if any, else NULL.
+    node_id:		Node	-> Null_Or(Id);				# Return Id     associated with given Node, if any, else NULL.
+    node_string:	Node	-> Null_Or(String);			# Return String associated with given Node, if any, else NULL.
+    node_float:		Node	-> Null_Or(Float);			# Return Float  associated with given Node, if any, else NULL.
+    node_graph:		Node	-> Null_Or(Graph);			# Return Graph  associated with given Node, if any, else NULL.
+    node_other:		Node	-> Null_Or(Other);			# Return Other  associated with given Node, if any, else NULL.
 
     make_tag:		Void	-> Tag;					# Create an Tag.
+    make_int_tag:	Int	-> Tag;					# Create an Tag with an associated Int    value, retrievable via tag_int.
+    make_id_tag:	Id	-> Tag;					# Create an Tag with an associated Id     value, retrievable via tag_id.
     make_string_tag:	String	-> Tag;					# Create an Tag with an associated String value, retrievable via tag_string.
     make_float_tag:	Float	-> Tag;					# Create an Tag with an associated Float  value, retrievable via tag_float.
     make_graph_tag:	Graph	-> Tag;					# Create an Tag with an associated Other  value, retrievable via tag_graph.
     make_other_tag:	Other	-> Tag;					# Create an Tag with an associated Other  value, retrievable via tag_other. This allows arbitrary values to be associated with the Tag.
 
+    tag_datum:		Tag   -> Datum;					# Return Datum  associated with given Tag.
+    tag_int:		Tag   -> Null_Or(Int);				# Return Int    associated with given Tag, if any, else NULL.
+    tag_id:		Tag   -> Null_Or(Id);				# Return Id     associated with given Tag, if any, else NULL.
     tag_string:		Tag   -> Null_Or(String);			# Return String associated with given Tag, if any, else NULL.
     tag_float:		Tag   -> Null_Or(Float);			# Return Float  associated with given Tag, if any, else NULL.
     tag_graph:		Tag   -> Null_Or(Graph);			# Return Graph  associated with given Tag, if any, else NULL.
@@ -52,10 +92,10 @@ api Digraph {
     empty_graph:	Graph;
 
     put_tagless_edge:	(Graph, Tagless_Edge) -> Graph;			# Store  a Tagless_Edge  into the Graph, returning the updated Graph. The input Graph is unchanged.
-    put_edge:		(Graph, Edge        ) -> Graph;			# Store  a Edge into the Graph, returning the updated Graph. The input Graph is unchanged.
+    put_edge:		(Graph, Edge        ) -> Graph;			# Store  a         Edge  into the Graph, returning the updated Graph. The input Graph is unchanged.
 
     drop_tagless_edge:	(Graph, Tagless_Edge ) -> Graph;		# Remove a Tagless_Edge  from the Graph, returning the updated Graph. The input Graph is unchanged.
-    drop_edge:		(Graph, Edge) -> Graph;				# Remove a Edge from the Graph, returning the updated Graph. The input Graph is unchanged.
+    drop_edge:		(Graph, Edge) -> Graph;				# Remove an        Edge  from the Graph, returning the updated Graph. The input Graph is unchanged.
 
 
     get_tagless_edges:	 Graph        ->         ts::Set ;		# Get all Tagless_Edges  in Graph.  User can iterate via ts::apply etc or do set operations via ts::union etc -- see src/lib/src/set.api
@@ -64,6 +104,7 @@ api Digraph {
     get_tagless_edges2:	(Graph, Node) -> Null_Or(ts::Set);		# Get all Tagless_Edges  in Graph with given Node in second slot.
     #
     has_tagless_edge:	(Graph, Tagless_Edge) -> Bool;			# See if given Tagless_Edge is in Graph.
+    has_edge:		(Graph, Edge) -> Bool;				# See if given         Edge is in Graph.
 
     get_edges:		 Graph        ->         es::Set ;		# Get all Edges  in Graph.    User can iterate via es::apply etc or do set operations via es::union etc -- see src/lib/src/set.api.
     #
@@ -71,11 +112,10 @@ api Digraph {
     get_edges2:		(Graph, Tag ) -> Null_Or(es::Set);		# Get all Edges in Graph with given Node in second slot.
     get_edges3:		(Graph, Node) -> Null_Or(es::Set);		# Get all Edges in Graph with given Node in third  slot.
     #
-    get_edges12:	(Graph, Node, Tag ) -> Null_Or(es::Set);	# Get all Edges in Graph with given Nodes in first  and second slots.
-    get_edges13:	(Graph, Node, Node) -> Null_Or(es::Set);	# Get all Edges in Graph with given Nodes in first  and third  slots.
-    get_edges23:	(Graph, Tag,  Node) -> Null_Or(es::Set);	# Get all Edges in Graph with given Nodes in second and third  slots.
+    get_edges12:	(Graph, Node, Tag ) -> Null_Or(es::Set);	# Get all Edges in Graph with given Node, Tag in first  and second slots.
+    get_edges13:	(Graph, Node, Node) -> Null_Or(es::Set);	# Get all Edges in Graph with given Node,Node in first  and third  slots.
+    get_edges23:	(Graph, Tag,  Node) -> Null_Or(es::Set);	# Get all Edges in Graph with given  Tag,Node in second and third  slots.
     #
-    has_edge:		(Graph, Edge) -> Bool;				# See if given Edge is in Graph.
 
     nodes_apply:	 Graph -> (Node -> Void) -> Void;		# Apply given fn once per Node for all Nodes in Graph.  This iterates over all Edges in the Graph.
     tags_apply:		 Graph -> (Tag  -> Void) -> Void;		# Apply given fn once per Tag  for all Tags  in Graph.  This iterates over all Edges in the Graph.
@@ -83,5 +123,5 @@ api Digraph {
 };									# api Graph
 
 
-## Original code by Jeff Prothero Copyright (c) 2014-2014,
+## Original code by Jeff Prothero Copyright (c) 2014-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

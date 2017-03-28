@@ -56,8 +56,7 @@ stipulate
 
     package gt  =  guiboss_types;				# guiboss_types			is from   src/lib/x-kit/widget/gui/guiboss-types.pkg
 
-#   package os  =  guiboss_to_spritespace;			# guiboss_to_spritespace	is from   src/lib/x-kit/widget/space/sprite/guiboss-to-spritespace.pkg
-    package pp  =  standard_prettyprint_mill;			# standard_prettyprint_mill	is from   src/lib/prettyprint/big/src/standard-prettyprint-mill.pkg
+    package pp  =  standard_prettyprinter;			# standard_prettyprinter	is from   src/lib/prettyprint/big/src/standard-prettyprinter.pkg
     tracefile   =  "widget-unit-test.trace.log";
 herein
 
@@ -70,9 +69,6 @@ herein
     package spritespace_imp
     :       Spritespace_Imp											# Spritespace_Imp		is from   src/lib/x-kit/widget/space/sprite/spritespace-imp.api
     {
-	#
-#	include package   guiboss_to_spritespace;								# guiboss_to_spritespace	is from   src/lib/x-kit/widget/space/sprite/guiboss-to-spritespace.pkg
-	#
 	Spritespace_State											# Holds all nonephemeral mutable state maintained by shape.
 	  =
 	  { id:		Id,
@@ -103,7 +99,7 @@ herein
 
 
 	Runstate =  {												# These values will be statically globally visible throughout the code body for the imp.
-		      me:		Spritespace_State,							# State which is preserved across imp shutdown/restart cycles.
+		      me:		Spritespace_State,							# 
 		      options:		List(gt::Spritespace_Option),
 		      imports:		Imports,								# Imps to which we send requests.
 		      to:		Replyqueue,								# The name makes   foo::pass_something(imp) to {. ... }   syntax read well.
@@ -128,7 +124,7 @@ herein
 		  #
 		  runstate as
 		  {												# These values will be statically globally visible throughout the code body for the imp.
-		    me:			Spritespace_State,							# State which is preserved across imp shutdown/restart cycles.
+		    me:			Spritespace_State,							# 
 		    options:		List(gt::Spritespace_Option),
 		    imports:		Imports,								# Imps to which we send requests.
 		    to:			Replyqueue,								# The name makes   foo::pass_something(imp) to {. ... }   syntax read well.

@@ -92,8 +92,8 @@ package   expand_oop_syntax2
 
 
 										# raw_syntax				is from   src/lib/compiler/front/parser/raw-syntax/raw-syntax.pkg
-										# symbolmapstack				is from   src/lib/compiler/front/typer-stuff/symbolmapstack/symbolmapstack.pkg
-										# prettyprinter				is from   src/lib/prettyprint/big/src/prettyprinter.pkg
+										# symbolmapstack			is from   src/lib/compiler/front/typer-stuff/symbolmapstack/symbolmapstack.pkg
+										# standard_prettyprinter		is from   src/lib/prettyprint/big/src/standard-prettyprinter.pkg
 									 	# unparse_raw_syntax			is from   src/lib/compiler/front/typer/print/unparse-raw-syntax.pkg
     fun unparse_raw_declaration
 	(
@@ -105,7 +105,7 @@ package   expand_oop_syntax2
 	if *debugging
 	    print "\n";
 	    print msg;
-	    pp = standard_prettyprint_mill::make_standard_prettyprint_mill "/dev/stdout" [];
+	    pp = standard_prettyprinter::make_standard_prettyprinter_into_file "/dev/stdout" [];
 
 	    pps = pp.pp;
 
@@ -129,7 +129,7 @@ package   expand_oop_syntax2
 	if *debugging
 	    print "\n";
 	    print msg;
-	    pp = standard_prettyprint_mill::make_standard_prettyprint_mill "/dev/stdout" [];
+	    pp = standard_prettyprinter::make_standard_prettyprinter_into_file "/dev/stdout" [];
 
 	    pps = pp.pp;
 
@@ -154,7 +154,7 @@ package   expand_oop_syntax2
 	if *debugging
 	    print "\n";
 	    print msg;
-	    pp = standard_prettyprint_mill::make_standard_prettyprint_mill "/dev/stdout" [];
+	    pp = standard_prettyprinter::make_standard_prettyprinter_into_file "/dev/stdout" [];
 
 	    pps = pp.pp;
 
@@ -195,15 +195,15 @@ package   expand_oop_syntax2
           declaration:   	raw_syntax::Declaration,
           symbolmapstack:         symbolmapstack::Symbolmapstack,
 	  source_code_region:   line_number_db::Source_Code_Region,
-          per_compile_data as
+          per_compile_stuff as
             {
               error_fn,
               ...
-            }:			typer_junk::Per_Compile_Data
+            }:			typer_junk::Per_Compile_Stuff
         )
 	=
 	{
-	    (oop_collect_methods_and_fields  (declaration, symbolmapstack, source_code_region, per_compile_data))
+	    (oop_collect_methods_and_fields  (declaration, symbolmapstack, source_code_region, per_compile_stuff))
                 ->
                 { fields,
                   methods_and_messages,						# Definitions of 'method' and 'message' methods.
@@ -238,7 +238,7 @@ package   expand_oop_syntax2
                 where 
 		    fun field_to_offset' ([], field_num)
 			    =>
-			    raise exception FAIL
+			    raise exception DIE
 			      ( sprintf	
                                 "expand-oop-syntax.pkg: field_to_offset': error: Class %s has no field %s"
                                 (symbol::name class_name)
@@ -320,7 +320,7 @@ package   expand_oop_syntax2
 
 			filter_fn _
 			    =>
-			    raise exception FAIL "expand-oop-syntax.pkg: Internal compiler error.";
+			    raise exception DIE "expand-oop-syntax.pkg: Internal compiler error.";
 		    end;
 		end;
 # XXX BUGGO FIXME  Need to pad this to at least length 2 in
@@ -338,7 +338,7 @@ package   expand_oop_syntax2
 
 			filter_fn _
 			    =>
-			    raise exception FAIL "expand-oop-syntax.pkg: Internal compiler error.";
+			    raise exception DIE "expand-oop-syntax.pkg: Internal compiler error.";
 		    end;
 		end;
 
@@ -353,7 +353,7 @@ package   expand_oop_syntax2
 
 			convert_to_normal_function _
 			    =>
-			    raise exception FAIL "expand-oop-syntax.pkg: convert_to_normal_function: Internal compiler error.";
+			    raise exception DIE "expand-oop-syntax.pkg: convert_to_normal_function: Internal compiler error.";
 		    end;
 		end;	
 
@@ -590,7 +590,7 @@ package   expand_oop_syntax2
 
 			extract_name_of_symbol_from_path  _
 			    =>
-			    raise exception FAIL "expand-oop-syntax.pkg: extract_name_of_symbol_from_path: Internal compiler error";	# XXX BUGGO FIXME what's the correct error protocol?
+			    raise exception DIE "expand-oop-syntax.pkg: extract_name_of_symbol_from_path: Internal compiler error";	# XXX BUGGO FIXME what's the correct error protocol?
 		    end;
 
 		    #	
@@ -608,7 +608,7 @@ package   expand_oop_syntax2
 
 			extract_name_of_symbol_from_patterns  []
 			    =>
-			    raise exception FAIL "expand-oop-syntax.pkg: extract_name_of_symbol_from_patterns: Internal compiler error";	# XXX BUGGO FIXME what's the correct error protocol?
+			    raise exception DIE "expand-oop-syntax.pkg: extract_name_of_symbol_from_patterns: Internal compiler error";	# XXX BUGGO FIXME what's the correct error protocol?
 		    end;
 
 		    #
@@ -624,7 +624,7 @@ package   expand_oop_syntax2
 
 			extract_name_of_symbol_from_fun_clauses _
 			    =>
-			    raise exception FAIL "expand-oop-syntax.pkg: extract_name_of_symbol_from_fun_clauses:  Internal compiler error";			# XXX BUGGO FIXME what's the correct error protocol?
+			    raise exception DIE "expand-oop-syntax.pkg: extract_name_of_symbol_from_fun_clauses:  Internal compiler error";			# XXX BUGGO FIXME what's the correct error protocol?
 		    end; 
 
 		herein
@@ -661,7 +661,7 @@ package   expand_oop_syntax2
 				if (message_name == "subclass_id")
                                     message_count;
                                 else
-				    raise exception FAIL
+				    raise exception DIE
 				      ( sprintf	
 					"expand-oop-syntax.pkg: message_to_offset': error: Class %s defines no message %s"
 					(symbol::name class_name)
@@ -700,7 +700,7 @@ package   expand_oop_syntax2
 			    =>
 			    case null_or_type
 				 THE type => type;
-				 NULL     => raise exception FAIL "expand-oop-syntax.pkg: extract type:  Internal compiler errore";	# XXX BUGGO FIXME what's the correct error protocol?
+				 NULL     => raise exception DIE "expand-oop-syntax.pkg: extract type:  Internal compiler errore";	# XXX BUGGO FIXME what's the correct error protocol?
 			    esac;
 		    end; 
 
@@ -1259,7 +1259,7 @@ package   expand_oop_syntax2
 
 					    NULL
 						=>
-						{    raise exception FAIL ("make_method_override_calls:  Did not find path defining method " + method_name + "\n");
+						{    raise exception DIE ("make_method_override_calls:  Did not find path defining method " + method_name + "\n");
 						};
 					esac;
 
@@ -1308,7 +1308,7 @@ package   expand_oop_syntax2
 					    =>
 					    type;
 
-					_   => raise exception FAIL  "oop-expand-syntax.pkg: declare_method_override_functions: Internal compiler error";
+					_   => raise exception DIE  "oop-expand-syntax.pkg: declare_method_override_functions: Internal compiler error";
 				    esac;
 
 				method_name
@@ -1694,7 +1694,7 @@ package   expand_oop_syntax2
 
 							   make_tuple_entry _
 							       =>
-							       raise exception FAIL "expand-oop-syntax.pkg: make_function_make_object_fields: Internal compiler error";
+							       raise exception DIE "expand-oop-syntax.pkg: make_function_make_object_fields: Internal compiler error";
 						       end;								# fun make_record_entry
 						   end									# where
 					    }
@@ -3294,7 +3294,7 @@ package   expand_oop_syntax2
 				    =>
 				    user_code;
 
-				_   => raise exception FAIL "expand-oop-syntax.pkg: make_new_class_declaration: Internal compiler error.";
+				_   => raise exception DIE "expand-oop-syntax.pkg: make_new_class_declaration: Internal compiler error.";
 			    esac;
 
 			# Drop in the user-supplied package body.
@@ -3369,7 +3369,7 @@ package   expand_oop_syntax2
           package_expression:   raw_syntax::Package_Expression,
           symbolmapstack:         symbolmapstack::Symbolmapstack,
 	  source_code_region:   line_number_db::Source_Code_Region,
-          per_compile_data:         typer_junk::Per_Compile_Data
+          per_compile_stuff:         typer_junk::Per_Compile_Stuff
 	)
 	: raw_syntax::Package_Expression
 	=
@@ -3391,7 +3391,7 @@ package   expand_oop_syntax2
 			package_expression,
 			symbolmapstack,
 			source_code_region',
-			per_compile_data
+			per_compile_stuff
 		      );
 
 		PACKAGE_DEFINITION  declaration
@@ -3402,7 +3402,7 @@ package   expand_oop_syntax2
 			declaration,
 			symbolmapstack,
 			source_code_region,
-			per_compile_data
+			per_compile_stuff
 		      );		
 	    esac;
 	};
@@ -3429,7 +3429,7 @@ package   expand_oop_syntax2
 
 
 
-## Code by Jeff Prothero: Copyright (c) 2010-2014,
+## Code by Jeff Prothero: Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.
 
 

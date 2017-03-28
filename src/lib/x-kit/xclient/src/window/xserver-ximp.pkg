@@ -79,6 +79,9 @@
 # be treated differently...?
 # ============================================================
 
+# Compiled by:
+#     src/lib/x-kit/xclient/xclient-internals.sublib
+
 
 # Compiled by:
 #     src/lib/x-kit/xclient/xclient-internals.sublib
@@ -109,15 +112,16 @@ stipulate
 
     package fb  =  font_base;					# font_base					is from   src/lib/x-kit/xclient/src/window/font-base.pkg
     package dy  =  display;					# display					is from   src/lib/x-kit/xclient/src/wire/display.pkg
-    package pp  =  standard_prettyprint_mill;			# standard_prettyprint_mill			is from   src/lib/prettyprint/big/src/standard-prettyprint-mill.pkg
+    package pp  =  standard_prettyprinter;			# standard_prettyprinter			is from   src/lib/prettyprint/big/src/standard-prettyprinter.pkg
 
     package xps =  xpacket_sink;				# xpacket_sink					is from   src/lib/x-kit/xclient/src/wire/xpacket-sink.pkg
     package xt  =  xtypes;					# xtypes					is from   src/lib/x-kit/xclient/src/wire/xtypes.pkg
 #   package xet =  xevent_types;				# xevent_types					is from   src/lib/x-kit/xclient/src/wire/xevent-types.pkg
     package wme =  window_map_event_sink;			# window_map_event_sink				is from   src/lib/x-kit/xclient/src/window/window-map-event-sink.pkg
-
     #
     trace =  xtr::log_if  xtr::io_logging  0;			# Conditionally write strings to tracing.log or whatever.
+
+    nb = log::note_on_stderr;					# log				is from   src/lib/std/src/log.pkg
 herein
 
 
@@ -126,19 +130,19 @@ herein
     #     src/lib/x-kit/xclient/src/window/xclient-ximps.pkg
 
     package   xserver_ximp
-    : (weak)  Xserver_Ximp					# Xserver_Ximp					is from   src/lib/x-kit/xclient/src/wire/xserver-ximp.api
+    : (weak)  Xserver_Ximp					# Xserver_Ximp					is from   src/lib/x-kit/xclient/src/window/xserver-ximp.api
     {
 	Xserver_Ximp_State									# Holds all nonephemeral mutable state maintained by ximp.
 	    =
 	    {
-	      topwindow_is_mapped:	Ref( Bool ),						# When it is not we can and do ignore all draw commands.
+	      hostwindow_is_mapped:	Ref( Bool ),						# When it is not we can and do ignore all draw commands.
 	      font_index:		fx::Font_Index						# Maps fontnames to fb::Font values.
 	    };
 
 	Imports   = {										# Ports we use which are exported by other imps.
 # XXX SUCKO FIXME we currently never reference   windowsystem_to_xevent_router
 # -- we should drop it if we don't find a use for it soon.
-		      windowsystem_to_xevent_router:	xwp::Windowsystem_To_Xevent_Router,	# Directs X mouseclicks etc to right topwindow.
+		      windowsystem_to_xevent_router:	xwp::Windowsystem_To_Xevent_Router,	# Directs X mouseclicks etc to right hostwindow.
 		      xclient_to_sequencer:	 	x2s::Xclient_To_Sequencer		# All drawing commands go to sequencer, outbuf then Xserver.
 		    };
 
@@ -154,9 +158,9 @@ herein
 	Exports	  = {										# Ports we export for use by other imps.
 # XXX SUCKO FIXME I can find no evidence that this is ever called.
 # It expects to be called with one of the three values
-#			    fun do_map_plea wme::s::TOPWINDOW_IS_NOW_UNMAPPED	=> 	me.topwindow_is_mapped := FALSE;
-#			        do_map_plea wme::s::TOPWINDOW_IS_NOW_MAPPED	=> 	me.topwindow_is_mapped := TRUE;
-#			        do_map_plea wme::s::FIRST_EXPOSE		=> 	me.topwindow_is_mapped := TRUE;
+#			    fun do_map_plea wme::s::HOSTWINDOW_IS_NOW_UNMAPPED	=> 	me.hostwindow_is_mapped := FALSE;
+#			        do_map_plea wme::s::HOSTWINDOW_IS_NOW_MAPPED	=> 	me.hostwindow_is_mapped := TRUE;
+#			        do_map_plea wme::s::FIRST_EXPOSE		=> 	me.hostwindow_is_mapped := TRUE;
 #			    end;
 # Looks like this should maybe be done by 
 # src/lib/x-kit/xclient/src/window/xevent-to-widget-ximp.pkg
@@ -178,11 +182,11 @@ herein
 	Map_Q    =  Mailqueue( wme::s::Mapped_State	);
 
 	Runstate =  {										# These values will be statically globally visible throughout the code body for the imp.
-		      me:				Xserver_Ximp_State,			# State which is preserved across imp shutdown/restart cycles.
+		      me:				Xserver_Ximp_State,			# 
 		      imports:				Imports,				# Ximps to which we send requests.
 		      to:				Replyqueue,				# The name makes   foo::pass_something(imp) to {. ... }   syntax read well.
 		      end_gun':				End_Gun,				# We shut down the microthread when this fires.
-		      map_q:				Map_Q,					# Notifications that our topwindow has been un/mappsed.
+		      map_q:				Map_Q,					# Notifications that our hostwindow has been un/mappsed.
 		      xdisplay:				dy::Xdisplay,
 		      next_xid:				Void -> xt::Xid,
 		      pen_cache:			pc::Pen_Cache
@@ -273,6 +277,7 @@ herein
 		pen_vals_used (w2x::x::IMAGE_TEXT8   _)	=>  standard_pen_components;
 		#
 		pen_vals_used (w2x::x::POLY_TEXT8    _)	=> (standard_pen_components | pen_fill_style);
+		pen_vals_used (w2x::x::POLY_TEXT16   _)	=> (standard_pen_components | pen_fill_style);
 		pen_vals_used (w2x::x::FILL_POLY     _)	=> (standard_pen_components | pen_fill_style);
 		pen_vals_used (w2x::x::POLY_FILL_BOX _)	=> (standard_pen_components | pen_fill_style);
 		pen_vals_used (w2x::x::POLY_FILL_ARC _)	=> (standard_pen_components | pen_fill_style);
@@ -294,11 +299,11 @@ herein
 		  #
 		  runstate as	
 		  {													# These values will be statically globally visible throughout the code body for the imp.
-		    me:					Xserver_Ximp_State,						# State which is preserved across imp shutdown/restart cycles.
+		    me:					Xserver_Ximp_State,						# 
 		    imports:				Imports,							# Ximps to which we send requests.
 		    to:					Replyqueue,							# The name makes   foo::pass_something(imp) to {. ... }   syntax read well.
 		    end_gun':				End_Gun,							# We shut down the microthread when this fires.
-		    map_q:				Map_Q,								# Notifications that our topwindow has been un/mappsed.
+		    map_q:				Map_Q,								# Notifications that our hostwindow has been un/mappsed.
 		    xdisplay:				dy::Xdisplay,
 		    next_xid:				Void -> xt::Xid,
 		    pen_cache:				pc::Pen_Cache
@@ -345,9 +350,9 @@ herein
  			    thread_exit { success => TRUE };								# Will not return.	
  			#
  
-			    fun do_map_plea wme::s::TOPWINDOW_IS_NOW_UNMAPPED	=> 	me.topwindow_is_mapped := FALSE;
-			        do_map_plea wme::s::TOPWINDOW_IS_NOW_MAPPED	=> 	me.topwindow_is_mapped := TRUE;
-			        do_map_plea wme::s::FIRST_EXPOSE		=> 	me.topwindow_is_mapped := TRUE;
+			    fun do_map_plea wme::s::HOSTWINDOW_IS_NOW_UNMAPPED	=> 	me.hostwindow_is_mapped := FALSE;
+			        do_map_plea wme::s::HOSTWINDOW_IS_NOW_MAPPED	=> 	me.hostwindow_is_mapped := TRUE;
+			        do_map_plea wme::s::FIRST_EXPOSE		=> 	me.hostwindow_is_mapped := TRUE;
 			    end;
 			    #
  		    end;												# fun outer_loop
@@ -565,9 +570,9 @@ draw_ops_calls = REF 0;
 				where
 				    last_fid =  f (fid, txt_items)
 						where
-						    fun f (last_fid, [])                   =>  last_fid;
+						    fun f (last_fid, [])                    =>  last_fid;
 							f (last_fid, (w2x::t::FONT id) ! r) =>  f (id, r);
-							f (last_fid, _ ! r)                =>  f (last_fid, r);
+							f (last_fid, _ ! r)                 =>  f (last_fid, r);
 						    end;
 						end;
 
@@ -606,7 +611,105 @@ draw_ops_calls = REF 0;
 
 					split_text s
 					    =>
-					    {   n = string::length s;
+					    {   n = string::length_in_bytes s;
+						#
+						fun split (i, l)
+						    =
+						    n - i  > 254
+						    ??  split (i+254,  substring (s, i, 254) ! l)
+						    ::  list::reverse (substring (s, i, n-i) ! l);
+
+						n > 254  ??  split (0, [])
+							 ::  [s];
+					    };
+				    end;
+
+				    #
+				    fun split_item (w2x::t::FONT id)
+					    =>
+					    [xt::FONT_ITEM id];
+
+					split_item (w2x::t::TEXT (delta, s))
+					    =>
+					    case (split_delta (delta, []), split_text s)
+						#
+						([], []) =>   [];
+						([], sl) =>   (map (\\ s = xt::TEXT_ITEM (0,  s)) sl);
+						(dl, []) =>   (map (\\ n = xt::TEXT_ITEM (n, "")) dl);
+
+						([d], s ! sr)
+						    =>
+						    (xt::TEXT_ITEM (d, s) ! (map (\\ s = xt::TEXT_ITEM (0, s)) sr));
+
+						(d ! dr, s ! sr)
+						    =>
+						    (                        map (\\ n = xt::TEXT_ITEM (n,"")) dr)
+						    @
+						    (xt::TEXT_ITEM (d, s) ! (map (\\ s = xt::TEXT_ITEM (0, s)) sr));
+					    esac;
+
+				    end;
+
+				    do_items   =    fold_backward
+							(\\ (item, l) =  (split_item item) @ l)
+							[];
+				end;
+
+			    encode { to, op => w2x::x::POLY_TEXT16 (fid, point, txt_items)	}			# Mostly identical to above POLY_TEXT8 case.
+				=>
+				note_xrequest   (   v2w::encode_poly_text16
+						    {
+						      drawable=>to,
+						      gc_id,
+						      point,
+						      items =>  do_items txt_items
+						    }
+						)
+				where
+				    last_fid =  f (fid, txt_items)
+						where
+						    fun f (last_fid, [])                    =>  last_fid;
+							f (last_fid, (w2x::t::FONT id) ! r) =>  f (id, r);
+							f (last_fid, _ ! r)                 =>  f (last_fid, r);
+						    end;
+						end;
+
+				    txt_items = last_fid == font_id
+						?? txt_items
+						:: txt_items @ [w2x::t::FONT font_id];
+
+				    txt_items = fid == font_id
+						?? txt_items
+						:: (w2x::t::FONT fid) ! txt_items;
+
+				    #
+				    fun split_delta (0, l)
+					    =>
+					    l;
+
+					split_delta (i, l)
+					    =>
+					    if (i < -128)
+						#
+						split_delta (i+128, -128 ! l);
+					    else
+						i > 127
+						?? split_delta (i - 127, 127 ! l)
+						:: i ! l;
+					    fi;
+				    end;
+
+
+				    # Split a string into legal
+				    # lengths for a PolyText16 command 
+				    #
+				    fun split_text ""
+					    =>
+					    [];
+
+					split_text s
+					    =>
+					    {   n = string::length_in_bytes s;
 						#
 						fun split (i, l)
 						    =
@@ -669,8 +772,8 @@ draw_ops_calls = REF 0;
 		# xsequencer
 		#
 		stipulate
-		    fun unwrap_reply  x2s::REPLY_LOST     =>  { log::fatal   "xsequencer-ximp.pkg: Lost X-server reply"; 	  						raise exception FAIL "LOST REPLY";  };
-			unwrap_reply (x2s::REPLY_ERROR s) =>  { log::fatal ( "xsequencer-ximp.pkg: X-server error: " + (e2s::xerror_to_string (w2v::decode_error s))); 	raise exception FAIL "ERROR_REPLY"; };
+		    fun unwrap_reply  x2s::REPLY_LOST     =>  { log::fatal   "xsequencer-ximp.pkg: Lost X-server reply"; 	  						raise exception DIE "LOST REPLY";  };
+			unwrap_reply (x2s::REPLY_ERROR s) =>  { log::fatal ( "xsequencer-ximp.pkg: X-server error: " + (e2s::xerror_to_string (w2v::decode_error s))); 	raise exception DIE "ERROR_REPLY"; };
 			unwrap_reply (x2s::REPLY s)       =>  s;														# NB log::fatal should never return;
 		    end;																		# above 'raises' keep typechecker happy.
 		    fun unwrap_flag r
@@ -855,6 +958,7 @@ draw_ops_calls = REF 0;
 					    where
 						fun gc_usage_of (w2x::x::CLEAR_AREA _)                =>   NO_GC;
 						    gc_usage_of (w2x::x::POLY_TEXT8  (font_id, _, _)) =>   WITH_FONT font_id;
+						    gc_usage_of (w2x::x::POLY_TEXT16 (font_id, _, _)) =>   WITH_FONT font_id;
 						    gc_usage_of (w2x::x::IMAGE_TEXT8 (font_id, _, _)) =>   SET_FONT  font_id;
 						    gc_usage_of _                                     =>   NO_FONT;
 						end;
@@ -1008,7 +1112,8 @@ draw_ops_calls = REF 0;
 		#
 		fun find_else_open_font	(name: String)
 		    =
-		    {   reply_oneshot = make_oneshot_maildrop():  Oneshot_Maildrop( Null_Or( fb::Font ) );
+		    {
+			reply_oneshot = make_oneshot_maildrop():  Oneshot_Maildrop( Null_Or( fb::Font ) );
 			#
 			put_in_mailqueue  (client_q,
 			    #
@@ -1079,7 +1184,7 @@ draw_ops_calls = REF 0;
 		    { name };
 	
 		me =	  {
-			    topwindow_is_mapped =>  REF FALSE,
+			    hostwindow_is_mapped =>  REF FALSE,
 			    font_index		=>  fx::make_font_index ()
 			  };
 
@@ -1129,5 +1234,5 @@ end;
 
 
 ## COPYRIGHT (c) 1990, 1991 by John H. Reppy.  See SMLNJ-COPYRIGHT file for details.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

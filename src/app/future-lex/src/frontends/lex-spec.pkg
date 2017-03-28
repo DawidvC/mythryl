@@ -73,9 +73,9 @@ package lex_spec {
                 =
                 conf;
 
-	    if   (string::length struct_name > 0)
+	    if   (string::length_in_bytes struct_name > 0)
 	        
-                 raise exception FAIL "Cannot have both %package and %header";
+                 raise exception DIE "Cannot have both %package and %header";
 	    fi;
 
 	    CONF {
@@ -96,9 +96,9 @@ package lex_spec {
                             clamp
                           };
 
-	    if   (string::length header  >  0)
+	    if   (string::length_in_bytes header  >  0)
 	        
-                 raise exception FAIL "Cannot have both %package and %header";
+                 raise exception DIE "Cannot have both %package and %header";
 	    fi;
 
 	    CONF {
@@ -191,5 +191,5 @@ package lex_spec {
 
 
 ## COPYRIGHT (c) 2005 
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

@@ -181,7 +181,7 @@ herein
 		    [] =>
 			case (reverse  *external_request_queue)
 			    #
-			    [] => raise exception FAIL "impossible";		# The above 'for' loop condition guarantees one of the two queues is nonempty.
+			    [] => raise exception DIE "impossible";		# The above 'for' loop condition guarantees one of the two queues is nonempty.
 			    #
 			    [ task ]
 				=>
@@ -353,5 +353,5 @@ herein
 
 end;
 
-## Code by Jeff Prothero: Copyright (c) 2010-2014,
+## Code by Jeff Prothero: Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

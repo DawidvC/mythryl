@@ -68,7 +68,7 @@ herein
 			# Adjust for zero termination and
 			# last byte containing the length: 
 			#
-			len =   unt::from_int (string::length file) + 0u2;
+			len =   unt::from_int (string::length_in_bytes file) + 0u2;
 
 			k4  =   unt::bitwise_and (len + 0u3, unt::bitwise_not 0u3);
 
@@ -138,5 +138,5 @@ end;
 
 
 ## COPYRIGHT (c) 2001 AT&T Bell Laboratories.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

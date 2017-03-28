@@ -41,7 +41,7 @@ api {
     #
     fun make_digit (i:  Int)
         =
-        string::get ("0123456789", i);
+        string::get_byte_as_char ("0123456789", i);
 
 
     # Decompose a non-zero float into a list of at most maxPrec significant digits
@@ -340,5 +340,5 @@ api {
 
 
 ## COPYRIGHT (c) 1992 by AT&T Bell Laboratories.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

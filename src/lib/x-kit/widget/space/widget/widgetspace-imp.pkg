@@ -65,12 +65,11 @@ stipulate
     package c2o =  objectspace_to_object;			# objectspace_to_object		is from   src/lib/x-kit/widget/space/object/objectspace-to-object.pkg
     package g2p =  gadget_to_pixmap;				# gadget_to_pixmap		is from   src/lib/x-kit/widget/theme/gadget-to-pixmap.pkg
 
-    package iuw =  issue_unique_widget_id;			# issue_unique_widget_id	is from   src/lib/x-kit/widget/gui/issue-unique-widget-id.pkg
     package im  =  int_red_black_map;				# int_red_black_map		is from   src/lib/src/int-red-black-map.pkg
     package gt  =  guiboss_types;				# guiboss_types			is from   src/lib/x-kit/widget/gui/guiboss-types.pkg
     package blk =  blank;					# blank				is from   src/lib/x-kit/widget/leaf/blank.pkg
 
-    package pp  =  standard_prettyprint_mill;			# standard_prettyprint_mill	is from   src/lib/prettyprint/big/src/standard-prettyprint-mill.pkg
+    package pp  =  standard_prettyprinter;			# standard_prettyprinter	is from   src/lib/prettyprint/big/src/standard-prettyprinter.pkg
     #
     tracefile   =  "widget-unit-test.trace.log";
 
@@ -108,7 +107,7 @@ herein
                             );
 
 	Runstate =  {													# These values will be statically globally visible throughout the code body for the imp.
-		      me:		Widgetspace_State,								# State which is preserved across imp shutdown/restart cycles.
+		      me:		Widgetspace_State,								# 
 		      options:		List(gt::Widgetspace_Option),
 		      imports:		Imports,									# Imps to which we send requests.
 		      to:		Replyqueue,									# The name makes   foo::pass_something(imp) to {. ... }   syntax read well.
@@ -133,7 +132,7 @@ herein
 		    #
 		    runstate as
 		    {													# These values will be statically globally visible throughout the code body for the imp.
-		      me:		Widgetspace_State,								# State which is preserved across imp shutdown/restart cycles.
+		      me:		Widgetspace_State,								# 
 		      options:		List(gt::Widgetspace_Option),
 		      imports:		Imports,									# Imps to which we send requests.
 		      to:		Replyqueue,									# The name makes   foo::pass_something(imp) to {. ... }   syntax read well.
@@ -335,5 +334,5 @@ end;
 ##########################################################################
 
 
-## Original code by Jeff Prothero Copyright (c) 2014-2014,
+## Original code by Jeff Prothero Copyright (c) 2014-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

@@ -9,7 +9,7 @@ SUBLIBRARY_EXPORTS
 SUBLIBRARY_COMPONENTS
 
         $ROOT/src/lib/std/standard.lib
-	$ROOT/src/lib/prettyprint/big/prettyprint-mill.lib
+	$ROOT/src/lib/prettyprint/big/prettyprinter.lib
 
 
 	/* parser */
@@ -106,5 +106,5 @@ SUBLIBRARY_COMPONENTS
 	#endif
 
 
-## Changes by Jeff Prothero Copyright (c) 2010-2014,
+## Changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

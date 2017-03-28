@@ -1,0 +1,1632 @@
+# millboss-types.pkg
+#
+# Types (and some code) in support of textpane modes like
+#
+#     src/lib/x-kit/widget/edit/fundamental-mode.pkg
+#     src/lib/x-kit/widget/edit/minimill-mode.pkg
+#
+# This is another of those files full of datatypes which wanted
+# so much to be mutually recursive that finally I gave up, merged
+# the relevant files, and let them recurse to their heart's content.
+#
+# See also:
+#     src/lib/x-kit/widget/edit/textpane.pkg
+#     src/lib/x-kit/widget/edit/millboss-imp.pkg
+#     src/lib/x-kit/widget/edit/textmill.pkg
+#     src/lib/x-kit/widget/gui/guiboss-types.pkg
+
+# Compiled by:
+#     src/lib/x-kit/widget/xkit-widget.sublib
+
+
+stipulate
+    include package   threadkit;				# threadkit			is from   src/lib/src/lib/thread-kit/src/core-thread-kit/threadkit.pkg
+    #
+#   package ap  =  client_to_atom;				# client_to_atom		is from   src/lib/x-kit/xclient/src/iccc/client-to-atom.pkg
+#   package au  =  authentication;				# authentication		is from   src/lib/x-kit/xclient/src/stuff/authentication.pkg
+#   package cpm =  cs_pixmap;					# cs_pixmap			is from   src/lib/x-kit/xclient/src/window/cs-pixmap.pkg
+#   package cpt =  cs_pixmat;					# cs_pixmat			is from   src/lib/x-kit/xclient/src/window/cs-pixmat.pkg
+#   package dy  =  display;					# display			is from   src/lib/x-kit/xclient/src/wire/display.pkg
+#   package fil =  file__premicrothread;			# file__premicrothread		is from   src/lib/std/src/posix/file--premicrothread.pkg
+#   package fti =  font_index;					# font_index			is from	  src/lib/x-kit/xclient/src/window/font-index.pkg
+#   package r2k =  xevent_router_to_keymap;			# xevent_router_to_keymap	is from   src/lib/x-kit/xclient/src/window/xevent-router-to-keymap.pkg
+#   package mtx =  rw_matrix;					# rw_matrix			is from   src/lib/std/src/rw-matrix.pkg
+#   package rop =  ro_pixmap;					# ro_pixmap			is from   src/lib/x-kit/xclient/src/window/ro-pixmap.pkg
+#   package rw  =  root_window;					# root_window			is from   src/lib/x-kit/widget/lib/root-window.pkg
+#   package rwv =  rw_vector;					# rw_vector			is from   src/lib/std/src/rw-vector.pkg
+#   package sep =  client_to_selection;				# client_to_selection		is from   src/lib/x-kit/xclient/src/window/client-to-selection.pkg
+#   package shp =  shade;					# shade				is from   src/lib/x-kit/widget/lib/shade.pkg
+#   package sj  =  socket_junk;					# socket_junk			is from   src/lib/internet/socket-junk.pkg
+#   package x2s =  xclient_to_sequencer;			# xclient_to_sequencer		is from   src/lib/x-kit/xclient/src/wire/xclient-to-sequencer.pkg
+#   package tr  =  logger;					# logger			is from   src/lib/src/lib/thread-kit/src/lib/logger.pkg
+#   package tsr =  thread_scheduler_is_running;			# thread_scheduler_is_running	is from   src/lib/src/lib/thread-kit/src/core-thread-kit/thread-scheduler-is-running.pkg
+#   package u1  =  one_byte_unt;				# one_byte_unt			is from   src/lib/std/one-byte-unt.pkg
+#   package v1u =  vector_of_one_byte_unts;			# vector_of_one_byte_unts	is from   src/lib/std/src/vector-of-one-byte-unts.pkg
+#   package v2w =  value_to_wire;				# value_to_wire			is from   src/lib/x-kit/xclient/src/wire/value-to-wire.pkg
+#   package wg  =  widget;					# widget			is from   src/lib/x-kit/widget/old/basic/widget.pkg
+#   package wi  =  window;					# window			is from   src/lib/x-kit/xclient/src/window/window.pkg
+#   package wme =  window_map_event_sink;			# window_map_event_sink		is from   src/lib/x-kit/xclient/src/window/window-map-event-sink.pkg
+#   package wpp =  client_to_window_watcher;			# client_to_window_watcher	is from   src/lib/x-kit/xclient/src/window/client-to-window-watcher.pkg
+#   package wy  =  widget_style;				# widget_style			is from   src/lib/x-kit/widget/lib/widget-style.pkg
+#   package xc  =  xclient;					# xclient			is from   src/lib/x-kit/xclient/xclient.pkg
+#   package xj  =  xsession_junk;				# xsession_junk			is from   src/lib/x-kit/xclient/src/window/xsession-junk.pkg
+#   package xtr =  xlogger;					# xlogger			is from   src/lib/x-kit/xclient/src/stuff/xlogger.pkg
+    #
+
+    #
+    package wt  =  widget_theme;				# widget_theme			is from   src/lib/x-kit/widget/theme/widget/widget-theme.pkg
+    package evt =  gui_event_types;				# gui_event_types		is from   src/lib/x-kit/widget/gui/gui-event-types.pkg
+    package gts =  gui_event_to_string;				# gui_event_to_string		is from   src/lib/x-kit/widget/gui/gui-event-to-string.pkg
+    package ct  =  cutbuffer_types;				# cutbuffer_types		is from   src/lib/x-kit/widget/edit/cutbuffer-types.pkg
+    package gt  =  guiboss_types;				# guiboss_types			is from   src/lib/x-kit/widget/gui/guiboss-types.pkg
+
+    package l2p =  screenline_to_textpane;			# screenline_to_textpane	is from   src/lib/x-kit/widget/edit/screenline-to-textpane.pkg
+    package p2l =  textpane_to_screenline;			# textpane_to_screenline	is from   src/lib/x-kit/widget/edit/textpane-to-screenline.pkg
+
+    package d2p =  drawpane_to_textpane;			# drawpane_to_textpane		is from   src/lib/x-kit/widget/edit/drawpane-to-textpane.pkg
+    package p2d =  textpane_to_drawpane;			# textpane_to_drawpane		is from   src/lib/x-kit/widget/edit/textpane-to-drawpane.pkg
+    package m2d =  mode_to_drawpane;				# mode_to_drawpane		is from   src/lib/x-kit/widget/edit/mode-to-drawpane.pkg
+    package g2p =  gadget_to_pixmap;				# gadget_to_pixmap		is from   src/lib/x-kit/widget/theme/gadget-to-pixmap.pkg
+
+    package b2p =  millboss_to_pane;				# millboss_to_pane		is from   src/lib/x-kit/widget/edit/millboss-to-pane.pkg
+    package a2c =  app_to_compileimp;				# app_to_compileimp		is from   src/lib/x-kit/widget/edit/app-to-compileimp.pkg
+
+    package a2r =  windowsystem_to_xevent_router;		# windowsystem_to_xevent_router	is from   src/lib/x-kit/xclient/src/window/windowsystem-to-xevent-router.pkg
+
+    package gd  =  gui_displaylist;				# gui_displaylist		is from   src/lib/x-kit/widget/theme/gui-displaylist.pkg
+
+    package pp  =  standard_prettyprinter;			# standard_prettyprinter	is from   src/lib/prettyprint/big/src/standard-prettyprinter.pkg
+
+
+    package err =  compiler::error_message;			# compiler			is from   src/lib/core/compiler/compiler.pkg
+								# error_message			is from   src/lib/compiler/front/basics/errormsg/error-message.pkg
+
+    package im  =  int_red_black_map;				# int_red_black_map		is from   src/lib/src/int-red-black-map.pkg
+#   package is  =  int_red_black_set;				# int_red_black_set		is from   src/lib/src/int-red-black-set.pkg
+    package idm =  id_map;					# id_map			is from   src/lib/src/id-map.pkg
+    package sm  =  string_map;					# string_map			is from   src/lib/src/string-map.pkg
+
+    package r8  =  rgb8;					# rgb8				is from   src/lib/x-kit/xclient/src/color/rgb8.pkg
+    package r64 =  rgb;						# rgb				is from   src/lib/x-kit/xclient/src/color/rgb.pkg
+    package g2d =  geometry2d;					# geometry2d			is from   src/lib/std/2d/geometry2d.pkg
+#   package g2j =  geometry2d_junk;				# geometry2d_junk		is from   src/lib/std/2d/geometry2d-junk.pkg
+
+    package dxy =  digraphxy;					# digraphxy			is from   src/lib/src/digraphxy.pkg
+    package bq  =  bounded_queue;				# bounded_queue			is from   src/lib/src/bounded-queue.pkg
+    package nl  =  red_black_numbered_list;			# red_black_numbered_list	is from   src/lib/src/red-black-numbered-list.pkg
+    package slt =  screenline_types;				# screenline_types		is from   src/lib/x-kit/widget/edit/screenline-types.pkg
+
+    tracefile   =  "widget-unit-test.trace.log";
+
+    nb = log::note_on_stderr;					# log				is from   src/lib/std/src/log.pkg
+
+herein
+
+    package millboss_types									# 
+    {
+	Wakeup_Arg	=	gt::Wakeup_Arg;
+	Wake_Me_Option ==	gt::Wake_Me_Option;
+
+	Point_And_Mark										# 'Point' is the visible cursor.  'Mark' (if set) marks the other end of the selected region.  (Emacs nomenclature.)
+	  =
+	  { point:		g2d::Point,							# Note that point and mark are per-textpane, not per-textmill. (This matters because there may be multiple textpanes open on one textmill).  This is different from emacs, where 'mark' is per-textmill.
+	    mark:		Null_Or(g2d::Point)						# NULL means the emacs-style 'mark' is not currently set.
+	  };
+
+	Inport											# Used to name mill input ports.
+	  =											#
+	  { mill_id:		Id,								# Id   of the mill.
+	    inport_name:	String								# Name of the input port.
+	  };
+
+	Outport											# Used to name mill output ports.
+	  =											#
+	  { mill_id:		Id,								# Id   of the mill.
+	    outport_name:	String								# Name of the output port.
+	  };
+
+	Portpair										# Used to name watcher-watchee mill-pairs.
+	  =											#
+	  { inport:		Inport,								# Watcher.
+	    outport:		Outport								# Watchee.
+	  };
+
+	package inport_key {
+	    #
+	    Key = Inport;
+	    #
+	    fun compare
+		  (
+		    k1:		Key,
+		    k2:		Key
+		  )
+		=
+		case (int::compare ((id_to_int k1.mill_id), (id_to_int k2.mill_id)))
+		    #	
+		    GREATER =>  GREATER;
+		    LESS    =>  LESS;
+		    EQUAL   =>  string::compare (k1.inport_name, k2.inport_name);	
+		esac;
+	};
+
+	package outport_key {
+	    #
+	    Key = Outport;
+	    #
+	    fun compare
+		  (
+		    k1:		Key,
+		    k2:		Key
+		  )
+		=
+		case (int::compare ((id_to_int k1.mill_id), (id_to_int k2.mill_id)))
+		    #	
+		    GREATER =>  GREATER;
+		    LESS    =>  LESS;
+		    EQUAL   =>  string::compare (k1.outport_name, k2.outport_name);	
+		esac;
+	};
+
+	package millwatch_key {									# We use this to track which mill inports are watching which mill outports.
+	    #
+	    Key = Portpair;
+	    #
+	    fun compare										# This comparison is just for doing lookups,
+		  (										# so we do the Int compares first because the are fast,
+		    k1:		Key,								# followed by the slow string compares (which we may
+		    k2:		Key								# thus avoid doing at all on most compares).
+		  )
+		=
+		case (int::compare ( (id_to_int k1.inport.mill_id),
+                                     (id_to_int k2.inport.mill_id)
+		     )             )
+		    #	
+		    GREATER =>  GREATER;
+		    LESS    =>  LESS;
+		    EQUAL   =>
+			case (int::compare ( (id_to_int k1.outport.mill_id),
+					     (id_to_int k2.outport.mill_id)
+			     )             )
+			    #
+			    GREATER =>  GREATER;
+			    LESS    =>  LESS;
+			    EQUAL   =>
+				case (string::compare (k1.inport.inport_name, k2.inport.inport_name))
+				    #
+				    GREATER =>  GREATER;
+				    LESS    =>  LESS;
+				    EQUAL   =>  string::compare (k1.outport.outport_name, k2.outport.outport_name);	
+				esac;
+			esac;		    
+		esac;
+	};
+
+	package ipm =  red_black_map_g(    inport_key );					# "ipm" ==  "inport_map".	red_black_map_g		is from   src/lib/src/red-black-map-g.pkg
+	package ips =  red_black_set_g(    inport_key );					# "ips" ==  "inport_set".	red_black_set_g		is from   src/lib/src/red-black-set-g.pkg
+
+	package opm =  red_black_map_g(   outport_key );					# "opm" == "outport_map".	red_black_map_g		is from   src/lib/src/red-black-map-g.pkg
+	package ops =  red_black_set_g(   outport_key );					# "ops" == "outport_set".	red_black_set_g		is from   src/lib/src/red-black-set-g.pkg
+
+	package mwm =  red_black_map_g( millwatch_key );					# "mwm" == "millwatch_map".	red_black_map_g		is from   src/lib/src/red-black-map-g.pkg
+	package mws =  red_black_set_g( millwatch_key );					# "mws" == "millwatch_set".	red_black_set_g		is from   src/lib/src/red-black-set-g.pkg
+
+	Millout											# One output port for a mill.  This is a specialization of the Crypt type in src/lib/core/init/pervasive.pkg
+	  =											# 
+	  { outport:		Outport,							# Globally unique identifier for output port consisting of mill id + port name.
+	    crypt:		Exception,							# The hidden value packed in an exception, taking advantage of the fact that Exception is Mythryl's only extensible datatype.  This hack lets code in millboss_imp, plugboard etc to process Millouts and Millins without importing all the underlying data types.
+	    #
+	    port_type:		String,								# Type of the contents of the 'crypt' field, for debugging/inspection, e.g. "int_millout::Int_Millout"	for   src/lib/x-kit/widget/edit/int-millout.pkg
+	    data_type:		String,								# Type of the values that flow through the stream, for plugboard.pkg,  e.g. "Int"			for   src/lib/x-kit/widget/edit/int-millout.pkg
+	    info:		String,								# Any added info about the data field, for debugging/inspection.  This compensates for Millout's lack of typesafety; it should include any information useful when debugging "Whoops, we got the wrong Millout here" bugs. Can be just the empty string.
+	    #
+	    counter:		Ref(Int)							# Count messages sent through port, for debug/display purposes.
+	  };											#
+
+	Millin											# One input port for a mill.
+	  = 											#
+	  { inport:		Inport,								# Globally unique identifier for input port consisting of mill id + port name.
+	    port_type:		String,								# Specifies which mill outputs may be connected to this mill input:  Must have Millout.port_type == Millin.port_type.
+	    mono:		Bool,								# TRUE iff this Input can watch at most one Watchable.
+	    #											#
+	    note_input:		Millout -> Void,						# For a MONO_INPUT this call will replace any previous setting;  for a POLY_INPUT this will add  the Millout to   the set of outputs read.
+	    drop_input:		Millout -> Void,						# For a MONO_INPUT this call will clear the input to NULL;       for a POLY_INPUT it will remove the Millout from the set of outputs read -- no-op if not present.
+	    #
+	    counter:		Ref(Int)							# Count messages read through port, for debug/display purposes.
+	  };				 	 						# 
+
+	Millwatch										# Everything millboss knows about a case of one mill inport watching one mill outport.
+	  =
+	  { millin:		Millin,
+	    millout:		Millout
+	  };
+
+	Graphic_Line_Prefix									# Support for drawing arbitrary mouse-sensitive graphics to the left of the line in   src/lib/x-kit/widget/edit/screenline.pkg
+	  =											# Motivating example is planned plugboard.pkg support;  could also be used for conventional [+] vs [-] collapsable hierarchy display, say.
+	  { prefix_length_in_pixels:	Int,							# This tells screenline.pkg how many pixels to indent the regular text for the line.
+	    prefix_draw_fn:		slt::Redraw_Fn,						# This tells screenline.pkg what to draw on the left-of-text space.
+	    prefix_click_fn:		slt::Mouse_Click_Fn					# This tells screenline.pkg what to do when user clicks on left-of-text space.
+	  };
+	Monoline										# Monoline + Polyline are intended as support for foldingmode-style functionality where a visible screen line may represent either a single line of text or else an entire indented paragraph where only the first line is displayed.
+	  =											#
+	  { string:	String,									#
+	    prefix:	Null_Or( Graphic_Line_Prefix )						#
+	  };			 		     						#
+	Polyline										# 
+	  =											# 
+	  { line:	Monoline,								# The visible line.
+	    more:	List(Monoline)								# The currently-invisible lines, if any.
+	  };											#
+	Textline										#
+	  #											#
+	  = MONOLINE Monoline									# The normal case -- folding isn't hiding anything.
+	  | POLYLINE Polyline									# The folded case -- folding is    hiding the 'more' part.
+	  ;											#
+	fun visible_line (MONOLINE { string, ... }) =>      string;				# A little convenience function to get the visible line.
+	    visible_line (POLYLINE { line,   ... }) => line.string;				#
+	end;											#
+	    
+
+	Textlines = nl::Numbered_List( Textline );						# In textmill.pkg we store our file contents in this, line by line.
+
+	fun findline										# A little convenience fn used heavily in files like   src/lib/x-kit/widget/edit/fundamental-mode.pkg
+	      (
+		textlines:	Textlines,
+		line_key:	Int
+	      )
+	    =
+	    {   line =	case (nl::find (textlines, line_key))
+			    #
+			    THE line => line;
+			    #
+			    NULL     => MONOLINE  { string => "\n",
+						    prefix => NULL
+						  };
+			esac;
+
+		visible_line  line;
+	    };
+
+
+	Textstate
+	  =
+	  { textlines:			Textlines,						# Complete text contents of textmill.
+	    editcount:			Int							# Count of edits applied.  Intended to allow clients to quickly detect whether any changes have been made since they last polled us.
+	  };
+
+	Undostate = Textstate;									# Synonym for readability.
+
+	Edit_History = bq::Queue( Undostate );
+
+	Pane_Info
+	  =
+	  { pane_id:				Id,
+	    pane_tag:				Int,						# We assign each pane a small positive Int tag to be displayed on modeline and used by "C-x o" (other_pane) in   src/lib/x-kit/widget/edit/fundamental-mode.pkg
+	    mill_id:				Id						# Id for mill displayed in this pane.
+	  };
+
+	Stage = INITIAL
+	      | MEDIAL
+	      | FINAL
+	      ;
+	#
+	Promptfor
+	  #											# We should probably add POSITIVE_NUMBER and INTEGER cases here, for editfns like fundamental_mode::goto_line. XXX SUCKO FIXME.
+	  = STRING		{ prompt: String,  doc: String }				# String arg is the prompt to supply to user.
+	  | FILENAME		{ prompt: String,  doc: String }				# The critical difference between FILENAME    and STRING is that we can do tab-completion on FILENAME    based on reading directory contents.
+	  | MILLNAME		{ prompt: String,  doc: String }				# The critical difference between MILLNAME    and STRING is that we can do tab-completion on MILLNAME    based on list of all running mill microthreads.
+	  | COMMANDNAME		{ prompt: String,  doc: String }				# The critical difference between COMMANDNAME and STRING is that we can do tab-completion on COMMANDNAME based on list of all defined commands.
+	  | INCREMENTAL_STRING  { prompt: String,  doc: String }				#
+	  ;
+	
+	fun promptfor_prompt  (STRING		    r) => r.prompt;
+	    promptfor_prompt  (FILENAME		    r) => r.prompt;
+	    promptfor_prompt  (MILLNAME		    r) => r.prompt;
+	    promptfor_prompt  (COMMANDNAME	    r) => r.prompt;
+	    promptfor_prompt  (INCREMENTAL_STRING   r) => r.prompt;
+	end;
+
+	fun promptfor_doc     (STRING		    r) => r.doc;
+	    promptfor_doc     (FILENAME		    r) => r.doc;
+	    promptfor_doc     (MILLNAME		    r) => r.doc;
+	    promptfor_doc     (COMMANDNAME	    r) => r.doc;
+	    promptfor_doc     (INCREMENTAL_STRING   r) => r.doc;
+	end;
+
+	Prompted_Arg
+	  #
+	  = STRING_ARG		   { prompt: String, doc: String, arg: String }			# 'arg' is the string read from user.  Other two are copied from Promptfor record.
+	  | INCREMENTAL_STRING_ARG { prompt: String, doc: String, arg: String, stage: Stage }	# An INCREMENTAL_STRING -- editfn gets called each time it changes, even though not yet complete.
+#	  | COMMAND_ARG
+#	  | FILENAME_ARG									# I'm not sure we'll need this -- any reason a filename can't be just a string at this point?
+	  ;
+
+	Editfn_Out_Option									# This conveys information from editfns via textmill back to textpane.  These are basically the operations implemented by textpane for use by editfns in (e.g.)  src/lib/x-kit/widget/edit/fundamental-mode.pkg
+	  #
+	  = TEXTLINES			Textlines						# Note revised contents of textmill.
+	  | TEXTMILL			Textpane_To_Textmill					# Note that textpane is now open on a different textmill.
+	  | POINT			g2d::Point
+	  | MARK			Null_Or(g2d::Point)
+	  | LASTMARK			Null_Or(g2d::Point)
+	  | SCREEN_ORIGIN		g2d::Point
+	  | READONLY			Bool							# Set textmill readonly flag to given value.
+	  | EDIT_HISTORY		Edit_History	
+	  | SAVE										# Save textmill contents to disk, if dirty.
+	  | QUIT										# This is intended to implement keyboard_quit  (normally bound to C-g) functionality in fundamental-mode.pkg.
+	  | STRING_ENTRY_COMPLETE								# This is intended to implement input_complete (normally bound to RET) functionality in minimill-mode.pkg.
+	  | MODELINE_MESSAGE		String							# Post a message (e.g., "No files need saving.") to the textpane modeline that will be visible until next keystroke is typed. 
+	  | EDITFN_TO_INVOKE		Keymap_Node						# Execute given editfn.  Supports (e.g.) query_replace -- this lets it read input from modeline and then continue.
+	  | QUOTE_NEXT			Keymap_Node						# Dedicated support for C-q:  Insert next keystroke in buffer instead of interpreting as a command.
+	  | EXECUTE_COMMAND		String							# Dedicated support for M-x:  Execute command with given name.
+	  | COMMENCE_KMACRO									# Dedicated support for "C-x (": commence_keystroke_macro.
+	  | CONCLUDE_KMACRO									# Dedicated support for "C-x )": conclude_keystroke_macro.
+	  | ACTIVATE_KMACRO		Int							# Dedicated support for "C-x e": activate_keystroke_macro.  Int is repeat factor.
+
+	also
+	Textmill_Statechange									# Used to tell clients (mostly textpane.pkg) about changes in state of a textmill.  Textmills send these to all watchers -- this is how multiple textpanes can track a single textmill.
+	  #											# 
+	  = TEXTSTATE_CHANGED	{ was: Textstate,	   now: Textstate	  }
+	  | UNDO		{ was: Textstate,	   now: Undostate	  }
+	  | FILEPATH_CHANGED	{ was: Null_Or(String),	   now: Null_Or(String)	  }		# File being visited in the textmill.  Some textmills visit no file (in-memory editing only), hence the Null_Or.
+	  | NAME_CHANGED	{ was: String,		   now: String		  }		# Name of textmill.  Every textmills has a globally unique name.
+	  | READONLY_CHANGED	{ was: Bool,		   now: Bool		  }		#
+	  | DIRTY_CHANGED	{ was: Bool,		   now: Bool		  }		#
+
+	also
+	Textmill_Option										# Optional args when creating a new textmill.
+	  #											#
+	  =  MICROTHREAD_NAME	String								# 
+	  |  ID			Id								# Stable, unique id for imp.
+	  |  INITIAL_FILENAME	String								# 
+	  |  UTF8		String
+	  |  TEXTMILL_EXTENSION	Textmill_Extension
+
+	also
+	Textpane_To_Textmill									# This is the port/handle a textpane uses to represent/control a textmill.
+	    =											# 
+	    TEXTPANE_TO_TEXTMILL								# 
+	      { id:			Id,							# Unique id to facilitate storing textpane_to_textmill instances in indexed datastructures like red-black trees.
+		#
+		get_maxline:		Void -> Int,						# Max currently valid line number.
+		pass_maxline:		Replyqueue -> (Int -> Void) -> Void,
+		#
+		get_line:		Int -> Null_Or(String),
+		pass_line:		Replyqueue
+					   -> Int
+					   -> (Null_Or(String) -> Void)
+					   -> Void,
+		#
+		set_lines:		List(String) -> Void,
+		get_lines:		(Int, Int) -> List(String),
+		pass_lines:		Replyqueue
+					     -> (Int, Int)
+					     -> (List(String) -> Void)
+					     -> Void,
+		#
+		get_textstate:		Void -> Textstate,					# 
+		pass_textstate:		Replyqueue -> (Textstate -> Void) -> Void,
+		#
+		get_edit_result:	Edit_Arg -> Editfn_Out,
+		pass_edit_result:	Edit_Arg						# This should be unused and can probably be eliminated -- it turns out that textpane needs to wait for result and update its state before invoking another editfn via textmill.
+					     -> Replyqueue
+					     -> (Editfn_Out -> Void)
+					     -> Void,						# 
+
+		get_drawpane_startup_result:		Drawpane_Startup_Arg		-> Editfn_Out,
+		get_drawpane_shutdown_result:		Drawpane_Shutdown_Arg		-> Editfn_Out,
+		get_drawpane_initialize_gadget_result:	Drawpane_Initialize_Gadget_Arg	-> Editfn_Out,
+		get_drawpane_redraw_request_result:	Drawpane_Redraw_Request_Arg	-> Editfn_Out,
+		get_drawpane_mouse_click_result:	Drawpane_Mouse_Click_Arg	-> Editfn_Out,
+		get_drawpane_mouse_drag_result:		Drawpane_Mouse_Drag_Arg		-> Editfn_Out,
+		get_drawpane_mouse_transit_result:	Drawpane_Mouse_Transit_Arg	-> Editfn_Out,
+
+		undo:			Void -> Void,
+
+		set_readonly:		Bool -> Void,						# 
+		get_readonly:		Void -> Bool,						# TRUE iff textmill contents are currently marked as ineditable.
+		pass_readonly:		Replyqueue -> (Bool -> Void) -> Void,
+
+		set_textpane_hint:	Crypt -> Void,						# Store the current textpane's point+mark etc info on the textmill, so that if/when we open a new textpane onto this textmill, we can put the cursor in a sensible spot.
+		get_textpane_hint:	Void -> Crypt,						# Using 'Crypt' spares textmill.pkg from needing to know about the relevant textpane.pkg types.
+
+												# The watcher protocol allows others imps (including other texteditors and also arbitrary application imps) to monitor changes to a given textmill.
+		note__textmill_statechange__watcher						#  
+		    :										#
+		    ( Inport,									# Globally unique name for the watching port.
+		      Null_Or(Millin),								# This will be NULL if watcher is not another mill (e.g. a pane). Lets us pass Millin+Millout to millboss at same time, keeping millboss consistent.
+		      (Outport, Textmill_Statechange) -> Void					# This fn is how we actually pass statechanges to watcher. The Outport arg lets a single watcher distinguish miltiple watchees.
+		    )
+		    -> Void,									#
+		    	     	       			     	      	 			#
+		drop__textmill_statechange__watcher						#
+		    :										#
+		    Inport -> Void,								# The Inport must match that given to note__textmill_statechange__watcher.
+		    
+		textmill_extension:	Null_Or( Textmill_Extension ),
+
+		app_to_mill:		App_To_Mill						# Include the more general mill-agnostic interface.
+	      }
+
+	also
+	App_To_Mill										# This is intended to be an interface exported by all mills, not just textmills, to support operations which are generic across all mills.
+	    =
+	    APP_TO_MILL	
+	      { id:			Id,							# Unique id to facilitate storing textpane_to_textmill instances in indexed datastructures like red-black trees.
+		millins:		ipm::Map(Millin),					# Get  Millins for this mill indexed by Inport.
+		millouts:		opm::Map(Millout),					# Get  output streams available to watch.  Indexed by Outport.
+
+		#
+		get_dirty:		Void -> Bool,						# TRUE iff textmill contents are currently out of sync with diskfile contents.
+		pass_dirty:		Replyqueue -> (Bool -> Void) -> Void,
+
+		set_filepath:		Null_Or(String) -> Void,				# Filepath controls what file textmill contents are read/written from/to.
+		get_filepath:		Void -> Null_Or(String),				# 
+		pass_filepath:		Replyqueue -> (Null_Or(String) -> Void) -> Void,
+
+		set_name:		String -> Void,						# Name uniquely identifies textmill to interactive user.
+		get_name:		Void -> String,						# 
+		pass_name:		Replyqueue -> (String -> Void) -> Void,
+
+		reload_from_file:	Void -> Void,
+		save_to_file:		Void -> Void,
+
+		get_pane_guiplan:	Void -> gt::Gp_Widget_Type,				# Synthesize a guiplan for a pane which will display the state of this mill.  This is primarily support for  switch_to_mill()  in  src/lib/x-kit/widget/edit/fundamental-mode.pkg
+		pass_pane_guiplan:	Replyqueue -> (gt::Gp_Widget_Type -> Void) -> Void	# In general we do not want mills to know about GUI stuff (as a matter of clean layering and also to avoid package dependency loops) but we do want to have a way
+												# for a client to open up a GUI pane on an arbitrary mill, hence this call in the App_To_Mill interface.
+	      }
+
+	# This port is implemented in:
+	#
+	#     src/lib/x-kit/widget/edit/millboss-imp.pkg
+	#
+	also
+	Mill_To_Millboss									# This is the toplevel application code access pathway to texteditor functionality, and more generally pane/mill functionality.
+	    =											# 
+	    MILL_TO_MILLBOSS
+	      {
+		id:			Id,							# Unique id to facilitate storing mill_to_millboss instances in indexed datastructures like red-black trees.
+		#
+		get_textmill:		String       ->  Null_Or( Textpane_To_Textmill ),	# Get pre-existing textmill by name, return NULL if not found.
+		make_textmill:		Textmill_Arg ->           Textpane_To_Textmill,		# Create new       textmill.  If there is a pre-existing one by the same name, modify given name to make new buffer's name unique.
+		get_or_make_textmill:	Textmill_Arg ->           Textpane_To_Textmill,		# Get pre-existing textmill if one is found, create and return one if not found.
+		get_or_make_filebuffer:	Textmill_Arg -> String -> Textpane_To_Textmill,		# Find (or failing that, create) a textmill open on the given filepath.
+
+		get_cutbuffer_contents:	Void -> ct::Cutbuffer_Contents,				# O(1) nonblocking.
+		set_cutbuffer_contents:	ct::Cutbuffer_Contents -> Void,
+
+		note_pane:		{ millboss_to_pane:	b2p::Millboss_To_Pane,		# Remember existence of a pane. Intended to support textpanes but also eventually other kinds of panes.
+					  mill_id:		Id				# Mill displayed in pane.
+					} 							#
+					-> Void,						#
+
+		drop_pane:		{ pane_id: Id }		-> Void,			# Forget   existence of a pane. Inverse of above.
+		mail_pane:		(Id, Crypt)		-> Void,			# Send something to a pane. If the pane is not yet registered with millboss, the crypt will be queued up and delivered when the pane registers. Used for linking up screenline.pkg instances to textpane.pkg instances at startup (etc).
+												# Using a Crypt here makes the mechanism general at a small cost in typesafety.  In particular, it buys us valuable modularity by keeping millboss from needing to know the types of the interfaces between textpane and screenline (etc).
+		get_panes_by_id:	Void -> idm::Map( Pane_Info ),
+		get_mills_by_name:	Void ->  sm::Map( Mill_Info ),
+		get_mills_by_id:	Void -> idm::Map( Mill_Info ),
+		    
+		note_millwatch:		Millwatch -> Void,					# Take note of a new instance of one mill watching another.
+		drop_millwatch:		millwatch_key::Key -> Void,				# Undo previous.
+
+		wake_me:		{							# Used to schedule millboss_to_mill.wakeup calls.
+					  id:		Id,
+					  options:	List(Wake_Me_Option)
+					}
+					-> Void,
+
+		app_to_mill:		App_To_Mill						# Include the App_To_Mill interface so that millboss can export a Millgraph Outport as a kinda-sorta mill itself. 
+	      }
+
+	also
+	Editfn_Node
+	  #
+	  = PLAIN_EDITFN	Plain_Editfn
+	  | FANCY_EDITFN									# Not currently useful.  Intended to support fns which need to do significant work in the context of textpane.pkg (vs textmill.pkg).  It may be about time to phase this out, in which case Editfn_Node and Keymap_Node can just merge.
+
+	also
+	Keymap_Node
+	  #
+	  = EDITFN		Editfn_Node
+	  | SUBKEYMAP		Keymap
+	  | UNDEFINED										# This is so we can mark a keystroke sequence as undefined even if an ancestor defines it.
+
+	also
+	Panemode_Initialization_Option								# Returned by initialize_panemode_state() -- see below.
+	  #
+	  =
+	  INITIAL_POINT		g2d::Point
+
+	also
+	Panemode										# A panemode defines the semantics of a textpane. In particular, the keymap defines what editfns are invoked by what keystrokes.
+	    =											# For a live example of Panemode see   src/lib/x-kit/widget/edit/fundamental-mode.pkg
+	    PANEMODE
+	      {
+		id:			Id,
+		name:			String,
+		doc:			String,
+		#
+		keymap:			Ref( Keymap ),						# The keybindings for this mode, mapping for example "C-f" to forward_char().
+		parent:			Null_Or( Panemode ),					# So we can dynamically inherit keybindings from less specialized panemodes.
+		#
+		self_insert_command:	Keymap_Node,						# Support for C-q handling in   src/lib/x-kit/widget/edit/textpane.pkg
+		#
+		initialize_panemode_state							# Initialize state for (e.g.) the millgraph-mode part of a textpane at startup. This lets each running Panemode instance maintain private state.  We need multiple states because our parent mode(s) may also be maintaining private state(s).
+		  :										# Our canonical call is from textpane::startup_fn().		# textpane	is from   src/lib/x-kit/widget/edit/textpane.pkg
+		  ( Panemode,
+		    Panemode_State,
+		    Null_Or(Textmill_Extension),
+		    List( Panemode_Initialization_Option )
+		  )
+		  ->
+		  ( Panemode_State,
+		    Null_Or( Textmill_Extension ),
+		    List( Panemode_Initialization_Option )
+		  ),
+
+		finalize_state:		(    Panemode, Panemode_State) -> Void,			# Called when a panemode instance shuts down.
+												# If you add another drawpane_*_fn here, update the 'want_drawpane' logic in src/lib/x-kit/widget/edit/make-textpane.pkg
+		drawpane_startup_fn:		Null_Or( Drawpane_Startup_In		-> Editfn_Out ),
+		drawpane_shutdown_fn:		Null_Or( Drawpane_Shutdown_In		-> Editfn_Out ),
+		drawpane_initialize_gadget_fn:	Null_Or( Drawpane_Initialize_Gadget_In	-> Editfn_Out ),
+		drawpane_redraw_request_fn:	Null_Or( Drawpane_Redraw_Request_In	-> Editfn_Out ),
+		drawpane_mouse_click_fn:	Null_Or( Drawpane_Mouse_Click_In	-> Editfn_Out ),
+		drawpane_mouse_drag_fn:		Null_Or( Drawpane_Mouse_Drag_In		-> Editfn_Out ),
+		drawpane_mouse_transit_fn:	Null_Or( Drawpane_Mouse_Transit_In	-> Editfn_Out )
+	      }
+
+	also
+	Millgraph_Node										# Information attachable to a node in a Millgraph.
+	  = MILL_INFO	Mill_Info
+	  | MILLIN	Millin
+	  | MILLOUT	Millout
+
+	withtype
+	Make_Pane_Guiplan_Fn
+	  =
+	  { textpane_to_textmill:	Textpane_To_Textmill,					# 
+	    filepath:			Null_Or( String ),					# make_pane_guiplan will (should!) often select the pane mode to use based on the filename.
+	    textpane_hint:		Crypt	 						# Current pane mode (e.g. fundamental_mode) etc, wrapped up so textmill can't see the relevant types, in the interest of modularity.
+	  }
+	  ->
+	  gt::Gp_Widget_Type
+
+	also
+	Keymap
+	  = 
+	  sm::Map( Keymap_Node )
+
+	also
+	Millboss_To_Mill
+	  =											# 
+	  { id:				Id,							# Unique id to facilitate storing millboss_to_mill instances in indexed datastructures like red-black trees.
+	    #
+	    wakeup:			{							# These calls are set up by calling mill_to_millboss.wake_me[].
+					  wakeup_arg:		Wakeup_Arg,					# 
+					  wakeup_fn:		Wakeup_Arg -> Void 		# Mill thunk registered via mill_to_millboss.wake_me[].
+					}
+					->
+					Void
+	  }
+
+	also
+	Mill_Info										# Used in millboss_imp when tracking all running mills in textmills_by_name, textmills_by_id, textmills_by_filepath.
+	  =											# I'm keeping this record pure (no Ref cells) so that millboss_imp can safely return Map(Mill_Info) values to clients without risking having their states changed by clients behind millboss_imp's back.
+	  { mill_id:			Id,
+	    freshness:			Int,							# The larger this number, the more recently the mill was displayed in a pane.  Used to decide which mill to display by default in switch_to_mill -- we default to the freshest mill not currently visible.
+	    #
+	    app_to_mill:		App_To_Mill,						# Generic interface supported by all mills.
+	    pane_to_mill:		Crypt,							# Mill-specific interface, typically textpane_to_textmill wrapped by textmill_crypts::encrypt__textpane_to_textmill().
+	    #
+	    name:			String,
+	    filepath:			Null_Or( String ),					# NULL if the mill has only in-ram state, nothing on disk.
+	    #
+	    millins:			ipm::Map(Millin),					# Input  ports exported by this mill.
+	    millouts:			opm::Map(Millout),					# Output ports exported by this mill.
+	    #
+	    millboss_to_mill:		Millboss_To_Mill
+	  }
+
+	also
+	Millgraph										# Millboss streams these for plugboard or anyone else interested in tracking the global mill interconnect graph.
+	  =	
+	  { mills_by_id:		idm::Map( Mill_Info ),					# This is the set of all known running mills, indexed by id.  Might as well include these two also, so long as millboss is maintaining them. Silly to force clients to reinvent them:
+	    mills_by_name:		 sm::Map( Mill_Info ),					# Same, by name.  
+	    mills_by_filepath:		 sm::Map( Mill_Info ),					# Same, by file on which it is open (if any).
+	    #
+	    digraph:			dxy::Graph( Millgraph_Node, Void ),			# A digraph showing which mill inports are watching which mill outports.  The general graph structure is  mill_node -> outport_node -> inport_node -> mill_node with the arrows being respectively one-to-many, many-to-many, many-to-one.
+	    #											# We map digraphxy::Node(Id)      -> Id        via digraphxy::node_id.
+	    #											# We map digraphxy::Tag(Portpair) -> Portpair  via digraphxy::tag_other.
+	    #
+	    mill_nodes:			idm::Map(dxy::Node(Millgraph_Node)),			# Maps Id        values to digraph::Node values to map mill       values into digraph land.	This map contains one Mill_Info value for each running mill.
+	    inport_nodes:		ipm::Map(dxy::Node(Millgraph_Node)),			# Maps Inport    values to digraph::Node values to map inport     values into digraph land.	This map contains one Millin    value for each input  port on (any) running mill.
+	    outport_nodes:		opm::Map(dxy::Node(Millgraph_Node)),			# Maps Outport   values to digraph::Node values to map outport    values into digraph land.	This map contains one Millout   value for each output port on (any) running mill.
+	    #
+	    edge_tags:	        	 sm::Map(dxy::Tag(Void))				# Maps port_type values to digraph::Tag  values to map watcher/ee values into digraph land.	This map contains one Tag for each port_type string in a Millin or Millout (i.e., each type of datastream in the millgraph).
+	  }
+
+	also
+	Panemode_State										# We use this to hold the state(s) of a running Panemode instance.
+	  =											# 
+	  { mode:			Panemode,						# 
+	    data:			sm::Map( Crypt )					# State information for 'mode' plus all of its ancestors, encoded so they don't need to know each other's types, in the interests of modularity. Map contains one entry each for the mode and its ancestors, indexed by name.
+	  }
+
+	also
+	Textmill_Arg
+	  =
+	  { name:			String,
+	    textmill_options:		List( Textmill_Option )
+	  }
+
+	also
+	Textmill_State																# 
+	  =
+	  { state:		Ref( Textstate			),										# Current visible state of textmill.
+	    edit_history:	Ref( Edit_History		),										# Recent visible states of textmill, to support undo functionality.
+	    filepath:		Ref( Null_Or( String )		),										# Name of file being edited in buffer, or NULL if no file is associated with buffer contents.
+	    name:		Ref( String			),										# Name of textmill for display purposes, typically defaults to filename.
+	    dirty:		Ref( Bool			),										# TRUE if buffer contents have been changed since being read from disk.
+	    readonly:		Ref( Bool			),										# TRUE if buffer contents are currently marked as read-only.
+	    textpane_hint:	Ref( Crypt			)										# Point+mark etc info stored for textpane.pkg, in a format (only) textpane can decipher.
+	  }
+
+	also
+	Textmill_Imports
+	  =
+	  {																	# Ports we use, provided by other imps.
+	  }
+
+	also
+	Textmill_Statechange__Watchers														# Type for tracking the set of clients subscribed to a mill for Textmill_Statechange updates.
+	    =																	#
+	    ipm::Map( (Inport, (Outport, Textmill_Statechange) -> Void) )									# 
+
+	also
+	Textmill_Statechange_Millout
+	  =	
+	  { note_watcher:  ( Inport,
+			     Null_Or(Millin),													# Second arg will be NULL if watcher is not another mill (e.g. a pane).
+			     (Outport,Textmill_Statechange) -> Void
+			   )
+			   -> Void,
+
+	    drop_watcher:  Inport -> Void													# The Inport must match that given to note_watcher.
+	  }				 
+
+	also
+	Textmill_Statechange__Watchee														# Type for tracking the client we are subscribed to for Textmill_Statechange updates.
+	  =																	#
+	  { wrapped_millout:			Millout,											# 
+	    millout:				Textmill_Statechange_Millout									# Unwrapped version of previous.
+	  }
+
+	also
+	Textmill_Runstate
+	  =																	# These values will be statically globally visible throughout the code body for the imp.
+	  { id:					Id,
+	    me:					Textmill_State,											# 
+	    textmill_arg:			Textmill_Arg,
+	    textpane_to_textmill:		Textpane_To_Textmill,
+	    mill_to_millboss:			Mill_To_Millboss,
+	    millins:				ipm::Map(Millin),										# Millins for this mill indexed by Inport.
+	    millouts:				opm::Map(Millout),										# Output streams available to watch.  Indexed by Outport.
+	    make_pane_guiplan':			Make_Pane_Guiplan_Fn,
+	    finalize_textmill_extension:	Void -> Void,											# Function to be called at textmill shutdown, so textmill extension can do any required shutdown of its own.
+	    imports:				Textmill_Imports,										# Imps to which we send requests.
+	    to:					Replyqueue,											# The name makes   foo::pass_something(imp) to {. ... }   syntax read well.
+	    #																	#
+	    textmill_statechange__outport:	Outport,											# Name of     port on which we stream out textmill changes.
+	    textmill_statechange__millout:	Millout,											#             Port on which we stream out textmill changes.
+	    textmill_statechange__watchers:	Ref( Textmill_Statechange__Watchers ),								# Watchers of port on which we stream out textmill changes.
+	    #																	#
+	    textmill_statechange__inport:	Inport,												# Name of     port on which we read in    textmill changes.
+	    textmill_statechange__millin:	Millin,												#             Port on which we read in    textmill changes.
+	    textmill_statechange__watchee:	Ref( Null_Or( Textmill_Statechange__Watchee ) ),						# Port from           which we read in    textmill changes.
+	    #																	#
+	    end_gun':				End_Gun												# We shut down the microthread when this fires.
+	  }
+
+	also
+	Textmill_Q
+	  =
+	  Mailqueue( Textmill_Runstate -> Void )
+
+	also
+	Textmill_Extension
+	  =
+	  { id				: Id,							# Unique id for extension, to facilitate distinguishing them and storing them in indexed collections like id_maps.
+	    #
+	    initialize_textmill_extension
+	      :
+	      { mill_id:		Id,
+		textmill_q:		Textmill_Q,
+		millins:		ipm::Map(Millin),					# Inports  exported by parent textmill.
+		millouts:		opm::Map(Millout),					# Outports exported by parent textmill.
+		make_pane_guiplan':	Make_Pane_Guiplan_Fn
+	      }
+	     ->
+	      {
+		millins:		ipm::Map(Millin),					# Above 'millins'  augmented as required by this textmill extension.  Parent textmill will publish via its App_To_Mill interface.
+		millouts:		opm::Map(Millout),					# Above 'millouts' augmented as required by this textmill extension.  Parent textmill will publish via its App_To_Mill interface.
+		#
+		mill_extension_state:	Crypt,							# Arbitrary private state for this mill extension.
+		#
+		make_pane_guiplan':		Make_Pane_Guiplan_Fn,
+		finalize_textmill_extension:	Void -> Void					# Function to be called at textmill shutdown, so textmill extension can do any required shutdown of its own.
+	      }
+	  }
+
+	also
+	Editfn_In										# This is what  do_pass_edit_result()  passes to editfns in   src/lib/x-kit/widget/edit/textmill.pkg
+	  =
+	  { args:			List( Prompted_Arg ),
+	    textlines:			Textlines,
+	    point:			g2d::Point,						# As in Point_And_Mark.  (Emacs nomenclature -- 'point' is the visible cursor, 'mark' if set is the other end of the selected region.)
+	    mark:			Null_Or( g2d::Point ),					# 
+	    lastmark:			Null_Or( g2d::Point ),					# Last valid value of 'mark' if any -- used to retrieve old mark values by   exchange_point_and_mark	in   src/lib/x-kit/widget/edit/fundamental-mode.pkg
+	    screen_origin:		g2d::Point,						# Origin of pane-visible text relative to textmill contents:  (0,0) means we're showing top of buffer at top of textpane.
+	    visible_lines:		Int,							# Number of lines of text visible in pane.
+	    keystring:			String,							# User keystroke that invoked this editfn.
+	    readonly:			Bool,							# TRUE iff textmill contents are currently marked as read-only.
+	    numeric_prefix:		Null_Or( Int ),						# ^U "Universal numeric prefix" value for this editfn if supplied by user, else NULL.
+	    pane_tag:			Int,							# Tag of pane for which this editfn is being invoked.  This is a small int for human/GUI use.
+	    pane_id:			Id,							# Id  of pane for which this editfn is being invoked.
+	    mill_id:			Id,							# Id  of mill for which this editfn is being invoked.
+	    to:				Replyqueue,						# The name makes   foo::pass_something(imp) to {. ... }   syntax read well.
+	    edit_history:		Edit_History,						# Recent visible states of textmill, to support undo functionality.
+	    widget_to_guiboss:		gt::Widget_To_Guiboss,					# 
+	    mill_to_millboss:		Mill_To_Millboss,
+	    #
+	    mainmill_modestate:		Panemode_State,						# Any persistent per-mode state (e.g., private state for fundamental-mode.pkg) for main mill is available via this.
+	    minimill_modestate:		Panemode_State,						# Any persistent per-mode state (e.g., private state for    minimill-mode.pkg) for mini mill is available via this.
+	    #
+	    mill_extension_state:	Crypt,
+	    textpane_to_textmill:	Textpane_To_Textmill,					# NB: Editfns run in textmill's microthread to guarantee atomicity, so any attempt by them to invoke blocking textpane_to_textmill.* fns is likely to deadlock.
+	    mode_to_drawpane:		Null_Or( m2d::Mode_To_Drawpane ),			# 
+	    valid_completions:		Null_Or( String -> List(String) )			# If this is non-NULL then user is entering a commandname or filename or millname(=buffername) on the modeline, and given fn returns all valid completions of string-entered-so-far.
+	  }
+
+	also
+	Editfn_Out										# Return   NULL    to abort. This is appropriate when operation cannot be performed, for example previous_char called at start of buffer.
+	  =											# Return   THE []  otherwise, where list contains CHANGES to state.  E.g., do not return TEXTLINES unless textlines value was changed.
+	  Fail_Or (List( Editfn_Out_Option ) )							# One advantage of this system is that additional returns can be accomodated without breaking old code.
+
+	also
+	Editfn = Editfn_In -> Editfn_Out
+
+	also
+	Plain_Editfn
+	  =
+	  { name:			String,
+	    doc:			String,
+	    args:			List(Promptfor),					# Technically 'parameters', but 'args' is shorter. :-)  Args to read in interactively from user, e.g. filenames and search strings.
+	    editfn:			Editfn							# 
+	  }
+
+	also
+	Edit_Arg										# textpane.pkg passes this to 	textmill::pass_edit_result().
+	  =
+	  { keystring:			String,							# User keystroke that invoked this editfn.
+	    numeric_prefix:		Null_Or( Int ),						# ^U "Universal numeric prefix" value for this editfn if supplied by user, else NULL.
+	    prompted_args:		List( Prompted_Arg ),					# Args read interactively from user.
+	    point_and_mark:		Point_And_Mark,
+	    lastmark:			Null_Or(g2d::Point),
+	    screen_origin:		g2d::Point,						# Origin of pane-visible text relative to textmill contents:  (0,0) means we're showing top of buffer at top of textpane.
+	    visible_lines:		Int,							# Number of lines of text visible in pane.
+	    log_undo_info:		Bool,							# If log_undo_info is FALSE no entry will be made in the undo history.
+	    #
+	    pane_tag:			Int,							# Tag of pane for which this editfn is being invoked.  This is a small int for human/GUI use.
+	    pane_id:			Id,							# Id  of pane for which this editfn is being invoked.
+	    editfn_node:		Editfn_Node,
+ 	    widget_to_guiboss:		gt::Widget_To_Guiboss,					# Mainly for access to get_cutbuffer_contents/set_cutbuffer_contents in mill_to_millboss.
+	    #
+	    mainmill_modestate:		Panemode_State,
+	    minimill_modestate:		Panemode_State,
+	    #
+	    textpane_to_textmill:	Textpane_To_Textmill,					# 
+	    mode_to_drawpane:		Null_Or( m2d::Mode_To_Drawpane ),			#
+	    
+	    valid_completions:		Null_Or( String -> List(String) )			# If this is non-NULL then user is entering a commandname or filename or millname(=buffername) on the modeline, and given fn returns all valid completions of string-entered-so-far.
+	  }
+
+	also
+	Drawpane_Startup_Arg									# This is passed from textpane.pkg to textmill.pkg.
+	  =
+	  {
+	    drawpane_id:		Id,							# Unique id of this drawpane widget.
+	    doc:			String,							# Text description of this drawpane widget for debug/display purposes.
+	    widget_to_guiboss:		gt::Widget_To_Guiboss,					# 
+	    point_and_mark:		Point_And_Mark,
+	    lastmark:			Null_Or( g2d::Point ),					# Last valid value of 'mark' if any -- used to retrieve old mark values by   exchange_point_and_mark	in   src/lib/x-kit/widget/edit/fundamental-mode.pkg
+	    screen_origin:		g2d::Point,						# Origin of pane-visible text relative to textmill contents:  (0,0) means we're showing top of buffer at top of textpane.
+	    visible_lines:		Int,							# Number of lines of text visible in pane.
+	    log_undo_info:		Bool,							# If log_undo_info is FALSE no entry will be made in the undo history.
+	    pane_tag:			Int,							# Tag of pane for which this editfn is being invoked.  This is a small int for human/GUI use.
+	    pane_id:			Id,							# Id  of pane for which this editfn is being invoked.
+	    #
+	    mainmill_modestate:		Panemode_State,						# Any persistent per-mode state (e.g., private state for fundamental-mode.pkg) for main mill is available via this.
+	    minimill_modestate:		Panemode_State,						# Any persistent per-mode state (e.g., private state for    minimill-mode.pkg) for mini mill is available via this.
+	    #
+	    textpane_to_textmill:	Textpane_To_Textmill,					# NB: Editfns run in textmill's microthread to guarantee atomicity, so any attempt by them to invoke blocking textpane_to_textmill.* fns is likely to deadlock.
+	    mode_to_drawpane:		m2d::Mode_To_Drawpane,
+	    valid_completions:		Null_Or( String -> List(String) ),			# If this is non-NULL then user is entering a commandname or filename or millname(=buffername) on the modeline, and given fn returns all valid completions of string-entered-so-far.
+	    #
+	    do:				(Void -> Void) -> Void,					# Used by widget subthreads to run code in main widget microthread.
+	    to:				Replyqueue						# Used to call 'pass_*' methods in other imps.
+	  }
+	also
+	Drawpane_Startup_In									# This is passed from textmill.pkg to foo-mode.pkg
+	  =
+	  {
+	    drawpane_id:		Id,							# Unique id of this drawpane widget.
+	    doc:			String,							# Text description of this drawpane widget for debug/display purposes.
+	    widget_to_guiboss:		gt::Widget_To_Guiboss,					# 
+	    textlines:			Textlines,
+	    point_and_mark:		Point_And_Mark,
+	    lastmark:			Null_Or( g2d::Point ),					# Last valid value of 'mark' if any -- used to retrieve old mark values by   exchange_point_and_mark	in   src/lib/x-kit/widget/edit/fundamental-mode.pkg
+	    screen_origin:		g2d::Point,						# Origin of pane-visible text relative to textmill contents:  (0,0) means we're showing top of buffer at top of textpane.
+	    visible_lines:		Int,							# Number of lines of text visible in pane.
+	    readonly:			Bool,							# TRUE iff textmill contents are currently marked as read-only.
+	    pane_tag:			Int,							# Tag of pane for which this editfn is being invoked.  This is a small int for human/GUI use.
+	    pane_id:			Id,							# Id  of pane for which this editfn is being invoked.
+	    mill_id:			Id,							# Id  of mill for which this editfn is being invoked.
+	    edit_history:		Edit_History,						# Recent visible states of textmill, to support undo functionality.
+	    mill_to_millboss:		Mill_To_Millboss,
+	    #
+	    mainmill_modestate:		Panemode_State,						# Any persistent per-mode state (e.g., private state for fundamental-mode.pkg) for main mill is available via this.
+	    minimill_modestate:		Panemode_State,						# Any persistent per-mode state (e.g., private state for    minimill-mode.pkg) for mini mill is available via this.
+	    #
+	    mill_extension_state:	Crypt,
+	    textpane_to_textmill:	Textpane_To_Textmill,					# NB: Editfns run in textmill's microthread to guarantee atomicity, so any attempt by them to invoke blocking textpane_to_textmill.* fns is likely to deadlock.
+	    mode_to_drawpane:		m2d::Mode_To_Drawpane,
+	    valid_completions:		Null_Or( String -> List(String) ),			# If this is non-NULL then user is entering a commandname or filename or millname(=buffername) on the modeline, and given fn returns all valid completions of string-entered-so-far.
+	    #
+	    do:				(Void -> Void) -> Void,					# Used by widget subthreads to run code in main widget microthread.
+	    to:				Replyqueue						# Used to call 'pass_*' methods in other imps.
+	  }
+
+	also
+	Drawpane_Shutdown_Arg									# This is passed from textpane.pkg to textmill.pkg.
+	  =
+	  {
+	    point_and_mark:		Point_And_Mark,
+	    lastmark:			Null_Or( g2d::Point ),					# Last valid value of 'mark' if any -- used to retrieve old mark values by   exchange_point_and_mark	in   src/lib/x-kit/widget/edit/fundamental-mode.pkg
+	    screen_origin:		g2d::Point,						# Origin of pane-visible text relative to textmill contents:  (0,0) means we're showing top of buffer at top of textpane.
+	    visible_lines:		Int,							# Number of lines of text visible in pane.
+	    log_undo_info:		Bool,							# If log_undo_info is FALSE no entry will be made in the undo history.
+	    pane_tag:			Int,							# Tag of pane for which this editfn is being invoked.  This is a small int for human/GUI use.
+	    pane_id:			Id,							# Id  of pane for which this editfn is being invoked.
+	    #
+	    mainmill_modestate:		Panemode_State,						# Any persistent per-mode state (e.g., private state for fundamental-mode.pkg) for main mill is available via this.
+	    minimill_modestate:		Panemode_State,						# Any persistent per-mode state (e.g., private state for    minimill-mode.pkg) for mini mill is available via this.
+	    #
+	    textpane_to_textmill:	Textpane_To_Textmill,					# NB: Editfns run in textmill's microthread to guarantee atomicity, so any attempt by them to invoke blocking textpane_to_textmill.* fns is likely to deadlock.
+	    mode_to_drawpane:		m2d::Mode_To_Drawpane,
+	    valid_completions:		Null_Or( String -> List(String) )			# If this is non-NULL then user is entering a commandname or filename or millname(=buffername) on the modeline, and given fn returns all valid completions of string-entered-so-far.
+	  }
+	also
+	Drawpane_Shutdown_In									# This is passed from textmill.pkg to foo-mode.pkg
+	  =
+	  {
+	    textlines:			Textlines,
+	    point_and_mark:		Point_And_Mark,
+	    lastmark:			Null_Or( g2d::Point ),					# Last valid value of 'mark' if any -- used to retrieve old mark values by   exchange_point_and_mark	in   src/lib/x-kit/widget/edit/fundamental-mode.pkg
+	    screen_origin:		g2d::Point,						# Origin of pane-visible text relative to textmill contents:  (0,0) means we're showing top of buffer at top of textpane.
+	    visible_lines:		Int,							# Number of lines of text visible in pane.
+	    readonly:			Bool,							# TRUE iff textmill contents are currently marked as read-only.
+	    pane_tag:			Int,							# Tag of pane for which this editfn is being invoked.  This is a small int for human/GUI use.
+	    pane_id:			Id,							# Id  of pane for which this editfn is being invoked.
+	    mill_id:			Id,							# Id  of mill for which this editfn is being invoked.
+	    edit_history:		Edit_History,						# Recent visible states of textmill, to support undo functionality.
+	    mill_to_millboss:		Mill_To_Millboss,
+	    #
+	    mainmill_modestate:		Panemode_State,						# Any persistent per-mode state (e.g., private state for fundamental-mode.pkg) for main mill is available via this.
+	    minimill_modestate:		Panemode_State,						# Any persistent per-mode state (e.g., private state for    minimill-mode.pkg) for mini mill is available via this.
+	    #
+	    mill_extension_state:	Crypt,
+	    textpane_to_textmill:	Textpane_To_Textmill,					# NB: Editfns run in textmill's microthread to guarantee atomicity, so any attempt by them to invoke blocking textpane_to_textmill.* fns is likely to deadlock.
+	    mode_to_drawpane:		m2d::Mode_To_Drawpane,
+	    valid_completions:		Null_Or( String -> List(String) )			# If this is non-NULL then user is entering a commandname or filename or millname(=buffername) on the modeline, and given fn returns all valid completions of string-entered-so-far.
+	  }
+
+	also
+	Drawpane_Initialize_Gadget_Arg								# This is passed from textpane.pkg to textmill.pkg.
+	  =
+	  {
+	    drawpane_id:		Id,							# Unique id of this drawpane widget.
+	    doc:			String,							# Text description of this drawpane widget for debug/display purposes.
+	    site:			g2d::Box,						# Widget's assigned area in window coordinates.
+	    pass_font:			List(String) -> Replyqueue
+						     -> (evt::Font -> Void) -> Void,		# Nonblocking version of next, for use in imps.
+	     get_font:			List(String) ->	 evt::Font,				# Accepts a list of font names which are tried in order.
+	    make_rw_pixmap:		g2d::Size -> g2p::Gadget_To_Rw_Pixmap,			# Make an Xserver-side rw_pixmap for scratch use by widget.  In general there is no need for the widget to explicitly free these -- guiboss_imp will do this automatically when the gui is killed.
+	    #
+	    point_and_mark:		Point_And_Mark,
+	    lastmark:			Null_Or( g2d::Point ),					# Last valid value of 'mark' if any -- used to retrieve old mark values by   exchange_point_and_mark	in   src/lib/x-kit/widget/edit/fundamental-mode.pkg
+	    screen_origin:		g2d::Point,						# Origin of pane-visible text relative to textmill contents:  (0,0) means we're showing top of buffer at top of textpane.
+	    visible_lines:		Int,							# Number of lines of text visible in pane.
+	    log_undo_info:		Bool,							# If log_undo_info is FALSE no entry will be made in the undo history.
+	    pane_tag:			Int,							# Tag of pane for which this editfn is being invoked.  This is a small int for human/GUI use.
+	    pane_id:			Id,							# Id  of pane for which this editfn is being invoked.
+	    widget_to_guiboss:		gt::Widget_To_Guiboss,					# 
+	    theme:			wt::Widget_Theme,
+	    #
+	    mainmill_modestate:		Panemode_State,						# Any persistent per-mode state (e.g., private state for fundamental-mode.pkg) for main mill is available via this.
+	    minimill_modestate:		Panemode_State,						# Any persistent per-mode state (e.g., private state for    minimill-mode.pkg) for mini mill is available via this.
+	    #
+	    textpane_to_textmill:	Textpane_To_Textmill,					# NB: Editfns run in textmill's microthread to guarantee atomicity, so any attempt by them to invoke blocking textpane_to_textmill.* fns is likely to deadlock.
+	    mode_to_drawpane:		m2d::Mode_To_Drawpane,
+	    valid_completions:		Null_Or( String -> List(String) ),			# If this is non-NULL then user is entering a commandname or filename or millname(=buffername) on the modeline, and given fn returns all valid completions of string-entered-so-far.
+	    #
+	    do:				(Void -> Void) -> Void,					# Used by widget subthreads to run code in main widget microthread.
+	    to:				Replyqueue						# Used to call 'pass_*' methods in other imps.
+	  }
+	also
+	Drawpane_Initialize_Gadget_In								# This is passed from textmill.pkg to foo-mode.pkg
+	  =
+	  {
+	    drawpane_id:		Id,							# Unique id of this drawpane widget.
+	    doc:			String,							# Text description of this drawpane widget for debug/display purposes.
+	    site:			g2d::Box,						# Widget's assigned area in window coordinates.
+	    pass_font:			List(String) -> Replyqueue
+						     -> (evt::Font -> Void) -> Void,		# Nonblocking version of next, for use in imps.
+	     get_font:			List(String) ->	 evt::Font,				# Accepts a list of font names which are tried in order.
+	    make_rw_pixmap:		g2d::Size -> g2p::Gadget_To_Rw_Pixmap,			# Make an Xserver-side rw_pixmap for scratch use by widget.  In general there is no need for the widget to explicitly free these -- guiboss_imp will do this automatically when the gui is killed.
+	    #
+	    textlines:			Textlines,
+	    point_and_mark:		Point_And_Mark,
+	    lastmark:			Null_Or( g2d::Point ),					# Last valid value of 'mark' if any -- used to retrieve old mark values by   exchange_point_and_mark	in   src/lib/x-kit/widget/edit/fundamental-mode.pkg
+	    screen_origin:		g2d::Point,						# Origin of pane-visible text relative to textmill contents:  (0,0) means we're showing top of buffer at top of textpane.
+	    visible_lines:		Int,							# Number of lines of text visible in pane.
+	    readonly:			Bool,							# TRUE iff textmill contents are currently marked as read-only.
+	    pane_tag:			Int,							# Tag of pane for which this editfn is being invoked.  This is a small int for human/GUI use.
+	    pane_id:			Id,							# Id  of pane for which this editfn is being invoked.
+	    mill_id:			Id,							# Id  of mill for which this editfn is being invoked.
+	    edit_history:		Edit_History,						# Recent visible states of textmill, to support undo functionality.
+	    widget_to_guiboss:		gt::Widget_To_Guiboss,					# 
+	    mill_to_millboss:		Mill_To_Millboss,
+	    theme:			wt::Widget_Theme,
+	    #
+	    mainmill_modestate:		Panemode_State,						# Any persistent per-mode state (e.g., private state for fundamental-mode.pkg) for main mill is available via this.
+	    minimill_modestate:		Panemode_State,						# Any persistent per-mode state (e.g., private state for    minimill-mode.pkg) for mini mill is available via this.
+	    #
+	    mill_extension_state:	Crypt,
+	    textpane_to_textmill:	Textpane_To_Textmill,					# NB: Editfns run in textmill's microthread to guarantee atomicity, so any attempt by them to invoke blocking textpane_to_textmill.* fns is likely to deadlock.
+	    mode_to_drawpane:		m2d::Mode_To_Drawpane,
+	    valid_completions:		Null_Or( String -> List(String) ),			# If this is non-NULL then user is entering a commandname or filename or millname(=buffername) on the modeline, and given fn returns all valid completions of string-entered-so-far.
+	    #
+	    do:				(Void -> Void) -> Void,					# Used by widget subthreads to run code in main widget microthread.
+	    to:				Replyqueue						# Used to call 'pass_*' methods in other imps.
+	  }
+
+
+	also
+	Drawpane_Redraw_Request_Arg								# This is passed from textpane.pkg to textmill.pkg.
+	  =
+	  {
+	    drawpane_id:		Id,							# Unique id of this drawpane widget.
+	    doc:			String,							# Text description of this drawpane widget for debug/display purposes.
+	    frame_number:		Int,							# 1,2,3,... Purely for convenience of widget, guiboss-imp makes no use of this.
+	    site:			g2d::Box,						# Widget's assigned area in window coordinates.
+	    duration_in_seconds:	Float,							# If state has changed look-imp should call note_changed_gadget_foreground() before this time is up. Also useful for motionblur.
+	    gadget_mode:		gt::Gadget_Mode,
+	    popup_nesting_depth:	Int,							# 0 for gadgets on basewindow, 1 for gadgets on popup on basewindow, 2 for gadgets on popup on popup, etc.
+	    #
+	    point_and_mark:		Point_And_Mark,
+	    lastmark:			Null_Or( g2d::Point ),					# Last valid value of 'mark' if any -- used to retrieve old mark values by   exchange_point_and_mark	in   src/lib/x-kit/widget/edit/fundamental-mode.pkg
+	    screen_origin:		g2d::Point,						# Origin of pane-visible text relative to textmill contents:  (0,0) means we're showing top of buffer at top of textpane.
+	    visible_lines:		Int,							# Number of lines of text visible in pane.
+	    log_undo_info:		Bool,							# If log_undo_info is FALSE no entry will be made in the undo history.
+	    pane_tag:			Int,							# Tag of pane for which this editfn is being invoked.  This is a small int for human/GUI use.
+	    pane_id:			Id,							# Id  of pane for which this editfn is being invoked.
+	    widget_to_guiboss:		gt::Widget_To_Guiboss,					# 
+	    theme:			wt::Widget_Theme,
+	    #
+	    mainmill_modestate:		Panemode_State,						# Any persistent per-mode state (e.g., private state for fundamental-mode.pkg) for main mill is available via this.
+	    minimill_modestate:		Panemode_State,						# Any persistent per-mode state (e.g., private state for    minimill-mode.pkg) for mini mill is available via this.
+	    #
+	    textpane_to_textmill:	Textpane_To_Textmill,					# NB: Editfns run in textmill's microthread to guarantee atomicity, so any attempt by them to invoke blocking textpane_to_textmill.* fns is likely to deadlock.
+	    mode_to_drawpane:		m2d::Mode_To_Drawpane,					# 
+	    valid_completions:		Null_Or( String -> List(String) ),			# If this is non-NULL then user is entering a commandname or filename or millname(=buffername) on the modeline, and given fn returns all valid completions of string-entered-so-far.
+	    #
+	    do:				(Void -> Void) -> Void,					# Used by widget subthreads to run code in main widget microthread.
+	    to:				Replyqueue						# Used to call 'pass_*' methods in other imps.
+	  }
+	also
+	Drawpane_Redraw_Request_In								# This is passed from textmill.pkg to foo-mode.pkg
+	  =
+	  {
+	    drawpane_id:		Id,							# Unique id of this drawpane widget.
+	    doc:			String,							# Text description of this drawpane widget for debug/display purposes.
+	    frame_number:		Int,							# 1,2,3,... Purely for convenience of widget, guiboss-imp makes no use of this.
+	    site:			g2d::Box,						# Widget's assigned area in window coordinates.
+	    duration_in_seconds:	Float,							# If state has changed look-imp should call note_changed_gadget_foreground() before this time is up. Also useful for motionblur.
+	    gadget_mode:		gt::Gadget_Mode,
+	    popup_nesting_depth:	Int,							# 0 for gadgets on basewindow, 1 for gadgets on popup on basewindow, 2 for gadgets on popup on popup, etc.
+	    #
+	    textlines:			Textlines,
+	    point_and_mark:		Point_And_Mark,
+	    lastmark:			Null_Or( g2d::Point ),					# Last valid value of 'mark' if any -- used to retrieve old mark values by   exchange_point_and_mark	in   src/lib/x-kit/widget/edit/fundamental-mode.pkg
+	    screen_origin:		g2d::Point,						# Origin of pane-visible text relative to textmill contents:  (0,0) means we're showing top of buffer at top of textpane.
+	    visible_lines:		Int,							# Number of lines of text visible in pane.
+	    readonly:			Bool,							# TRUE iff textmill contents are currently marked as read-only.
+	    pane_tag:			Int,							# Tag of pane for which this editfn is being invoked.  This is a small int for human/GUI use.
+	    pane_id:			Id,							# Id  of pane for which this editfn is being invoked.
+	    mill_id:			Id,							# Id  of mill for which this editfn is being invoked.
+	    edit_history:		Edit_History,						# Recent visible states of textmill, to support undo functionality.
+	    widget_to_guiboss:		gt::Widget_To_Guiboss,					# 
+	    mill_to_millboss:		Mill_To_Millboss,
+	    theme:			wt::Widget_Theme,
+	    #
+	    mainmill_modestate:		Panemode_State,						# Any persistent per-mode state (e.g., private state for fundamental-mode.pkg) for main mill is available via this.
+	    minimill_modestate:		Panemode_State,						# Any persistent per-mode state (e.g., private state for    minimill-mode.pkg) for mini mill is available via this.
+	    #
+	    mill_extension_state:	Crypt,
+	    textpane_to_textmill:	Textpane_To_Textmill,					# NB: Editfns run in textmill's microthread to guarantee atomicity, so any attempt by them to invoke blocking textpane_to_textmill.* fns is likely to deadlock.
+	    mode_to_drawpane:		m2d::Mode_To_Drawpane,					# 
+	    valid_completions:		Null_Or( String -> List(String) ),			# If this is non-NULL then user is entering a commandname or filename or millname(=buffername) on the modeline, and given fn returns all valid completions of string-entered-so-far.
+	    #
+	    do:				(Void -> Void) -> Void,					# Used by widget subthreads to run code in main widget microthread.
+	    to:				Replyqueue						# Used to call 'pass_*' methods in other imps.
+	  }
+
+	also
+	Drawpane_Mouse_Click_Arg								# This is passed from textpane.pkg to textmill.pkg.
+	  =
+	  {
+	    drawpane_id:		Id,							# Unique id of this drawpane widget.
+	    doc:			String,							# Text description of this drawpane widget for debug/display purposes.
+	    button:			evt::Mousebutton,
+	    event:			gt::Mousebutton_Event,					# MOUSEBUTTON_PRESS or MOUSEBUTTON_RELEASE.
+	    point:			g2d::Point,
+	    widget_layout_hint:		gt::Widget_Layout_Hint,
+	    frame_indent_hint:		gt::Frame_Indent_Hint,
+	    site:			g2d::Box,						# Widget's assigned area in window coordinates.
+	    modifier_keys_state:	evt::Modifier_Keys_State,				# State of the modifier keys (shift, ctrl...).
+	    mousebuttons_state:		evt::Mousebuttons_State,				# State of mouse buttons as a bool record.
+	    point_and_mark:		Point_And_Mark,
+	    lastmark:			Null_Or( g2d::Point ),					# Last valid value of 'mark' if any -- used to retrieve old mark values by   exchange_point_and_mark	in   src/lib/x-kit/widget/edit/fundamental-mode.pkg
+	    screen_origin:		g2d::Point,						# Origin of pane-visible text relative to textmill contents:  (0,0) means we're showing top of buffer at top of textpane.
+	    visible_lines:		Int,							# Number of lines of text visible in pane.
+	    log_undo_info:		Bool,							# If log_undo_info is FALSE no entry will be made in the undo history.
+	    pane_tag:			Int,							# Tag of pane for which this editfn is being invoked.  This is a small int for human/GUI use.
+	    pane_id:			Id,							# Id  of pane for which this editfn is being invoked.
+	    widget_to_guiboss:		gt::Widget_To_Guiboss,					# 
+	    theme:			wt::Widget_Theme,
+	    #
+	    mainmill_modestate:		Panemode_State,						# Any persistent per-mode state (e.g., private state for fundamental-mode.pkg) for main mill is available via this.
+	    minimill_modestate:		Panemode_State,						# Any persistent per-mode state (e.g., private state for    minimill-mode.pkg) for mini mill is available via this.
+	    #
+	    textpane_to_textmill:	Textpane_To_Textmill,					# NB: Editfns run in textmill's microthread to guarantee atomicity, so any attempt by them to invoke blocking textpane_to_textmill.* fns is likely to deadlock.
+	    mode_to_drawpane:		m2d::Mode_To_Drawpane,					# 
+	    valid_completions:		Null_Or( String -> List(String) ),			# If this is non-NULL then user is entering a commandname or filename or millname(=buffername) on the modeline, and given fn returns all valid completions of string-entered-so-far.
+	    #
+	    do:				(Void -> Void) -> Void,					# Used by widget subthreads to run code in main widget microthread.
+	    to:				Replyqueue						# Used to call 'pass_*' methods in other imps.
+	  }
+	also
+	Drawpane_Mouse_Click_In									# This is passed from textmill.pkg to foo-mode.pkg
+	  =
+	  {
+	    drawpane_id:		Id,							# Unique id of this drawpane widget.
+	    doc:			String,							# Text description of this drawpane widget for debug/display purposes.
+	    button:			evt::Mousebutton,
+	    event:			gt::Mousebutton_Event,					# MOUSEBUTTON_PRESS or MOUSEBUTTON_RELEASE.
+	    point:			g2d::Point,
+	    widget_layout_hint:		gt::Widget_Layout_Hint,
+	    frame_indent_hint:		gt::Frame_Indent_Hint,
+	    site:			g2d::Box,						# Widget's assigned area in window coordinates.
+	    modifier_keys_state:	evt::Modifier_Keys_State,				# State of the modifier keys (shift, ctrl...).
+	    mousebuttons_state:		evt::Mousebuttons_State,				# State of mouse buttons as a bool record.
+	    textlines:			Textlines,
+	    point_and_mark:		Point_And_Mark,
+	    lastmark:			Null_Or( g2d::Point ),					# Last valid value of 'mark' if any -- used to retrieve old mark values by   exchange_point_and_mark	in   src/lib/x-kit/widget/edit/fundamental-mode.pkg
+	    screen_origin:		g2d::Point,						# Origin of pane-visible text relative to textmill contents:  (0,0) means we're showing top of buffer at top of textpane.
+	    visible_lines:		Int,							# Number of lines of text visible in pane.
+	    readonly:			Bool,							# TRUE iff textmill contents are currently marked as read-only.
+	    pane_tag:			Int,							# Tag of pane for which this editfn is being invoked.  This is a small int for human/GUI use.
+	    pane_id:			Id,							# Id  of pane for which this editfn is being invoked.
+	    mill_id:			Id,							# Id  of mill for which this editfn is being invoked.
+	    edit_history:		Edit_History,						# Recent visible states of textmill, to support undo functionality.
+	    widget_to_guiboss:		gt::Widget_To_Guiboss,					# 
+	    mill_to_millboss:		Mill_To_Millboss,
+	    theme:			wt::Widget_Theme,
+	    #
+	    mainmill_modestate:		Panemode_State,						# Any persistent per-mode state (e.g., private state for fundamental-mode.pkg) for main mill is available via this.
+	    minimill_modestate:		Panemode_State,						# Any persistent per-mode state (e.g., private state for    minimill-mode.pkg) for mini mill is available via this.
+	    #
+	    mill_extension_state:	Crypt,
+	    textpane_to_textmill:	Textpane_To_Textmill,					# NB: Editfns run in textmill's microthread to guarantee atomicity, so any attempt by them to invoke blocking textpane_to_textmill.* fns is likely to deadlock.
+	    mode_to_drawpane:		m2d::Mode_To_Drawpane,					# 
+	    valid_completions:		Null_Or( String -> List(String) ),			# If this is non-NULL then user is entering a commandname or filename or millname(=buffername) on the modeline, and given fn returns all valid completions of string-entered-so-far.
+	    #
+	    do:				(Void -> Void) -> Void,					# Used by widget subthreads to run code in main widget microthread.
+	    to:				Replyqueue						# Used to call 'pass_*' methods in other imps.
+	  }
+
+	also
+	Drawpane_Mouse_Drag_Arg									# This is passed from textpane.pkg to textmill.pkg.
+	  =
+	  {
+	    drawpane_id:		Id,							# Unique id of this drawpane widget.
+	    doc:			String,							# Text description of this drawpane widget for debug/display purposes.
+	    button:			evt::Mousebutton,
+	    event_point:		g2d::Point,
+	    start_point:		g2d::Point,
+	    last_point:			g2d::Point,
+	    phase:			gt::Drag_Phase,	
+	    widget_layout_hint:		gt::Widget_Layout_Hint,
+	    frame_indent_hint:		gt::Frame_Indent_Hint,
+	    site:			g2d::Box,						# Widget's assigned area in window coordinates.
+	    modifier_keys_state:	evt::Modifier_Keys_State,				# State of the modifier keys (shift, ctrl...).
+	    mousebuttons_state:		evt::Mousebuttons_State,				# State of mouse buttons as a bool record.
+	    point_and_mark:		Point_And_Mark,
+	    lastmark:			Null_Or( g2d::Point ),					# Last valid value of 'mark' if any -- used to retrieve old mark values by   exchange_point_and_mark	in   src/lib/x-kit/widget/edit/fundamental-mode.pkg
+	    screen_origin:		g2d::Point,						# Origin of pane-visible text relative to textmill contents:  (0,0) means we're showing top of buffer at top of textpane.
+	    visible_lines:		Int,							# Number of lines of text visible in pane.
+	    log_undo_info:		Bool,							# If log_undo_info is FALSE no entry will be made in the undo history.
+	    pane_tag:			Int,							# Tag of pane for which this editfn is being invoked.  This is a small int for human/GUI use.
+	    pane_id:			Id,							# Id  of pane for which this editfn is being invoked.
+	    widget_to_guiboss:		gt::Widget_To_Guiboss,					# 
+	    theme:			wt::Widget_Theme,
+	    #
+	    mainmill_modestate:		Panemode_State,						# Any persistent per-mode state (e.g., private state for fundamental-mode.pkg) for main mill is available via this.
+	    minimill_modestate:		Panemode_State,						# Any persistent per-mode state (e.g., private state for    minimill-mode.pkg) for mini mill is available via this.
+	    #
+	    textpane_to_textmill:	Textpane_To_Textmill,					# NB: Editfns run in textmill's microthread to guarantee atomicity, so any attempt by them to invoke blocking textpane_to_textmill.* fns is likely to deadlock.
+	    mode_to_drawpane:		m2d::Mode_To_Drawpane,					# 
+	    valid_completions:		Null_Or( String -> List(String) ),			# If this is non-NULL then user is entering a commandname or filename or millname(=buffername) on the modeline, and given fn returns all valid completions of string-entered-so-far.
+	    #
+	    do:				(Void -> Void) -> Void,					# Used by widget subthreads to run code in main widget microthread.
+	    to:				Replyqueue						# Used to call 'pass_*' methods in other imps.
+	  }
+	also
+	Drawpane_Mouse_Drag_In									# This is passed from textmill.pkg to foo-mode.pkg
+	  =
+	  {
+	    drawpane_id:		Id,							# Unique id of this drawpane widget.
+	    doc:			String,							# Text description of this drawpane widget for debug/display purposes.
+	    button:			evt::Mousebutton,
+	    event_point:		g2d::Point,
+	    start_point:		g2d::Point,
+	    last_point:			g2d::Point,
+	    phase:			gt::Drag_Phase,	
+	    widget_layout_hint:		gt::Widget_Layout_Hint,
+	    frame_indent_hint:		gt::Frame_Indent_Hint,
+	    site:			g2d::Box,						# Widget's assigned area in window coordinates.
+	    modifier_keys_state:	evt::Modifier_Keys_State,				# State of the modifier keys (shift, ctrl...).
+	    mousebuttons_state:		evt::Mousebuttons_State,				# State of mouse buttons as a bool record.
+	    textlines:			Textlines,
+	    point_and_mark:		Point_And_Mark,
+	    lastmark:			Null_Or( g2d::Point ),					# Last valid value of 'mark' if any -- used to retrieve old mark values by   exchange_point_and_mark	in   src/lib/x-kit/widget/edit/fundamental-mode.pkg
+	    screen_origin:		g2d::Point,						# Origin of pane-visible text relative to textmill contents:  (0,0) means we're showing top of buffer at top of textpane.
+	    visible_lines:		Int,							# Number of lines of text visible in pane.
+	    readonly:			Bool,							# TRUE iff textmill contents are currently marked as read-only.
+	    pane_tag:			Int,							# Tag of pane for which this editfn is being invoked.  This is a small int for human/GUI use.
+	    pane_id:			Id,							# Id  of pane for which this editfn is being invoked.
+	    mill_id:			Id,							# Id  of mill for which this editfn is being invoked.
+	    edit_history:		Edit_History,						# Recent visible states of textmill, to support undo functionality.
+	    widget_to_guiboss:		gt::Widget_To_Guiboss,					# 
+	    mill_to_millboss:		Mill_To_Millboss,
+	    theme:			wt::Widget_Theme,
+	    #
+	    mainmill_modestate:		Panemode_State,						# Any persistent per-mode state (e.g., private state for fundamental-mode.pkg) for main mill is available via this.
+	    minimill_modestate:		Panemode_State,						# Any persistent per-mode state (e.g., private state for    minimill-mode.pkg) for mini mill is available via this.
+	    #
+	    mill_extension_state:	Crypt,
+	    textpane_to_textmill:	Textpane_To_Textmill,					# NB: Editfns run in textmill's microthread to guarantee atomicity, so any attempt by them to invoke blocking textpane_to_textmill.* fns is likely to deadlock.
+	    mode_to_drawpane:		m2d::Mode_To_Drawpane,					# 
+	    valid_completions:		Null_Or( String -> List(String) ),			# If this is non-NULL then user is entering a commandname or filename or millname(=buffername) on the modeline, and given fn returns all valid completions of string-entered-so-far.
+	    #
+	    do:				(Void -> Void) -> Void,					# Used by widget subthreads to run code in main widget microthread.
+	    to:				Replyqueue						# Used to call 'pass_*' methods in other imps.
+	  }
+
+	also
+	Drawpane_Mouse_Transit_Arg								# This is passed from textpane.pkg to textmill.pkg.
+	  =
+	  {
+	    drawpane_id:		Id,							# Unique id of this drawpane widget.
+	    doc:			String,							# Text description of this drawpane widget for debug/display purposes.
+	    transit:			gt::Gadget_Transit,					# Mouse is entering (CAME) or leaving (LEFT) widget, or moving (MOVE) across it.
+	    event_point:		g2d::Point,
+	    widget_layout_hint:		gt::Widget_Layout_Hint,
+	    frame_indent_hint:		gt::Frame_Indent_Hint,
+	    site:			g2d::Box,						# Widget's assigned area in window coordinates.
+	    modifier_keys_state:	evt::Modifier_Keys_State,				# State of the modifier keys (shift, ctrl...).
+	    point_and_mark:		Point_And_Mark,
+	    lastmark:			Null_Or( g2d::Point ),					# Last valid value of 'mark' if any -- used to retrieve old mark values by   exchange_point_and_mark	in   src/lib/x-kit/widget/edit/fundamental-mode.pkg
+	    screen_origin:		g2d::Point,						# Origin of pane-visible text relative to textmill contents:  (0,0) means we're showing top of buffer at top of textpane.
+	    visible_lines:		Int,							# Number of lines of text visible in pane.
+	    log_undo_info:		Bool,							# If log_undo_info is FALSE no entry will be made in the undo history.
+	    pane_tag:			Int,							# Tag of pane for which this editfn is being invoked.  This is a small int for human/GUI use.
+	    pane_id:			Id,							# Id  of pane for which this editfn is being invoked.
+	    widget_to_guiboss:		gt::Widget_To_Guiboss,					# 
+	    theme:			wt::Widget_Theme,
+	    #
+	    mainmill_modestate:		Panemode_State,						# Any persistent per-mode state (e.g., private state for fundamental-mode.pkg) for main mill is available via this.
+	    minimill_modestate:		Panemode_State,						# Any persistent per-mode state (e.g., private state for    minimill-mode.pkg) for mini mill is available via this.
+	    #
+	    textpane_to_textmill:	Textpane_To_Textmill,					# NB: Editfns run in textmill's microthread to guarantee atomicity, so any attempt by them to invoke blocking textpane_to_textmill.* fns is likely to deadlock.
+	    mode_to_drawpane:		m2d::Mode_To_Drawpane,					# 
+	    valid_completions:		Null_Or( String -> List(String) ),			# If this is non-NULL then user is entering a commandname or filename or millname(=buffername) on the modeline, and given fn returns all valid completions of string-entered-so-far.
+	    #
+	    do:				(Void -> Void) -> Void,					# Used by widget subthreads to run code in main widget microthread.
+	    to:				Replyqueue						# Used to call 'pass_*' methods in other imps.
+	  }
+	also
+	Drawpane_Mouse_Transit_In								# This is passed from textmill.pkg to foo-mode.pkg
+	  =
+	  {
+	    drawpane_id:		Id,							# Unique id of this drawpane widget.
+	    doc:			String,							# Text description of this drawpane widget for debug/display purposes.
+	    transit:			gt::Gadget_Transit,					# Mouse is entering (CAME) or leaving (LEFT) widget, or moving (MOVE) across it.
+	    event_point:		g2d::Point,
+	    widget_layout_hint:		gt::Widget_Layout_Hint,
+	    frame_indent_hint:		gt::Frame_Indent_Hint,
+	    site:			g2d::Box,						# Widget's assigned area in window coordinates.
+	    modifier_keys_state:	evt::Modifier_Keys_State,				# State of the modifier keys (shift, ctrl...).
+	    textlines:			Textlines,
+	    point_and_mark:		Point_And_Mark,
+	    lastmark:			Null_Or( g2d::Point ),					# Last valid value of 'mark' if any -- used to retrieve old mark values by   exchange_point_and_mark	in   src/lib/x-kit/widget/edit/fundamental-mode.pkg
+	    screen_origin:		g2d::Point,						# Origin of pane-visible text relative to textmill contents:  (0,0) means we're showing top of buffer at top of textpane.
+	    visible_lines:		Int,							# Number of lines of text visible in pane.
+	    readonly:			Bool,							# TRUE iff textmill contents are currently marked as read-only.
+	    pane_tag:			Int,							# Tag of pane for which this editfn is being invoked.  This is a small int for human/GUI use.
+	    pane_id:			Id,							# Id  of pane for which this editfn is being invoked.
+	    mill_id:			Id,							# Id  of mill for which this editfn is being invoked.
+	    edit_history:		Edit_History,						# Recent visible states of textmill, to support undo functionality.
+	    widget_to_guiboss:		gt::Widget_To_Guiboss,					# 
+	    mill_to_millboss:		Mill_To_Millboss,
+	    theme:			wt::Widget_Theme,
+	    #
+	    mainmill_modestate:		Panemode_State,						# Any persistent per-mode state (e.g., private state for fundamental-mode.pkg) for main mill is available via this.
+	    minimill_modestate:		Panemode_State,						# Any persistent per-mode state (e.g., private state for    minimill-mode.pkg) for mini mill is available via this.
+	    #
+	    mill_extension_state:	Crypt,
+	    textpane_to_textmill:	Textpane_To_Textmill,					# NB: Editfns run in textmill's microthread to guarantee atomicity, so any attempt by them to invoke blocking textpane_to_textmill.* fns is likely to deadlock.
+	    mode_to_drawpane:		m2d::Mode_To_Drawpane,					# 
+	    valid_completions:		Null_Or( String -> List(String) ),			# If this is non-NULL then user is entering a commandname or filename or millname(=buffername) on the modeline, and given fn returns all valid completions of string-entered-so-far.
+	    #
+	    do:				(Void -> Void) -> Void,					# Used by widget subthreads to run code in main widget microthread.
+	    to:				Replyqueue						# Used to call 'pass_*' methods in other imps.
+	  };
+
+
+
+	Textmill_Spec										# A textpane is a window onto a textmill, so when creating a textpane we must somehow specify what textmill to display.
+	  #											# This type gets consumed by textpane::with in   src/lib/x-kit/widget/edit/textpane.pkg
+	  = OLD_TEXTMILL_BY_NAME	String							# Display a pre-existing textmill, fetching it by given name   via et::Mill_To_Millboss.get_textmill.
+	  | OLD_TEXTMILL_BY_PORT	Textpane_To_Textmill 					# Display a pre-existing textmill, specified by given port to it.
+	  | NEW_TEXTMILL		Textmill_Arg						# Display a newly made   textmill, created via et::Mill_To_Millboss.make_textmill.
+	  ;
+
+	exception  MILL_TO_MILLBOSS__CRYPT	    	Mill_To_Millboss;
+	exception  TEXTPANE_TO_SCREENLINE__CRYPT    	p2l::Textpane_To_Screenline;
+	#
+	exception  MODE_AND_TEXTPANE_TO_DRAWPANE__CRYPT ( p2d::Textpane_To_Drawpane, 
+							  m2d::Mode_To_Drawpane
+							);
+
+
+	mill_to_millboss__global								# millboss_imp will set this non-NULL when it starts up.  This provides an assured way for any mill to contact millboss.
+	    =											# We used to do this via gadget_to_guiboss but mills shouldn't have to know about gui stuff.
+	    REF (NULL: Null_Or(Mill_To_Millboss));
+
+	fun get__mill_to_millboss  (caller:  String):  Mill_To_Millboss
+	    =
+	    case *mill_to_millboss__global
+		#
+		THE mill_to_millboss =>  mill_to_millboss;
+
+		NULL =>	{   msg =  sprintf "mill_to_millboss_global not set by millboss_imp in time?! -- millboss_types::get__mill_to_millboss called by %s" caller;
+			    log::fatal msg;
+			    raise exception DIE msg;
+			};
+	    esac;
+
+
+	empty_keymap =  sm::empty: Keymap;							# Helps clients abstract a bit from current specific implementation of keymaps.
+
+	stipulate										# This idiom borrowed from   src/lib/src/quickstring.pkg
+	    #
+	    lock = make_full_maildrop ();
+	    #
+	herein
+	    fun atomically f a
+		=
+		{   take_from_maildrop lock;
+		    #
+		    f a
+		    then
+			put_in_maildrop (lock, ());
+		};
+	end;
+
+	stipulate
+	    #
+	    all_known_editfns_by_name
+		=
+		REF (sm::empty: sm::Map( Editfn_Node ));
+
+	    fun note_editfn (keymap_node: Keymap_Node): Void
+		=
+		case keymap_node
+		    #
+		    EDITFN editfn
+			=>
+			{   name =  case editfn
+					#
+					PLAIN_EDITFN { name, ... }
+					    =>
+					    name;
+
+					FANCY_EDITFN
+					    =>
+					    {   msg = "FANCY_EDITFN not yet supported (or defined).";
+						log::fatal msg;
+						raise exception DIE msg;
+					    };
+				    esac;
+
+			    all_known_editfns_by_name
+				:=
+				sm::set (*all_known_editfns_by_name, name, editfn);
+			};
+
+		    _ => ();
+		esac;
+
+	herein
+	    note_editfn =  atomically  note_editfn;						# Use 'atomically' to avoid barely-conceivable bugs due to concurrent micro/threads trying to simultaneously register editfns.
+	    
+	    fun get_all_known_editfns_by_name ()						# No obvious reason to use 'atomically' here:  reading a refcell basically is atomic anyhow.
+		=
+		*all_known_editfns_by_name;
+	end;
+
+	fun keystring_to_modemap_key								# Convert keystroke string from guishim-imp-for-x.pkg (or other guishim) into traditional emacs keymap representation like "C-SPC" or "C-M-q" or such.
+	      (
+		keystring:		String,
+		modifier_keys_state:	evt::Modifier_Keys_State
+	      )
+	    =
+	    if (keystring == "")
+		#
+		keystring;									# Mostly just so we don't have to worry about empty strings in the rest of the routine.
+
+	    else
+		modifier_keys_state
+		  ->
+		  { shift_key_was_down:		Bool,
+		    shiftlock_key_was_down:	Bool,
+		    control_key_was_down:	Bool,
+		    mod1_key_was_down:		Bool,						# ALT, which emacs traditionally interprets as META modifier key.
+		    mod2_key_was_down:		Bool,
+		    mod3_key_was_down:		Bool,
+		    mod4_key_was_down:		Bool,						# Windows/Command key, which emacs traditionally interprets as SUPER modifier key.
+		    mod5_key_was_down:		Bool
+		  };
+
+		my (keystring, control_key_was_down)						# Normalize actual control chars to modkey + alphabetic representation.
+		    =
+		    case keystring
+			#
+			"\^@"	=>	("@", TRUE);
+			"\^A"	=>	("a", TRUE);
+			"\^B"	=>	("b", TRUE);
+			"\^C"	=>	("c", TRUE);
+			"\^D"	=>	("d", TRUE);
+			"\^E"	=>	("e", TRUE);
+			"\^F"	=>	("f", TRUE);
+			"\^G"	=>	("g", TRUE);
+			"\^H"	=>	("h", TRUE);
+			"\^I"	=>	("i", TRUE);
+			"\^J"	=>	("j", TRUE);
+			"\^K"	=>	("k", TRUE);
+			"\^L"	=>	("l", TRUE);
+			"\^M"	=>	("m", TRUE);
+			"\^N"	=>	("n", TRUE);
+			"\^O"	=>	("o", TRUE);
+			"\^P"	=>	("p", TRUE);
+			"\^Q"	=>	("q", TRUE);
+			"\^R"	=>	("r", TRUE);
+			"\^S"	=>	("s", TRUE);
+			"\^T"	=>	("t", TRUE);
+			"\^U"	=>	("u", TRUE);
+			"\^V"	=>	("v", TRUE);
+			"\^W"	=>	("w", TRUE);
+			"\^X"	=>	("x", TRUE);
+			"\^Y"	=>	("y", TRUE);
+			"\^Z"	=>	("z", TRUE);
+			"\^["	=>	("[", TRUE);
+			"\^\"	=>	("\\",TRUE);
+			"\^]"	=>	("]", TRUE);
+			"\^_"	=>	("_", TRUE);
+			#
+			_	=>	(keystring, control_key_was_down);
+		    esac;
+
+		my (keystring, control_key_was_down)						# A few ad hoc traditional names.
+		    =
+		    case (keystring, control_key_was_down)
+			#
+			("i", TRUE) => ("TAB", FALSE);
+			("m", TRUE) => ("RET", FALSE);
+			("[", TRUE) => ("ESC", FALSE);
+			#
+			_	    => (keystring, control_key_was_down);
+		    esac;
+
+		keystring = if (keystring == " ")   "SPC";
+			    else		    keystring;
+			    fi;
+
+		# By inspection of describe-bindings output,
+		# the canonical emacs ordering for the
+		#
+		#     Super = 's-'
+		#     Meta  = 'M-'
+		#     Ctrl  = 'C-'
+		#     Shift = 'S-'
+		#
+		# prefixes seems to be
+		#
+		#     s-C-M-S-x
+		#
+		# Here we build them up in right-to-left order:
+
+		keystring							# The shift modifier 'S-' is only useful on special keys, which are represented in angle brackets, eg "<backspace>" or "<home>".
+		    =
+		    {	bytelen = string::length_in_bytes   keystring;
+			charlen = string::length_in_chars   keystring;
+			#
+			if (charlen < 3)
+			    #
+			    keystring;
+			else
+			    firstchar =  string::get_byte_as_char (keystring, 0);
+			    lastchar  =  string::get_byte_as_char (keystring, bytelen - 1);
+
+			    keystring
+				=
+				case ( firstchar,
+				       lastchar,
+				       shift_key_was_down or shiftlock_key_was_down
+				     )
+				    #
+				    ('<', '>', TRUE) => "S-" + keystring;	# We *do* have something like "<backspace>" and shift *is* set, so add the S- prefix.
+				    _	             =>        keystring;	# Ignore shift (if any) because in cases like 4 vs $ (etc) it is implicit in the keystring.
+				esac;
+
+			    keystring;
+			fi;
+		    };
+
+		keystring							# The META modifier 'M-' may be applied to anything.
+		    =
+		    case mod1_key_was_down
+			#
+			TRUE	    => "M-" + keystring;
+			_	    =>        keystring;
+		    esac;
+
+		keystring							# The CTRL modifier 'C-' may be applied to anything.
+		    =
+		    case control_key_was_down
+			#
+			TRUE	    => "C-" + keystring;
+			_	    =>        keystring;
+		    esac;
+
+		keystring							# The SUPER modifier 's-' may be applied to anything.
+		    =
+		    case mod4_key_was_down
+			#
+			TRUE	    => "s-" + keystring;
+			_	    =>        keystring;
+		    esac;
+
+
+		keystring;
+	    fi;
+
+
+
+	fun add_editfn_to_keymap
+	      (
+		keymap:		Keymap,
+		key:		List(String),							# The strings should have been run through keystring_to_modemap_key() or be in its format.  List has one string for single-keystroke commands, two strings for single-prefix commands etc.
+		keymap_node:	Keymap_Node
+	      )
+	    :			Keymap
+	    =
+	    case key
+		#
+		[]	 => keymap;								# Shouldn't happen.
+
+		k ! []   => sm::set (keymap, k, keymap_node);
+
+		k ! rest => {   subkeymap = case (sm::get (keymap, k))
+						#
+						THE (SUBKEYMAP subkeymap)
+						    =>
+						    subkeymap;					# Use existing subkeymap for this prefix key.
+
+						_   =>  empty_keymap;				# Start a new subkeymap for this prefix key.
+					    esac;
+
+				subkeymap
+				    =
+				    add_editfn_to_keymap (subkeymap, rest, keymap_node);
+
+				sm::set (keymap, k, SUBKEYMAP subkeymap);			# Silently clobber any previous non-prefix-key keymap_node associated with 'k'.
+			    };
+	    esac;
+
+
+	fun add_editfn_to_keymap_throughout_char_range						# Emacs directly represents char ranges in keymaps, but for now we'll keep our keymaps simple.  Ram is a million times cheaper now than it was in the early 1970s when emacs was designed. :-)
+	      {
+		keymap:		Keymap,
+		keymap_node:	Keymap_Node,
+		#
+		firstchar:	Char,
+		lastchar:	Char
+	      }
+	    :			Keymap
+	    =
+	    {   keymap =    loop (firstchar, keymap)
+			    where
+				fun loop (c: Char, keymap: Keymap)
+				    =
+				    if (c > lastchar)
+					#
+					keymap;
+				    else
+					key = char::to_string c;
+
+					key =	case key					# This is a little bugfix; we were unable to insert  "  or  \  into an editbuffer because the keymap had the chars backslashed (two-byte strings) and the incoming keystrings had them non-backslashed (one-byte) strings.
+						    #						# The difference arose in to_string() in   src/lib/std/src/char.pkg
+						    "\\\"" => "\"";				# I'm reluctant to change that fn because a lot of existing code might break, so instead I'm
+						    "\\\\" => "\\";				# doing this ugly little patch here to paper over the problem Captain-Crunch style.  --2015-09-15 CrT
+						    _	   =>  key;
+						esac;
+
+					key = keystring_to_modemap_key (key, evt::no_modifier_keys_were_down);
+					#
+					keymap = sm::set (keymap, key, keymap_node);
+
+					loop (char::next c,  keymap);
+				    fi;
+			    end;
+		
+		keymap;
+	    };	
+    };
+
+end;
+
+
+
+
+
+##########################################################################
+#   The following is support for outline-minor-mode in emacs.		 #
+#  ^C @ ^T hides all Text. (Leaves all headings.)			 #
+#  ^C @ ^A shows All of file.						 #
+#  ^C @ ^Q Quickfolds entire file. (Leaves only top-level headings.)	 #
+#  ^C @ ^I shows Immediate children of node.				 #
+#  ^C @ ^S Shows all of a node.						 #
+#  ^C @ ^D hiDes all of a node.						 #
+#  ^HFoutline-mode gives more details.					 #
+#  (Or do ^HI and read emacs:outline mode.)				 #
+#									 #
+# Local variables:							 #
+# mode: outline-minor							 #
+# outline-regexp: "[{ \t]*\\(fun \\)"			 		 #
+# End:									 #
+##########################################################################
+
+
+## Original code by Jeff Prothero Copyright (c) 2014-2015,
+## released per terms of SMLNJ-COPYRIGHT.

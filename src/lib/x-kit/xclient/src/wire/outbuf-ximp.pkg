@@ -45,7 +45,7 @@ stipulate
 		cat ("Io: " ! op ! " failed on \"" ! name ! "\"" ! cause_message);
 	    };
 
-	exception_message (FAIL s)            => "FAIL: " + s;
+	exception_message (DIE s)            => "DIE: " + s;
 	exception_message BIND                => "nonexhaustive naming failure";     # NOTE: we should probably include line/file info for MATCH and BIND  XXX BUGGO FIXME
 	exception_message MATCH               => "nonexhaustive match failure";
 	exception_message INDEX_OUT_OF_BOUNDS => "index out of bounds";
@@ -175,7 +175,7 @@ herein
 
 
 	fun run {													# These values will be statically globally visible throughout the code body for the imp.
-		  me:			Outbuf_State,									# State which is preserved across imp shutdown/restart cycles.
+		  me:			Outbuf_State,									# 
 		  imports:		Imports,									# Ximps to which we send requests.
 		  to:			Replyqueue,									# The name makes   foo::pass_something(imp) to {. ... }   syntax read well.
 		  end_gun':		End_Gun,									# We shut down the microthread when this fires.
@@ -407,5 +407,5 @@ end;
 
 
 ## COPYRIGHT (c) 1990, 1991 by John H. Reppy.  See SMLNJ-COPYRIGHT file for details.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

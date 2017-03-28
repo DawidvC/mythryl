@@ -81,7 +81,7 @@ stipulate
     package err =  error_message;							# error_message			is from   src/lib/compiler/front/basics/errormsg/error-message.pkg
     package id  =  inlining_data;							# inlining_data			is from   src/lib/compiler/front/typer-stuff/basics/inlining-data.pkg
     package mtt =  more_type_types;							# more_type_types		is from   src/lib/compiler/front/typer/types/more-type-types.pkg
-    package pp  =  standard_prettyprint_mill;						# standard_prettyprint_mill	is from   src/lib/prettyprint/big/src/standard-prettyprint-mill.pkg
+    package pp  =  standard_prettyprinter;						# standard_prettyprinter	is from   src/lib/prettyprint/big/src/standard-prettyprinter.pkg
     package ppt =  prettyprint_type;							# prettyprint_type		is from   src/lib/compiler/front/typer/print/prettyprint-type.pkg
     package td  =  typer_debugging;							# typer_debugging		is from   src/lib/compiler/front/typer/main/typer-debugging.pkg
     package tdt =  type_declaration_types;						# type_declaration_types	is from   src/lib/compiler/front/typer-stuff/types/type-declaration-types.pkg
@@ -295,7 +295,7 @@ debugging = log::debugging;
                                                     (sum_type, fresh_meta_typevars);						# Ignored arg is fresh_meta_typevars.
 
 																if *debugging
-																    pp = standard_prettyprint_mill::make_standard_prettyprint_mill "/dev/stdout" [];
+																    pp = standard_prettyprinter::make_standard_prettyprinter_into_file "/dev/stdout" [];
 																    prettyprint_typoid =  ppt::prettyprint_typoid  symbolmapstack  pp;
 
 																    pp.lit "resolve_overloaded_variable/use_first_match: variant = ";
@@ -337,7 +337,7 @@ debugging = log::debugging;
 						else
 																prettyprint_typoid =  ppt::prettyprint_typoid  symbolmapstack;
 																if *debugging
-																    pp = standard_prettyprint_mill::make_standard_prettyprint_mill "/dev/stdout" [];
+																    pp = standard_prettyprinter::make_standard_prettyprinter_into_file "/dev/stdout" [];
 																    pp.lit (sprintf "soft-unify attempt WORKED  -- use_first_match in [resolve-overloaded-variables.pkg]");
 																    prettyprint_typoid =  ppt::prettyprint_typoid  symbolmapstack  pp;
 																    len =  list::length  fresh_meta_typevars;
@@ -407,12 +407,12 @@ end;																# stipulate
 # We had a problem in that
 #
 #     v = "abc";
-#     string::get (v,1);
+#     string::get_byte_as_char (v,1);
 #
 # would work as expected but
 #
 #     v = "abc";
-#     overloaded my bar: ((X, Y) -> Z) =  (string::get);
+#     overloaded my bar: ((X, Y) -> Z) =  (string::get_byte_as_char);
 #     bar(v,1);
 #
 # would die with
@@ -426,14 +426,14 @@ end;																# stipulate
 #     src/lib/compiler/front/typer/types/type-core-language-declaration-g.pkg
 #
 # we had 
-#					case (inlining_data_to_my_type  inlining_data)						# For builtins like string::get, inlining_data was set up from   all_primops   in   src/lib/compiler/front/semantic/symbolmapstack/base-types-and-ops.pkg
+#					case (inlining_data_to_my_type  inlining_data)						# For builtins like string::get_byte_as_char, inlining_data was set up from   all_primops   in   src/lib/compiler/front/semantic/symbolmapstack/base-types-and-ops.pkg
 #					    #
 #					    THE inl_typoid =>   {   (tj::instantiate_if_typescheme  inl_typoid) ->  (inl_typoid', fresh_meta_typevars);
 #							            [...]
 #								    typescheme_args =>  REF fresh_meta_typevars
 #
 # which results in typescheme_args remembering the types to which
-# string::get (== numsubscript8cv) gets applied, but nothing like
+# string::get_byte_as_char (== numsubscript8cv) gets applied, but nothing like
 # that was happening in this file during overloading resolution.
 
 
@@ -463,5 +463,5 @@ end;																# stipulate
 
 
 ## COPYRIGHT 1996 AT&T Bell Laboratories. 
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

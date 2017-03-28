@@ -71,9 +71,212 @@ LIBRARY_EXPORTS
 	pkg beta2_spline
 	pkg region
 
+
+ 	pkg app_to_guishim_xspecific
+
+ 	api Arrowbutton
+ 	pkg arrowbutton
+
+ 	api Blank
+ 	pkg blank
+
+ 	api Button
+ 	pkg button
+
+ 	api Checkbox
+ 	pkg checkbox
+
+ 	pkg client_to_image
+ 	pkg cutbuffer_types
+ 	pkg textlines_junk
+
+ 	api Diamondbutton
+ 	pkg diamondbutton
+
+ 	pkg dazzle_mode
+ 	pkg dazzle_mill
+
+ 	pkg dired_mode
+ 	pkg dired_mill
+
+ 	pkg eval_mode
+ 	pkg eval_mill
+
+ 	pkg millgraph_mode
+ 	pkg millgraph_mill
+
+ 	pkg shell_mode
+ 	pkg shell_mill
+
+ 	pkg exercise_x_appwindow
+
+	pkg boolfloatintstrings_millout
+	pkg bool_millout
+	pkg bools_millout
+	pkg float_millout
+	pkg floats_millout
+	pkg int_millout
+	pkg ints_millout
+	pkg millgraph_millout
+	pkg string_millout
+	pkg strings_millout
+	pkg textmill_statechange_millout
+
+ 	api Frame
+ 	pkg frame
+
+ 	pkg fundamental_mode
+ 	pkg gadget_to_pixmap
+ 	pkg gui_displaylist			# All the x-independent gui stuff should actually be moved out of xkit.lib into some new library named maybe gui.lib. XXX SUCKO FIXME.
+
+ 	api Gui_Event_To_String
+ 	pkg gui_event_to_string
+
+ 	api Gui_Event_To_Xevent
+ 	pkg gui_event_to_xevent
+
+ 	pkg gui_event_types
+ 	pkg gui_to_object_theme
+ 	pkg gui_to_sprite_theme
+
+ 	api Guiboss_Event_Dispatch		# There is probably no good reason to export
+ 	pkg guiboss_event_dispatch		# these two from this library, actually.
+
+ 	api Guiboss_Imp
+ 	pkg guiboss_imp
+
+	pkg run_guiplan_on_x
+
+ 	api Guiboss_Popup_Junk			# There is probably no good reason to export
+ 	pkg guiboss_popup_junk			# these two from this library, actually.
+
+ 	pkg guiboss_to_guishim
+ 	pkg guiboss_types
+ 	pkg guiboss_types_junk
+
+ 	api Guiboss_Widget_Layout
+ 	pkg guiboss_widget_layout
+
+ 	api Guishim_Imp
+ 	pkg guishim_imp_for_x
+
+ 	api Horizontal_Float_Slider
+ 	pkg horizontal_float_slider
+
+ 	api Horizontal_Int_Slider
+ 	pkg horizontal_int_slider
+
+ 	pkg keystroke_macro_junk
+ 	pkg make_textpane
+
+ 	api Compile_Imp
+ 	pkg compile_imp
+ 	pkg guiboss_to_compileimp
+ 	pkg app_to_compileimp
+
+ 	api Millboss_Imp
+ 	pkg millboss_imp
+ 	pkg millboss_to_guiboss
+ 	pkg millboss_types
+
+ 	pkg modes_to_preload
+ 	pkg minimill_mode
+
+ 	api Object_Imp
+ 	pkg object_imp
+
+ 	api Object_Theme_Imp
+ 	pkg object_theme_imp
+
+ 	pkg object_to_objectspace
+
+ 	api Objectspace_Imp
+ 	pkg objectspace_imp
+
+ 	pkg objectspace_to_object
+
+ 	api Popupframe
+ 	pkg popupframe
+
+ 	api Roundbutton
+ 	pkg roundbutton
+
+ 	api Screenline
+ 	pkg screenline
+ 	pkg screenline_types
+
+ 	pkg screenline_to_textpane
+ 	pkg   drawpane_to_textpane
+
+ 	api Sprite_Imp
+ 	pkg sprite_imp
+
+ 	api Sprite_Theme_Imp
+ 	pkg sprite_theme_imp
+
+ 	pkg sprite_to_spritespace
+
+ 	api Spritespace_Imp
+ 	pkg spritespace_imp
+
+ 	pkg spritespace_to_sprite
+
+ 	api Texteditor
+ 	pkg texteditor
+
+ 	api Textentry
+ 	pkg textentry
+
+ 	api Textmill
+ 	pkg textmill
+ 	pkg textmill_crypts
+
+ 	api Textpane
+ 	pkg textpane
+
+ 	pkg textpane_hint
+ 	pkg textpane_to_screenline
+ 	pkg textpane_to_drawpane
+ 	pkg textpane_types
+ 	pkg mode_to_drawpane
+
+ 	api Drawpane
+ 	pkg drawpane
+ 	pkg drawpane_types
+
+ 	api Translate_Guipane_To_Guipith
+ 	pkg translate_guipane_to_guipith
+
+ 	api Translate_Guiplan_To_Guipane
+ 	pkg translate_guiplan_to_guipane
+
+ 	api Vertical_Float_Slider
+ 	pkg vertical_float_slider
+
+ 	api Vertical_Int_Slider
+ 	pkg vertical_int_slider
+
+ 	api Widget_Imp
+ 	pkg widget_imp
+
+ 	pkg widget_imp_types
+ 	pkg widget_theme
+
+ 	api Widget_Theme_Imp
+ 	pkg widget_theme_imp
+
+ 	api Widgetspace_Imp
+ 	pkg widgetspace_imp
+
+ 	api Xevent_To_Gui_Event 
+ 	pkg xevent_to_gui_event
+
+        pkg issue_unique_widget_id
+
+
         # From widgets:
 	#
-	api Topwindow
+	api Hostwindow
 	api Widget
 	api Xevent_Mail_Router
 	api Three_D
@@ -123,7 +326,7 @@ LIBRARY_EXPORTS
 	pkg root_window_old
 
 	pkg xevent_mail_router
-	pkg topwindow
+	pkg hostwindow
 	pkg widget
 	pkg three_d
 
@@ -231,5 +434,5 @@ LIBRARY_COMPONENTS
 	draw/xkit-draw.sublib
 	widget/xkit-widget.sublib
 
-## Changes by Jeff Prothero Copyright (c) 2010-2014,
+## Changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

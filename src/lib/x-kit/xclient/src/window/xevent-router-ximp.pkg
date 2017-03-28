@@ -1,6 +1,6 @@
 ## xevent-router-ximp.pkg
 #
-# Replaces   src/lib/x-kit/xclient/src/window/xsocket-to-topwindow-router-old.pkg
+# Replaces   src/lib/x-kit/xclient/src/window/xsocket-to-hostwindow-router-old.pkg
 #
 #        src/lib/x-kit/xclient/src/window/xevent-router-ximp.pkg
 #        src/lib/x-kit/xclient/src/window/keymap-ximp.pkg
@@ -83,7 +83,7 @@ herein
 	    WINDOW_INFO
 	      {
 		window_id:	xt::Window_Id,					# 29-bit X id for this particular window.
-		route:		xwp::Envelope_Route,				# Path needed to reach this window, starting at its topwindow.
+		route:		xwp::Envelope_Route,				# Path needed to reach this window, starting at its hostwindow.
 		parent_info:	Null_Or( Window_Info ),
 		#
 		children:	Ref( List(Window_Info) ),
@@ -134,7 +134,7 @@ herein
 	#
 	Xevent_Action
 	  #	
-	  = SEND_TO_WINDOW                        xt::Window_Id			# Forward event to given window via all of its ancestors from topwindow down.
+	  = SEND_TO_WINDOW                        xt::Window_Id			# Forward event to given window via all of its ancestors from hostwindow down.
 	  | NOTE_SITE_CHANGE_AND_SEND_TO_WINDOW  (xt::Window_Id, g2d::Box)	# Note new size+position of window, then forward event normally.
 	  | NOTE_WINDOW_DESTRUCTION               xt::Window_Id
 	  | SEND_TO_KEYMAP_IMP							# This appears to be unused at present.
@@ -152,7 +152,7 @@ herein
 	Xevent_Q =  Mailqueue( xet::x::Event );
 
 	Runstate =  {													# These values will be statically globally visible throughout the code body for the imp.
-		      me:				Xevent_Router_Ximp_State,					# State which is preserved across imp shutdown/restart cycles.
+		      me:				Xevent_Router_Ximp_State,					# 
 		      imports:				Imports,							# Ximps to which we send requests.
 		      to:				Replyqueue,							# The name makes   foo::pass_something(imp) to {. ... }   syntax read well.
 		      #
@@ -307,7 +307,7 @@ herein
 
 			trace {.
 			    #
-			    cat [ "xsocket_to_topwindow_router: ", xevent_to_string::xevent_name  xevent,
+			    cat [ "xsocket_to_hostwindow_router: ", xevent_to_string::xevent_name  xevent,
                                   " => ", xevent_action_to_string xevent_action
                                 ];
 			};
@@ -348,7 +348,7 @@ herein
 		  #
 		  runstate as
 		  {													# These values will be statically globally visible throughout the code body for the imp.
-		    me:					Xevent_Router_Ximp_State,					# State which is preserved across imp shutdown/restart cycles.
+		    me:					Xevent_Router_Ximp_State,					# 
 		    imports:				Imports,							# Ximps to which we send requests.
 		    to:					Replyqueue,							# The name makes   foo::pass_something(imp) to {. ... }   syntax read well.
 		    #
@@ -392,7 +392,7 @@ herein
 						    winfo;
 						};
 				NULL      =>    {   log::fatal ("window_id not found -- do_plea (plea::GET_WINDOW_SITE in xevent-router-ximp.pkg");
-						    raise exception FAIL "";						# Should not get here.
+						    raise exception DIE "";						# Should not get here.
 						};
 			    esac;
 };
@@ -506,7 +506,7 @@ herein
 						    remove_child []
 							=>
 							{   log::fatal ("Missing child -- do_xevent/NOTE_WINDOW_DESTRUCTION in xevent-router-ximp.pkg");
-							    raise exception FAIL "";	# Shouldn't get here.
+							    raise exception DIE "";	# Shouldn't get here.
 							};
 						end;
 					    end;
@@ -522,14 +522,14 @@ herein
 					(new_wid_to_winfo, NULL)
 					    =>
 					    {   log::fatal ("Missing window -- do_xevent/NOTE_WINDOW_DESTRUCTION in xevent-router-ximp.pkg");
-						raise exception FAIL "";	# Shouldn't get here.
+						raise exception DIE "";	# Shouldn't get here.
 					    };
 				    esac;
 
 				SEND_TO_KEYMAP_IMP
 				    =>
 				    {   log::fatal ("Unexpected SEND_TO_KEYMAP_IMP do_xevent in xevent-router-ximp.pkg]");
-					raise exception FAIL "";
+					raise exception DIE "";
 				    };
 
 				SEND_TO_WINDOW_PROPERTY_IMP  =>  imports.window_property_xevent_sink.put_value  xevent;
@@ -554,7 +554,7 @@ herein
 
 		windowsystem_to_xevent_router
 		  =
-		  { note_new_topwindow,
+		  { note_new_hostwindow,
 		    get_window_site,
 		    given_window_id_pass_site,
 		    get_''seen_first_expose''_oneshot_of,
@@ -593,7 +593,7 @@ herein
 			# XXX SUCKO FIXME  I'm hoping we can eliminate this with the new startup protocol. --CrT 2013-08-11
 			# ===============
 
-		fun note_new_topwindow											# PUBLIC.
+		fun note_new_hostwindow											# PUBLIC.
 		      (
 			window_id:	xt::Window_Id,
 			window_site:	g2d::Window_Site,
@@ -605,8 +605,8 @@ herein
 			    \\ ({ me, imports, ... }: Runstate)
 				=
 				{
-# PLEA_NOTE_NEW_TOPWINDOW arg
-# 			fun do_plea (PLEA_NOTE_NEW_TOPWINDOW  (window_id, window_site, xevent_sink))			# Log a new top-level window.
+# PLEA_NOTE_NEW_HOSTWINDOW arg
+# 			fun do_plea (PLEA_NOTE_NEW_HOSTWINDOW  (window_id, window_site, xevent_sink))			# Log a new top-level window.
 # 				=>
 # 				{
 # I have the following in the oldworld, I'm not
@@ -615,7 +615,7 @@ herein
 # something less awful.
 #
 #					# Handle any prematurely-registered oneshot.
-#					# I'm not sure a topwindow will ever get an
+#					# I'm not sure a hostwindow will ever get an
 #					# EXPOSE event, so this may be pointless:
 #					#
 #					oneshot =   {   oneshot =  get_from_oneshot_map  window_id;
@@ -666,7 +666,7 @@ printf "get_winfo found entry!  -- xevent-router-ximp.pkg\n";
 					    winfo;
 					};
 			NULL      =>    {   log::fatal ("window_id not found -- do_plea (plea::GET_WINDOW_SITE in xevent-router-ximp.pkg");
-					    raise exception FAIL "";						# Should not get here.
+					    raise exception DIE "";						# Should not get here.
 					};
 		    esac;
 };
@@ -826,5 +826,5 @@ end;
 
 
 ## COPYRIGHT (c) 1990, 1991 by John H. Reppy.  See SMLNJ-COPYRIGHT file for details.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

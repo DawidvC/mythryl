@@ -154,11 +154,11 @@ herein
 		#
 		THE (MOVE (s1, THE c', s2)) =>  THE s2;
 		NULL                        =>  NULL;
-		_			    =>  raise exception FAIL "Compiler bug: Unsupported case in move'";
+		_			    =>  raise exception DIE "Compiler bug: Unsupported case in move'";
 	    esac
 	    where
 		fun f (MOVE (s1, THE c', s2)) =>   (s1==i and c==c');
-		    f _                       =>   raise exception FAIL "Compiler bug: Unsupported case in move'";
+		    f _                       =>   raise exception DIE "Compiler bug: Unsupported case in move'";
 		end;
 	    end;
 
@@ -365,7 +365,7 @@ end;
 
 
 ## COPYRIGHT (c) 1998 Bell Labs, Lucent Technologies.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.
 
 

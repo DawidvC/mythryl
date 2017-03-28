@@ -20,7 +20,7 @@ stipulate
     include package   threadkit;						# threadkit			is from   src/lib/src/lib/thread-kit/src/core-thread-kit/threadkit.pkg
     include package   geometry2d;						# geometry2d			is from   src/lib/std/2d/geometry2d.pkg
     #
-    package chr =  char;							# char				is from   src/lib/std/src/char.pkg
+    package chr =  char;							# char				is from   src/lib/std/char.pkg
     package evt =  gui_event_types;						# gui_event_types		is from   src/lib/x-kit/widget/gui/gui-event-types.pkg
     package g2p =  gadget_to_pixmap;						# gadget_to_pixmap		is from   src/lib/x-kit/widget/theme/gadget-to-pixmap.pkg
     package gd  =  gui_displaylist;						# gui_displaylist		is from   src/lib/x-kit/widget/theme/gui-displaylist.pkg
@@ -33,10 +33,8 @@ stipulate
     package g2d =  geometry2d;							# geometry2d			is from   src/lib/std/2d/geometry2d.pkg
     package g2j =  geometry2d_junk;						# geometry2d_junk		is from   src/lib/std/2d/geometry2d-junk.pkg
     package mtx =  rw_matrix;							# rw_matrix			is from   src/lib/std/src/rw-matrix.pkg
-    package pp  =  standard_prettyprint_mill;					# standard_prettyprint_mill	is from   src/lib/prettyprint/big/src/standard-prettyprint-mill.pkg
+    package pp  =  standard_prettyprinter;					# standard_prettyprinter	is from   src/lib/prettyprint/big/src/standard-prettyprinter.pkg
     package gtg =  guiboss_to_guishim;						# guiboss_to_guishim		is from   src/lib/x-kit/widget/theme/guiboss-to-guishim.pkg
-
-    package iuw =  issue_unique_widget_id;					# issue_unique_widget_id	is from   src/lib/x-kit/widget/gui/issue-unique-widget-id.pkg
 
     nb =  log::note_on_stderr;							# log				is from   src/lib/std/src/log.pkg
 herein
@@ -46,7 +44,7 @@ herein
     {
 	App_To_Textentry
 	  =
-	  { id:				iuw::Id,
+	  { id:				Id,
 	    #
 	    get_active:			Void -> Bool,
 	    get_state:			Void -> String,
@@ -62,8 +60,8 @@ herein
 	    =
 	    REDRAW_FN_ARG
 	      {
-		id:				iuw::Id,			# Unique id.
-		doc:				String,
+		id:				Id,				# Unique Id for widget.
+		doc:				String,				# Human-readable description of this widget, for debug and inspection.
 		frame_number:			Int,				# 1,2,3,... Purely for convenience of widget, guiboss-imp makes no use of this.
 		frame_indent_hint:		gt::Frame_Indent_Hint,
 		site:				g2d::Box,			# Window rectangle in which to draw.
@@ -81,7 +79,7 @@ herein
 		default_redraw_fn:		Redraw_Fn,
 		#
 		relief:				wt::Relief,			# Is the widget outline a slope, a ridge, or a flat band?
-		cursor_on:			Bool,
+		have_keyboard_focus:		Bool,
 		state:				String,
 		#
 		fonts:				List(String),
@@ -109,8 +107,8 @@ herein
 	Mouse_Click_Fn_Arg
 	    =
 	    MOUSE_CLICK_FN_ARG							# Needs to be a sumtype because of recursive reference in default_mouse_click_fn.
-	      { id:				iuw::Id,			# Unique id.
-		doc:				String,
+	      { id:				Id,				# Unique Id for widget.
+		doc:				String,				# Human-readable description of this widget, for debug and inspection.
 		event:				gt::Mousebutton_Event,		# MOUSEBUTTON_PRESS or MOUSEBUTTON_RELEASE.
 		button:				evt::Mousebutton,		# Which mousebutton was pressed/released.
 		point:				g2d::Point,			# Where the mouse was.
@@ -127,7 +125,7 @@ herein
 		default_mouse_click_fn:		Mouse_Click_Fn,
 		#
 		relief:				Ref(wt::Relief),		# Is the widget outline a slope, a ridge, or a flat band?
-		cursor_on:			Ref(Bool),
+		have_keyboard_focus:		Bool,
 		state:				Ref(String),
 		#
 		notify_string_outs:		Void -> Void,			# 
@@ -142,8 +140,8 @@ herein
 	    =
 	    MOUSE_DRAG_FN_ARG
 	      {
-		id:				iuw::Id,			# Unique id.
-		doc:				String,
+		id:				Id,				# Unique Id for widget.
+		doc:				String,				# Human-readable description of this widget, for debug and inspection.
 		event_point:			g2d::Point,
 		start_point:			g2d::Point,
 		last_point:			g2d::Point,
@@ -162,7 +160,7 @@ herein
 		default_mouse_drag_fn:		Mouse_Drag_Fn,
 		#
 		relief:				Ref(wt::Relief),		# Is the widget outline a slope, a ridge, or a flat band?
-		cursor_on:			Ref(Bool),
+		have_keyboard_focus:		    Bool,
 		state:				Ref(String),
 		#
 		notify_string_outs:		Void -> Void,			# 
@@ -177,8 +175,8 @@ herein
 	    =
 	    MOUSE_TRANSIT_FN_ARG
 	      {
-		id:				iuw::Id,			# Unique id.
-		doc:				String,
+		id:				Id,				# Unique Id for widget.
+		doc:				String,				# Human-readable description of this widget, for debug and inspection.
 		event_point:			g2d::Point,
 		widget_layout_hint:		gt::Widget_Layout_Hint,
 		frame_indent_hint:		gt::Frame_Indent_Hint,
@@ -193,7 +191,7 @@ herein
 		default_mouse_transit_fn:	Mouse_Transit_Fn,
 		#
 		relief:				Ref(wt::Relief),		# Is the widget outline a slope, a ridge, or a flat band?
-		cursor_on:			Ref(Bool),
+		have_keyboard_focus:		    Bool,
 		state:				Ref(String),
 		#
 		notify_string_outs:		Void -> Void,			# 
@@ -208,20 +206,14 @@ herein
 	    =
 	    KEY_EVENT_FN_ARG
 	      {
-		id:				iuw::Id,			# Unique id.
-		doc:				String,
-		key_event:			gt::Key_Event,			# KEY_PRESS or KEY_RELEASE
-		keycode:			evt::Keycode,			# Keycode of the depressed key.
-		keysym:				evt::Keysym,			# Keysym  of the depressed key.  See Note[1] in src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp.api
-		string:				String,				# Ascii  for the depressed key.  See Note[1] in src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp.api
-		char:				Char,				# First char of 'string' ('\0' if string-length != 1).
-		event_point:			g2d::Point,
+		id:				Id,				# Unique Id for widget.
+		doc:				String,				# Human-readable description of this widget, for debug and inspection.
+		keystroke:			gt::Keystroke_Info,		# Keystring etc for event.
 		widget_layout_hint:		gt::Widget_Layout_Hint,
 		frame_indent_hint:		gt::Frame_Indent_Hint,
 		site:				g2d::Box,			# Widget's assigned area in window coordinates.
-		modifier_keys_state:	        evt::Modifier_Keys_State,	# State of the modifier keys (shift, ctrl...).
-		mousebuttons_state:		evt::Mousebuttons_State,	# State of mouse buttons as a bool record.
 		widget_to_guiboss:		gt::Widget_To_Guiboss,
+		guiboss_to_widget:		gt::Guiboss_To_Widget,		# Used by textpane.pkg keystroke-macro stuff to synthesize fake keystroke events to widget.
 		theme:				wt::Widget_Theme,
 		do:				(Void -> Void) -> Void,		# Used by widget subthreads to execute code in main widget microthread.
 		to:				Replyqueue,			# Used to call 'pass_*' methods in other imps.
@@ -229,7 +221,7 @@ herein
 		default_key_event_fn:		Key_Event_Fn,
 		#
 		relief:				Ref(wt::Relief),		# Is the widget outline a slope, a ridge, or a flat band?
-		cursor_on:			Ref(Bool),
+		have_keyboard_focus:		Bool,
 		state:				Ref(String),
 		#
 		notify_string_outs:		Void -> Void,			# 
@@ -255,7 +247,7 @@ herein
 		| BODY_COLOR_WHEN_ON			rgb::Rgb
 		| BODY_COLOR_WHEN_ON_WITH_MOUSEFOCUS	rgb::Rgb
 		#
-		| ID			iuw::Id
+		| ID			Id
 		| DOC			String
 		#
 		| RELIEF		wt::Relief				# Should button boundary be drawn flat, raised, sunken, ridged or grooved?
@@ -280,7 +272,7 @@ herein
 		#
 		| STRING_OUT		(String -> Void)			# Widget's current state              will be sent to these fns each time state changes.
 		| PORTWATCHER		(Null_Or(App_To_Textentry) -> Void)	# Widget's app port                   will be sent to these fns at widget startup.
-		| SITEWATCHER		(Null_Or((iuw::Id,g2d::Box)) -> Void)	# Widget's site in window coordinates will be sent to these fns each time it changes.
+		| SITEWATCHER		(Null_Or((Id,g2d::Box)) -> Void)	# Widget's site in window coordinates will be sent to these fns each time it changes.
 		;								# To help prevent deadlock, watcher fns should be fast and nonblocking, typically just setting a var or entering something into a mailqueue.
 		
 	fun process_options
@@ -457,7 +449,8 @@ herein
 		state		=  a.state;
 		theme		=  a.theme;
 		thick		=  a.thick;
-		cursor_on	=  a.cursor_on;
+
+		have_keyboard_focus =  a.have_keyboard_focus;
 
 		background_box	=  site;
 		background	=  [ gd::COLOR (palette.surround_color,  [ gd::FILLED_BOXES [ background_box ]]) ];
@@ -488,7 +481,7 @@ herein
 
 		fun get_text_dimensions (text: String)
 		    =
-		    {   g =  wti::get__guiboss_to_topwindow  theme;
+		    {   g =  wti::get__guiboss_to_hostwindow  theme;
 			#
 			font = g.get_font (get_fontnames ());
 
@@ -538,8 +531,10 @@ herein
 
 			displaylist
 			    =
-			    if (cursor_on  and   gadget_mode.has_mouse_focus)
+			    if (not have_keyboard_focus)
 				#
+				displaylist;
+			    else
 				cursor_box  = { row  =>  row - text_dimensions.font_ascent,
 						col  =>  col + text_dimensions.length_in_pixels,
 						high =>  text_dimensions.font_ascent + text_dimensions.font_descent,
@@ -549,8 +544,6 @@ herein
 				cursorlist  = [ gd::FILLED_BOXES [ cursor_box ] ];
 
 				displaylist @ cursorlist;
-			    else
-				displaylist;
 			    fi;
 
 			displaylist
@@ -595,8 +588,8 @@ herein
 	fun default_mouse_click_fn
 	    (
 	      MOUSE_CLICK_FN_ARG
-	      { id:				iuw::Id,						# Unique id.
-		doc:				String,
+	      { id:				Id,							# Unique Id for widget.
+		doc:				String,							# Human-readable description of this widget, for debug and inspection.
 		event:				gt::Mousebutton_Event,					# MOUSEBUTTON_PRESS or MOUSEBUTTON_RELEASE.
 		button:				evt::Mousebutton,
 		point:				g2d::Point,
@@ -613,7 +606,7 @@ herein
 		default_mouse_click_fn:		Mouse_Click_Fn,
 		#
 		relief:				Ref(wt::Relief),
-		cursor_on:			Ref(Bool),
+		have_keyboard_focus:		Bool,
 		state:				Ref(String),
 		#
 		notify_string_outs:		Void -> Void,						# 
@@ -626,15 +619,12 @@ herein
 		    #
 		    gt::MOUSEBUTTON_PRESS
 			=>
-			{   # note_state  (not button_state);
-			    # needs_redraw_gadget_request ();
+			{   widget_to_guiboss.g.request_keyboard_focus id;
 			};
 
 		    gt::MOUSEBUTTON_RELEASE
 			=>
 			{
-			    # note_state  initial_state;
-			    # needs_redraw_gadget_request ();
 			};
 		esac;
 
@@ -643,30 +633,12 @@ herein
 
 	fun default_mouse_transit_fn (MOUSE_TRANSIT_FN_ARG a)
 	    =
-	    {   fun flip_blink (wa: gt::Wakeup_Arg)
-		    =
-		    {   a.cursor_on :=  not *a.cursor_on;
-			#
-			a.needs_redraw_gadget_request ();
-		    };
-
-		case a.transit
+	    {   case a.transit
 		    #
 		    gt::CAME => {   a.needs_redraw_gadget_request ();						# So button will lighten when mouse enters it.
 				    #
-				    a.widget_to_guiboss.g.wake_me
-				      {
-					id      =>  a.id,
-					options =>  [ gt::EVERY_N_FRAMES (THE (40, flip_blink)) ]
-				      };
 				};
-		    gt::LEFT => {   a.needs_redraw_gadget_request ();						# So button will revert  when mosue leaves it.
-				    #
-				    a.widget_to_guiboss.g.wake_me
-				      {
-					id	=>  a.id,
-					options =>  [ gt::EVERY_N_FRAMES (NULL                ) ]
-				      };
+		    gt::LEFT => {   a.needs_redraw_gadget_request ();						# So button will revert  when mouse leaves it.
 				};
 		    _	 => ();
 		esac;
@@ -675,48 +647,50 @@ herein
 
 	fun default_key_event_fn (KEY_EVENT_FN_ARG a)
 	    =
-	    {   key_event			=  a.key_event;
-		char				=  a.char;
-		string				=  a.string;
+	    {   key_event			=  a.keystroke.key_event;
+		keystring			=  a.keystroke.keystring;
+		keychar				=  a.keystroke.keychar;
 		state				=  a.state;
 		needs_redraw_gadget_request	=  a.needs_redraw_gadget_request;
 		notify_string_outs		=  a.notify_string_outs;
 
 		if (key_event == gt::KEY_PRESS)								# Currently we ignore KEY_RELEASE.
 		    #
-		    if (char::is_print char)
+		    if (char::is_print keychar)
 			#
-			state := *state + string;
+			state := *state + keystring;
 			needs_redraw_gadget_request ();
 		    else
-			if (char == chr::ctrl_h
-			or  char == chr::del)
+			if (keychar   == chr::ctrl_h
+			or  keychar   == chr::del
+			or  keystring == "<backspace>"
+			or  keystring == "<delete>")
 			    #
-			    if (string::length *state > 0)
+			    if (string::length_in_bytes *state > 0)
 				#
-				state := string::substring (*state, 0, string::length *state - 1);
+				state := string::substring (*state, 0, string::length_in_bytes *state - 1);
 				needs_redraw_gadget_request ();
 			    fi;
 
-			elif (char == chr::ctrl_u)
+			elif (keychar == chr::ctrl_u)
 			    #
-			    if (string::length *state > 0)
+			    if (string::length_in_bytes *state > 0)
 				#
 				state := "";
 				needs_redraw_gadget_request ();
 			    fi;
 
-			elif (char == chr::return)
+			elif (keychar == chr::return)
 			    #
 			    notify_string_outs ();
 
-			elif (char == chr::nul)
+			elif (keychar == chr::nul)
 			    #
-			    case string
+			    case keystring
 				#
 				("<Clear>" | "<Home>")
 				    =>
-				    if (string::length *state > 0)
+				    if (string::length_in_bytes *state > 0)
 					#
 					state := "";
 					needs_redraw_gadget_request ();
@@ -724,9 +698,9 @@ herein
 
 				"<Left>"
 				    =>
-				    if (string::length *state > 0)
+				    if (string::length_in_bytes *state > 0)
 					#
-					state := string::substring (*state, 0, string::length *state - 1);
+					state := string::substring (*state, 0, string::length_in_bytes *state - 1);
 					needs_redraw_gadget_request ();
 				    fi;
 
@@ -739,12 +713,11 @@ herein
 
 
 
-	fun with (options: List(Option))								# PUBLIC
+	fun with (options: List(Option))								# PUBLIC.  The point of the 'with' name is that GUI coders can write 'textentry::with { this => that, foo => bar, ... }.'
 	    =
 	    {
 		reliefref	= REF wt::SUNKEN;							# 
 		textref		= REF "";
-		cursoronref	= REF TRUE;
 		#
 	        (process_options
 		  (
@@ -829,7 +802,7 @@ herein
 
 		widget_to_guiboss__global
 		    =
-		    REF (NULL:  Null_Or((gt::Widget_To_Guiboss, iuw::Id)));
+		    REF (NULL:  Null_Or((gt::Widget_To_Guiboss, Id)));
 
 		fun note_changed_gadget_activity (is_active: Bool)
 		    =
@@ -855,6 +828,7 @@ herein
 			  }:					g2d::Box
 			);
 
+		have_keyboard_focus__global	=  REF FALSE;
 
 		button_active
 		    =
@@ -867,7 +841,7 @@ herein
 				      };	
 
 
-		fun note_site  (id: iuw::Id,  site: g2d::Box)
+		fun note_site  (id: Id,  site: g2d::Box)
 		    =
 		    if(*last_known_site != site)
 			last_known_site := site;
@@ -954,10 +928,11 @@ herein
 
 		fun startup_fn
 		    { 
-		      id:				iuw::Id,						# Unique id.
-		      doc:				String,
+		      id:				Id,							# Unique Id for widget.
+		      doc:				String,							# Human-readable description of this widget, for debug and inspection.
 		      widget_to_guiboss:		gt::Widget_To_Guiboss,
-		      do:				(Void -> Void) -> Void					# Used by widget subthreads to execute code in main widget microthread.
+		      do:				(Void -> Void) -> Void,					# Used by widget subthreads to execute code in main widget microthread.
+		      to:				Replyqueue
 		    }
 		    =
 		    {	widget_to_guiboss__global
@@ -1003,12 +978,24 @@ herein
 				    =
 				    sitewatcher NULL;
 			    end;
+
+			case *widget_to_guiboss__global
+			    #
+			    THE (widget_to_guiboss, id)
+				=>
+				if *have_keyboard_focus__global
+				    #
+				    widget_to_guiboss.g.release_keyboard_focus id;
+				fi;
+
+			    NULL => ();
+			esac;
 		    };
 	
 		fun initialize_gadget_fn
 		    {
-		      id:				iuw::Id,						# Unique id.
-		      doc:				String,
+		      id:				Id,							# Unique Id for widget.
+		      doc:				String,							# Human-readable description of this widget, for debug and inspection.
 		      site:				g2d::Box,						# Window rectangle in which to draw.
 		      widget_to_guiboss:		gt::Widget_To_Guiboss,
 		      theme:				wt::Widget_Theme,
@@ -1028,8 +1015,8 @@ herein
 
 		fun redraw_request_fn_wrapper
 		    {
-		      id:				iuw::Id,						# Unique id.
-		      doc:				String,
+		      id:				Id,							# Unique Id for widget.
+		      doc:				String,							# Human-readable description of this widget, for debug and inspection.
 		      frame_number:			Int,							# 1,2,3,... Purely for convenience of widget-imp, guiboss-imp makes no use of this.
 		      frame_indent_hint:		gt::Frame_Indent_Hint,
 		      site:				g2d::Box,						# Window rectangle in which to draw.
@@ -1080,7 +1067,7 @@ herein
 				#
 				state	  => *textref,
 				relief	  => *reliefref,
-				cursor_on => *cursoronref,
+				have_keyboard_focus => *have_keyboard_focus__global,
 
 				fonts,
 				font_weight,
@@ -1105,8 +1092,8 @@ herein
 
 		fun mouse_click_fn_wrapper									# This a callback we hand to   src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp.pkg
 		      {
-			id:				iuw::Id,						# Unique id.
-			doc:				String,
+			id:				Id,							# Unique Id for widget.
+			doc:				String,							# Human-readable description of this widget, for debug and inspection.
 			event:				gt::Mousebutton_Event,					# MOUSEBUTTON_PRESS or MOUSEBUTTON_RELEASE.
 			button:				evt::Mousebutton,
 			point:				g2d::Point,
@@ -1146,7 +1133,7 @@ herein
 				#
 				state	  =>  textref,								# We don't pass the refcell here because we want client code to make state changes via note_state(), which will properly notify all state-watchers.
 				relief	  =>  reliefref,
-				cursor_on =>  cursoronref,
+				have_keyboard_focus =>  *have_keyboard_focus__global,
 				#
 				notify_string_outs,
 				needs_redraw_gadget_request
@@ -1157,8 +1144,8 @@ herein
 
 		fun mouse_drag_fn_wrapper									# This a callback we hand to   src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp.pkg
 		    (
-		      {	id:				iuw::Id,						# Unique id.
-			doc:				String,
+		      {	id:				Id,							# Unique Id for widget.
+			doc:				String,							# Human-readable description of this widget, for debug and inspection.
 			event_point:			g2d::Point,
 			start_point:			g2d::Point,
 			last_point:			g2d::Point,
@@ -1203,7 +1190,7 @@ herein
 				#
 				state	  =>  textref,								# We don't pass the refcell here because we want client code to make state changes via note_state(), which will properly notify all state-watchers.
 				relief	  =>  reliefref,
-				cursor_on =>  cursoronref,
+				have_keyboard_focus =>  *have_keyboard_focus__global,
 				#
 				notify_string_outs,
 				needs_redraw_gadget_request
@@ -1220,8 +1207,8 @@ herein
 		      #
 		      ( arg as
 			{
-			  id:				iuw::Id,						# Unique id.
-			  doc:				String,
+			  id:				Id,							# Unique Id for widget.
+			  doc:				String,							# Human-readable description of this widget, for debug and inspection.
 			  event_point:			g2d::Point,
 			  widget_layout_hint:		gt::Widget_Layout_Hint,
 			  frame_indent_hint:		gt::Frame_Indent_Hint,
@@ -1258,7 +1245,7 @@ herein
 				#
 				state	  =>  textref,								# We don't pass the refcell here because we want client code to make state changes via note_state(), which will properly notify all state-watchers.
 				relief	  =>  reliefref,
-				cursor_on =>  cursoronref,
+				have_keyboard_focus =>  *have_keyboard_focus__global,
 				#
 				notify_string_outs,
 				needs_redraw_gadget_request
@@ -1271,20 +1258,14 @@ herein
 
 		fun key_event_fn_wrapper
 		      {
-			id:				iuw::Id,						# Unique id.
-			doc:				String,
-			key_event:			gt::Key_Event,						# KEY_PRESS or KEY_RELEASE.
-			keycode:			evt::Keycode,						# Keycode of the depressed key.
-			keysym:				evt::Keysym,						# Keysym  of the depressed key.
-			string:				String,							# Ascii  for the depressed key.
-			char:				Char,							# First char of 'string' ('\0' if string-length != 1).
-			event_point:			g2d::Point,
+			id:				Id,							# Unique Id for widget.
+			doc:				String,							# Human-readable description of this widget, for debug and inspection.
+			keystroke:			gt::Keystroke_Info,					# Keystring etc for event.
 			widget_layout_hint:		gt::Widget_Layout_Hint,
 			frame_indent_hint:		gt::Frame_Indent_Hint,
 			site:		 		g2d::Box,						# Widget's assigned area in window coordinates.
-			modifier_keys_state:	        evt::Modifier_Keys_State,				# State of the modifier keys (shift, ctrl...).
-			mousebuttons_state:		evt::Mousebuttons_State,				# State of mouse buttons as a bool record.
 			widget_to_guiboss:		gt::Widget_To_Guiboss,
+			guiboss_to_widget:		gt::Guiboss_To_Widget,					# Used by textpane.pkg keystroke-macro stuff to synthesize fake keystroke events to widget.
 			theme:				wt::Widget_Theme,
 			do:				(Void -> Void) -> Void,					# Used by widget subthreads to execute code in main widget microthread.
 			to:				Replyqueue						# Used to call 'pass_*' methods in other imps.
@@ -1298,18 +1279,12 @@ herein
 			      {
 				id,
 				doc,
-				key_event,
-				keycode,
-				keysym,
-				string,
-				char,
-				event_point,
+				keystroke,
 				widget_layout_hint,
 				frame_indent_hint,
 				site,
-				modifier_keys_state,
-				mousebuttons_state,
 				widget_to_guiboss,
+				guiboss_to_widget,
 				theme,
 				do,
 				to,
@@ -1318,7 +1293,7 @@ herein
 				#
 				state	  =>  textref,								# We don't pass the refcell here because we want client code to make state changes via note_state(), which will properly notify all state-watchers.
 				relief	  =>  reliefref,
-				cursor_on =>  cursoronref,
+				have_keyboard_focus =>  *have_keyboard_focus__global,
 				#
 				notify_string_outs,
 				needs_redraw_gadget_request
@@ -1328,6 +1303,25 @@ herein
 
 			();
 		    };
+
+		fun note_keyboard_focus_fn_wrapper										# Not really a wrapper because we don't currently allow clients to replace it, but it is structurally parallel with our other wrapper fns in that it gets handed to widget-imp.pkg.
+		      {
+			id:				Id,									# Unique Id for widget.
+			doc:				String,									# Human-readable description of this widget, for debug and inspection.
+			have_keyboard_focus:		Bool,
+			widget_to_guiboss:		gt::Widget_To_Guiboss,
+			theme:				wt::Widget_Theme,
+			do:				(Void -> Void) -> Void,							# Used by widget subthreads to execute code in main widget microthread.
+			to:				Replyqueue								# Used to call 'pass_*' methods in other imps.
+		      }
+		    = 
+		    {	have_keyboard_focus__global
+			    :=
+			    have_keyboard_focus;
+
+			needs_redraw_gadget_request ();
+		    };
+
 
 
 		#
@@ -1359,6 +1353,7 @@ herein
 		    wi::MOUSE_CLICK_FN			mouse_click_fn_wrapper,
 		    wi::MOUSE_TRANSIT_FN		mouse_transit_fn_wrapper,
 		    wi::KEY_EVENT_FN			key_event_fn_wrapper,
+		    wi::NOTE_KEYBOARD_FOCUS_FN		note_keyboard_focus_fn_wrapper,
 		    wi::DOC				widget_doc
 		  ]
 		  @
@@ -1394,5 +1389,5 @@ end;
 
 
 ## COPYRIGHT (c) 1994 by AT&T Bell Laboratories  See SMLNJ-COPYRIGHT file for details.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

@@ -4,7 +4,7 @@
 # without any textstyle information at all.
 
 # Compiled by:
-#     src/lib/prettyprint/big/prettyprint-mill.lib
+#     src/lib/prettyprint/big/prettyprinter.lib
 
 package   traitless_text
 : (weak)  Traitful_Text						# Traitful_Text	is from   src/lib/prettyprint/big/src/traitful-text.api
@@ -13,10 +13,10 @@ package   traitless_text
     Traitful_Text = String;
     fun string s = s;
     fun texttraits _ = ();
-    fun size s = string::length s;
+    fun size s = string::length_in_bytes s;
 };
 
 
 ## COPYRIGHT (c) 1998 Bell Labs, Lucent Technologies.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

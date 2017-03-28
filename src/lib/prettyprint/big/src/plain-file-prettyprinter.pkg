@@ -1,0 +1,49 @@
+## plain-file-prettyprinter.pkg
+# A pretty printer with plain-text output to a file.
+# There are no styles -- Traitful_Text is just String.
+
+# Compiled by:
+#     src/lib/prettyprint/big/prettyprinter.lib
+
+stipulate
+    package fil =  file__premicrothread;									# file__premicrothread				is from   src/lib/std/src/posix/file--premicrothread.pkg
+    package out =  plain_prettyprint_output_stream;								# plain_prettyprint_output_stream		is from   src/lib/prettyprint/big/src/out/plain-prettyprint-output-stream.pkg
+herein
+
+    # This package is referenced (only) in:
+    #
+    #     src/app/future-lex/src/backends/sml/ml.pkg
+    #     src/app/future-lex/src/backends/sml/sml-fun-output.pkg
+    #
+    package plain_file_prettyprinter: (weak)	    api {
+							include api Base_Prettyprinter			# Base_Prettyprinter				is from   src/lib/prettyprint/big/src/base-prettyprinter.api
+							            where
+							                Traitful_Text == String;
+
+							make_plain_file_prettyprinter
+							  :
+							  { output_stream:   fil::Output_Stream
+							  }
+							  -> Prettyprinter;
+						    }
+    {
+	package pp
+	    =
+	    base_prettyprinter_g (										# base-prettyprinter_g			is from   src/lib/prettyprint/big/src/base-prettyprinter-g.pkg
+		#
+		package tt  =  traitless_text;									# traitless_text				is from   src/lib/prettyprint/big/src/traitless-text.pkg
+		package out =  out;
+	    );
+
+	include package   pp;
+
+	fun make_plain_file_prettyprinter   arg
+	    =
+	    make_prettyprinter  (out::make_plain_prettyprinter_output_stream  arg)  [];
+    };
+end;
+
+
+## COPYRIGHT (c) 1999 Bell Labs, Lucent Technologies.
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
+## released per terms of SMLNJ-COPYRIGHT.

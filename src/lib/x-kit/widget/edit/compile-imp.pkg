@@ -1,0 +1,509 @@
+## compile-imp.pkg
+#
+# See overview comments in:
+#
+#     src/lib/x-kit/widget/edit/compile-imp.api
+
+# Compiled by:
+#     src/lib/x-kit/widget/xkit-widget.sublib
+
+
+stipulate
+    include package   threadkit;				# threadkit			is from   src/lib/src/lib/thread-kit/src/core-thread-kit/threadkit.pkg
+    #
+#   package ap  =  client_to_atom;				# client_to_atom		is from   src/lib/x-kit/xclient/src/iccc/client-to-atom.pkg
+#   package au  =  authentication;				# authentication		is from   src/lib/x-kit/xclient/src/stuff/authentication.pkg
+#   package cpm =  cs_pixmap;					# cs_pixmap			is from   src/lib/x-kit/xclient/src/window/cs-pixmap.pkg
+#   package cpt =  cs_pixmat;					# cs_pixmat			is from   src/lib/x-kit/xclient/src/window/cs-pixmat.pkg
+#   package dy  =  display;					# display			is from   src/lib/x-kit/xclient/src/wire/display.pkg
+#   package fil =  file__premicrothread;			# file__premicrothread		is from   src/lib/std/src/posix/file--premicrothread.pkg
+#   package fti =  font_index;					# font_index			is from	  src/lib/x-kit/xclient/src/window/font-index.pkg
+#   package r2k =  xevent_router_to_keymap;			# xevent_router_to_keymap	is from   src/lib/x-kit/xclient/src/window/xevent-router-to-keymap.pkg
+#   package mtx =  rw_matrix;					# rw_matrix			is from   src/lib/std/src/rw-matrix.pkg
+#   package rop =  ro_pixmap;					# ro_pixmap			is from   src/lib/x-kit/xclient/src/window/ro-pixmap.pkg
+#   package rw  =  root_window;					# root_window			is from   src/lib/x-kit/widget/lib/root-window.pkg
+#   package rwv =  rw_vector;					# rw_vector			is from   src/lib/std/src/rw-vector.pkg
+#   package sep =  client_to_selection;				# client_to_selection		is from   src/lib/x-kit/xclient/src/window/client-to-selection.pkg
+#   package shp =  shade;					# shade				is from   src/lib/x-kit/widget/lib/shade.pkg
+#   package sj  =  socket_junk;					# socket_junk			is from   src/lib/internet/socket-junk.pkg
+#   package x2s =  xclient_to_sequencer;			# xclient_to_sequencer		is from   src/lib/x-kit/xclient/src/wire/xclient-to-sequencer.pkg
+#   package tr  =  logger;					# logger			is from   src/lib/src/lib/thread-kit/src/lib/logger.pkg
+#   package tsr =  thread_scheduler_is_running;			# thread_scheduler_is_running	is from   src/lib/src/lib/thread-kit/src/core-thread-kit/thread-scheduler-is-running.pkg
+#   package u1  =  one_byte_unt;				# one_byte_unt			is from   src/lib/std/one-byte-unt.pkg
+#   package v1u =  vector_of_one_byte_unts;			# vector_of_one_byte_unts	is from   src/lib/std/src/vector-of-one-byte-unts.pkg
+#   package v2w =  value_to_wire;				# value_to_wire			is from   src/lib/x-kit/xclient/src/wire/value-to-wire.pkg
+#   package wg  =  widget;					# widget			is from   src/lib/x-kit/widget/old/basic/widget.pkg
+#   package wi  =  window;					# window			is from   src/lib/x-kit/xclient/src/window/window.pkg
+#   package wme =  window_map_event_sink;			# window_map_event_sink		is from   src/lib/x-kit/xclient/src/window/window-map-event-sink.pkg
+#   package wpp =  client_to_window_watcher;			# client_to_window_watcher	is from   src/lib/x-kit/xclient/src/window/client-to-window-watcher.pkg
+#   package wy  =  widget_style;				# widget_style			is from   src/lib/x-kit/widget/lib/widget-style.pkg
+#   package xc  =  xclient;					# xclient			is from   src/lib/x-kit/xclient/xclient.pkg
+#   package xj  =  xsession_junk;				# xsession_junk			is from   src/lib/x-kit/xclient/src/window/xsession-junk.pkg
+#   package xtr =  xlogger;					# xlogger			is from   src/lib/x-kit/xclient/src/stuff/xlogger.pkg
+    #
+
+    #
+    package evt =  gui_event_types;				# gui_event_types		is from   src/lib/x-kit/widget/gui/gui-event-types.pkg
+    package gts =  gui_event_to_string;				# gui_event_to_string		is from   src/lib/x-kit/widget/gui/gui-event-to-string.pkg
+    package gt  =  guiboss_types;				# guiboss_types			is from   src/lib/x-kit/widget/gui/guiboss-types.pkg
+
+    package a2r =  windowsystem_to_xevent_router;		# windowsystem_to_xevent_router	is from   src/lib/x-kit/xclient/src/window/windowsystem-to-xevent-router.pkg
+
+    package gd  =  gui_displaylist;				# gui_displaylist		is from   src/lib/x-kit/widget/theme/gui-displaylist.pkg
+
+    package pp  =  standard_prettyprinter;			# standard_prettyprinter	is from   src/lib/prettyprint/big/src/standard-prettyprinter.pkg
+    package lms =  list_mergesort;				# list_mergesort		is from   src/lib/src/list-mergesort.pkg
+
+
+
+    package ct  =  cutbuffer_types;				# cutbuffer_types		is from   src/lib/x-kit/widget/edit/cutbuffer-types.pkg
+#   package ct  =  gui_to_object_theme;				# gui_to_object_theme		is from   src/lib/x-kit/widget/theme/object/gui-to-object-theme.pkg
+#   package bt  =  gui_to_sprite_theme;				# gui_to_sprite_theme		is from   src/lib/x-kit/widget/theme/sprite/gui-to-sprite-theme.pkg
+#   package wt  =  widget_theme;				# widget_theme			is from   src/lib/x-kit/widget/theme/widget/widget-theme.pkg
+
+    package ml  =  makelib;				 	# makelib			is from   src/lib/core/makelib/makelib.pkg
+
+    package boi =  spritespace_imp;				# spritespace_imp		is from   src/lib/x-kit/widget/space/sprite/spritespace-imp.pkg
+    package cai =  objectspace_imp;				# objectspace_imp		is from   src/lib/x-kit/widget/space/object/objectspace-imp.pkg
+    package pai =  widgetspace_imp;				# widgetspace_imp		is from   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
+
+    #    
+    package gtg =  guiboss_to_guishim;				# guiboss_to_guishim		is from   src/lib/x-kit/widget/theme/guiboss-to-guishim.pkg
+
+    package b2s =  spritespace_to_sprite;			# spritespace_to_sprite		is from   src/lib/x-kit/widget/space/sprite/spritespace-to-sprite.pkg
+    package c2o =  objectspace_to_object;			# objectspace_to_object		is from   src/lib/x-kit/widget/space/object/objectspace-to-object.pkg
+
+    package s2b =  sprite_to_spritespace;			# sprite_to_spritespace		is from   src/lib/x-kit/widget/space/sprite/sprite-to-spritespace.pkg
+    package o2c =  object_to_objectspace;			# object_to_objectspace		is from   src/lib/x-kit/widget/space/object/object-to-objectspace.pkg
+
+    package g2p =  gadget_to_pixmap;				# gadget_to_pixmap		is from   src/lib/x-kit/widget/theme/gadget-to-pixmap.pkg
+
+    package im  =  int_red_black_map;				# int_red_black_map		is from   src/lib/src/int-red-black-map.pkg
+#   package is  =  int_red_black_set;				# int_red_black_set		is from   src/lib/src/int-red-black-set.pkg
+    package sm  =  string_map;					# string_map			is from   src/lib/src/string-map.pkg
+    package idm =  id_map;					# id_map			is from   src/lib/src/id-map.pkg
+    package dxy =  digraphxy;					# digraphxy			is from   src/lib/src/digraphxy.pkg
+
+								# compiler			is from   src/lib/core/compiler/compiler.pkg
+    package acf =  compiler::anormcode_form;			# anormcode_form		is from   src/lib/compiler/back/top/anormcode/anormcode-form.pkg
+    package cs  =  compiler::compiler_state;			# compiler_state		is from   src/lib/compiler/toplevel/interact/compiler-state.pkg
+    package ds  =  compiler::deep_syntax;			# deep_syntax			is from   src/lib/compiler/front/typer-stuff/deep-syntax/deep-syntax.pkg
+    package err =  compiler::error_message;			# compiler			is from   src/lib/core/compiler/compiler.pkg
+    package it  =  compiler::import_tree;			# import_tree			is from   src/lib/compiler/execution/main/import-tree.pkg
+    package lt  =  compiler::linking_mapstack;			# linking_mapstack		is from   src/lib/compiler/execution/linking-mapstack/linking-mapstack.pkg
+    package pcs =  compiler::per_compile_stuff;			# per_compile_stuff		is from   src/lib/compiler/front/typer-stuff/main/per-compile-stuff.pkg
+    package ph  =  compiler::picklehash;			# picklehash			is from   src/lib/compiler/front/basics/map/picklehash.pkg
+    package raw =  compiler::raw_syntax;			# raw_syntax			is from   src/lib/compiler/front/parser/raw-syntax/raw-syntax.pkg
+    package sci =  compiler::sourcecode_info;			# sourcecode_info		is from   src/lib/compiler/front/basics/source/sourcecode-info.pkg
+    package seg =  compiler::code_segment;			# code_segment			is from   src/lib/compiler/execution/code-segments/code-segment.pkg
+    package syx =  compiler::symbolmapstack;			# symbolmapstack		is from   src/lib/compiler/front/typer-stuff/symbolmapstack/symbolmapstack.pkg
+    package tmp =  compiler::highcode_codetemp;			# highcode_codetemp		is from   src/lib/compiler/back/top/highcode/highcode-codetemp.pkg
+								# error_message			is from   src/lib/compiler/front/basics/errormsg/error-message.pkg
+
+    package sj  =  string_junk;					# string_junk			is from   src/lib/std/src/string-junk.pkg
+    package r8  =  rgb8;					# rgb8				is from   src/lib/x-kit/xclient/src/color/rgb8.pkg
+    package r64 =  rgb;						# rgb				is from   src/lib/x-kit/xclient/src/color/rgb.pkg
+    package g2d =  geometry2d;					# geometry2d			is from   src/lib/std/2d/geometry2d.pkg
+    package g2j =  geometry2d_junk;				# geometry2d_junk		is from   src/lib/std/2d/geometry2d-junk.pkg
+
+    package mt  =  millboss_types;				# millboss_types		is from   src/lib/x-kit/widget/edit/millboss-types.pkg
+
+    package a2c =  app_to_compileimp;				# app_to_compileimp		is from   src/lib/x-kit/widget/edit/app-to-compileimp.pkg
+    package g2c =  guiboss_to_compileimp;			# guiboss_to_compileimp		is from   src/lib/x-kit/widget/edit/guiboss-to-compileimp.pkg
+#   package e2g =  millboss_to_guiboss;				# millboss_to_guiboss		is from   src/lib/x-kit/widget/edit/millboss-to-guiboss.pkg
+
+    package tbi =  textmill;					# textmill			is from   src/lib/x-kit/widget/edit/textmill.pkg
+    package tmt =  textmill_crypts;				# textmill_crypts		is from   src/lib/x-kit/widget/edit/textmill-crypts.pkg
+
+    package p2l =  textpane_to_screenline;			# textpane_to_screenline	is from   src/lib/x-kit/widget/edit/textpane-to-screenline.pkg
+    package l2p =  screenline_to_textpane;			# screenline_to_textpane	is from   src/lib/x-kit/widget/edit/screenline-to-textpane.pkg
+    #
+    package b2p =  millboss_to_pane;				# millboss_to_pane		is from   src/lib/x-kit/widget/edit/millboss-to-pane.pkg
+
+    package mmo =  millgraph_millout;				# millgraph_millout		is from   src/lib/x-kit/widget/edit/millgraph-millout.pkg
+    package fm  =  fundamental_mode;				# fundamental_mode		is from   src/lib/x-kit/widget/edit/fundamental-mode.pkg
+
+    tracefile   =  "widget-unit-test.trace.log";
+
+    nb = log::note_on_stderr;					# log				is from   src/lib/std/src/log.pkg
+
+dummy1 = make_textpane::make_pane_guiplan;	# XXX SUCKO FIXME Clumsy way to force this to compile and load. Should think of a better. The problem is that it is never called directly, just backpatches itself into a refcell, so the usual dependency mechanisms do not kick in.
+
+herein
+
+    package compile_imp
+    :       Compile_Imp													# Compile_Imp		is from   src/lib/x-kit/widget/edit/compile-imp.api
+    {
+	Compile_Option
+	  #
+	  =  MICROTHREAD_NAME	String											# 
+	  |  ID			Id											# Stable, unique id for imp.
+	  ;	
+
+	Compileimp_Arg =  List(Compile_Option);										# Currently no required component.
+
+	Imports = {													# Ports we use, provided by other imps.
+		  };
+															# 
+
+	Millboss_State													# 
+	  =
+	  {
+	  };
+
+	Me_Slot = Mailslot( { imports:		Imports,
+			      me:		Millboss_State,
+			      compileimp_arg:	Compileimp_Arg,
+			      run_gun':		Run_Gun,
+			      end_gun':		End_Gun
+			    }
+			  );
+
+	Exports
+	  =
+	  { app_to_compileimp:		a2c::App_To_Compileimp,								# Ports we provide for use by other imps.
+	    guiboss_to_compileimp:	g2c::Guiboss_To_Compileimp
+	  };
+
+
+	Compileimp_Egg =  Void -> (Exports,   (Imports, Run_Gun, End_Gun) -> Void);
+
+
+	Runstate =    {													# These values will be statically globally visible throughout the code body for the imp.
+			id:			Id,
+			me:			Millboss_State,								# 
+			compileimp_arg:		Compileimp_Arg,
+			imports:		Imports,								# Imps to which we send requests.
+			to:			Replyqueue,								# The name makes   foo::pass_something(imp) to {. ... }   syntax read well.
+			#												#
+			end_gun':		End_Gun									# We shut down the microthread when this fires.
+		      };
+
+	Compileimp_Q    = Mailqueue( Runstate -> Void );
+
+
+
+
+
+	fun run ( compileimp_q:			Compileimp_Q,								# 
+		  #
+		  runstate as
+		  {													# These values will be statically globally visible throughout the code body for the imp.
+		    id:				Id,
+		    me:				Millboss_State,								# 
+		    compileimp_arg:		Compileimp_Arg,
+		    imports:			Imports,								# Imps to which we send requests.
+		    to:				Replyqueue,								# The name makes   foo::pass_something(imp) to {. ... }   syntax read well.
+		    #													#
+		    end_gun':			End_Gun									# 
+		  }
+		)
+	    =
+	    {	loop ();
+	    }
+	    where
+
+
+		#
+		fun loop ()												# Outer loop for the imp.
+		    =
+		    {   do_one_mailop' to [
+			    #
+			    end_gun'                        ==>  shut_down_millboss_imp',
+			    take_from_mailqueue' compileimp_q ==>  do_millboss_plea
+			];
+
+			loop ();
+		    }	
+		    where
+			fun do_millboss_plea  thunk
+			    =
+			    thunk runstate;
+			#
+			fun shut_down_millboss_imp' ()
+			    =
+			    {
+				thread_exit { success => TRUE };							# Will not return.	
+			    };
+		    end;
+	    end;	
+
+
+
+	#
+	fun startup   (id: Id,   reply_oneshot:  Oneshot_Maildrop( (Me_Slot, Exports) ))   ()				# Root fn of imp microthread.  Note currying.
+	    =
+	    {   me_slot  =  make_mailslot  ()	:  Me_Slot;
+		#
+		app_to_compileimp
+		  =
+		  { id => issue_unique_id (),										# 
+		    #
+		    parse_string_to_raw_declarations,									# 
+		    compile_raw_declaration_to_package_closure,								# 
+		    link_and_run_package_closure									#
+		  };
+
+		fun shut_down_compileimp ()
+		    =
+		    {
+# XXX BUGGO FIXME   TBD
+		    };
+
+		guiboss_to_compileimp
+		  =
+		  { id => issue_unique_id (),										# 
+		    #
+		    shut_down_compileimp
+		  };
+
+		exports
+		  =
+		  { app_to_compileimp,
+		    guiboss_to_compileimp
+		  };
+
+		to          =  make_replyqueue();
+		#
+		put_in_oneshot (reply_oneshot, (me_slot, exports));							# Return value from compileimp_egg'().
+
+		(take_from_mailslot  me_slot)										# Imports from compileimp_egg'().
+		    ->
+		    { me, compileimp_arg, imports, run_gun', end_gun' };
+
+		block_until_mailop_fires  run_gun';									# Wait for the starting gun.
+
+		run ( compileimp_q,		 									# Will not return.
+		      { id,
+			me,
+			compileimp_arg,
+			imports,
+			to,
+			#
+			end_gun'
+		      }
+		);
+	    }
+	    where
+		compileimp_q     =  make_mailqueue (get_current_microthread()):  Compileimp_Q;
+
+
+
+		#################################################################################
+		# App_To_Compileimp interface fns::
+		#
+		#
+
+		fun parse_string_to_raw_declarations									# PUBLIC.
+		      {
+			sourcecode_info:		sci::Sourcecode_Info,
+			pp:				pp::Prettyprinter						# Where to prettyprint results.
+		      }
+		    :
+		      List( raw::Declaration )										# 
+		    =
+		    {   reply_oneshot =  make_oneshot_maildrop()
+				      :  Oneshot_Maildrop( List(raw::Declaration) );
+			#
+			put_in_mailqueue  (compileimp_q,								# Serialize access to the parser because it may not be threadsafe.
+			    #												# When/if we verify that the parser is threadsafe -- or make it
+			    \\ (r as { id, me, ... }: Runstate)								# threadsafe -- we can switch to doing the parse in the caller's
+				=											# microthread instead of our own.
+				{   (ml::parse_string_to_raw_declarations
+					  {
+					    sourcecode_info,
+					    pp
+					  }
+				    ) ->  declarations;
+
+				    put_in_oneshot (reply_oneshot, declarations);
+				}
+			);
+			get_from_oneshot  reply_oneshot;
+		    };
+
+
+		fun compile_raw_declaration_to_package_closure								# PUBLIC.
+		    ( arg as
+		      {													# 
+			declaration:				raw::Declaration,					#
+			sourcecode_info:			sci::Sourcecode_Info,					# Source code to compile, also error sink.
+			pp:					pp::Prettyprinter,					# Where to prettyprint results.
+			compiler_state_stack:			(cs::Compiler_State, List(cs::Compiler_State)),		# Compiler symbol tables to use for this compile.
+			options:				List( cs::Compile_And_Eval_String_Option )		# Future-proofing, lets us add more parameters in future without breaking backward compatibility at the client-call level.
+		      }													#
+		    )
+		    :
+		    Null_Or (
+		      { package_closure:			seg::Package_Closure,
+			import_trees:				List( it::Import_Tree ),
+			export_picklehash:			Null_Or( ph::Picklehash ),
+			linking_mapstack:			lt::Picklehash_To_Heapchunk_Mapstack,
+			code_and_data_segments:     		seg::Code_And_Data_Segments,
+			new_symbolmapstack:         		syx::Symbolmapstack,					# A symbol table delta containing (only) stuff from raw_declaration.
+			deep_syntax_declaration:    		ds::Declaration,					# Typechecked form of  raw_declaration.
+			exported_highcode_variables:		List( tmp::Codetemp ),
+			inline_expression:			Null_Or( acf::Function ),
+			top_level_pkg_etc_defs_jar:		cs::Compiler_Mapstack_Set_Jar,
+			get_current_compiler_mapstack_set:	Void -> cs::Compiler_Mapstack_Set,
+			compiler_verbosity:			pcs::Compiler_Verbosity,
+			compiler_state_stack:			(cs::Compiler_State, List(cs::Compiler_State))
+		      }
+		    )
+		    =
+		    {   reply_oneshot =  make_oneshot_maildrop();
+
+			#
+			put_in_mailqueue  (compileimp_q,								# Serialize access to the compiler because it is not threadsafe -- the SML/NJ people are fond of global variables.
+			    #												# When/if we rewrite the compiler to be threadsafe we can switch to doing the compile in the caller's microthread
+			    \\ (r as { id, me, ... }: Runstate)								# instead of our own.
+				=
+				{   (ml::compile_raw_declaration_to_package_closure  arg)
+				        ->
+					result;
+
+				    put_in_oneshot (reply_oneshot, result);
+				}
+			);
+			get_from_oneshot  reply_oneshot;
+		    };
+
+
+		fun link_and_run_package_closure									# PUBLIC.
+		    ( arg1 as
+		      {													# 
+			sourcecode_info:			sci::Sourcecode_Info,					# Source code to compile, also error sink.
+			pp:					pp::Prettyprinter					# Where to prettyprint results.
+		      }
+		    )
+		    ( arg2 as
+		      {													# 
+			package_closure:			seg::Package_Closure,
+			import_trees:       			List( it::Import_Tree ),
+			export_picklehash:  			Null_Or( ph::Picklehash ),
+			linking_mapstack:   			lt::Picklehash_To_Heapchunk_Mapstack,
+			code_and_data_segments:     		seg::Code_And_Data_Segments,
+			new_symbolmapstack:         		syx::Symbolmapstack,					# A symbol table delta containing (only) stuff from raw_declaration.
+			deep_syntax_declaration:    		ds::Declaration,					# Typechecked form of  raw_declaration.
+			exported_highcode_variables:		List( tmp::Codetemp ),
+			inline_expression:			Null_Or( acf::Function ),
+			top_level_pkg_etc_defs_jar:		cs::Compiler_Mapstack_Set_Jar,
+			get_current_compiler_mapstack_set:	Void -> cs::Compiler_Mapstack_Set,
+			compiler_verbosity:			pcs::Compiler_Verbosity,
+			compiler_state_stack:			(cs::Compiler_State, List(cs::Compiler_State))		# Compiler symbol tables to use for this compile.
+		      }													#
+		    )
+		    :
+		      (cs::Compiler_State, List(cs::Compiler_State))							# Updated compiler symbol tables.  Caller may keep or discard.
+		    =
+		    {
+			ml::link_and_run_package_closure  arg1 arg2;							# Do the actual execution in caller's microthread, because it might
+															# block indefinitely (maybe it invokes an interactive dialog or loop)
+															# and we don't want compile_imp dead in the water indefinitely.
+															# I'm hoping the link process is threadsafe -- should check.			# XXX QUERO FIXME
+		    };
+	    end;
+
+
+	#
+	fun process_options (options: List(Compile_Option), { name, id })
+	    =
+	    {   my_name			=  REF name;
+		my_id			=  REF id;
+		#
+		apply  do_option  options
+		where
+		    fun do_option (MICROTHREAD_NAME	n) =>   my_name			:=  n;
+			do_option (ID			i) =>   my_id                   :=  i;
+		    end;
+		end;
+
+		{ name			=>  *my_name,
+		  id 			=>   *my_id
+		};
+	    };
+
+
+        ##########################################################################################
+	# PUBLIC.
+	#
+	fun make_compileimp_egg												# PUBLIC. PHASE 1: Construct our state and initialize from 'options'.
+	      (
+		compileimp_arg:		Compileimp_Arg									# Called (only) by startup()	in   src/lib/x-kit/widget/gui/guiboss-imp.pkg
+	      )
+	    =
+	    {	compileimp_arg ->  (compileimp_options);								# Currently no compileimp_needs component, so this is a no-op.
+		#
+		(process_options
+		  ( compileimp_options,
+		    { name		=> "compileimp",
+		      id		=>  id_zero
+		    }
+		) )
+		    ->
+		    { name,
+		      id
+		    };
+	
+		my (id, compileimp_options)
+		    =
+		    if (id_to_int(id) == 0)
+			id = issue_unique_id();										# Allocate unique imp id.
+			(id, ID id ! compileimp_options);								# Make our id stable across stop/restart cycles.   # But we've given up doing stop/restart cycles.
+		    else
+			(id, compileimp_options);
+		    fi;
+
+		compileimp_arg = (compileimp_options);									# Currently no compileimp_needs component, so this is a no-op.
+
+		me =  {	
+		      };
+
+		\\ () = {   reply_oneshot = make_oneshot_maildrop():  Oneshot_Maildrop( (Me_Slot, Exports) );		# PUBLIC. PHASE 2: Start our microthread and return our Exports to caller.
+			    #
+			    xlogger::make_thread  name  (startup  (id, reply_oneshot));					# Note that startup() is curried.
+
+			    (get_from_oneshot  reply_oneshot) -> (me_slot, exports);
+
+			    fun phase3											# PUBLIC. PHASE 3: Accept our Imports, then wait for Run_Gun to fire.
+				(
+				  imports:	Imports,
+				  run_gun':	Run_Gun,	
+				  end_gun':	End_Gun
+				)
+				=
+				{
+				    put_in_mailslot  (me_slot, { me, compileimp_arg, imports, run_gun', end_gun' });
+				};
+
+			    (exports, phase3);
+			};
+	    };
+    };
+
+end;
+
+
+
+
+
+##########################################################################
+#   The following is support for outline-minor-mode in emacs.		 #
+#  ^C @ ^T hides all Text. (Leaves all headings.)			 #
+#  ^C @ ^A shows All of file.						 #
+#  ^C @ ^Q Quickfolds entire file. (Leaves only top-level headings.)	 #
+#  ^C @ ^I shows Immediate children of node.				 #
+#  ^C @ ^S Shows all of a node.						 #
+#  ^C @ ^D hiDes all of a node.						 #
+#  ^HFoutline-mode gives more details.					 #
+#  (Or do ^HI and read emacs:outline mode.)				 #
+#									 #
+# Local variables:							 #
+# mode: outline-minor							 #
+# outline-regexp: "[{ \t]*\\(fun \\)"			 		 #
+# End:									 #
+##########################################################################
+
+
+## Original code by Jeff Prothero Copyright (c) 2014-2015,
+## released per terms of SMLNJ-COPYRIGHT.

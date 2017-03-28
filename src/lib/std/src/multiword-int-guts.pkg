@@ -163,7 +163,7 @@ herein
 	    =
 	    {   fun dig d
 		    =
-		    string_guts::get (digvec, tagged_unt_guts::to_int_x d);
+		    string_guts::get_byte_as_char (digvec, tagged_unt_guts::to_int_x d);
 
 		my BI { digits, negative }
 		    =
@@ -762,7 +762,7 @@ herein
 		end;
 	    end;
 
-	fun list_min [] =>   raise exception FAIL "Cannot do list_min on empty list";
+	fun list_min [] =>   raise exception DIE "Cannot do list_min on empty list";
 	    #
 	    list_min (i ! ints)
 		=>
@@ -774,7 +774,7 @@ herein
 		end;
 	end;
 
-	fun list_max [] =>   raise exception FAIL "Cannot do list_max on empty list";
+	fun list_max [] =>   raise exception DIE "Cannot do list_max on empty list";
 	    #
 	    list_max (i ! ints)
 		=>
@@ -855,5 +855,5 @@ end;
 
 
 ## COPYRIGHT (c) 1995 by AT&T Bell Laboratories. See SMLNJ-COPYRIGHT file for details.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

@@ -32,9 +32,9 @@ stipulate
     #
     package gd  =  gui_displaylist;				# gui_displaylist			is from   src/lib/x-kit/widget/theme/gui-displaylist.pkg
     #
-    package dbx =  sprite_theme_imp;				# sprite_theme_imp			is from   src/lib/x-kit/widget/xkit/theme/sprite/default/default-sprite-theme-for-x.pkg
-    package dcx =  object_theme_imp;				# object_theme_imp			is from   src/lib/x-kit/widget/xkit/theme/object/default/default-object-theme-for-x.pkg
-    package dtx =  widget_theme_imp;				# widget_theme_imp			is from   src/lib/x-kit/widget/xkit/theme/widget/default/default-widget-theme-for-x.pkg
+    package dbx =  sprite_theme_imp;				# sprite_theme_imp			is from   src/lib/x-kit/widget/xkit/theme/sprite/default/sprite-theme-imp.pkg
+    package dcx =  object_theme_imp;				# object_theme_imp			is from   src/lib/x-kit/widget/xkit/theme/object/default/object-theme-imp.pkg
+    package dtx =  widget_theme_imp;				# widget_theme_imp			is from   src/lib/x-kit/widget/xkit/theme/widget/default/widget-theme-imp.pkg
     #
     package dy  =  display;					# display				is from   src/lib/x-kit/xclient/src/wire/display.pkg
 #   package w2x =  windowsystem_to_xserver;			# windowsystem_to_xserver		is from   src/lib/x-kit/xclient/src/window/windowsystem-to-xserver.pkg
@@ -42,7 +42,6 @@ stipulate
     package fti =  font_index;					# font_index				is from	  src/lib/x-kit/xclient/src/window/font-index.pkg
     package gtg =  guiboss_to_guishim;				# guiboss_to_guishim			is from   src/lib/x-kit/widget/theme/guiboss-to-guishim.pkg
     package gq  =  guiboss_imp;					# guiboss_imp				is from   src/lib/x-kit/widget/gui/guiboss-imp.pkg
-#   package c2g =  client_to_guiboss;				# client_to_guiboss			is from   src/lib/x-kit/widget/gui/client-to-guiboss.pkg
 #   package r2k =  xevent_router_to_keymap;			# xevent_router_to_keymap		is from   src/lib/x-kit/xclient/src/window/xevent-router-to-keymap.pkg
     package mtx =  rw_matrix;					# rw_matrix				is from   src/lib/std/src/rw-matrix.pkg
     package r8  =  rgb8;					# rgb8					is from   src/lib/x-kit/xclient/src/color/rgb8.pkg
@@ -81,10 +80,7 @@ stipulate
     package db  =  diamondbutton;				# diamondbutton				is from   src/lib/x-kit/widget/leaf/diamondbutton.pkg
     package rb  =  roundbutton;					# roundbutton				is from   src/lib/x-kit/widget/leaf/roundbutton.pkg
 
-    package le  =  lineeditor;					# lineeditor				is from   src/lib/x-kit/widget/edit/lineeditor.pkg
-    package sl  =  statusline;					# statusline				is from   src/lib/x-kit/widget/edit/statusline.pkg
-    package mb  =  minibuffer;					# minbuffer				is from   src/lib/x-kit/widget/edit/minibuffer.pkg
-    package tef =  textedit;					# textedit				is from   src/lib/x-kit/widget/edit/texteditor.pkg
+#   package sl  =  screenline;					# screenline				is from   src/lib/x-kit/widget/edit/screenline.pkg
     package tpf =  textpane;					# textpane				is from   src/lib/x-kit/widget/edit/textpane.pkg
 
     package his =  horizontal_int_slider;			# horizontal_int_slider			is from   src/lib/x-kit/widget/leaf/horizontal-int-slider.pkg
@@ -95,8 +91,6 @@ stipulate
 
     package ten =  textentry;					# textentry				is from   src/lib/x-kit/widget/leaf/textentry.pkg
     package ted =  texteditor;					# texteditor				is from   src/lib/x-kit/widget/edit/texteditor.pkg
-
-    package iuw =  issue_unique_widget_id;			# issue_unique_widget_id		is from   src/lib/x-kit/widget/gui/issue-unique-widget-id.pkg
 
 #   package xet =  xevent_types;				# xevent_types				is from   src/lib/x-kit/xclient/src/wire/xevent-types.pkg
 #   package e2s =  xevent_to_string;				# xevent_to_string			is from   src/lib/x-kit/xclient/src/to-string/xevent-to-string.pkg
@@ -150,11 +144,13 @@ dummy8 = ted::with;
 
     sample_text
 	=
-	"In Xanadu did Kubla Khan\n\
+	"=====================================\t# This is a poem by\n\
+	\#\t\t\t\t\t# Samuel Taylor Coleridge\n\
+	\In Xanadu did Kubla Khan\n\
 	\A stately pleasure-dome decree:\n\
 	\Where Alph, the sacred river, ran\n\
 	\Through caverns measureless to man\n\
-	\   Down to a sunless sea.\n\
+	\\tDown to a sunless sea.\n\
 	\So twice five miles of fertile ground\n\
 	\With walls and towers were girdled round;\n\
 	\And there were gardens bright with sinuous rills,\n\
@@ -205,7 +201,24 @@ dummy8 = ted::with;
 	\Weave a circle round him thrice,\n\
 	\And close your eyes with holy dread\n\
 	\For he on honey-dew hath fed,\n\
-	\And drunk the milk of Paradise.\n";
+	\And drunk the milk of Paradise.\n\
+	\\^A\^B\^C\^I\^K\n\
+	\And now for something completely different -- some test 16-bit UTF8 chars.\n\
+	\Depending on your font, you may see mostly boxes:\n\
+	\ĀāĂăĄąĆćĈĉĊċČčĎďĐđĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħĨĩĪīĬĭĮįİıĲĳĴĵĶķĸĹĺĻļĽľĿŀŁłŃńŅņŇňŉŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴŵŶŷŸŹźŻżŽžſ\n\
+	\ƀƁƂƃƄƅƆƇƈƉƊƋƌƍƎƏƐƑƒƓƔƕƖƗƘƙƚƛƜƝƞƟƠơƢƣƤƥƦƧƨƩƪƫƬƭƮƯưƱƲƳƴƵƶƷƸƹƺƻƼƽƾƿǀǁǂǃǄǅǆǇǈǉǊǋǌǍǎǏǐǑǒǓǔǕǖǗǘǙǚǛǜǝǞǟǠǡǢǣǤǥǦǧǨǩǪǫǬǭǮǯǰǱǲǳǴǵǶǷǸǹǺǻǼǽǾǿȀȁȂȃȄȅȆȇȈȉȊȋȌȍȎȏȐȑȒȓȔȕȖȗȘșȚțȜȝȞȟȠȡȢȣȤȥȦȧȨȩȪȫȬȭȮȯȰȱȲȳȴȵȶȷȸȹȺȻȼȽȾȿɀɁɂɃɄɅɆɇɈɉɊɋɌɍɎɏ\n\
+	\ɐɑɒɓɔɕɖɗɘəɚɛɜɝɞɟɠɡɢɣɤɥɦɧɨɩɪɫɬɭɮɯɰɱɲɳɴɵɶɷɸɹɺɻɼɽɾɿʀʁʂʃʄʅʆʇʈʉʊʋʌʍʎʏʐʑʒʓʔʕʖʗʘʙʚʛʜʝʞʟʠʡʢʣʤʥʦʧʨʩʪʫʬʭʮʯ\n\
+	\ʰʱʲʳʴʵʶʷʸʹʺʻʼʽʾʿˀˁ˂˃˄˅ˆˇˈˉˊˋˌˍˎˏːˑ˒˓˔˕˖˗˘˙˚˛˜˝˞˟ˠˡˢˣˤ˥˦˧˨˩˪˫ˬ˭ˮ˯˰˱˲˳˴˵˶˷˸˹˺˻˼˽˾˿\n\
+	\ͰͱͲͳʹ͵Ͷͷͺͻͼͽ;Ϳ΄΅Ά·ΈΉΊΌΎΏΐΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩΪΫάέήίΰαβγδεζηθικλμνξοπρςστυφχψωϊϋόύώϏϐϑϒϓϔϕϖϗϘϙϚϛϜϝϞϟϠϡϢϣϤϥϦϧϨϩϪϫϬϭϮϯϰϱϲϳϴϵ϶ϷϸϹϺϻϼϽϾϿ\n\
+	\ЀЁЂЃЄЅІЇЈЉЊЋЌЍЎЏАБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдежзийклмнопрстуфхцчшщъыьэюяѐёђѓєѕіїјљњћќѝўџѠѡѢѣѤѥѦѧѨѩѪѫѬѭѮѯѰѱѲѳѴѵѶѷѸѹѺѻѼѽѾѿҀҁ҂҃҄҅҆҇҈҉ҊҋҌҍҎҏҐґҒғҔҕҖҗҘҙҚқҜҝҞҟҠҡҢңҤҥҦҧҨҩҪҫҬҭҮүҰұҲҳҴҵҶҷҸҹҺһҼҽҾҿӀӁӂӃӄӅӆӇӈӉӊӋӌӍӎӏӐӑӒӓӔӕӖӗӘәӚӛӜӝӞӟӠӡӢӣӤӥӦӧӨөӪӫӬӭӮӯӰӱӲӳӴӵӶӷӸӹӺӻӼӽӾӿ\\n\
+	\ԱԲԳԴԵԶԷԸԹԺԻԼԽԾԿՀՁՂՃՄՅՆՇՈՉՊՋՌՍՎՏՐՑՒՓՔՕՖՙ՚՛՜՝՞ ՟աբգդեզէըթժիլխծկհձղճմյնշոչպջռսվտրցւփքօֆև։֊֍֎֏\n\
+	\ֿ׀ׁׂ׃ׅׄ׆ׇאבגדהוזחטיךכלםמןנסעףפץצקרשתװױײ׳״\n\
+	\℀℁ℂ℃℄℅℆ℇ℈℉ℊℋℌℍℎℏℐℑℒℓ℔ℕ№℗℘ℙℚℛℜℝ℞℟℠℡™℣ℤ℥Ω℧ℨ℩KÅℬℭ℮ℯℰℱℲℳℴℵℶℷℸℹ℺℻ℼℽℾℿ⅀⅁⅂⅃⅄ⅅⅆⅇⅈⅉ⅊⅋⅌⅍ⅎ⅏\n\
+	\⟰⟱⟲⟳⟴⟵⟶⟷⟸⟹⟺⟻⟼⟽⟾⟿⤀⤁⤂⤃⤄⤅⤆⤇⤈⤉⤊⤋⤌⤍⤎⤏⤐⤑⤒⤓⤔⤕⤖⤗⤘⤙⤚⤛⤜⤝⤞⤟⤠⤡⤢⤣⤤⤥⤦⤧⤨⤩⤪⤫⤬⤭⤮⤯⤰⤱⤲⤳⤴⤵⤶⤷⤸⤹⤺⤻⤼⤽⤾⤿⥀⥁⥂⥃⥄⥅⥆⥇⥈⥉⥊⥋⥌⥍⥎⥏⥐⥑⥒⥓⥔⥕⥖⥗⥘⥙⥚⥛⥜⥝⥞⥟⥠⥡⥢⥣⥤⥥⥦⥧⥨⥩⥪⥫⥬⥭⥮⥯⥰⥱⥲⥳⥴⥵⥶⥷⥸⥹⥺⥻⥼⥽⥾⥿\n\
+	\✁✂✃✄✅✆✇✈✉✊✋✌✍✎✏✐✑✒✓✔✕✖✗✘✙✚✛✜✝✞✟✠✡✢✣✤✥✦✧✨✩✪✫✬✭✮✯✰✱✲✳✴✵✶✷✸✹✺✻✼✽✾✿❀❁❂❃❄❅❆❇❈❉❊❋❌❍❎❏❐❑❒❓❔❕❖❗❘❙❚❛❜❝❞❟❠❡❢❣❤❥❦❧❨❩❪❫❬❭❮❯❰❱❲❳❴❵❶❷❸❹❺❻❼❽❾❿➀➁➂➃➄➅➆➇➈➉➊➋➌➍➎➏➐➑➒➓➔➕➖➗➘➙➚➛➜➝➞➟➠➡➢➣➤➥➦➧➨➩➪➫➬➭➮➯➰➱➲➳➴➵➶➷➸➹➺➻➼➽➾➿\n\
+	\∑−∓∔∕∖∗∘∙√∛∜∝∞∟\n\
+	\";
+
 
 
 herein
@@ -618,20 +631,20 @@ herein
 
 		  scroll_state:		Ref( g2d::Point ),
 
-		  widget_sites:   { site1a: Ref (Null_Or((iuw::Id,g2d::Box))),						# Row one,   button one.
-				    site2a: Ref (Null_Or((iuw::Id,g2d::Box))),						# Row one,   button two.
-				    site3a: Ref (Null_Or((iuw::Id,g2d::Box))),						# Row one,   button three.
-				    site4a: Ref (Null_Or((iuw::Id,g2d::Box))),						# Row one,   button four. 
+		  widget_sites:   { site1a: Ref (Null_Or((Id,g2d::Box))),						# Row one,   button one.
+				    site2a: Ref (Null_Or((Id,g2d::Box))),						# Row one,   button two.
+				    site3a: Ref (Null_Or((Id,g2d::Box))),						# Row one,   button three.
+				    site4a: Ref (Null_Or((Id,g2d::Box))),						# Row one,   button four. 
 															#
-				    site1b: Ref (Null_Or((iuw::Id,g2d::Box))),						# Row two,   button one.  
-				    site2b: Ref (Null_Or((iuw::Id,g2d::Box))),						# Row two,   button two.  
-				    site3b: Ref (Null_Or((iuw::Id,g2d::Box))),						# Row two,   button three.
-				    site4b: Ref (Null_Or((iuw::Id,g2d::Box))),						# Row two,   button four. 
+				    site1b: Ref (Null_Or((Id,g2d::Box))),						# Row two,   button one.  
+				    site2b: Ref (Null_Or((Id,g2d::Box))),						# Row two,   button two.  
+				    site3b: Ref (Null_Or((Id,g2d::Box))),						# Row two,   button three.
+				    site4b: Ref (Null_Or((Id,g2d::Box))),						# Row two,   button four. 
 															#
-				    site1c: Ref (Null_Or((iuw::Id,g2d::Box))),						# Row three, button one.  
-				    site2c: Ref (Null_Or((iuw::Id,g2d::Box))),						# Row three, button two.  
-				    site3c: Ref (Null_Or((iuw::Id,g2d::Box))),						# Row three, button three.
-				    site4c: Ref (Null_Or((iuw::Id,g2d::Box)))						# Row three, button four. 
+				    site1c: Ref (Null_Or((Id,g2d::Box))),						# Row three, button one.  
+				    site2c: Ref (Null_Or((Id,g2d::Box))),						# Row three, button two.  
+				    site3c: Ref (Null_Or((Id,g2d::Box))),						# Row three, button three.
+				    site4c: Ref (Null_Or((Id,g2d::Box)))						# Row three, button four. 
 				  },
 
 		  read_back_sites_and_ports_of_guiplan_widgets:	Void -> Void						# Fills in values of widget_sites
@@ -643,20 +656,20 @@ herein
 		scroll_state		= REF { row =>  0, col =>  0 };							# Not currently in use. This global tracks where the middle roll is current scrolled to. We only need this when doing autoscrolling in conjunction with autoscroll_distance above.
 
 		stipulate
-		    site1a' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row one,   first  button, site notification mailqueue.
-		    site2a' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row one,   second button, site notification mailqueue.
-		    site3a' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row one,   third  button, site notification mailqueue.
-		    site4a' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row one,   fourth button, site notification mailqueue.
+		    site1a' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row one,   first  button, site notification mailqueue.
+		    site2a' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row one,   second button, site notification mailqueue.
+		    site3a' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row one,   third  button, site notification mailqueue.
+		    site4a' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row one,   fourth button, site notification mailqueue.
 															#
-		    site1b' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row two,   first  button, site notification mailqueue.
-		    site2b' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row two,   second button, site notification mailqueue.
-		    site3b' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row two,   third  button, site notification mailqueue.
-		    site4b' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row two,   fourth button, site notification mailqueue.
+		    site1b' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row two,   first  button, site notification mailqueue.
+		    site2b' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row two,   second button, site notification mailqueue.
+		    site3b' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row two,   third  button, site notification mailqueue.
+		    site4b' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row two,   fourth button, site notification mailqueue.
 															#														                                                     
-		    site1c' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row three, first  button, site notification mailqueue.
-		    site2c' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row three, second button, site notification mailqueue.
-		    site3c' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row three, third  button, site notification mailqueue.
-		    site4c' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row three, fourth button, site notification mailqueue.
+		    site1c' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row three, first  button, site notification mailqueue.
+		    site2c' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row three, second button, site notification mailqueue.
+		    site3c' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row three, third  button, site notification mailqueue.
+		    site4c' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row three, fourth button, site notification mailqueue.
 
 
 		    port1a' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or(ab::App_To_Arrowbutton) );	# Row one,   first  button, port notification mailqueue.
@@ -681,20 +694,20 @@ herein
 															# to generate fake mouseclicks on them for test
 															# purposes. A normal GUI app wouldn't do this.) 
 															#
-		    site1a = REF (NULL: Null_Or((iuw::Id,g2d::Box)));							# Row one,   button one.
-		    site2a = REF (NULL: Null_Or((iuw::Id,g2d::Box)));							# Row one,   button two.
-		    site3a = REF (NULL: Null_Or((iuw::Id,g2d::Box)));							# Row one,   button three.
-		    site4a = REF (NULL: Null_Or((iuw::Id,g2d::Box)));							# Row one,   button four. 
+		    site1a = REF (NULL: Null_Or((Id,g2d::Box)));							# Row one,   button one.
+		    site2a = REF (NULL: Null_Or((Id,g2d::Box)));							# Row one,   button two.
+		    site3a = REF (NULL: Null_Or((Id,g2d::Box)));							# Row one,   button three.
+		    site4a = REF (NULL: Null_Or((Id,g2d::Box)));							# Row one,   button four. 
 															#
-		    site1b = REF (NULL: Null_Or((iuw::Id,g2d::Box)));							# Row two,   button one.  
-		    site2b = REF (NULL: Null_Or((iuw::Id,g2d::Box)));							# Row two,   button two.  
-		    site3b = REF (NULL: Null_Or((iuw::Id,g2d::Box)));							# Row two,   button three.
-		    site4b = REF (NULL: Null_Or((iuw::Id,g2d::Box)));							# Row two,   button four. 
+		    site1b = REF (NULL: Null_Or((Id,g2d::Box)));							# Row two,   button one.  
+		    site2b = REF (NULL: Null_Or((Id,g2d::Box)));							# Row two,   button two.  
+		    site3b = REF (NULL: Null_Or((Id,g2d::Box)));							# Row two,   button three.
+		    site4b = REF (NULL: Null_Or((Id,g2d::Box)));							# Row two,   button four. 
 															#
-		    site1c = REF (NULL: Null_Or((iuw::Id,g2d::Box)));							# Row three, button one.  
-		    site2c = REF (NULL: Null_Or((iuw::Id,g2d::Box)));							# Row three, button two.  
-		    site3c = REF (NULL: Null_Or((iuw::Id,g2d::Box)));							# Row three, button three.
-		    site4c = REF (NULL: Null_Or((iuw::Id,g2d::Box)));							# Row three, button four. 
+		    site1c = REF (NULL: Null_Or((Id,g2d::Box)));							# Row three, button one.  
+		    site2c = REF (NULL: Null_Or((Id,g2d::Box)));							# Row three, button two.  
+		    site3c = REF (NULL: Null_Or((Id,g2d::Box)));							# Row three, button three.
+		    site4c = REF (NULL: Null_Or((Id,g2d::Box)));							# Row three, button four. 
 
 		    port1a = REF (NULL: Null_Or( ab::App_To_Arrowbutton ));						# Row one,   button one.
 		    port2a = REF (NULL: Null_Or( ab::App_To_Arrowbutton ));						# Row one,   button two.
@@ -716,20 +729,20 @@ herein
 															# guiboss layer to find out where our buttons are on
 															# the window:
 															#
-		    fun sitewatcher1a (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site1a', site);		# Row one,   first  button, site notification callback.
-		    fun sitewatcher2a (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site2a', site);		# Row one,   second button, site notification callback.
-		    fun sitewatcher3a (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site3a', site);		# Row one,   third  button, site notification callback.
-		    fun sitewatcher4a (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site4a', site);		# Row one,   fourth button, site notification callback.
+		    fun sitewatcher1a (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site1a', site);		# Row one,   first  button, site notification callback.
+		    fun sitewatcher2a (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site2a', site);		# Row one,   second button, site notification callback.
+		    fun sitewatcher3a (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site3a', site);		# Row one,   third  button, site notification callback.
+		    fun sitewatcher4a (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site4a', site);		# Row one,   fourth button, site notification callback.
 		    #													#
-		    fun sitewatcher1b (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site1b', site);		# Row two,   first  button, site notification callback.
-		    fun sitewatcher2b (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site2b', site);		# Row two,   second button, site notification callback.
-		    fun sitewatcher3b (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site3b', site);		# Row two,   third  button, site notification callback.
-		    fun sitewatcher4b (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site4b', site);		# Row two,   fourth button, site notification callback.
+		    fun sitewatcher1b (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site1b', site);		# Row two,   first  button, site notification callback.
+		    fun sitewatcher2b (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site2b', site);		# Row two,   second button, site notification callback.
+		    fun sitewatcher3b (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site3b', site);		# Row two,   third  button, site notification callback.
+		    fun sitewatcher4b (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site4b', site);		# Row two,   fourth button, site notification callback.
 		    #													#
-		    fun sitewatcher1c (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site1c', site);		# Row three, first  button, site notification callback.
-		    fun sitewatcher2c (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site2c', site);		# Row three, second button, site notification callback.
-		    fun sitewatcher3c (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site3c', site);		# Row three, third  button, site notification callback.
-		    fun sitewatcher4c (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site4c', site);		# Row three, fourth button, site notification callback.
+		    fun sitewatcher1c (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site1c', site);		# Row three, first  button, site notification callback.
+		    fun sitewatcher2c (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site2c', site);		# Row three, second button, site notification callback.
+		    fun sitewatcher3c (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site3c', site);		# Row three, third  button, site notification callback.
+		    fun sitewatcher4c (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site4c', site);		# Row three, fourth button, site notification callback.
 
 
 		    fun portwatcher1a (port: Null_Or(ab::App_To_Arrowbutton)) =  put_in_mailqueue (port1a', port);	# Row one,   first  button, port notification callback.
@@ -840,7 +853,7 @@ herein
 
 #		fun mouse_drag_fn										# This mouse-drag callback fn is used by all twelve buttons.
 #		      {	
-#			id:			iuw::Id,							# Unique id.
+#			id:			Id,								# Unique id.
 #			doc:			String,
 #			event_point:		g2d::Point,
 #			start_point:		g2d::Point,
@@ -876,7 +889,7 @@ herein
 		      #	
 		      ( ab::MOUSE_DRAG_FN_ARG
 			  {	
-			    id:				iuw::Id,						# Unique id.
+			    id:				Id,							# Unique id.
 			    doc:			String,
 			    event_point:		g2d::Point,
 			    start_point:		g2d::Point,
@@ -961,7 +974,7 @@ nb {. sprintf "make_three_row_guiplan.arrowbutton_mouse_drag_fn: relief was %s, 
 			  (
 			    ab::MOUSE_DRAG_FN_ARG
 			      {	
-				id:				iuw::Id,					# Unique id.
+				id:				Id,						# Unique id.
 				doc:				String,
 				event_point:			g2d::Point,
 				start_point:			g2d::Point,
@@ -1056,7 +1069,7 @@ nb {. sprintf "make_three_row_guiplan.arrowbutton_mouse_drag_fn: relief was %s, 
 			  (
 			    ab::MOUSE_DRAG_FN_ARG
 			      {	
-				id:				iuw::Id,					# Unique id.
+				id:				Id,						# Unique id.
 				doc:				String,
 				event_point:			g2d::Point,
 				start_point:			g2d::Point,
@@ -1150,7 +1163,7 @@ nb {. sprintf "make_three_row_guiplan.arrowbutton_mouse_drag_fn: relief was %s, 
 			  (
 			    ab::MOUSE_DRAG_FN_ARG
 			      {	
-				id:				iuw::Id,					# Unique id.
+				id:				Id,						# Unique id.
 				doc:				String,
 				event_point:			g2d::Point,
 				start_point:			g2d::Point,
@@ -1246,7 +1259,7 @@ nb {. sprintf "make_three_row_guiplan.arrowbutton_mouse_drag_fn: relief was %s, 
 			  (
 			    ab::MOUSE_DRAG_FN_ARG
 			      {	
-				id:				iuw::Id,					# Unique id.
+				id:				Id,						# Unique id.
 				doc:				String,
 				event_point:			g2d::Point,
 				start_point:			g2d::Point,
@@ -1341,7 +1354,7 @@ nb {. sprintf "make_three_row_guiplan.arrowbutton_mouse_drag_fn: relief was %s, 
 			  (
 			    ab::MOUSE_DRAG_FN_ARG
 			      {	
-				id:				iuw::Id,					# Unique id.
+				id:				Id,						# Unique id.
 				doc:				String,
 				event_point:			g2d::Point,
 				start_point:			g2d::Point,
@@ -1436,7 +1449,7 @@ nb {. sprintf "make_three_row_guiplan.arrowbutton_mouse_drag_fn: relief was %s, 
 			  (
 			    ab::MOUSE_DRAG_FN_ARG
 			      {	
-				id:				iuw::Id,					# Unique id.
+				id:				Id,						# Unique id.
 				doc:				String,
 				event_point:			g2d::Point,
 				start_point:			g2d::Point,
@@ -1605,11 +1618,11 @@ nb {. sprintf "make_three_row_guiplan.arrowbutton_mouse_drag_fn: relief was %s, 
 															# needs to know this, but our test code needs this information in
 															# order to synthesize fake mouseclicks etc on the buttons.
 															#
-		  widget_sites:   { site1a: Ref (Null_Or((iuw::Id,g2d::Box))),							# Row one,   button one.
-				    site2a: Ref (Null_Or((iuw::Id,g2d::Box))),							# Row one,   button two.
+		  widget_sites:   { site1a: Ref (Null_Or((Id,g2d::Box))),							# Row one,   button one.
+				    site2a: Ref (Null_Or((Id,g2d::Box))),							# Row one,   button two.
 															#
-				    site1b: Ref (Null_Or((iuw::Id,g2d::Box))),							# Row two,   button one.  
-				    site2b: Ref (Null_Or((iuw::Id,g2d::Box)))							# Row two,   button two.  
+				    site1b: Ref (Null_Or((Id,g2d::Box))),							# Row two,   button one.  
+				    site2b: Ref (Null_Or((Id,g2d::Box)))							# Row two,   button two.  
 				  },
 
 		  read_back_sites_and_ports_of_grid_guiplan_widgets:	Void -> Void					# Fills in values of widget_sites
@@ -1617,11 +1630,11 @@ nb {. sprintf "make_three_row_guiplan.arrowbutton_mouse_drag_fn: relief was %s, 
 	    =
 	    {
 		stipulate
-		    site1a'  = make_mailqueue (get_current_microthread()): Mailqueue(Null_Or((iuw::Id,g2d::Box)));	# Row one,   first  button, site notification mailqueue.
-		    site2a'  = make_mailqueue (get_current_microthread()): Mailqueue(Null_Or((iuw::Id,g2d::Box)));	# Row one,   second button, site notification mailqueue.
+		    site1a'  = make_mailqueue (get_current_microthread()): Mailqueue(Null_Or((Id,g2d::Box)));	# Row one,   first  button, site notification mailqueue.
+		    site2a'  = make_mailqueue (get_current_microthread()): Mailqueue(Null_Or((Id,g2d::Box)));	# Row one,   second button, site notification mailqueue.
 		    #													#
-		    site1b'  = make_mailqueue (get_current_microthread()): Mailqueue(Null_Or((iuw::Id,g2d::Box)));	# Row two,   first  button, site notification mailqueue.
-		    site2b'  = make_mailqueue (get_current_microthread()): Mailqueue(Null_Or((iuw::Id,g2d::Box)));	# Row two,   second button, site notification mailqueue.
+		    site1b'  = make_mailqueue (get_current_microthread()): Mailqueue(Null_Or((Id,g2d::Box)));	# Row two,   first  button, site notification mailqueue.
+		    site2b'  = make_mailqueue (get_current_microthread()): Mailqueue(Null_Or((Id,g2d::Box)));	# Row two,   second button, site notification mailqueue.
 
 		    port1a'  = make_mailqueue (get_current_microthread()): Mailqueue(Null_Or(ab::App_To_Arrowbutton));	# Row one,   first  button, port notification mailqueue.
 		    port2a'  = make_mailqueue (get_current_microthread()): Mailqueue(Null_Or(ab::App_To_Arrowbutton));	# Row one,   seond  button, port notification mailqueue.
@@ -1638,11 +1651,11 @@ nb {. sprintf "make_three_row_guiplan.arrowbutton_mouse_drag_fn: relief was %s, 
 															# to generate fake mouseclicks on them for test
 															# purposes. A normal GUI app wouldn't do this.) 
 															#
-		    site1a  = REF (NULL: Null_Or((iuw::Id,g2d::Box)));							# Row one,   button one.
-		    site2a  = REF (NULL: Null_Or((iuw::Id,g2d::Box)));							# Row one,   button two.
+		    site1a  = REF (NULL: Null_Or((Id,g2d::Box)));							# Row one,   button one.
+		    site2a  = REF (NULL: Null_Or((Id,g2d::Box)));							# Row one,   button two.
 		    #													#
-		    site1b  = REF (NULL: Null_Or((iuw::Id,g2d::Box)));							# Row two,   button one.
-		    site2b  = REF (NULL: Null_Or((iuw::Id,g2d::Box)));							# Row two,   button two.
+		    site1b  = REF (NULL: Null_Or((Id,g2d::Box)));							# Row two,   button one.
+		    site2b  = REF (NULL: Null_Or((Id,g2d::Box)));							# Row two,   button two.
 
 		    port1a  = REF (NULL: Null_Or( ab::App_To_Arrowbutton ));						# Row one,   button one.
 		    port2a  = REF (NULL: Null_Or( ab::App_To_Arrowbutton ));						# Row one,   button two.
@@ -1656,30 +1669,30 @@ nb {. sprintf "make_three_row_guiplan.arrowbutton_mouse_drag_fn: relief was %s, 
 															# guiboss layer to find out where our buttons are on
 															# the window:
 															#
-#		    fun sitewatcher1a (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site1a', site);		# Row one,   first  button, site notification callback.
-#		    fun sitewatcher2a (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site2a', site);		# Row one,   second button, site notification callback.
+#		    fun sitewatcher1a (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site1a', site);		# Row one,   first  button, site notification callback.
+#		    fun sitewatcher2a (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site2a', site);		# Row one,   second button, site notification callback.
 #		    #													#
-#		    fun sitewatcher1b (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site1b', site);		# Row two,   first  button, site notification callback.
-#		    fun sitewatcher2b (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site2b', site);		# Row two,   second button, site notification callback.
+#		    fun sitewatcher1b (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site1b', site);		# Row two,   first  button, site notification callback.
+#		    fun sitewatcher2b (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site2b', site);		# Row two,   second button, site notification callback.
 
-		    fun sitewatcher1a (site: Null_Or((iuw::Id,g2d::Box)))
+		    fun sitewatcher1a (site: Null_Or((Id,g2d::Box)))
 			=
 			{
 			    put_in_mailqueue (site1a', site);								# Row one,   first  button, site notification callback.
 			};
 
-		    fun sitewatcher2a (site: Null_Or((iuw::Id,g2d::Box)))
+		    fun sitewatcher2a (site: Null_Or((Id,g2d::Box)))
 			=
 			{
 			    put_in_mailqueue (site2a', site);								# Row one,   second button, site notification callback.
 			};
 		    #													#
-		    fun sitewatcher1b (site: Null_Or((iuw::Id,g2d::Box)))
+		    fun sitewatcher1b (site: Null_Or((Id,g2d::Box)))
 			=
 			{
 			    put_in_mailqueue (site1b', site);								# Row two,   first  button, site notification callback.
 			};
-		    fun sitewatcher2b (site: Null_Or((iuw::Id,g2d::Box)))
+		    fun sitewatcher2b (site: Null_Or((Id,g2d::Box)))
 			=
 			{
 			    put_in_mailqueue (site2b', site);								# Row two,   second button, site notification callback.
@@ -1732,7 +1745,7 @@ nb {. sprintf "make_three_row_guiplan.arrowbutton_mouse_drag_fn: relief was %s, 
 
 #		fun mouse_drag_fn										# 
 #		      {	
-#			id:			iuw::Id,							# Unique id.
+#			id:			Id,								# Unique id.
 #			doc:			String,
 #			event_point:		g2d::Point,
 #			start_point:		g2d::Point,
@@ -1758,11 +1771,11 @@ nb {. sprintf "make_three_row_guiplan.arrowbutton_mouse_drag_fn: relief was %s, 
 
 		grid_2x2      =      issue_unique_id ();
 		#
-		bigarrowbtn   = iuw::issue_unique_id ();
-		bigroundbtn   = iuw::issue_unique_id ();
-		verticalbtn   = iuw::issue_unique_id ();
-		horizontalbtn = iuw::issue_unique_id ();
-		cornerbtn     = iuw::issue_unique_id ();
+		bigarrowbtn   = issue_unique_id ();
+		bigroundbtn   = issue_unique_id ();
+		verticalbtn   = issue_unique_id ();
+		horizontalbtn = issue_unique_id ();
+		cornerbtn     = issue_unique_id ();
 
 		fun arrowbutton_mouse_drag_fn									# 
 		      #	
@@ -1774,7 +1787,7 @@ nb {. sprintf "make_three_row_guiplan.arrowbutton_mouse_drag_fn: relief was %s, 
 			#
 			\\  ( ab::MOUSE_DRAG_FN_ARG
 				{	
-				  id:				iuw::Id,					# Unique id.
+				  id:				Id,						# Unique id.
 				  doc:				String,
 				  event_point:			g2d::Point,
 				  start_point:			g2d::Point,
@@ -1814,64 +1827,70 @@ nb {. sprintf "make_three_row_guiplan.arrowbutton_mouse_drag_fn: relief was %s, 
 						#
 						if (which == 1)
 						    #
-						    guipiths = widget_to_guiboss.g.get_guipiths ();
+						    do_while_not {.
 
-						    guipiths =  gtj::guipith_map
-								  (
-								    guipiths,
+							#
+							(widget_to_guiboss.g.get_guipiths ())
+							    ->
+							    (gui_version, guipiths);
 
-								    [ gtj::XI_GRID_MAP_FN  do_grid
-								    ]
-								  )
-								where
-								    fun do_grid  (xi_grid:  gt::Xi_Grid)
-									=
-									{   xi_grid ->  { id:				Id,										# A grid of widgets.
-											  widgets:			List( List( gt::Xi_Widget_Type ) )
-											};
+							guipiths =  gtj::guipith_map
+								      (
+									guipiths,
 
-									    if (same_id (id, grid_2x2))
-										#
-										case xi_grid
-										    #
-										    { id, widgets => [ [ w1 as gt::XI_WIDGET w1', w2 ], [ w3, w4 ] ] }
-											=>
-											{ id, widgets =>  [ [ w4,
-													      w3
-													    ],
-													    [ w2,
-													      gt::XI_GUIPLAN (roundbutton::with [ rb::ID bigroundbtn,
-																		  rb::MOMENTARY_CONTACT,
-																		  rb::PORTWATCHER portwatcher1aa,
-																		  rb::SITEWATCHER sitewatcher1a,
-																		  rb::MOUSE_DRAG_FN (roundbutton_mouse_drag_fn 1 port1aa),
-																		  rb::PIXELS_HIGH_MIN  0,
-																		  rb::PIXELS_WIDE_MIN  0,
-																		  rb::PIXELS_HIGH_CUT 1.0,
-																		  rb::PIXELS_WIDE_CUT 1.0,
-																		  rb::MARGIN 40,
-																		  rb::THICK 20
-																		]
-															     )
-													    ]
-													  ]
-											};
-
-											
-										    _ =>    {   log::note_on_stderr {. "widgets grid not 2x2 as expected?! -- arrowbutton_mouse_drag_fn in widget-unit-test.pkg"; };
-												xi_grid;
+									[ gtj::XI_GRID_MAP_FN  do_grid
+									]
+								      )
+								    where
+									fun do_grid  (xi_grid:  gt::Xi_Grid)
+									    =
+									    {   xi_grid ->  { id:				Id,										# A grid of widgets.
+											      widgets:			List( List( gt::Xi_Widget_Type ) )
 											    };
-										esac;
-										
-									    else
-										xi_grid;
-									    fi;
-									};
-								end;
 
-						    widget_to_guiboss.g.install_updated_guipiths  guipiths;
+										if (same_id (id, grid_2x2))
+										    #
+										    case xi_grid
+											#
+											{ id, widgets => [ [ w1 as gt::XI_WIDGET w1', w2 ], [ w3, w4 ] ] }
+											    =>
+											    { id, widgets =>  [ [ w4,
+														  w3
+														],
+														[ w2,
+														  gt::XI_GUIPLAN (roundbutton::with [ rb::ID bigroundbtn,
+																		      rb::MOMENTARY_CONTACT,
+																		      rb::PORTWATCHER portwatcher1aa,
+																		      rb::SITEWATCHER sitewatcher1a,
+																		      rb::MOUSE_DRAG_FN (roundbutton_mouse_drag_fn 1 port1aa),
+																		      rb::PIXELS_HIGH_MIN  0,
+																		      rb::PIXELS_WIDE_MIN  0,
+																		      rb::PIXELS_HIGH_CUT 1.0,
+																		      rb::PIXELS_WIDE_CUT 1.0,
+																		      rb::MARGIN 40,
+																		      rb::THICK 20
+																		    ]
+																 )
+														]
+													      ]
+											    };
 
-						    ();
+
+											_ =>    {   log::note_on_stderr {. "widgets grid not 2x2 as expected?! -- arrowbutton_mouse_drag_fn in widget-unit-test.pkg"; };
+												    xi_grid;
+												};
+										    esac;
+
+										else
+										    xi_grid;
+										fi;
+									    };
+								    end;
+
+							widget_to_guiboss.g.install_updated_guipiths					# If this returns FALSE we'll repeat.
+							    #
+							    (gui_version, guipiths);
+						    };											# do_while_not
 						else
 						    big := not *big;
 
@@ -1946,7 +1965,7 @@ nb {. sprintf "make_grid_2x2_guiplan.arrowbutton_mouse_drag_fn: relief was %s, n
 			#
 			\\  ( rb::MOUSE_DRAG_FN_ARG
 				{	
-				  id:				iuw::Id,					# Unique id.
+				  id:				Id,						# Unique id.
 				  doc:				String,
 				  event_point:			g2d::Point,
 				  start_point:			g2d::Point,
@@ -1985,65 +2004,70 @@ nb {. sprintf "make_grid_2x2_guiplan.arrowbutton_mouse_drag_fn: relief was %s, n
 						#
 						if (which == 1)
 						    #
-						    guipiths = widget_to_guiboss.g.get_guipiths ();
+						    do_while_not {.
+							#
+							(widget_to_guiboss.g.get_guipiths ())
+							    ->
+							    (gui_version, guipiths); 
 
-						    guipiths =  gtj::guipith_map
-								  (
-								    guipiths,
+							guipiths =  gtj::guipith_map
+								      (
+									guipiths,
 
-								    [ gtj::XI_GRID_MAP_FN  do_grid
-								    ]
-								  )
-								where
-								    fun do_grid  (xi_grid:  gt::Xi_Grid)
-									=
-									{   xi_grid ->  { id:				Id,										# A grid of widgets.
-											  widgets:			List( List( gt::Xi_Widget_Type ) )
-											};
-
-									    if (same_id (id, grid_2x2))
-										#
-										case xi_grid
-										    #
-										    { id, widgets => [ [ w1 as gt::XI_WIDGET w1', w2 ], [ w3, w4 ] ] }
-											=>
-											{ id, widgets =>  [ [ gt::XI_GUIPLAN (arrowbutton::with [ ab::ID bigarrowbtn,
-																		  ab::MOMENTARY_CONTACT,
-																		  ab::PORTWATCHER portwatcher1a,
-																		  ab::SITEWATCHER sitewatcher1a,
-																		  ab::LEFT,
-																		  ab::MOUSE_DRAG_FN (arrowbutton_mouse_drag_fn 1 port1a),
-																		  ab::PIXELS_HIGH_MIN  0,
-																		  ab::PIXELS_WIDE_MIN  0,
-																		  ab::PIXELS_HIGH_CUT 1.0,
-																		  ab::PIXELS_WIDE_CUT 1.0,
-																		  ab::MARGIN 40,
-																		  ab::THICK 20
-																		]
-															     ),
-													      w3
-													    ],
-													    [ w2,
-													      w1
-													    ]
-													  ]
-											};
-
-											
-										    _ =>    {   log::note_on_stderr {. "widgets grid not 2x2 as expected?! -- roundbutton_mouse_drag_fn in widget-unit-test.pkg"; };
-												xi_grid;
+									[ gtj::XI_GRID_MAP_FN  do_grid
+									]
+								      )
+								    where
+									fun do_grid  (xi_grid:  gt::Xi_Grid)
+									    =
+									    {   xi_grid ->  { id:				Id,										# A grid of widgets.
+											      widgets:			List( List( gt::Xi_Widget_Type ) )
 											    };
-										esac;
-										
-									    else
-										xi_grid;
-									    fi;
-									};
-								end;
 
-						    widget_to_guiboss.g.install_updated_guipiths  guipiths;
+										if (same_id (id, grid_2x2))
+										    #
+										    case xi_grid
+											#
+											{ id, widgets => [ [ w1 as gt::XI_WIDGET w1', w2 ], [ w3, w4 ] ] }
+											    =>
+											    { id, widgets =>  [ [ gt::XI_GUIPLAN (arrowbutton::with [ ab::ID bigarrowbtn,
+																		      ab::MOMENTARY_CONTACT,
+																		      ab::PORTWATCHER portwatcher1a,
+																		      ab::SITEWATCHER sitewatcher1a,
+																		      ab::LEFT,
+																		      ab::MOUSE_DRAG_FN (arrowbutton_mouse_drag_fn 1 port1a),
+																		      ab::PIXELS_HIGH_MIN  0,
+																		      ab::PIXELS_WIDE_MIN  0,
+																		      ab::PIXELS_HIGH_CUT 1.0,
+																		      ab::PIXELS_WIDE_CUT 1.0,
+																		      ab::MARGIN 40,
+																		      ab::THICK 20
+																		    ]
+																 ),
+														  w3
+														],
+														[ w2,
+														  w1
+														]
+													      ]
+											    };
 
-						    ();
+
+											_ =>    {   log::note_on_stderr {. "widgets grid not 2x2 as expected?! -- roundbutton_mouse_drag_fn in widget-unit-test.pkg"; };
+												    xi_grid;
+												};
+										    esac;
+
+										else
+										    xi_grid;
+										fi;
+									    };
+								    end;
+
+							widget_to_guiboss.g.install_updated_guipiths					# If this returns FALSE, we'll loop back and retry.
+							    #
+							    (gui_version, guipiths);
+						    };											# do_while_not
 						else
 						    big := not *big;
 
@@ -2146,25 +2170,25 @@ nb {. sprintf "make_grid_2x2_guiplan.roundbutton_mouse_drag_fn: relief was %s, n
 														# needs to know this, but our test code needs this information in
 														# order to synthesize fake mouseclicks etc on the buttons.
 														#
-		  widget_sites:   { site1a: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row one,   button one.
-				    site2a: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row one,   button two.
-				    site3a: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row one,   button three.
-				    site4a: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row one,   button four.
+		  widget_sites:   { site1a: Ref (Null_Or((Id,g2d::Box))),					# Row one,   button one.
+				    site2a: Ref (Null_Or((Id,g2d::Box))),					# Row one,   button two.
+				    site3a: Ref (Null_Or((Id,g2d::Box))),					# Row one,   button three.
+				    site4a: Ref (Null_Or((Id,g2d::Box))),					# Row one,   button four.
 														#
-				    site1b: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row two,   button one.  
-				    site2b: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row two,   button two.  
-				    site3b: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row two,   button three.
-				    site4b: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row two,   button four.
+				    site1b: Ref (Null_Or((Id,g2d::Box))),					# Row two,   button one.  
+				    site2b: Ref (Null_Or((Id,g2d::Box))),					# Row two,   button two.  
+				    site3b: Ref (Null_Or((Id,g2d::Box))),					# Row two,   button three.
+				    site4b: Ref (Null_Or((Id,g2d::Box))),					# Row two,   button four.
 														#
-				    site1c: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row three, button one.  
-				    site2c: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row three, button two.  
-				    site3c: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row three, button three.
-				    site4c: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row three, button four.
+				    site1c: Ref (Null_Or((Id,g2d::Box))),					# Row three, button one.  
+				    site2c: Ref (Null_Or((Id,g2d::Box))),					# Row three, button two.  
+				    site3c: Ref (Null_Or((Id,g2d::Box))),					# Row three, button three.
+				    site4c: Ref (Null_Or((Id,g2d::Box))),					# Row three, button four.
 														#
-				    site1d: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row four,  button one.  
-				    site2d: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row four,  button two.  
-				    site3d: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row four,  button three.
-				    site4d: Ref (Null_Or((iuw::Id,g2d::Box)))					# Row four,  button four.
+				    site1d: Ref (Null_Or((Id,g2d::Box))),					# Row four,  button one.  
+				    site2d: Ref (Null_Or((Id,g2d::Box))),					# Row four,  button two.  
+				    site3d: Ref (Null_Or((Id,g2d::Box))),					# Row four,  button three.
+				    site4d: Ref (Null_Or((Id,g2d::Box)))					# Row four,  button four.
 				  },
 
 		  read_back_sites_and_ports_of_buttons_guiplan_widgets:	Void -> Void				# Fills in values of widget_sites
@@ -2172,25 +2196,25 @@ nb {. sprintf "make_grid_2x2_guiplan.roundbutton_mouse_drag_fn: relief was %s, n
 	    =
 	    {
 		stipulate
-		    site1a' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)));	# Row one,   first  button, site notification mailqueue.
-		    site2a' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)));	# Row one,   second button, site notification mailqueue.
-		    site3a' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)));	# Row one,   third  button, site notification mailqueue.
-		    site4a' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)));	# Row one,   fourth button, site notification mailqueue.
+		    site1a' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)));	# Row one,   first  button, site notification mailqueue.
+		    site2a' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)));	# Row one,   second button, site notification mailqueue.
+		    site3a' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)));	# Row one,   third  button, site notification mailqueue.
+		    site4a' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)));	# Row one,   fourth button, site notification mailqueue.
 		    #													#
-		    site1b' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)));	# Row two,   first  button, site notification mailqueue.
-		    site2b' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)));	# Row two,   second button, site notification mailqueue.
-		    site3b' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)));	# Row two,   third  button, site notification mailqueue.
-		    site4b' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)));	# Row two,   fourth button, site notification mailqueue.
+		    site1b' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)));	# Row two,   first  button, site notification mailqueue.
+		    site2b' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)));	# Row two,   second button, site notification mailqueue.
+		    site3b' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)));	# Row two,   third  button, site notification mailqueue.
+		    site4b' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)));	# Row two,   fourth button, site notification mailqueue.
 		    #													#
-		    site1c' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)));	# Row three, first  button, site notification mailqueue.
-		    site2c' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)));	# Row three, second button, site notification mailqueue.
-		    site3c' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)));	# Row three, third  button, site notification mailqueue.
-		    site4c' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)));	# Row three, fourth button, site notification mailqueue.
+		    site1c' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)));	# Row three, first  button, site notification mailqueue.
+		    site2c' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)));	# Row three, second button, site notification mailqueue.
+		    site3c' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)));	# Row three, third  button, site notification mailqueue.
+		    site4c' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)));	# Row three, fourth button, site notification mailqueue.
 		    #													#
-		    site1d' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)));	# Row four,  first  button, site notification mailqueue.
-		    site2d' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)));	# Row four,  second button, site notification mailqueue.
-		    site3d' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)));	# Row four,  third  button, site notification mailqueue.
-		    site4d' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)));	# Row four,  fourth button, site notification mailqueue.
+		    site1d' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)));	# Row four,  first  button, site notification mailqueue.
+		    site2d' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)));	# Row four,  second button, site notification mailqueue.
+		    site3d' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)));	# Row four,  third  button, site notification mailqueue.
+		    site4d' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)));	# Row four,  fourth button, site notification mailqueue.
 		herein														                                                     
 														# These globals hold the values read from the above
 														# mailops by the later do_one_mailop() calls.
@@ -2199,49 +2223,49 @@ nb {. sprintf "make_grid_2x2_guiplan.roundbutton_mouse_drag_fn: relief was %s, n
 														# to generate fake mouseclicks on them for test
 														# purposes. A normal GUI app wouldn't do this.) 
 														#
-		    site1a = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row one,   button one.
-		    site2a = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row one,   button two.
-		    site3a = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row one,   button three.
-		    site4a = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row one,   button four.
+		    site1a = REF (NULL: Null_Or((Id,g2d::Box)));						# Row one,   button one.
+		    site2a = REF (NULL: Null_Or((Id,g2d::Box)));						# Row one,   button two.
+		    site3a = REF (NULL: Null_Or((Id,g2d::Box)));						# Row one,   button three.
+		    site4a = REF (NULL: Null_Or((Id,g2d::Box)));						# Row one,   button four.
 		    #												#
-		    site1b = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row two,   button one.
-		    site2b = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row two,   button two.
-		    site3b = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row two,   button three.
-		    site4b = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row two,   button four.
+		    site1b = REF (NULL: Null_Or((Id,g2d::Box)));						# Row two,   button one.
+		    site2b = REF (NULL: Null_Or((Id,g2d::Box)));						# Row two,   button two.
+		    site3b = REF (NULL: Null_Or((Id,g2d::Box)));						# Row two,   button three.
+		    site4b = REF (NULL: Null_Or((Id,g2d::Box)));						# Row two,   button four.
 		    #												#
-		    site1c = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row three, button one.
-		    site2c = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row three, button two.
-		    site3c = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row three, button three.
-		    site4c = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row three, button four.
+		    site1c = REF (NULL: Null_Or((Id,g2d::Box)));						# Row three, button one.
+		    site2c = REF (NULL: Null_Or((Id,g2d::Box)));						# Row three, button two.
+		    site3c = REF (NULL: Null_Or((Id,g2d::Box)));						# Row three, button three.
+		    site4c = REF (NULL: Null_Or((Id,g2d::Box)));						# Row three, button four.
 		    #												#
-		    site1d = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row four,  button one.
-		    site2d = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row four,  button two.
-		    site3d = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row four,  button three.
-		    site4d = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row four,  button four.
+		    site1d = REF (NULL: Null_Or((Id,g2d::Box)));						# Row four,  button one.
+		    site2d = REF (NULL: Null_Or((Id,g2d::Box)));						# Row four,  button two.
+		    site3d = REF (NULL: Null_Or((Id,g2d::Box)));						# Row four,  button three.
+		    site4d = REF (NULL: Null_Or((Id,g2d::Box)));						# Row four,  button four.
 
 														# These are the site-watcher callbacks we pass to the
 														# guiboss layer to find out where our buttons are on
 														# the window:
 														#
-		    fun sitewatcher1a (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site1a', site);	# Row one,   first  button, site notification callback.
-		    fun sitewatcher2a (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site2a', site);	# Row one,   second button, site notification callback.
-		    fun sitewatcher3a (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site3a', site);	# Row one,   third  button, site notification callback.
-		    fun sitewatcher4a (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site4a', site);	# Row one,   fourth button, site notification callback.
+		    fun sitewatcher1a (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site1a', site);	# Row one,   first  button, site notification callback.
+		    fun sitewatcher2a (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site2a', site);	# Row one,   second button, site notification callback.
+		    fun sitewatcher3a (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site3a', site);	# Row one,   third  button, site notification callback.
+		    fun sitewatcher4a (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site4a', site);	# Row one,   fourth button, site notification callback.
 		    #												#
-		    fun sitewatcher1b (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site1b', site);	# Row two,   first  button, site notification callback.
-		    fun sitewatcher2b (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site2b', site);	# Row two,   second button, site notification callback.
-		    fun sitewatcher3b (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site3b', site);	# Row two,   third  button, site notification callback.
-		    fun sitewatcher4b (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site4b', site);	# Row two,   fourth button, site notification callback.
+		    fun sitewatcher1b (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site1b', site);	# Row two,   first  button, site notification callback.
+		    fun sitewatcher2b (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site2b', site);	# Row two,   second button, site notification callback.
+		    fun sitewatcher3b (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site3b', site);	# Row two,   third  button, site notification callback.
+		    fun sitewatcher4b (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site4b', site);	# Row two,   fourth button, site notification callback.
 		    #												#
-		    fun sitewatcher1c (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site1c', site);	# Row three, first  button, site notification callback.
-		    fun sitewatcher2c (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site2c', site);	# Row three, second button, site notification callback.
-		    fun sitewatcher3c (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site3c', site);	# Row three, third  button, site notification callback.
-		    fun sitewatcher4c (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site4c', site);	# Row three, fourth button, site notification callback.
+		    fun sitewatcher1c (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site1c', site);	# Row three, first  button, site notification callback.
+		    fun sitewatcher2c (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site2c', site);	# Row three, second button, site notification callback.
+		    fun sitewatcher3c (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site3c', site);	# Row three, third  button, site notification callback.
+		    fun sitewatcher4c (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site4c', site);	# Row three, fourth button, site notification callback.
 		    #												#
-		    fun sitewatcher1d (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site1d', site);	# Row four,  first  button, site notification callback.
-		    fun sitewatcher2d (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site2d', site);	# Row four,  second button, site notification callback.
-		    fun sitewatcher3d (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site3d', site);	# Row four,  third  button, site notification callback.
-		    fun sitewatcher4d (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site4d', site);	# Row four,  fourth button, site notification callback.
+		    fun sitewatcher1d (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site1d', site);	# Row four,  first  button, site notification callback.
+		    fun sitewatcher2d (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site2d', site);	# Row four,  second button, site notification callback.
+		    fun sitewatcher3d (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site3d', site);	# Row four,  third  button, site notification callback.
+		    fun sitewatcher4d (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site4d', site);	# Row four,  fourth button, site notification callback.
 
 
 		    fun read_back_sites_and_ports_of_buttons_guiplan_widgets ()					# Fill in the above globals via blocking reads.
@@ -2371,29 +2395,29 @@ nb {. sprintf "make_grid_2x2_guiplan.roundbutton_mouse_drag_fn: relief was %s, n
 														# needs to know this, but our test code needs this information in
 														# order to synthesize fake mouseclicks etc on the buttons.
 														#
-		  widget_sites:   { site1a: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row one,   button one.
-				    site2a: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row one,   button two.
+		  widget_sites:   { site1a: Ref (Null_Or((Id,g2d::Box))),					# Row one,   button one.
+				    site2a: Ref (Null_Or((Id,g2d::Box))),					# Row one,   button two.
 														#
-				    site1b: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row two,   button one.  
-				    site2b: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row two,   button two.  
+				    site1b: Ref (Null_Or((Id,g2d::Box))),					# Row two,   button one.  
+				    site2b: Ref (Null_Or((Id,g2d::Box))),					# Row two,   button two.  
 														#
-				    site1c: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row three, button one.  
-				    site2c: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row three, button two.  
+				    site1c: Ref (Null_Or((Id,g2d::Box))),					# Row three, button one.  
+				    site2c: Ref (Null_Or((Id,g2d::Box))),					# Row three, button two.  
 														#
-				    site1d: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row four,  button one.  
-				    site2d: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row four,  button two.  
+				    site1d: Ref (Null_Or((Id,g2d::Box))),					# Row four,  button one.  
+				    site2d: Ref (Null_Or((Id,g2d::Box))),					# Row four,  button two.  
 														#
-				    site1e: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row five,  button one.
-				    site2e: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row five,  button two.  
+				    site1e: Ref (Null_Or((Id,g2d::Box))),					# Row five,  button one.
+				    site2e: Ref (Null_Or((Id,g2d::Box))),					# Row five,  button two.  
 														#
-				    site1f: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row six,   button one.  
-				    site2f: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row six,   button two.  
+				    site1f: Ref (Null_Or((Id,g2d::Box))),					# Row six,   button one.  
+				    site2f: Ref (Null_Or((Id,g2d::Box))),					# Row six,   button two.  
 														#
-				    site1g: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row seven, button one.  
-				    site2g: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row seven, button two.  
+				    site1g: Ref (Null_Or((Id,g2d::Box))),					# Row seven, button one.  
+				    site2g: Ref (Null_Or((Id,g2d::Box))),					# Row seven, button two.  
 														#
-				    site1h: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row eight, button one.  
-				    site2h: Ref (Null_Or((iuw::Id,g2d::Box)))					# Row eight, button two.  
+				    site1h: Ref (Null_Or((Id,g2d::Box))),					# Row eight, button one.  
+				    site2h: Ref (Null_Or((Id,g2d::Box)))					# Row eight, button two.  
 				  },
 
 		  read_back_sites_and_ports_of_hsliders:	Void -> Void					# Fills in values of widget_sites
@@ -2401,29 +2425,29 @@ nb {. sprintf "make_grid_2x2_guiplan.roundbutton_mouse_drag_fn: relief was %s, n
 	    =
 	    {
 		stipulate
-		    site1a' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row one,   first  button, site notification mailqueue.
-		    site2a' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row one,   second button, site notification mailqueue.
+		    site1a' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row one,   first  button, site notification mailqueue.
+		    site2a' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row one,   second button, site notification mailqueue.
 		    #													#
-		    site1b' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row two,   first  button, site notification mailqueue.
-		    site2b' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row two,   second button, site notification mailqueue.
+		    site1b' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row two,   first  button, site notification mailqueue.
+		    site2b' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row two,   second button, site notification mailqueue.
 		    #													#
-		    site1c' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row three, first  button, site notification mailqueue.
-		    site2c' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row three, second button, site notification mailqueue.
+		    site1c' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row three, first  button, site notification mailqueue.
+		    site2c' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row three, second button, site notification mailqueue.
 		    #													#
-		    site1d' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row four,  first  button, site notification mailqueue.
-		    site2d' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row four,  second button, site notification mailqueue.
+		    site1d' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row four,  first  button, site notification mailqueue.
+		    site2d' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row four,  second button, site notification mailqueue.
 		    #													#
-		    site1e' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row five,  first  button, site notification mailqueue.
-		    site2e' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row five,  second button, site notification mailqueue.
+		    site1e' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row five,  first  button, site notification mailqueue.
+		    site2e' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row five,  second button, site notification mailqueue.
 		    #													#
-		    site1f' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row six,   first  button, site notification mailqueue.
-		    site2f' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row six,   second button, site notification mailqueue.
+		    site1f' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row six,   first  button, site notification mailqueue.
+		    site2f' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row six,   second button, site notification mailqueue.
 		    #													#
-		    site1g' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row seven, first  button, site notification mailqueue.
-		    site2g' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row seven, second button, site notification mailqueue.
+		    site1g' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row seven, first  button, site notification mailqueue.
+		    site2g' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row seven, second button, site notification mailqueue.
 		    #													#
-		    site1h' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row eight, first  button, site notification mailqueue.
-		    site2h' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row eight, second button, site notification mailqueue.
+		    site1h' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row eight, first  button, site notification mailqueue.
+		    site2h' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row eight, second button, site notification mailqueue.
 		herein														                                                     
 														# These globals hold the values read from the above
 														# mailops by the later do_one_mailop() calls.
@@ -2432,57 +2456,57 @@ nb {. sprintf "make_grid_2x2_guiplan.roundbutton_mouse_drag_fn: relief was %s, n
 														# to generate fake mouseclicks on them for test
 														# purposes. A normal GUI app wouldn't do this.) 
 														#
-		    site1a = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row one,   button one.
-		    site2a = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row one,   button two.
+		    site1a = REF (NULL: Null_Or((Id,g2d::Box)));						# Row one,   button one.
+		    site2a = REF (NULL: Null_Or((Id,g2d::Box)));						# Row one,   button two.
 		    #												#
-		    site1b = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row two,   button one.
-		    site2b = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row two,   button two.
+		    site1b = REF (NULL: Null_Or((Id,g2d::Box)));						# Row two,   button one.
+		    site2b = REF (NULL: Null_Or((Id,g2d::Box)));						# Row two,   button two.
 		    #												#
-		    site1c = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row three, button one.
-		    site2c = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row three, button two.
+		    site1c = REF (NULL: Null_Or((Id,g2d::Box)));						# Row three, button one.
+		    site2c = REF (NULL: Null_Or((Id,g2d::Box)));						# Row three, button two.
 		    #												#
-		    site1d = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row four,  button one.
-		    site2d = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row four,  button two.
+		    site1d = REF (NULL: Null_Or((Id,g2d::Box)));						# Row four,  button one.
+		    site2d = REF (NULL: Null_Or((Id,g2d::Box)));						# Row four,  button two.
 		    #												#
-		    site1e = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row five,  button one.
-		    site2e = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row five,  button two.
+		    site1e = REF (NULL: Null_Or((Id,g2d::Box)));						# Row five,  button one.
+		    site2e = REF (NULL: Null_Or((Id,g2d::Box)));						# Row five,  button two.
 		    #												#
-		    site1f = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row six,   button one.
-		    site2f = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row six,   button two.
+		    site1f = REF (NULL: Null_Or((Id,g2d::Box)));						# Row six,   button one.
+		    site2f = REF (NULL: Null_Or((Id,g2d::Box)));						# Row six,   button two.
 		    #												#
-		    site1g = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row seven, button one.
-		    site2g = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row seven, button two.
+		    site1g = REF (NULL: Null_Or((Id,g2d::Box)));						# Row seven, button one.
+		    site2g = REF (NULL: Null_Or((Id,g2d::Box)));						# Row seven, button two.
 		    #												#
-		    site1h = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row eight, button one.
-		    site2h = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row eight, button two.
+		    site1h = REF (NULL: Null_Or((Id,g2d::Box)));						# Row eight, button one.
+		    site2h = REF (NULL: Null_Or((Id,g2d::Box)));						# Row eight, button two.
 
 														# These are the site-watcher callbacks we pass to the
 														# guiboss layer to find out where our buttons are on
 														# the window:
 														#
-		    fun sitewatcher1a (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site1a', site);	# Row one,   first  button, site notification callback.
-		    fun sitewatcher2a (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site2a', site);	# Row one,   second button, site notification callback.
+		    fun sitewatcher1a (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site1a', site);	# Row one,   first  button, site notification callback.
+		    fun sitewatcher2a (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site2a', site);	# Row one,   second button, site notification callback.
 		    #												#
-		    fun sitewatcher1b (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site1b', site);	# Row two,   first  button, site notification callback.
-		    fun sitewatcher2b (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site2b', site);	# Row two,   second button, site notification callback.
+		    fun sitewatcher1b (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site1b', site);	# Row two,   first  button, site notification callback.
+		    fun sitewatcher2b (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site2b', site);	# Row two,   second button, site notification callback.
 		    #												#
-		    fun sitewatcher1c (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site1c', site);	# Row three, first  button, site notification callback.
-		    fun sitewatcher2c (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site2c', site);	# Row three, second button, site notification callback.
+		    fun sitewatcher1c (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site1c', site);	# Row three, first  button, site notification callback.
+		    fun sitewatcher2c (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site2c', site);	# Row three, second button, site notification callback.
 		    #												#
-		    fun sitewatcher1d (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site1d', site);	# Row four,  first  button, site notification callback.
-		    fun sitewatcher2d (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site2d', site);	# Row four,  second button, site notification callback.
+		    fun sitewatcher1d (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site1d', site);	# Row four,  first  button, site notification callback.
+		    fun sitewatcher2d (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site2d', site);	# Row four,  second button, site notification callback.
 		    #												#
-		    fun sitewatcher1e (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site1e', site);	# Row five,  first  button, site notification callback.
-		    fun sitewatcher2e (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site2e', site);	# Row five,  second button, site notification callback.
+		    fun sitewatcher1e (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site1e', site);	# Row five,  first  button, site notification callback.
+		    fun sitewatcher2e (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site2e', site);	# Row five,  second button, site notification callback.
 		    #												#
-		    fun sitewatcher1f (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site1f', site);	# Row six,   first  button, site notification callback.
-		    fun sitewatcher2f (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site2f', site);	# Row six,   second button, site notification callback.
+		    fun sitewatcher1f (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site1f', site);	# Row six,   first  button, site notification callback.
+		    fun sitewatcher2f (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site2f', site);	# Row six,   second button, site notification callback.
 		    #												#
-		    fun sitewatcher1g (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site1g', site);	# Row seven, first  button, site notification callback.
-		    fun sitewatcher2g (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site2g', site);	# Row seven, second button, site notification callback.
+		    fun sitewatcher1g (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site1g', site);	# Row seven, first  button, site notification callback.
+		    fun sitewatcher2g (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site2g', site);	# Row seven, second button, site notification callback.
 		    #												#
-		    fun sitewatcher1h (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site1h', site);	# Row eight, first  button, site notification callback.
-		    fun sitewatcher2h (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site2h', site);	# Row eight, second button, site notification callback.
+		    fun sitewatcher1h (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site1h', site);	# Row eight, first  button, site notification callback.
+		    fun sitewatcher2h (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site2h', site);	# Row eight, second button, site notification callback.
 
 
 		    fun read_back_sites_and_ports_of_hsliders ()						# Fill in the above globals via blocking reads.
@@ -2626,29 +2650,29 @@ nb {. sprintf "make_grid_2x2_guiplan.roundbutton_mouse_drag_fn: relief was %s, n
 														# needs to know this, but our test code needs this information in
 														# order to synthesize fake mouseclicks etc on the buttons.
 														#
-		  widget_sites:   { site1a: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row one,   button one.
-				    site2a: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row one,   button two.
+		  widget_sites:   { site1a: Ref (Null_Or((Id,g2d::Box))),					# Row one,   button one.
+				    site2a: Ref (Null_Or((Id,g2d::Box))),					# Row one,   button two.
 														#
-				    site1b: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row two,   button one.  
-				    site2b: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row two,   button two.  
+				    site1b: Ref (Null_Or((Id,g2d::Box))),					# Row two,   button one.  
+				    site2b: Ref (Null_Or((Id,g2d::Box))),					# Row two,   button two.  
 														#
-				    site1c: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row three, button one.  
-				    site2c: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row three, button two.  
+				    site1c: Ref (Null_Or((Id,g2d::Box))),					# Row three, button one.  
+				    site2c: Ref (Null_Or((Id,g2d::Box))),					# Row three, button two.  
 														#
-				    site1d: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row four,  button one.  
-				    site2d: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row four,  button two.  
+				    site1d: Ref (Null_Or((Id,g2d::Box))),					# Row four,  button one.  
+				    site2d: Ref (Null_Or((Id,g2d::Box))),					# Row four,  button two.  
 														#
-				    site1e: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row five,  button one.
-				    site2e: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row five,  button two.  
+				    site1e: Ref (Null_Or((Id,g2d::Box))),					# Row five,  button one.
+				    site2e: Ref (Null_Or((Id,g2d::Box))),					# Row five,  button two.  
 														#
-				    site1f: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row six,   button one.  
-				    site2f: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row six,   button two.  
+				    site1f: Ref (Null_Or((Id,g2d::Box))),					# Row six,   button one.  
+				    site2f: Ref (Null_Or((Id,g2d::Box))),					# Row six,   button two.  
 														#
-				    site1g: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row seven, button one.  
-				    site2g: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row seven, button two.  
+				    site1g: Ref (Null_Or((Id,g2d::Box))),					# Row seven, button one.  
+				    site2g: Ref (Null_Or((Id,g2d::Box))),					# Row seven, button two.  
 														#
-				    site1h: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row eight, button one.  
-				    site2h: Ref (Null_Or((iuw::Id,g2d::Box)))					# Row eight, button two.  
+				    site1h: Ref (Null_Or((Id,g2d::Box))),					# Row eight, button one.  
+				    site2h: Ref (Null_Or((Id,g2d::Box)))					# Row eight, button two.  
 				  },
 
 		  read_back_sites_and_ports_of_vsliders:	Void -> Void					# Fills in values of widget_sites
@@ -2656,29 +2680,29 @@ nb {. sprintf "make_grid_2x2_guiplan.roundbutton_mouse_drag_fn: relief was %s, n
 	    =
 	    {
 		stipulate
-		    site1a' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row one,   first  button, site notification mailqueue.
-		    site2a' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row one,   second button, site notification mailqueue.
+		    site1a' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row one,   first  button, site notification mailqueue.
+		    site2a' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row one,   second button, site notification mailqueue.
 		    #													#
-		    site1b' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row two,   first  button, site notification mailqueue.
-		    site2b' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row two,   second button, site notification mailqueue.
+		    site1b' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row two,   first  button, site notification mailqueue.
+		    site2b' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row two,   second button, site notification mailqueue.
 		    #													#
-		    site1c' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row three, first  button, site notification mailqueue.
-		    site2c' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row three, second button, site notification mailqueue.
+		    site1c' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row three, first  button, site notification mailqueue.
+		    site2c' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row three, second button, site notification mailqueue.
 		    #													#
-		    site1d' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row four,  first  button, site notification mailqueue.
-		    site2d' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row four,  second button, site notification mailqueue.
+		    site1d' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row four,  first  button, site notification mailqueue.
+		    site2d' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row four,  second button, site notification mailqueue.
 		    #													#
-		    site1e' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row five,  first  button, site notification mailqueue.
-		    site2e' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row five,  second button, site notification mailqueue.
+		    site1e' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row five,  first  button, site notification mailqueue.
+		    site2e' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row five,  second button, site notification mailqueue.
 		    #													#
-		    site1f' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row six,   first  button, site notification mailqueue.
-		    site2f' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row six,   second button, site notification mailqueue.
+		    site1f' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row six,   first  button, site notification mailqueue.
+		    site2f' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row six,   second button, site notification mailqueue.
 		    #													#
-		    site1g' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row seven, first  button, site notification mailqueue.
-		    site2g' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row seven, second button, site notification mailqueue.
+		    site1g' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row seven, first  button, site notification mailqueue.
+		    site2g' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row seven, second button, site notification mailqueue.
 		    #													#
-		    site1h' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row eight, first  button, site notification mailqueue.
-		    site2h' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row eight, second button, site notification mailqueue.
+		    site1h' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row eight, first  button, site notification mailqueue.
+		    site2h' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row eight, second button, site notification mailqueue.
 		herein														                                                     
 														# These globals hold the values read from the above
 														# mailops by the later do_one_mailop() calls.
@@ -2687,57 +2711,57 @@ nb {. sprintf "make_grid_2x2_guiplan.roundbutton_mouse_drag_fn: relief was %s, n
 														# to generate fake mouseclicks on them for test
 														# purposes. A normal GUI app wouldn't do this.) 
 														#
-		    site1a = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row one,   button one.
-		    site2a = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row one,   button two.
+		    site1a = REF (NULL: Null_Or((Id,g2d::Box)));						# Row one,   button one.
+		    site2a = REF (NULL: Null_Or((Id,g2d::Box)));						# Row one,   button two.
 		    #												#
-		    site1b = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row two,   button one.
-		    site2b = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row two,   button two.
+		    site1b = REF (NULL: Null_Or((Id,g2d::Box)));						# Row two,   button one.
+		    site2b = REF (NULL: Null_Or((Id,g2d::Box)));						# Row two,   button two.
 		    #												#
-		    site1c = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row three, button one.
-		    site2c = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row three, button two.
+		    site1c = REF (NULL: Null_Or((Id,g2d::Box)));						# Row three, button one.
+		    site2c = REF (NULL: Null_Or((Id,g2d::Box)));						# Row three, button two.
 		    #												#
-		    site1d = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row four,  button one.
-		    site2d = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row four,  button two.
+		    site1d = REF (NULL: Null_Or((Id,g2d::Box)));						# Row four,  button one.
+		    site2d = REF (NULL: Null_Or((Id,g2d::Box)));						# Row four,  button two.
 		    #												#
-		    site1e = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row five,  button one.
-		    site2e = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row five,  button two.
+		    site1e = REF (NULL: Null_Or((Id,g2d::Box)));						# Row five,  button one.
+		    site2e = REF (NULL: Null_Or((Id,g2d::Box)));						# Row five,  button two.
 		    #												#
-		    site1f = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row six,   button one.
-		    site2f = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row six,   button two.
+		    site1f = REF (NULL: Null_Or((Id,g2d::Box)));						# Row six,   button one.
+		    site2f = REF (NULL: Null_Or((Id,g2d::Box)));						# Row six,   button two.
 		    #												#
-		    site1g = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row seven, button one.
-		    site2g = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row seven, button two.
+		    site1g = REF (NULL: Null_Or((Id,g2d::Box)));						# Row seven, button one.
+		    site2g = REF (NULL: Null_Or((Id,g2d::Box)));						# Row seven, button two.
 		    #												#
-		    site1h = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row eight, button one.
-		    site2h = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row eight, button two.
+		    site1h = REF (NULL: Null_Or((Id,g2d::Box)));						# Row eight, button one.
+		    site2h = REF (NULL: Null_Or((Id,g2d::Box)));						# Row eight, button two.
 
 														# These are the site-watcher callbacks we pass to the
 														# guiboss layer to find out where our buttons are on
 														# the window:
 														#
-		    fun sitewatcher1a (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site1a', site);	# Row one,   first  button, site notification callback.
-		    fun sitewatcher2a (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site2a', site);	# Row one,   second button, site notification callback.
+		    fun sitewatcher1a (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site1a', site);	# Row one,   first  button, site notification callback.
+		    fun sitewatcher2a (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site2a', site);	# Row one,   second button, site notification callback.
 		    #												#
-		    fun sitewatcher1b (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site1b', site);	# Row two,   first  button, site notification callback.
-		    fun sitewatcher2b (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site2b', site);	# Row two,   second button, site notification callback.
+		    fun sitewatcher1b (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site1b', site);	# Row two,   first  button, site notification callback.
+		    fun sitewatcher2b (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site2b', site);	# Row two,   second button, site notification callback.
 		    #												#
-		    fun sitewatcher1c (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site1c', site);	# Row three, first  button, site notification callback.
-		    fun sitewatcher2c (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site2c', site);	# Row three, second button, site notification callback.
+		    fun sitewatcher1c (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site1c', site);	# Row three, first  button, site notification callback.
+		    fun sitewatcher2c (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site2c', site);	# Row three, second button, site notification callback.
 		    #												#
-		    fun sitewatcher1d (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site1d', site);	# Row four,  first  button, site notification callback.
-		    fun sitewatcher2d (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site2d', site);	# Row four,  second button, site notification callback.
+		    fun sitewatcher1d (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site1d', site);	# Row four,  first  button, site notification callback.
+		    fun sitewatcher2d (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site2d', site);	# Row four,  second button, site notification callback.
 		    #												#
-		    fun sitewatcher1e (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site1e', site);	# Row five,  first  button, site notification callback.
-		    fun sitewatcher2e (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site2e', site);	# Row five,  second button, site notification callback.
+		    fun sitewatcher1e (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site1e', site);	# Row five,  first  button, site notification callback.
+		    fun sitewatcher2e (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site2e', site);	# Row five,  second button, site notification callback.
 		    #												#
-		    fun sitewatcher1f (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site1f', site);	# Row six,   first  button, site notification callback.
-		    fun sitewatcher2f (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site2f', site);	# Row six,   second button, site notification callback.
+		    fun sitewatcher1f (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site1f', site);	# Row six,   first  button, site notification callback.
+		    fun sitewatcher2f (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site2f', site);	# Row six,   second button, site notification callback.
 		    #												#
-		    fun sitewatcher1g (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site1g', site);	# Row seven, first  button, site notification callback.
-		    fun sitewatcher2g (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site2g', site);	# Row seven, second button, site notification callback.
+		    fun sitewatcher1g (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site1g', site);	# Row seven, first  button, site notification callback.
+		    fun sitewatcher2g (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site2g', site);	# Row seven, second button, site notification callback.
 		    #												#
-		    fun sitewatcher1h (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site1h', site);	# Row eight, first  button, site notification callback.
-		    fun sitewatcher2h (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site2h', site);	# Row eight, second button, site notification callback.
+		    fun sitewatcher1h (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site1h', site);	# Row eight, first  button, site notification callback.
+		    fun sitewatcher2h (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site2h', site);	# Row eight, second button, site notification callback.
 
 
 		    fun read_back_sites_and_ports_of_vsliders ()						# Fill in the above globals via blocking reads.
@@ -2877,29 +2901,29 @@ nb {. sprintf "make_grid_2x2_guiplan.roundbutton_mouse_drag_fn: relief was %s, n
 														# needs to know this, but our test code needs this information in
 														# order to synthesize fake mouseclicks etc on the buttons.
 														#
-		  widget_sites:   { site1a: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row one,   button one.
-				    site2a: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row one,   button two.
+		  widget_sites:   { site1a: Ref (Null_Or((Id,g2d::Box))),					# Row one,   button one.
+				    site2a: Ref (Null_Or((Id,g2d::Box))),					# Row one,   button two.
 														#
-				    site1b: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row two,   button one.  
-				    site2b: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row two,   button two.  
+				    site1b: Ref (Null_Or((Id,g2d::Box))),					# Row two,   button one.  
+				    site2b: Ref (Null_Or((Id,g2d::Box))),					# Row two,   button two.  
 														#
-				    site1c: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row three, button one.  
-				    site2c: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row three, button two.  
+				    site1c: Ref (Null_Or((Id,g2d::Box))),					# Row three, button one.  
+				    site2c: Ref (Null_Or((Id,g2d::Box))),					# Row three, button two.  
 														#
-				    site1d: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row four,  button one.  
-				    site2d: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row four,  button two.  
+				    site1d: Ref (Null_Or((Id,g2d::Box))),					# Row four,  button one.  
+				    site2d: Ref (Null_Or((Id,g2d::Box))),					# Row four,  button two.  
 														#
-				    site1e: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row five,  button one.
-				    site2e: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row five,  button two.  
+				    site1e: Ref (Null_Or((Id,g2d::Box))),					# Row five,  button one.
+				    site2e: Ref (Null_Or((Id,g2d::Box))),					# Row five,  button two.  
 														#
-				    site1f: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row six,   button one.  
-				    site2f: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row six,   button two.  
+				    site1f: Ref (Null_Or((Id,g2d::Box))),					# Row six,   button one.  
+				    site2f: Ref (Null_Or((Id,g2d::Box))),					# Row six,   button two.  
 														#
-				    site1g: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row seven, button one.  
-				    site2g: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row seven, button two.  
+				    site1g: Ref (Null_Or((Id,g2d::Box))),					# Row seven, button one.  
+				    site2g: Ref (Null_Or((Id,g2d::Box))),					# Row seven, button two.  
 														#
-				    site1h: Ref (Null_Or((iuw::Id,g2d::Box))),					# Row eight, button one.  
-				    site2h: Ref (Null_Or((iuw::Id,g2d::Box)))					# Row eight, button two.  
+				    site1h: Ref (Null_Or((Id,g2d::Box))),					# Row eight, button one.  
+				    site2h: Ref (Null_Or((Id,g2d::Box)))					# Row eight, button two.  
 				  },
 
 		  read_back_sites_and_ports_of_textentries:	Void -> Void					# Fills in values of widget_sites
@@ -2907,29 +2931,29 @@ nb {. sprintf "make_grid_2x2_guiplan.roundbutton_mouse_drag_fn: relief was %s, n
 	    =
 	    {
 		stipulate
-		    site1a' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row one,   first  button, site notification mailqueue.
-		    site2a' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row one,   second button, site notification mailqueue.
+		    site1a' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row one,   first  button, site notification mailqueue.
+		    site2a' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row one,   second button, site notification mailqueue.
 		    #													#
-		    site1b' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row two,   first  button, site notification mailqueue.
-		    site2b' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row two,   second button, site notification mailqueue.
+		    site1b' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row two,   first  button, site notification mailqueue.
+		    site2b' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row two,   second button, site notification mailqueue.
 		    #													#
-		    site1c' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row three, first  button, site notification mailqueue.
-		    site2c' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row three, second button, site notification mailqueue.
+		    site1c' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row three, first  button, site notification mailqueue.
+		    site2c' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row three, second button, site notification mailqueue.
 		    #													#
-		    site1d' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row four,  first  button, site notification mailqueue.
-		    site2d' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row four,  second button, site notification mailqueue.
+		    site1d' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row four,  first  button, site notification mailqueue.
+		    site2d' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row four,  second button, site notification mailqueue.
 		    #													#
-		    site1e' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row five,  first  button, site notification mailqueue.
-		    site2e' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row five,  second button, site notification mailqueue.
+		    site1e' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row five,  first  button, site notification mailqueue.
+		    site2e' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row five,  second button, site notification mailqueue.
 		    #													#
-		    site1f' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row six,   first  button, site notification mailqueue.
-		    site2f' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row six,   second button, site notification mailqueue.
+		    site1f' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row six,   first  button, site notification mailqueue.
+		    site2f' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row six,   second button, site notification mailqueue.
 		    #													#
-		    site1g' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row seven, first  button, site notification mailqueue.
-		    site2g' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row seven, second button, site notification mailqueue.
+		    site1g' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row seven, first  button, site notification mailqueue.
+		    site2g' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row seven, second button, site notification mailqueue.
 		    #													#
-		    site1h' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row eight, first  button, site notification mailqueue.
-		    site2h' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((iuw::Id,g2d::Box)) );	# Row eight, second button, site notification mailqueue.
+		    site1h' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row eight, first  button, site notification mailqueue.
+		    site2h' = make_mailqueue (get_current_microthread()): Mailqueue( Null_Or((Id,g2d::Box)) );	# Row eight, second button, site notification mailqueue.
 		herein														                                                     
 														# These globals hold the values read from the above
 														# mailops by the later do_one_mailop() calls.
@@ -2938,57 +2962,57 @@ nb {. sprintf "make_grid_2x2_guiplan.roundbutton_mouse_drag_fn: relief was %s, n
 														# to generate fake mouseclicks on them for test
 														# purposes. A normal GUI app wouldn't do this.) 
 														#
-		    site1a = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row one,   button one.
-		    site2a = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row one,   button two.
+		    site1a = REF (NULL: Null_Or((Id,g2d::Box)));						# Row one,   button one.
+		    site2a = REF (NULL: Null_Or((Id,g2d::Box)));						# Row one,   button two.
 		    #												#
-		    site1b = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row two,   button one.
-		    site2b = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row two,   button two.
+		    site1b = REF (NULL: Null_Or((Id,g2d::Box)));						# Row two,   button one.
+		    site2b = REF (NULL: Null_Or((Id,g2d::Box)));						# Row two,   button two.
 		    #												#
-		    site1c = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row three, button one.
-		    site2c = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row three, button two.
+		    site1c = REF (NULL: Null_Or((Id,g2d::Box)));						# Row three, button one.
+		    site2c = REF (NULL: Null_Or((Id,g2d::Box)));						# Row three, button two.
 		    #												#
-		    site1d = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row four,  button one.
-		    site2d = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row four,  button two.
+		    site1d = REF (NULL: Null_Or((Id,g2d::Box)));						# Row four,  button one.
+		    site2d = REF (NULL: Null_Or((Id,g2d::Box)));						# Row four,  button two.
 		    #												#
-		    site1e = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row five,  button one.
-		    site2e = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row five,  button two.
+		    site1e = REF (NULL: Null_Or((Id,g2d::Box)));						# Row five,  button one.
+		    site2e = REF (NULL: Null_Or((Id,g2d::Box)));						# Row five,  button two.
 		    #												#
-		    site1f = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row six,   button one.
-		    site2f = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row six,   button two.
+		    site1f = REF (NULL: Null_Or((Id,g2d::Box)));						# Row six,   button one.
+		    site2f = REF (NULL: Null_Or((Id,g2d::Box)));						# Row six,   button two.
 		    #												#
-		    site1g = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row seven, button one.
-		    site2g = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row seven, button two.
+		    site1g = REF (NULL: Null_Or((Id,g2d::Box)));						# Row seven, button one.
+		    site2g = REF (NULL: Null_Or((Id,g2d::Box)));						# Row seven, button two.
 		    #												#
-		    site1h = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row eight, button one.
-		    site2h = REF (NULL: Null_Or((iuw::Id,g2d::Box)));						# Row eight, button two.
+		    site1h = REF (NULL: Null_Or((Id,g2d::Box)));						# Row eight, button one.
+		    site2h = REF (NULL: Null_Or((Id,g2d::Box)));						# Row eight, button two.
 
 														# These are the site-watcher callbacks we pass to the
 														# guiboss layer to find out where our buttons are on
 														# the window:
 														#
-		    fun sitewatcher1a (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site1a', site);	# Row one,   first  button, site notification callback.
-		    fun sitewatcher2a (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site2a', site);	# Row one,   second button, site notification callback.
+		    fun sitewatcher1a (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site1a', site);	# Row one,   first  button, site notification callback.
+		    fun sitewatcher2a (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site2a', site);	# Row one,   second button, site notification callback.
 		    #												#
-		    fun sitewatcher1b (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site1b', site);	# Row two,   first  button, site notification callback.
-		    fun sitewatcher2b (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site2b', site);	# Row two,   second button, site notification callback.
+		    fun sitewatcher1b (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site1b', site);	# Row two,   first  button, site notification callback.
+		    fun sitewatcher2b (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site2b', site);	# Row two,   second button, site notification callback.
 		    #												#
-		    fun sitewatcher1c (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site1c', site);	# Row three, first  button, site notification callback.
-		    fun sitewatcher2c (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site2c', site);	# Row three, second button, site notification callback.
+		    fun sitewatcher1c (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site1c', site);	# Row three, first  button, site notification callback.
+		    fun sitewatcher2c (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site2c', site);	# Row three, second button, site notification callback.
 		    #												#
-		    fun sitewatcher1d (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site1d', site);	# Row four,  first  button, site notification callback.
-		    fun sitewatcher2d (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site2d', site);	# Row four,  second button, site notification callback.
+		    fun sitewatcher1d (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site1d', site);	# Row four,  first  button, site notification callback.
+		    fun sitewatcher2d (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site2d', site);	# Row four,  second button, site notification callback.
 		    #												#
-		    fun sitewatcher1e (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site1e', site);	# Row five,  first  button, site notification callback.
-		    fun sitewatcher2e (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site2e', site);	# Row five,  second button, site notification callback.
+		    fun sitewatcher1e (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site1e', site);	# Row five,  first  button, site notification callback.
+		    fun sitewatcher2e (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site2e', site);	# Row five,  second button, site notification callback.
 		    #												#
-		    fun sitewatcher1f (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site1f', site);	# Row six,   first  button, site notification callback.
-		    fun sitewatcher2f (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site2f', site);	# Row six,   second button, site notification callback.
+		    fun sitewatcher1f (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site1f', site);	# Row six,   first  button, site notification callback.
+		    fun sitewatcher2f (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site2f', site);	# Row six,   second button, site notification callback.
 		    #												#
-		    fun sitewatcher1g (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site1g', site);	# Row seven, first  button, site notification callback.
-		    fun sitewatcher2g (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site2g', site);	# Row seven, second button, site notification callback.
+		    fun sitewatcher1g (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site1g', site);	# Row seven, first  button, site notification callback.
+		    fun sitewatcher2g (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site2g', site);	# Row seven, second button, site notification callback.
 		    #												#
-		    fun sitewatcher1h (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site1h', site);	# Row eight, first  button, site notification callback.
-		    fun sitewatcher2h (site: Null_Or((iuw::Id,g2d::Box))) =  put_in_mailqueue (site2h', site);	# Row eight, second button, site notification callback.
+		    fun sitewatcher1h (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site1h', site);	# Row eight, first  button, site notification callback.
+		    fun sitewatcher2h (site: Null_Or((Id,g2d::Box))) =  put_in_mailqueue (site2h', site);	# Row eight, second button, site notification callback.
 
 
 		    fun read_back_sites_and_ports_of_textentries ()						# Fill in the above globals via blocking reads.
@@ -3123,7 +3147,7 @@ nb {. sprintf "make_grid_2x2_guiplan.roundbutton_mouse_drag_fn: relief was %s, n
 		  gt::FRAME
 		    ( [ gt::FRAME_WIDGET (popupframe::with []) ],
 		      #
-		      texteditor::with ("*testbuffer*", [ ted::ASCII sample_text ])
+		      texteditor::with ("*testbuffer*", [ ted::UTF8 sample_text ])
 		    );
 
 		{ guiplan,
@@ -3227,7 +3251,7 @@ printf "widget-unit-test.pkg/exercise_window_stuff/TOP\n";
 		# Our toplevel layout is designed to
 		# look best at a 4:3 aspect ration, so:
 		#
-		topwindow_size
+		hostwindow_size
 		    =
 		    if (root_window_size_in_pixels.wide * 3
 		    <   root_window_size_in_pixels.high * 4)
@@ -3291,7 +3315,7 @@ nb {. sprintf "root_window_size_in_mm     = %s" (g2j::size_to_string root_window
 # 
 # 			fun redraw_request_fn1
 # 			    {
-# 			      id:				iuw::Id,						# Unique id.
+# 			      id:				Id,							# Unique id.
 # 			      frame_number:			Int,							# 1,2,3,... Purely for convenience of widget-imp, guiboss-imp makes no use of this.
 # 			      site:				g2d::Box,						# Window rectangle in which to draw.
 # 			      visible:				Bool,							# If FALSE, widget is not visible on screen, so widget-imp may be able to avoid updating foreground and background.
@@ -3317,7 +3341,7 @@ nb {. sprintf "root_window_size_in_mm     = %s" (g2j::size_to_string root_window
 # 
 # 			fun redraw_request_fn2
 # 			    {
-# 			      id:				iuw::Id,						# Unique id.
+# 			      id:				Id,							# Unique id.
 # 			      frame_number:			Int,							# 1,2,3,... Purely for convenience of widget-imp, guiboss-imp makes no use of this.
 # 			      site:				g2d::Box,						# Window rectangle in which to draw.
 # 			      visible:				Bool,							# If FALSE, widget is not visible on screen, so widget-imp may be able to avoid updating foreground and background.
@@ -3343,7 +3367,7 @@ nb {. sprintf "root_window_size_in_mm     = %s" (g2j::size_to_string root_window
 # 
 # 			fun button_press_fn
 # 			      {
-#				id:				iuw::Id,						# Unique id.
+#				id:				Id,							# Unique id.
 #				button:				evt::Mousebutton,
 # 				point:				g2d::Point,
 #				widget_layout_hint:		gt::Widget_Layout_Hint,
@@ -3363,7 +3387,7 @@ nb {. sprintf "root_window_size_in_mm     = %s" (g2j::size_to_string root_window
 # 
 # 			fun button_release_fn
 # 			      {
-#				id:				iuw::Id,						# Unique id.
+#				id:				Id,							# Unique id.
 #				button:				evt::Mousebutton,
 # 				point:				g2d::Point,
 #				widget_layout_hint:		gt::Widget_Layout_Hint,
@@ -3383,7 +3407,7 @@ nb {. sprintf "root_window_size_in_mm     = %s" (g2j::size_to_string root_window
 # 
 # 			fun key_press_fn
 # 			      {
-#				id:				iuw::Id,						# Unique id.
+#				id:				Id,							# Unique id.
 #				keycode:			evt::Keycode,						# Keycode of the depressed key.
 # 				keysym:				evt::Keysym,						# Keysym  of the depressed key.
 # 				ascii:				String,							# Ascii  for the depressed key.
@@ -3405,7 +3429,7 @@ nb {. sprintf "root_window_size_in_mm     = %s" (g2j::size_to_string root_window
 # 
 # 			fun key_release_fn
 # 			      {
-#				id:				iuw::Id,						# Unique id.
+#				id:				Id,							# Unique id.
 #			        keycode:			evt::Keycode,						# Keycode of the released key.
 # 				keysym:				evt::Keysym,						# Keysym  of the released key.
 # 				ascii:				String,							# Ascii  for the released key.
@@ -3463,11 +3487,11 @@ nb {. sprintf "root_window_size_in_mm     = %s" (g2j::size_to_string root_window
 		    # We also note the site (size and location) of each button widget;
 		    # we need this information (only) to synthesize fake test clicks
 		    # on the buttons via
-		    #     guiboss_to_topwindow.send_fake_mousebutton_release_event()
+		    #     guiboss_to_hostwindow.send_fake_mousebutton_release_event()
 
 																	# These mailops are referenced only in
-																	#     1) The immediately following sitewatcher1a etc fns
-																	#     2) The read_back_sites_and_ports_of_guiplan_widgets do_one_mailop() calls
+																	#     1. The immediately following sitewatcher1a etc fns
+																	#     2. The read_back_sites_and_ports_of_guiplan_widgets do_one_mailop() calls
 																	#        which copy read value into site1a etc.
 
 
@@ -3485,8 +3509,8 @@ nb {. sprintf "root_window_size_in_mm     = %s" (g2j::size_to_string root_window
 			      =	
 			      { row,
 				col,
-				wide => topwindow_size.wide,
-				high => topwindow_size.high
+				wide => hostwindow_size.wide,
+				high => hostwindow_size.high
 			      };
 			end;
 
@@ -3586,15 +3610,15 @@ nb {. sprintf "root_window_size_in_mm     = %s" (g2j::size_to_string root_window
 
 
 				stipulate
-				    row = topwindow_size.high / 10;
-				    col = topwindow_size.wide / 10;
+				    row = hostwindow_size.high / 10;
+				    col = hostwindow_size.wide / 10;
 				herein
 				    buttons_popup_site
 				      =	
 				      { row,
 					col,
-					wide => topwindow_size.wide - 4*col,
-					high => topwindow_size.high - 4*row
+					wide => hostwindow_size.wide - 4*col,
+					high => hostwindow_size.high - 4*row
 				      };
 				end;
 
@@ -3618,15 +3642,15 @@ nb {. sprintf "root_window_size_in_mm     = %s" (g2j::size_to_string root_window
 
 
 				stipulate
-				    row = (topwindow_size.high * 35) / 100;
-				    col =  topwindow_size.wide / 10;
+				    row = (hostwindow_size.high * 35) / 100;
+				    col =  hostwindow_size.wide / 10;
 				herein
 				    hslider_popup_site
 				      =
 				      { row,
 					col,
-					wide => topwindow_size.wide - 2*col,
-					high => topwindow_size.high - 2*row
+					wide => hostwindow_size.wide - 2*col,
+					high => hostwindow_size.high - 2*row
 				      };
 				end;
 
@@ -3650,15 +3674,15 @@ nb {. sprintf "root_window_size_in_mm     = %s" (g2j::size_to_string root_window
 
 
 				stipulate
-				    row =  topwindow_size.high / 10;
-				    col = (topwindow_size.wide * 42) / 100;
+				    row =  hostwindow_size.high / 10;
+				    col = (hostwindow_size.wide * 42) / 100;
 				herein
 				    vsliders_popup_site
 					=
 					{ row,
 					  col,
-					  high => topwindow_size.high - 2*row,
-					  wide => topwindow_size.wide - 2*col
+					  high => hostwindow_size.high - 2*row,
+					  wide => hostwindow_size.wide - 2*col
 					};
 				end;
 
@@ -3682,15 +3706,15 @@ nb {. sprintf "root_window_size_in_mm     = %s" (g2j::size_to_string root_window
 
 
 				stipulate
-				    row = topwindow_size.high / 5;
-				    col = topwindow_size.wide / 5;
+				    row = hostwindow_size.high / 5;
+				    col = hostwindow_size.wide / 5;
 				herein
 				    textentries_popup_site
 				      =
 				      { row,
 					col,
-					high => topwindow_size.high - 4*row,
-					wide => topwindow_size.wide - 2*col
+					high => hostwindow_size.high - 4*row,
+					wide => hostwindow_size.wide - 2*col
 				      };
 				end;
 
@@ -3712,15 +3736,16 @@ nb {. sprintf "root_window_size_in_mm     = %s" (g2j::size_to_string root_window
 
 
 				stipulate
-				    row = topwindow_size.high / 20;
-				    col = topwindow_size.wide / 20;
+				    row = hostwindow_size.high / 20;
+				    col = hostwindow_size.wide / 20;
 				herein
 				    texteditor_popup_site
 					=
 					{ row,
 					  col,
-					  high => topwindow_size.high - 5*row,
-					  wide => topwindow_size.wide - 2*col
+					  high => hostwindow_size.high - 5*row,
+					  wide => hostwindow_size.wide - 2*col
+#					  wide => 336
 					};
 				end;
 
@@ -3747,41 +3772,41 @@ nb {. sprintf "root_window_size_in_mm     = %s" (g2j::size_to_string root_window
 # nb {. sprintf "widget-unit-test pprinting guiplan:"; };
 #		    gt::pprint_guiplan  guiplan;
 
-		    topwindow_hints		# 
+		    hostwindow_hints		# 
 			=			# 
 			[
 			  gtg::BACKGROUND_PIXEL	(r8::rgb8_from_ints (128+32, 16, 32)),		# Slightly desaturated green. (NOW RED.)
 			  gtg::BORDER_PIXEL	(r8::rgb8_from_ints (0,       0,  0)),		# Black.
 			  #
 			  gtg::SITE		( { upperleft		=>   { col =>     0, row  =>   0 },
-						    size		=>   topwindow_size,
+						    size		=>   hostwindow_size,
 						    border_thickness	=>  1
 						  }
 						  : g2d::Window_Site
 						)
 			];
 
-		    (client_to_guiboss.make_topwindow  topwindow_hints)
+		    (client_to_guiboss.make_hostwindow  hostwindow_hints)
 			->
-			guiboss_to_topwindow;
+			guiboss_to_hostwindow;
 
-		topwindow_site
-		    =
-		    guiboss_to_topwindow.get_window_site ();
+		    hostwindow_site
+			=
+			guiboss_to_hostwindow.get_window_site ();
 
-		topwindow_site
-		    ->
-		    { upperleft		=> topwindow_upperleft:	g2d::Point,
-		      size		=> topwindow_size:	g2d::Size,
-		      border_thickness	=> topwindow:		Int
-		    };
+		    hostwindow_site
+			->
+			{ upperleft	    => hostwindow_upperleft:	g2d::Point,
+			  size		    => hostwindow_size:		g2d::Size,
+			  border_thickness  => hostwindow:		Int
+			};
 
-nb {. sprintf "topwindow_size             = %s" (g2j::size_to_string  topwindow_site.size            ); };
-nb {. sprintf "topwindow_upperleft        = %s" (g2j::point_to_string topwindow_site.upperleft       ); };
-nb {. sprintf "topwindow_border_thickness = %d"                       topwindow_site.border_thickness ; };
+nb {. sprintf "hostwindow_size             = %s" (g2j::size_to_string  hostwindow_site.size            ); };
+nb {. sprintf "hostwindow_upperleft        = %s" (g2j::point_to_string hostwindow_site.upperleft       ); };
+nb {. sprintf "hostwindow_border_thickness = %d"                       hostwindow_site.border_thickness ; };
 
 
-		    (guiboss_to_topwindow.exercise_appwindow ())
+		    (guiboss_to_hostwindow.exercise_appwindow ())
 			->
 		        wait_until_exercise_is_complete;
 			
@@ -3790,7 +3815,7 @@ nb {. sprintf "topwindow_border_thickness = %d"                       topwindow_
 
 
 
-		    (client_to_guiboss.start_gui  (guiboss_to_topwindow, guiplan))
+		    (client_to_guiboss.start_gui  (guiboss_to_hostwindow, guiplan))
 			->
 			block_until_gui_startup_is_complete;
 
@@ -3798,13 +3823,13 @@ nb {. sprintf "topwindow_border_thickness = %d"                       topwindow_
 			->
 			client_to_guiwindow;
 
-# nb {. sprintf "widget-unit-test doing guiboss_to_topwindow.send_fake_mousebutton_press_event() ..."; };
+# nb {. sprintf "widget-unit-test doing guiboss_to_hostwindow.send_fake_mousebutton_press_event() ..."; };
 		    #
-#		    guiboss_to_topwindow.send_fake_mousebutton_press_event    (evt::button1, { row => 13, col => 17 });
-#		    guiboss_to_topwindow.send_fake_mousebutton_release_event  (evt::button1, { row => 14, col => 18 });
+#		    guiboss_to_hostwindow.send_fake_mousebutton_press_event    (evt::button1, { row => 13, col => 17 });
+#		    guiboss_to_hostwindow.send_fake_mousebutton_release_event  (evt::button1, { row => 14, col => 18 });
 		    #
-#		    guiboss_to_topwindow.send_fake_key_press_event   (evt::KEYCODE 1, { row => 23, col => 27 });
-#		    guiboss_to_topwindow.send_fake_key_release_event (evt::KEYCODE 1, { row => 24, col => 28 });
+#		    guiboss_to_hostwindow.send_fake_key_press_event   (evt::KEYCODE 1, { row => 23, col => 27 });
+#		    guiboss_to_hostwindow.send_fake_key_release_event (evt::KEYCODE 1, { row => 24, col => 28 });
 
 
 
@@ -3831,10 +3856,10 @@ nb {. sprintf "topwindow_border_thickness = %d"                       topwindow_
 			    THE (id,site) => {
 # printf "site1 == { row => %d, col => %d, high => %d, wide => %d }\n" site.row site.col site.high site.wide;
 					    site_midpoint = g2d::box::midpoint site;
-#					    guiboss_to_topwindow.send_fake_mousebutton_press_event    (evt::button1, site_midpoint );
-#					    guiboss_to_topwindow.send_fake_mousebutton_release_event  (evt::button1, site_midpoint );
+#					    guiboss_to_hostwindow.send_fake_mousebutton_press_event    (evt::button1, site_midpoint );
+#					    guiboss_to_hostwindow.send_fake_mousebutton_release_event  (evt::button1, site_midpoint );
 					    window_rectangle_to_read = g2d::box::make (site_midpoint, { wide => 5, high => 5 });
-					    rw_matrix_rgb8 = guiboss_to_topwindow.get_pixel_rectangle window_rectangle_to_read;
+					    rw_matrix_rgb8 = guiboss_to_hostwindow.get_pixel_rectangle window_rectangle_to_read;
 					    row = 1;
 					    col = 1;
 					    rgb8 = rw_matrix_rgb8[row,col];
@@ -3849,9 +3874,9 @@ nb {. sprintf "topwindow_border_thickness = %d"                       topwindow_
 # # printf "site2 == { row => %d, col => %d, high => %d, wide => %d }\n" site.row site.col site.high site.wide;
 # 					    site_midpoint = g2d::box::midpoint site;
 # if (*log::debugging) log::note  {. "widget-unit-test sending site2 downclick ..."; }; fi;
-# #					    guiboss_to_topwindow.send_fake_mousebutton_press_event    (evt::button1, site_midpoint );
+# #					    guiboss_to_hostwindow.send_fake_mousebutton_press_event    (evt::button1, site_midpoint );
 # if (*log::debugging) log::note  {. "widget-unit-test sending site2   upclick ..."; }; fi;
-# #					    guiboss_to_topwindow.send_fake_mousebutton_release_event  (evt::button1, site_midpoint );
+# #					    guiboss_to_hostwindow.send_fake_mousebutton_release_event  (evt::button1, site_midpoint );
 # 					};
 # 			    NULL	 => ();
 # 			esac;
@@ -3861,9 +3886,9 @@ nb {. sprintf "topwindow_border_thickness = %d"                       topwindow_
 # # printf "site3 == { row => %d, col => %d, high => %d, wide => %d }\n" site.row site.col site.high site.wide;
 # 					    site_midpoint = g2d::box::midpoint site;
 # if (*log::debugging) log::note  {. "widget-unit-test sending site3 downclick ..."; }; fi;
-# #					    guiboss_to_topwindow.send_fake_mousebutton_press_event    (evt::button1, site_midpoint );
+# #					    guiboss_to_hostwindow.send_fake_mousebutton_press_event    (evt::button1, site_midpoint );
 # if (*log::debugging) log::note  {. "widget-unit-test sending site3   upclick ..."; }; fi;
-# #					    guiboss_to_topwindow.send_fake_mousebutton_release_event  (evt::button1, site_midpoint );
+# #					    guiboss_to_hostwindow.send_fake_mousebutton_release_event  (evt::button1, site_midpoint );
 # 					};
 # 			    NULL	 => ();
 # 			esac;
@@ -3872,8 +3897,8 @@ nb {. sprintf "topwindow_border_thickness = %d"                       topwindow_
 			    THE (id,site) => {
 # printf "site4 == { row => %d, col => %d, high => %d, wide => %d }\n" site.row site.col site.high site.wide;
 					    site_midpoint = g2d::box::midpoint site;
-#					    guiboss_to_topwindow.send_fake_mousebutton_press_event    (evt::button1, site_midpoint );
-#					    guiboss_to_topwindow.send_fake_mousebutton_release_event  (evt::button1, site_midpoint );
+#					    guiboss_to_hostwindow.send_fake_mousebutton_press_event    (evt::button1, site_midpoint );
+#					    guiboss_to_hostwindow.send_fake_mousebutton_release_event  (evt::button1, site_midpoint );
 					};
 			    NULL	 => ();
 			esac;
@@ -3885,10 +3910,10 @@ nb {. sprintf "topwindow_border_thickness = %d"                       topwindow_
 # printf "site1 == { row => %d, col => %d, high => %d, wide => %d }\n" site.row site.col site.high site.wide;
 # XXX BUGGO FIXME DO NOT USE 'i' HERE!!!
 					    site_midpoint = g2d::box::midpoint site + { row => 400 + i*10, col => i*10 };				# The added 400 is to transform us from the scrollable-view coordinate system into the toplevel window coordinate system.
-#					    guiboss_to_topwindow.send_fake_mousebutton_press_event    (evt::button1, site_midpoint );
-#					    guiboss_to_topwindow.send_fake_mousebutton_release_event  (evt::button1, site_midpoint );
+#					    guiboss_to_hostwindow.send_fake_mousebutton_press_event    (evt::button1, site_midpoint );
+#					    guiboss_to_hostwindow.send_fake_mousebutton_release_event  (evt::button1, site_midpoint );
 					    window_rectangle_to_read = g2d::box::make (site_midpoint, { wide => 5, high => 5 });
-					    rw_matrix_rgb8 = guiboss_to_topwindow.get_pixel_rectangle window_rectangle_to_read;
+					    rw_matrix_rgb8 = guiboss_to_hostwindow.get_pixel_rectangle window_rectangle_to_read;
 					    row = 1;
 					    col = 1;
 					    rgb8 = rw_matrix_rgb8[row,col];
@@ -3904,9 +3929,9 @@ nb {. sprintf "topwindow_border_thickness = %d"                       topwindow_
 # # XXX BUGGO FIXME DO NOT USE 'i' HERE!!!
 # 					    site_midpoint = g2d::box::midpoint site + { row => 400 + i*10, col => i*10 };				# The added 400 is to transform us from the scrollable-view coordinate system into the toplevel window coordinate system.
 # if (*log::debugging) log::note  {. "widget-unit-test sending site2 downclick ..."; }; fi;
-# #					    guiboss_to_topwindow.send_fake_mousebutton_press_event    (evt::button1, site_midpoint );
+# #					    guiboss_to_hostwindow.send_fake_mousebutton_press_event    (evt::button1, site_midpoint );
 # if (*log::debugging) log::note  {. "widget-unit-test sending site2   upclick ..."; }; fi;
-# #					    guiboss_to_topwindow.send_fake_mousebutton_release_event  (evt::button1, site_midpoint );
+# #					    guiboss_to_hostwindow.send_fake_mousebutton_release_event  (evt::button1, site_midpoint );
 # 					};
 # 			    NULL	 => ();
 # 			esac;
@@ -3917,9 +3942,9 @@ nb {. sprintf "topwindow_border_thickness = %d"                       topwindow_
 # # XXX BUGGO FIXME DO NOT USE 'i' HERE!!!
 # 					    site_midpoint = g2d::box::midpoint site + { row => 400 + i*10, col => i*10 };				# The added 400 is to transform us from the scrollable-view coordinate system into the toplevel window coordinate system.
 # if (*log::debugging) log::note  {. "widget-unit-test sending site3 downclick ..."; }; fi;
-# #					    guiboss_to_topwindow.send_fake_mousebutton_press_event    (evt::button1, site_midpoint );
+# #					    guiboss_to_hostwindow.send_fake_mousebutton_press_event    (evt::button1, site_midpoint );
 # if (*log::debugging) log::note  {. "widget-unit-test sending site3   upclick ..."; }; fi;
-# #					    guiboss_to_topwindow.send_fake_mousebutton_release_event  (evt::button1, site_midpoint );
+# #					    guiboss_to_hostwindow.send_fake_mousebutton_release_event  (evt::button1, site_midpoint );
 # 					};
 # 			    NULL	 => ();
 # 			esac;
@@ -3930,9 +3955,9 @@ nb {. sprintf "topwindow_border_thickness = %d"                       topwindow_
 # # XXX BUGGO FIXME DO NOT USE 'i' HERE!!!
 # 					    site_midpoint = g2d::box::midpoint site + { row => 400 + i*10, col => i*10 };				# The added 400 is to transform us from the scrollable-view coordinate system into the toplevel window coordinate system.
 # if (*log::debugging) log::note  {. "widget-unit-test sending site4 downclick ..."; }; fi;
-# #					    guiboss_to_topwindow.send_fake_mousebutton_press_event    (evt::button1, site_midpoint );
+# #					    guiboss_to_hostwindow.send_fake_mousebutton_press_event    (evt::button1, site_midpoint );
 # if (*log::debugging) log::note  {. "widget-unit-test sending site4   upclick ..."; }; fi;
-# #					    guiboss_to_topwindow.send_fake_mousebutton_release_event  (evt::button1, site_midpoint );
+# #					    guiboss_to_hostwindow.send_fake_mousebutton_release_event  (evt::button1, site_midpoint );
 # 					};
 # 			    NULL	 => ();
 # 			esac;
@@ -3943,10 +3968,10 @@ nb {. sprintf "topwindow_border_thickness = %d"                       topwindow_
 			    THE (id,site) => {
 # printf "site1 == { row => %d, col => %d, high => %d, wide => %d }\n" site.row site.col site.high site.wide;
 					    site_midpoint = g2d::box::midpoint site;
-#					    guiboss_to_topwindow.send_fake_mousebutton_press_event    (evt::button1, site_midpoint );
-#					    guiboss_to_topwindow.send_fake_mousebutton_release_event  (evt::button1, site_midpoint );
+#					    guiboss_to_hostwindow.send_fake_mousebutton_press_event    (evt::button1, site_midpoint );
+#					    guiboss_to_hostwindow.send_fake_mousebutton_release_event  (evt::button1, site_midpoint );
 					    window_rectangle_to_read = g2d::box::make (site_midpoint, { wide => 5, high => 5 });
-					    rw_matrix_rgb8 = guiboss_to_topwindow.get_pixel_rectangle window_rectangle_to_read;
+					    rw_matrix_rgb8 = guiboss_to_hostwindow.get_pixel_rectangle window_rectangle_to_read;
 					    row = 1;
 					    col = 1;
 					    rgb8 = rw_matrix_rgb8[row,col];
@@ -3961,9 +3986,9 @@ nb {. sprintf "topwindow_border_thickness = %d"                       topwindow_
 # # printf "site2 == { row => %d, col => %d, high => %d, wide => %d }\n" site.row site.col site.high site.wide;
 # 					    site_midpoint = g2d::box::midpoint site;
 # if (*log::debugging) log::note  {. "widget-unit-test sending site2 downclick ..."; }; fi;
-# #					    guiboss_to_topwindow.send_fake_mousebutton_press_event    (evt::button1, site_midpoint );
+# #					    guiboss_to_hostwindow.send_fake_mousebutton_press_event    (evt::button1, site_midpoint );
 # if (*log::debugging) log::note  {. "widget-unit-test sending site2   upclick ..."; }; fi;
-# #					    guiboss_to_topwindow.send_fake_mousebutton_release_event  (evt::button1, site_midpoint );
+# #					    guiboss_to_hostwindow.send_fake_mousebutton_release_event  (evt::button1, site_midpoint );
 # 					};
 # 			    NULL	 => ();
 # 			esac;
@@ -3973,9 +3998,9 @@ nb {. sprintf "topwindow_border_thickness = %d"                       topwindow_
 # # printf "site3 == { row => %d, col => %d, high => %d, wide => %d }\n" site.row site.col site.high site.wide;
 # 					    site_midpoint = g2d::box::midpoint site;
 # if (*log::debugging) log::note  {. "widget-unit-test sending site3 downclick ..."; }; fi;
-# #					    guiboss_to_topwindow.send_fake_mousebutton_press_event    (evt::button1, site_midpoint );
+# #					    guiboss_to_hostwindow.send_fake_mousebutton_press_event    (evt::button1, site_midpoint );
 # if (*log::debugging) log::note  {. "widget-unit-test sending site3   upclick ..."; }; fi;
-# #					    guiboss_to_topwindow.send_fake_mousebutton_release_event  (evt::button1, site_midpoint );
+# #					    guiboss_to_hostwindow.send_fake_mousebutton_release_event  (evt::button1, site_midpoint );
 # 					};
 # 			    NULL	 => ();
 # 			esac;
@@ -3985,15 +4010,18 @@ nb {. sprintf "topwindow_border_thickness = %d"                       topwindow_
 # # printf "site4 == { row => %d, col => %d, high => %d, wide => %d }\n" site.row site.col site.high site.wide;
 # 					    site_midpoint = g2d::box::midpoint site;
 # if (*log::debugging) log::note  {. "widget-unit-test sending site4 downclick ..."; }; fi;
-# #					    guiboss_to_topwindow.send_fake_mousebutton_press_event    (evt::button1, site_midpoint );
+# #					    guiboss_to_hostwindow.send_fake_mousebutton_press_event    (evt::button1, site_midpoint );
 # if (*log::debugging) log::note  {. "widget-unit-test sending site4   upclick ..."; }; fi;
-# #					    guiboss_to_topwindow.send_fake_mousebutton_release_event  (evt::button1, site_midpoint );
+# #					    guiboss_to_hostwindow.send_fake_mousebutton_release_event  (evt::button1, site_midpoint );
 # 					};
 # 			    NULL	 => ();
 # 			esac;
 
 
 			sleep_for 2.0;
+#			sleep_for 4.0;
+#			sleep_for 8.0;
+#			sleep_for 20.0;
 		    };
 # if (*log::debugging) log::note  {. "widget-unit-test setting log::debugging back to FALSE."; }; fi;
 # log::debugging := FALSE;
@@ -4064,7 +4092,7 @@ nb {. sprintf "widget-unit-test ending gui run by calling kill_gui..."; };
 		
 
 		();
-	    };
+	    };												# fun exercise_window_stuff 
 
 	fun run ()
 	    =
@@ -4125,5 +4153,5 @@ end;
 ##########################################################################
 
 
-## Original code by Jeff Prothero Copyright (c) 2014-2014,
+## Original code by Jeff Prothero Copyright (c) 2014-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

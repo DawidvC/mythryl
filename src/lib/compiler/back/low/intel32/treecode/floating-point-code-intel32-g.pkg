@@ -84,7 +84,7 @@ stipulate
     package lem =  lowhalf_error_message;				# lowhalf_error_message			is from   src/lib/compiler/back/low/control/lowhalf-error-message.pkg
     package lms =  list_mergesort;					# list_mergesort			is from   src/lib/src/list-mergesort.pkg
     package odg =  oop_digraph;						# oop_digraph				is from   src/lib/graph/oop-digraph.pkg
-    package pp  =  standard_prettyprint_mill;				# standard_prettyprint_mill		is from   src/lib/prettyprint/big/src/standard-prettyprint-mill.pkg
+    package pp  =  standard_prettyprinter;				# standard_prettyprinter		is from   src/lib/prettyprint/big/src/standard-prettyprinter.pkg
     package rkj =  registerkinds_junk;					# registerkinds_junk			is from   src/lib/compiler/back/low/code/registerkinds-junk.pkg
     package rwv =  rw_vector;						# rw_vector				is from   src/lib/std/src/rw-vector.pkg
     package sos =  string_outstream;					# string_outstream			is from   src/lib/compiler/back/low/library/string-out-stream.pkg
@@ -621,7 +621,7 @@ herein
 					buf = ae::make_codebuffer pp [];
 					buf.put_op  op;
 				    };
-			    n = string::length s;
+			    n = string::length_in_bytes s;
 
 			    if (n == 0)    s;
 			    else           string::substring (s, 0, n - 1);			# Drop terminal newline?
@@ -2563,5 +2563,5 @@ end;			# stipulate
 
 
 ## COPYRIGHT (c) 2001 Bell Labs, Lucent Technologies
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

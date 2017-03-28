@@ -66,7 +66,7 @@
 #     src/lib/graph/graphs.lib
 #     src/lib/html/html.lib
 #     src/lib/posix/posix.lib
-#     src/lib/prettyprint/big/prettyprint-mill.lib
+#     src/lib/prettyprint/big/prettyprinter.lib
 #     src/lib/reactive/reactive.lib
 #     src/lib/tk/src/sources.sublib
 #     src/lib/tk/src/tk.sublib
@@ -452,6 +452,7 @@ LIBRARY_EXPORTS
 	api Process_Commandline
 	api Property_List
 	api Queue
+	api Bounded_Queue
 	api Quickstring
 	api Rand
 	api Random
@@ -522,6 +523,7 @@ LIBRARY_EXPORTS
 	pkg process_commandline
 	pkg property_list
 	pkg queue
+	pkg bounded_queue
 	pkg quickstring__premicrothread
 	pkg quickstring_binary_map		/* to be removed XXX BUGGO */
 	pkg quickstring_binary_set		/* to be removed XXX BUGGO */
@@ -543,6 +545,9 @@ LIBRARY_EXPORTS
 	pkg sfprintf
 	pkg disjoint_sets_with_constant_time_union
 	pkg sparse_rw_vector
+	pkg id_key
+	pkg id_map
+	pkg id_set
 	pkg string_key
 	pkg string_map
 	pkg string_set
@@ -754,7 +759,8 @@ LIBRARY_EXPORTS
 	api	Iterate
 	pkg	iterate
 
-
+	api	String_Junk
+	pkg	string_junk
 
 	# Graphtree stuff:
 
@@ -968,6 +974,9 @@ LIBRARY_COMPONENTS
 	$ROOT/src/lib/src/queue.api
 	$ROOT/src/lib/src/queue.pkg
 	$ROOT/src/lib/src/queue-via-paired-lists.pkg
+	$ROOT/src/lib/src/bounded-queue.api
+	$ROOT/src/lib/src/bounded-queue.pkg
+	$ROOT/src/lib/src/bounded-queue-via-paired-lists.pkg
 	$ROOT/src/lib/src/printf-field.pkg
 	$ROOT/src/lib/src/sfprintf.api
 	$ROOT/src/lib/src/sfprintf.pkg
@@ -1098,6 +1107,9 @@ LIBRARY_COMPONENTS
 	$ROOT/src/lib/src/finalize-g.pkg
 	$ROOT/src/lib/src/dir.api
 	$ROOT/src/lib/src/dir.pkg
+	$ROOT/src/lib/src/id-key.pkg
+	$ROOT/src/lib/src/id-map.pkg
+	$ROOT/src/lib/src/id-set.pkg
 	$ROOT/src/lib/src/string-key.pkg
 	$ROOT/src/lib/src/string-map.pkg
 	$ROOT/src/lib/src/string-set.pkg
@@ -1211,6 +1223,7 @@ LIBRARY_COMPONENTS
 	$ROOT/src/lib/std/src/io/winix-pure-text-file-for-os.api
 	$ROOT/src/lib/std/src/io/winix-mailslot-io-g.pkg
 
+
 	$ROOT/src/lib/std/winix.pkg
 	$ROOT/src/lib/std/src/posix/winix-process.pkg
 
@@ -1260,6 +1273,9 @@ LIBRARY_COMPONENTS
 
 	$ROOT/src/lib/std/src/char-set.api
 	$ROOT/src/lib/std/src/char-set.pkg
+
+	$ROOT/src/lib/std/src/string-junk.api
+	$ROOT/src/lib/std/src/string-junk.pkg
 
 	$ROOT/src/lib/src/iterate.api
 	$ROOT/src/lib/src/iterate.pkg
@@ -1343,5 +1359,5 @@ LIBRARY_COMPONENTS
 
 
 # Copyright (c) 2004 by The Fellowship of SML/NJ
-# Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+# Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 # released per terms of SMLNJ-COPYRIGHT.

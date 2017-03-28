@@ -192,7 +192,7 @@ herein
 		contents: X
 	      };
 
-											# NB: Envelope_Route is defined in src/lib/x-kit/xclient/src/window/xsocket-to-topwindow-router-old.pkg
+											# NB: Envelope_Route is defined in src/lib/x-kit/xclient/src/window/xsocket-to-hostwindow-router-old.pkg
 											#     Probably both it and Envelope() should be defined in an envelope.pkg.   XXX BUGGO FIXME.
 
 	Kidplug
@@ -459,5 +459,5 @@ end;		# stipulate
 
 
 ## COPYRIGHT (c) 1990, 1991 by John H. Reppy.  See SMLNJ-COPYRIGHT file for details.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

@@ -1,9 +1,7 @@
 ## list-sort.api
 
 # Compiled by:
-#     src/lib/std/standard.lib
-
-
+#     src/lib/std/src/standard-core.sublib
 
 # The generic list sorting interface.  Taken from the SML/NJ compiler.
 
@@ -45,5 +43,5 @@ api List_Sort {
 
 
 ## COPYRIGHT (c) 1989 by AT&T Bell Laboratories
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

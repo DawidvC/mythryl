@@ -1,11 +1,22 @@
 ## digraphxy.api
 #
 # API for simple, general-purpose fully-persistent graphs.
+#
+# Each Node and Tag is issued a unique Int id when created.
+# Two Nodes are equal iff they have the same 'id'.
+# Two Tags  are equal iff they have the same 'id'.
+# Two Edges are equal iff their Nodes and Tags are equal.
+#
+# Digraphxy differs from Digraph mainly in using type variables
+# for the values associated with Node and (edge-)Tag values,
+# at the cost of not supporting subgraphs. (I couldn't make
+# subgraphs work in the presence of typevars).
 
 # Compiled by:
 #     src/lib/std/standard.lib
 
 # Compare to:
+#     src/lib/src/digraph.api
 #     src/lib/src/tuplebase.api
 #     src/lib/graph/oop-digraph.api
 
@@ -18,6 +29,22 @@ api Digraphxy {
     Node(N);
     Tag(T);
 
+    Node_Datum(N) = NNONE
+		  | NINT    Int
+		  | NID     Id
+		  | NFLOAT  Float
+		  | NSTRING String
+		  | NOTHER  N
+		  ;
+
+    Tag_Datum(T) = TNONE
+		 | TINT    Int
+		 | TID     Id
+		 | TFLOAT  Float
+		 | TSTRING String
+		 | TOTHER  T
+		 ;
+
     Tagless_Edge(N) = (Node(N),         Node(N));
     Edge(N,T) 	    = (Node(N), Tag(T), Node(N));
 
@@ -25,19 +52,29 @@ api Digraphxy {
     package es: Setxy;									# Sets of Edges.		Set is from   src/lib/src/setxy.api
 
     make_node:		Void	-> Node(N);						# Create an Node(N).
+    make_int_node:	Int	-> Node(N);						# Create an Node(N) with an associated Int    value, retrievable via node_int.
+    make_id_node:	Id	-> Node(N);						# Create an Node(N) with an associated Id     value, retrievable via node_id.
     make_string_node:	String	-> Node(N);						# Create an Node(N) with an associated String value, retrievable via node_string.
     make_float_node:	Float	-> Node(N);						# Create an Node(N) with an associated Float  value, retrievable via node_float.
     make_other_node:	N	-> Node(N);						# Create an Node(N) with an associated N      value, retrievable via node_other.
 
+    node_datum:		Node(N)   -> Node_Datum(N);					# Return datum  associated with given Node(N).
+    node_int:		Node(N)   -> Null_Or(Int);					# Return Int    associated with given Node(N), if any, else NULL.
+    node_id:		Node(N)   -> Null_Or(Id);					# Return Id     associated with given Node(N), if any, else NULL.
     node_string:	Node(N)   -> Null_Or(String);					# Return String associated with given Node(N), if any, else NULL.
     node_float:		Node(N)   -> Null_Or(Float);					# Return Float  associated with given Node(N), if any, else NULL.
     node_other:		Node(N)   -> Null_Or(N);					# Return Other  associated with given Node(N), if any, else NULL.
 
     make_tag:		Void	-> Tag(T);						# Create an Tag(T).
+    make_int_tag:	Int	-> Tag(T);						# Create an Tag(T) with an associated Int    value, retrievable via tag_string.
+    make_id_tag:	Id	-> Tag(T);						# Create an Tag(T) with an associated Id     value, retrievable via tag_string.
     make_string_tag:	String	-> Tag(T);						# Create an Tag(T) with an associated String value, retrievable via tag_string.
     make_float_tag:	Float	-> Tag(T);						# Create an Tag(T) with an associated Float  value, retrievable via tag_float.
     make_other_tag:	T	-> Tag(T);						# Create an Tag(T) with an associated T      value, retrievable via tag_other.
 
+    tag_datum:		Tag(T)   -> Tag_Datum(T);					# Return datum  associated with given Tag(T).
+    tag_int:		Tag(T)   -> Null_Or(Int);					# Return Int    associated with given Tag(T), if any, else NULL.
+    tag_id:		Tag(T)   -> Null_Or(Id);					# Return Id     associated with given Tag(T), if any, else NULL.
     tag_string:		Tag(T)   -> Null_Or(String);					# Return String associated with given Tag(T), if any, else NULL.
     tag_float:		Tag(T)   -> Null_Or(Float);					# Return Float  associated with given Tag(T), if any, else NULL.
     tag_other:		Tag(T)   -> Null_Or(T);						# Return Other  associated with given Tag(T), if any, else NULL.
@@ -45,10 +82,10 @@ api Digraphxy {
     empty_graph:	Graph(N,T);
 
     put_tagless_edge:	(Graph(N,T), Tagless_Edge(N)) -> Graph(N,T);			# Store  a Tagless_Edge  into the Graph, returning the updated Graph. The input Graph is unchanged.
-    put_edge:		(Graph(N,T), Edge(N,T)        ) -> Graph(N,T);			# Store  a Edge into the Graph, returning the updated Graph. The input Graph is unchanged.
+    put_edge:		(Graph(N,T), Edge(N,T)      ) -> Graph(N,T);			# Store  a         Edge  into the Graph, returning the updated Graph. The input Graph is unchanged.
 
-    drop_tagless_edge:	(Graph(N,T), Tagless_Edge(N) ) -> Graph(N,T);			# Remove a Tagless_Edge  from the Graph, returning the updated Graph. The input Graph is unchanged.
-    drop_edge:		(Graph(N,T), Edge(N,T)) -> Graph(N,T);				# Remove a Edge from the Graph, returning the updated Graph. The input Graph is unchanged.
+    drop_tagless_edge:	(Graph(N,T), Tagless_Edge(N)) -> Graph(N,T);			# Remove a Tagless_Edge  from the Graph, returning the updated Graph. The input Graph is unchanged.
+    drop_edge:		(Graph(N,T), Edge(N,T))       -> Graph(N,T);			# Remove an        Edge  from the Graph, returning the updated Graph. The input Graph is unchanged.
 
 
     get_tagless_edges:	 Graph(N,T)        ->         ts::Set(N);			# Get all Tagless_Edges  in Graph.  User can iterate via ts::apply etc or do set operations via ts::union etc -- see src/lib/src/set.api
@@ -56,19 +93,19 @@ api Digraphxy {
     get_tagless_edges1:	(Graph(N,T), Node(N)) -> Null_Or(ts::Set(N));			# Get all Tagless_Edges  in Graph with given Node(N) in first  slot.
     get_tagless_edges2:	(Graph(N,T), Node(N)) -> Null_Or(ts::Set(N));			# Get all Tagless_Edges  in Graph with given Node(N) in second slot.
     #
-    has_tagless_edge:	(Graph(N,T), Tagless_Edge(N)) -> Bool;				# See if given Tagless_Edge is in Graph.
+    has_tagless_edge:	(Graph(N,T), Tagless_Edge(N)  ) -> Bool;			# See if given Tagless_Edge is in Graph.
+    has_edge:		(Graph(N,T),         Edge(N,T)) -> Bool;			# See if given Edge is in Graph.
 
     get_edges:		 Graph(N,T)        ->         es::Set(N,T) ;			# Get all Edges  in Graph.    User can iterate via es::apply etc or do set operations via es::union etc -- see src/lib/src/set.api.
     #
     get_edges1:		(Graph(N,T), Node(N)) -> Null_Or(es::Set(N,T));			# Get all Edges in Graph with given Node(N) in first  slot.
-    get_edges2:		(Graph(N,T), Tag(T) ) -> Null_Or(es::Set(N,T));			# Get all Edges in Graph with given Node(N) in second slot.
+    get_edges2:		(Graph(N,T), Tag(T) ) -> Null_Or(es::Set(N,T));			# Get all Edges in Graph with given  Tag(T) in second slot.
     get_edges3:		(Graph(N,T), Node(N)) -> Null_Or(es::Set(N,T));			# Get all Edges in Graph with given Node(N) in third  slot.
     #
-    get_edges12:	(Graph(N,T), Node(N), Tag(T) ) -> Null_Or(es::Set(N,T));	# Get all Edges in Graph with given Node(N)s in first  and second slots.
-    get_edges13:	(Graph(N,T), Node(N), Node(N)) -> Null_Or(es::Set(N,T));	# Get all Edges in Graph with given Node(N)s in first  and third  slots.
-    get_edges23:	(Graph(N,T), Tag(T),  Node(N)) -> Null_Or(es::Set(N,T));	# Get all Edges in Graph with given Node(N)s in second and third  slots.
+    get_edges12:	(Graph(N,T), Node(N), Tag(T) ) -> Null_Or(es::Set(N,T));	# Get all Edges in Graph with given Node(N),Tag(T)  in first  and second slots.
+    get_edges13:	(Graph(N,T), Node(N), Node(N)) -> Null_Or(es::Set(N,T));	# Get all Edges in Graph with given Node(N),Node(N) in first  and third  slots.
+    get_edges23:	(Graph(N,T), Tag(T),  Node(N)) -> Null_Or(es::Set(N,T));	# Get all Edges in Graph with given  Tag(T),Node(N) in second and third  slots.
     #
-    has_edge:		(Graph(N,T), Edge(N,T)) -> Bool;				# See if given Edge is in Graph.
 
     nodes_apply:	 Graph(N,T) -> (Node(N) -> Void) -> Void;			# Apply given fn once per Node(N) for all Node(N)s in Graph.  This iterates over all Edges in the Graph.
     tags_apply:		 Graph(N,T) -> (Tag(T)  -> Void) -> Void;			# Apply given fn once per Tag(T)  for all Tag(T)s  in Graph.  This iterates over all Edges in the Graph.
@@ -76,5 +113,5 @@ api Digraphxy {
 };											# api Graph
 
 
-## Original code by Jeff Prothero Copyright (c) 2014-2014,
+## Original code by Jeff Prothero Copyright (c) 2014-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

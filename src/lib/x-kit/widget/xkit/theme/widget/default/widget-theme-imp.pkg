@@ -51,12 +51,8 @@ stipulate
     #	
     package psi =  widgetspace_imp;						# widgetspace_imp			is from   src/lib/x-kit/widget/space/widget/widgetspace-imp.pkg
     #	
-#   package w2p =  widget_to_widgetspace;					# widget_to_widgetspace			is from   src/lib/x-kit/widget/space/widget/widget-to-widgetspace.pkg	
-    #
     package gd  =  gui_displaylist;						# gui_displaylist			is from   src/lib/x-kit/widget/theme/gui-displaylist.pkg
     package gt  =  guiboss_types;						# guiboss_types				is from   src/lib/x-kit/widget/gui/guiboss-types.pkg
-    #
-#   package g2g =  gadget_to_guiboss;						# gadget_to_guiboss			is from   src/lib/x-kit/widget/gui/gadget-to-guiboss.pkg
 
     package c64 =  rgb;		# Colors with Float64 red-green-blue values.	# rgb					is from   src/lib/x-kit/xclient/src/color/rgb.pkg
     package c8  =  rgb8;	# Colors with Unt8    red-green-blue values.	# rgb8					is from   src/lib/x-kit/xclient/src/color/rgb8.pkg
@@ -102,7 +98,7 @@ herein
 	Widget_Theme_Egg =  Void -> (Exports,   (Imports, Run_Gun, End_Gun) -> Void);
 
 	Runstate =  {													# These values will be statically globally visible throughout the code body for the imp.
-		      me:		Theme_State,									# State which is preserved across imp shutdown/restart cycles.
+		      me:		Theme_State,									# 
 		      imports:		Imports,									# Imps to which we send requests.
 		      to:		Replyqueue,									# The name makes   foo::pass_something(imp) to {. ... }   syntax read well.
 		      end_gun':		End_Gun										# We shut down the microthread when this fires.
@@ -110,15 +106,15 @@ herein
 
 	Theme_Q    = Mailqueue( Runstate -> Void );
 
-	fun get__guiboss_to_topwindow (theme: Widget_Theme)
+	fun get__guiboss_to_hostwindow (theme: Widget_Theme)
 	    =
-	    case *theme.guiboss_to_topwindow
+	    case *theme.guiboss_to_hostwindow
 		#
 		THE g => g;
 		#
-		NULL =>	{   msg = "font functions called before guiboss_to_topwindow available!";
+		NULL =>	{   msg = "font functions called before guiboss_to_hostwindow available!";
 			    log::fatal msg;
-			    raise exception FAIL msg;
+			    raise exception DIE msg;
 			};
 	    esac;
 
@@ -127,7 +123,7 @@ herein
 		  #
 		  runstate as
 		  {													# These values will be statically globally visible throughout the code body for the imp.
-		    me:			Theme_State,									# State which is preserved across imp shutdown/restart cycles.
+		    me:			Theme_State,									# 
 		    imports:		Imports,									# Imps to which we send requests.
 		    to:			Replyqueue,									# The name makes   foo::pass_something(imp) to {. ... }   syntax read well.
 		    end_gun':		End_Gun										# We shut down the microthread when this fires.
@@ -204,7 +200,7 @@ herein
 		polygon3d				= REF (\\ _ = \\ _ = []: gd::Gui_Displaylist);
 
 
-		guiboss_to_topwindow			= REF (NULL: Null_Or(gtg::Guiboss_To_Topwindow));
+		guiboss_to_hostwindow			= REF (NULL: Null_Or(gtg::Guiboss_To_Hostwindow));
 		#
 
 		stipulate
@@ -308,7 +304,7 @@ herein
 			    #
 			    color_by_depth	=>  REF color_by_depth,			# Real fn.
 
-			    default_font_size	=> REF 8,
+			    default_font_size	=> REF 13,
 
 			    # I found these font triples in use in Reppy+Gansner's 1990-era
 			    # CML+eXene codebase.  These days there may be better choices.
@@ -348,7 +344,7 @@ herein
 			    #
 			    #     -*-helvetica-medium-r-*-*-*-120-75-75-c-*-iso10646-1	# Unicode font.
 			    #
-			    # Might want to focus on scalable typewriter utf-8 fonts:
+			    # Currently focus is on scalable typewriter utf-8 fonts:
 			    #
 			    #     -misc-fixed-medium-r-normal--0-0-75-75-c-0-iso10646-1
 			    #     -misc-fixed-medium-o-normal--0-0-75-75-c-0-iso10646-1
@@ -365,22 +361,16 @@ herein
 			    #     -misc-fixed-medium-r-normal-ja-0-0-100-100-c-0-iso10646-1
 			    #     -misc-fixed-medium-r-normal-ko-0-0-100-100-c-0-iso10646-1
 			    #
-			    # Unfortunately, at the moment these seem to crash us in slider, 
-			    # text_entry and text_editor widgets (but not button widgets).
-			    # I'm guess the compute-pixel-size-of-string code breaks on
-			    # scalable fonts somehow:
-			    #                                        -- 2015-01-04 CrT
-			    #
-#			    roman_font_spex	=> REF "-misc-fixed-medium-r-normal-*-*-%d-75-75-c-*-iso10646-1",
-#			    italic_font_spex	=> REF "-misc-fixed-medium-o-normal-*-*-%d-75-75-c-*-iso10646-1",
-#			    bold_font_spex	=> REF   "-misc-fixed-bold-r-normal-*-*-%d-75-75-c-*-iso10646-1",
+			    roman_font_spex	=> REF "-misc-fixed-medium-r-normal-*-*-%d-75-75-c-*-iso10646-1",
+			    italic_font_spex	=> REF "-misc-fixed-medium-o-normal-*-*-%d-75-75-c-*-iso10646-1",
+			    bold_font_spex	=> REF   "-misc-fixed-bold-r-normal-*-*-%d-75-75-c-*-iso10646-1",
 
 
 			    # I've also experimented with these triples:
 
-			    roman_font_spex	=> REF "lucidasans-%d",
-			    italic_font_spex	=> REF "lucidasans-italic-%d",
-			    bold_font_spex	=> REF "lucidasans-bold-%d",
+#			    roman_font_spex	=> REF "lucidasans-%d",
+#			    italic_font_spex	=> REF "lucidasans-italic-%d",
+#			    bold_font_spex	=> REF "lucidasans-bold-%d",
 
 #			    roman_font_spex	=> REF "lucidasanstypewriter-%d",
 #			    italic_font_spex	=> REF "lucidasanstypewriter-italic-%d",
@@ -399,7 +389,7 @@ herein
 			    get_italic_font,
 			    get_bold_font,
 
-			    guiboss_to_topwindow
+			    guiboss_to_hostwindow
 
 #			    dummy_make_button_displaylist
 			  };
@@ -1020,7 +1010,7 @@ herein
 		stipulate
 		    fun fontname (spec: String, pointsize: Int)
 			=
-			if (string::length  spec < 10  or
+			if (string::length_in_bytes  spec < 10  or
 			    string::extract(spec,0,THE 10) != "lucidasans"
 			   )
 			     sfp::sprintf' spec [ sfp::INT (pointsize * 10) ];							# The X font naming system works in tenths of a point, not in points, hence the "*10",
@@ -1036,7 +1026,7 @@ herein
 		    =	
 		    {   fontname =  *theme.get_roman_fontname  pointsize;
 			#
-			g = get__guiboss_to_topwindow  theme;
+			g = get__guiboss_to_hostwindow  theme;
 
 			g.get_font [ fontname ];
 		    };
@@ -1045,7 +1035,7 @@ herein
 		    =	
 		    {   fontname =  *theme.get_italic_fontname  pointsize;
 			#
-			g = get__guiboss_to_topwindow theme;
+			g = get__guiboss_to_hostwindow theme;
 
 			g.get_font [ fontname ];
 		    };
@@ -1054,7 +1044,7 @@ herein
 		    =	
 		    {   fontname =  *theme.get_bold_fontname  pointsize;
 			#
-			g = get__guiboss_to_topwindow theme;
+			g = get__guiboss_to_hostwindow theme;
 
 			g.get_font [ fontname ];
 		    };
@@ -1205,5 +1195,5 @@ end;
 ##########################################################################
 
 
-## Original code by Jeff Prothero Copyright (c) 2014-2014,
+## Original code by Jeff Prothero Copyright (c) 2014-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

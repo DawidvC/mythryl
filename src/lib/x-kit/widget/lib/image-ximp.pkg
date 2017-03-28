@@ -71,7 +71,7 @@ herein
 	exception NOT_FOUND;
 
 	Runstate =  {													# These values will be statically globally visible throughout the code body for the imp.
-		      me:				Image_Ximp_State,						# State which is preserved across imp shutdown/restart cycles.
+		      me:				Image_Ximp_State,						# 
 		      imports:				Imports,							# Ximps to which we send requests.
 		      to:				Replyqueue,							# The name makes   foo::pass_something(imp) to {. ... }   syntax read well.
 		      end_gun':				End_Gun								# We shut down the microthread when this fires.
@@ -83,7 +83,7 @@ herein
 		  #
 		  runstate as
 		  {													# These values will be statically globally visible throughout the code body for the imp.
-		    me:					Image_Ximp_State,						# State which is preserved across imp shutdown/restart cycles.
+		    me:					Image_Ximp_State,						# 
 		    imports:				Imports,							# Ximps to which we send requests.
 		    to:					Replyqueue,							# The name makes   foo::pass_something(imp) to {. ... }   syntax read well.
 		    end_gun':				End_Gun								# We shut down the microthread when this fires.
@@ -150,7 +150,7 @@ herein
 				#
 				THE _ =>    {   msg = "Attempt to register already-present image -- image-ximp.pkg";
 						log::fatal msg;
-						raise exception FAIL msg;
+						raise exception DIE msg;
 					    };
 			    esac
 		    );
@@ -169,7 +169,7 @@ herein
 				#
 				NULL  =>    {   msg = "Failed to find required pixmap! -- GET_IMAGE in image-ximp.pkg";
 						log::fatal msg;
-						raise exception FAIL msg;
+						raise exception DIE msg;
 					    };
 			    esac
 			);
@@ -250,5 +250,5 @@ end;
 
 
 ## COPYRIGHT (c) 1994 by AT&T Bell Laboratories.  See SMLNJ-COPYRIGHT file for details
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

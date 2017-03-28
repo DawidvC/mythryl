@@ -15,7 +15,7 @@ stipulate
 herein
 
     package   beta2_spline
-    : (weak)  Beta2_Spline			# Betas2_Spline	is from   src/lib/x-kit/draw/beta2-spline.api
+    : (weak)  Beta2_Spline			# Beta2_Spline	is from   src/lib/x-kit/draw/beta2-spline.api
     {
 	include package   geometry2d;		# geometry2d	is from   src/lib/std/2d/geometry2d.pkg
 
@@ -203,7 +203,7 @@ herein
 		    my (pn, tl)
 			=
 			case (reverse (p0 ! p0 ! arg))   (pn ! tl) =>  (pn, tl);
-			     /* */			     _         =>  raise exception FAIL "Bug: Unsupported case in b_spline";	
+			     /* */			     _         =>  raise exception DIE "Bug: Unsupported case in b_spline";	
 			esac;
 		end;
 
@@ -248,5 +248,5 @@ end;
 
 
 ## COPYRIGHT (c) 1991 by AT&T Bell Laboratories  See SMLNJ-COPYRIGHT file for details.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

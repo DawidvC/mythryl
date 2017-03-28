@@ -87,7 +87,7 @@ stipulate
     package tmp =  highcode_codetemp;		# highcode_codetemp	is from   src/lib/compiler/back/top/highcode/highcode-codetemp.pkg
     package it  =  import_tree;			# import_tree		is from   src/lib/compiler/execution/main/import-tree.pkg
     package lcf =  lambdacode_form;		# lambdacode_form	is from   src/lib/compiler/back/top/lambdacode/lambdacode-form.pkg
-    package pcd =  per_compile_data;		# per_compile_data	is from   src/lib/compiler/front/typer-stuff/main/per-compile-data.pkg
+    package pcs =  per_compile_stuff;		# per_compile_stuff	is from   src/lib/compiler/front/typer-stuff/main/per-compile-stuff.pkg
     package ph  =  picklehash;			# picklehash		is from   src/lib/compiler/front/basics/map/picklehash.pkg
     package syx =  symbolmapstack;		# symbolmapstack	is from   src/lib/compiler/front/typer-stuff/symbolmapstack/symbolmapstack.pkg
     package vh  =  varhome;			# varhome		is from   src/lib/compiler/front/typer-stuff/basics/varhome.pkg
@@ -104,7 +104,7 @@ herein
 	      exported_highcode_variables:  List( tmp::Codetemp ),
 	      symbolmapstack:		    syx::Symbolmapstack,
 	      ansi_c_prototype_convention:  String,							#  "unix_convention" or "windows_convention" 
-	      per_compile_data:		    pcd::Per_Compile_Data( ds::Declaration )
+	      per_compile_stuff:		    pcs::Per_Compile_Stuff( ds::Declaration )
 	    }
 	    ->
 	    { lambdacode_expression:	    lcf::Lambdacode_Expression,
@@ -145,14 +145,14 @@ stipulate
     package mc  =  translate_deep_syntax_pattern_to_lambdacode;	# translate_deep_syntax_pattern_to_lambdacode	is from   src/lib/compiler/back/top/translate/translate-deep-syntax-pattern-to-lambdacode.pkg
     package mld =  module_level_declarations;			# module_level_declarations			is from   src/lib/compiler/front/typer-stuff/modules/module-level-declarations.pkg
     package mtt =  more_type_types;				# more_type_types				is from   src/lib/compiler/front/typer/types/more-type-types.pkg
-    package pcd =  per_compile_data;				# per_compile_data				is from   src/lib/compiler/front/typer-stuff/main/per-compile-data.pkg
+    package pcs =  per_compile_stuff;				# per_compile_stuff				is from   src/lib/compiler/front/typer-stuff/main/per-compile-stuff.pkg
     package pds =  prettyprint_deep_syntax;			# prettyprint_deep_syntax			is from   src/lib/compiler/front/typer/print/prettyprint-deep-syntax.pkg
     package peq =  polyequal;					# polyequal					is from   src/lib/compiler/back/top/translate/polyequal.pkg
     package ph  =  picklehash;					# picklehash					is from   src/lib/compiler/front/basics/map/picklehash.pkg
     package phm =  picklehash_map;				# picklehash_map				is from   src/lib/compiler/front/basics/map/picklehash-map.pkg
     package pht =  prettyprint_highcode_types;			# prettyprint_highcode_types			is from   src/lib/compiler/back/top/highcode/prettyprint-highcode-types.pkg
     package plx =  prettyprint_lambdacode_expression;		# prettyprint_lambdacode_expression		is from   src/lib/compiler/back/top/lambdacode/prettyprint-lambdacode-expression.pkg
-    package pp  =  standard_prettyprint_mill;			# standard_prettyprint_mill			is from   src/lib/prettyprint/big/src/standard-prettyprint-mill.pkg
+    package pp  =  standard_prettyprinter;			# standard_prettyprinter			is from   src/lib/prettyprint/big/src/standard-prettyprinter.pkg
     package ppt =  prettyprint_type;				# prettyprint_type				is from   src/lib/compiler/front/typer/print/prettyprint-type.pkg
     package sxe =  symbolmapstack_entry;			# symbolmapstack_entry				is from   src/lib/compiler/front/typer-stuff/symbolmapstack/symbolmapstack-entry.pkg
     package sy  =  symbol;					# symbol					is from   src/lib/compiler/front/basics/map/symbol.pkg
@@ -385,13 +385,13 @@ herein
 	      symbolmapstack:			 symbolmapstack::Symbolmapstack,
 	      ansi_c_prototype_convention:       String,				#  "unix_convention" or "windows_convention"  XXX BUGGO FIXME This should be a sumtype.
 	      #	
-	      per_compile_data
+	      per_compile_stuff
 		  as
 		    { error_match,
 		      error_fn,
 		      prettyprinter_or_null,
 		      ...
-		    }:				 per_compile_data::Per_Compile_Data( ds::Declaration )
+		    }:				 per_compile_stuff::Per_Compile_Stuff( ds::Declaration )
             }
 	    :
             { lambdacode_expression:		 lcf::Lambdacode_Expression,
@@ -408,7 +408,7 @@ herein
 
                 issue_highcode_codetemp
                     =
-                    per_compile_data.issue_highcode_codetemp;
+                    per_compile_stuff.issue_highcode_codetemp;
 		#
 		fun make_var ()
                     =
@@ -512,7 +512,7 @@ herein
 				  (
 				    hbo::MARK_EXCEPTION_WITH_STRING,								# Op
 				    #
-				    hcf::make_lambdacode_arrow_uniqtypoid								# Result type
+				    hcf::make_lambdacode_arrow_uniqtypoid							# Result type
 				      ( hcf::make_tuple_uniqtypoid [ hcf::exception_uniqtypoid, hcf::string_uniqtypoid ],
 					hcf::exception_uniqtypoid
 				      ),
@@ -523,9 +523,9 @@ herein
 		    fun with_region loc f x
                         =
 			{   r =   *source_code_region;
-
+			    #
                             {   source_code_region := loc;
-
+				#
                                 f x
                                 then
                                     source_code_region := r;
@@ -539,7 +539,7 @@ herein
 		    fun make_raise (x, lt)
                         = 
 			{   e =    if *global_controls::track_exn   lcf::APPLY (markexn, lcf::RECORD [ x, lcf::STRING (error_match *source_code_region) ] );
-				   else                            x;
+				   else                             x;
                                    fi;
 
                             lcf::RAISE (e, lt);
@@ -555,7 +555,7 @@ herein
                             complain err::WARNING "calling poly_equal"  err::null_error_body;
 			fi;
 
-		end;			#  markexn-local 
+		end;														#  stipulate
 
 
 
@@ -577,7 +577,7 @@ herein
 		fun hashkey l
                     =
                     fold_backward
-                        (\\ (x, y) =  ((x * 10 + y) % 1019))							# Are we being bloody stupid yet?  XXX SUCKO FIXME.
+                        (\\ (x, y) =  ((x * 10 + y) % 1019))									# Are we being bloody stupid yet?  XXX SUCKO FIXME.
                         0
                         l;
 		#
@@ -1602,7 +1602,7 @@ herein
 																	    close     =>  \\ () = ()
 																	  };
 
-																	pp =   pp::make_prettyprint_mill  output_stream  [];
+																	pp =   pp::make_prettyprinter  output_stream  [];
 
 																	fun prettyprint_uniqtype  uniqtype
 																	    =
@@ -1621,8 +1621,8 @@ herein
 																	pp.newline();
 																	pp.lit (sprintf "Prettyprinting %d types complete. -- translate_baseop/GET_VECSLOT_NUMERIC_CONTENTS [translate-deep-syntax-to-lambdacode.pkg]\n" len);
 
-																	pp::flush_prettyprint_mill  pp;
-																	pp::close_prettyprint_mill  pp;
+																	pp::flush_prettyprinter  pp;
+																	pp::close_prettyprinter  pp;
 																    fi;
 																};
 				    my (tc1, t1, t2)
@@ -1989,7 +1989,7 @@ herein
 																	close     =>  \\ () = ()	
 																      };
 
-																    pp =   pp::make_prettyprint_mill  output_stream  [];
+																    pp =   pp::make_prettyprinter  output_stream  [];
 
 																    fun prettyprint_typoid typoid
 																	=
@@ -2011,8 +2011,8 @@ herein
 																    pp.newline();
 																    pp.lit (sprintf "prettyprinting %d typoids done -- translate_variable_in_expression/PLAIN_VARIABLE/do_inline_baseop/   [translate-deep-syntax-to-lambdacode.pkg]" len);
 																    pp.newline();
-																    pp::flush_prettyprint_mill  pp;
-																    pp::close_prettyprint_mill  pp;
+																    pp::flush_prettyprinter  pp;
+																    pp::close_prettyprinter  pp;
 																fi;
 							    translate_baseop
 							      (
@@ -2059,7 +2059,7 @@ herein
                             (
                               varhome,
                               info,
-                              \\ () = deepsyntax_package_to_uniqtypoid (s, d, per_compile_data),
+                              \\ () = deepsyntax_package_to_uniqtypoid (s, d, per_compile_stuff),
                               NULL
                             );
 
@@ -2073,7 +2073,7 @@ herein
                             (
                               varhome,
                               info,
-                              \\ () = deepsyntax_generic_package_to_uniqtypoid (f, d, per_compile_data),
+                              \\ () = deepsyntax_generic_package_to_uniqtypoid (f, d, per_compile_stuff),
                               NULL
                             );
 
@@ -2636,7 +2636,7 @@ herein
 
 					#  Naming of all v's components 
 
-					    lcf::TYPEFUN (knds, lcf::FN (v, deepsyntax_package_to_uniqtypoid (parameter, new_depth, per_compile_data), header body));
+					    lcf::TYPEFUN (knds, lcf::FN (v, deepsyntax_package_to_uniqtypoid (parameter, new_depth, per_compile_stuff), header body));
 					};
 
 				    _ => bug "translate_generic_expression: unexpected varhome";
@@ -2744,7 +2744,7 @@ herein
 						=>
 						if (varhome_is_external varhome)
 						    #
-						    translate_varhome_with_type (varhome, deepsyntax_package_to_uniqtypoid (s, debruijn_depth, per_compile_data), NULL);
+						    translate_varhome_with_type (varhome, deepsyntax_package_to_uniqtypoid (s, debruijn_depth, per_compile_stuff), NULL);
 						    ();
 						fi;
 					    #
@@ -2881,7 +2881,7 @@ herein
 
 				translate_deep_syntax_expression_to_lambdacode'' (ds::CHAR_CONSTANT_IN_EXPRESSION s)
 				    =>
-				    lcf::INT (char::to_int (string::get (s, 0)));
+				    lcf::INT (string::get_byte (s, 0));
 
 				     # NOTE: the above won't work for cross compiling to 
 				     #  multi-byte characters        XXX BUGGO FIXME
@@ -3323,7 +3323,7 @@ herein
 		    printf   "============= translate_deep_syntax_to_lambdacode/BOTTOM ==========   [translate-deep-syntax-to-lambdacode.pkg]\n";
 		fi;
 
-	        per_compile_data ->   { prettyprinter_or_null, ... };
+	        per_compile_stuff ->   { prettyprinter_or_null, compiler_verbosity, ... };
 
 		# Prettyprint to logfile if so requested:
 		#
@@ -3333,7 +3333,9 @@ herein
 
 		    THE pp
 			=>
-			{   if (pcd::saw_errors  per_compile_data)
+			if compiler_verbosity.pprint_lambdacode_tree
+			    #
+			    if (pcs::saw_errors  per_compile_stuff)
 				#
 				pp.newline();
 				pp.newline();
@@ -3353,7 +3355,7 @@ herein
 				pp.newline();
 			    fi;
 			    pp.flush();
-			};
+			fi;
 		esac;
 
 
@@ -3389,5 +3391,5 @@ end;										#  top-level with
 
 
 ## COPYRIGHT (c) 1996 Bell Laboratories 
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

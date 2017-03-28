@@ -33,7 +33,7 @@ herein
 
 	fun is_dot_initial  name
 	    =
-	    string::get (name, 0)   ==   '.';
+	    string::get_byte_as_char (name, 0)   ==   '.';
 
 	fun canonicalize  directory_name
 	    =
@@ -55,10 +55,10 @@ herein
 		#
 		directory_name
 		    =
-		    if   (string::length directory_name == 0)
+		    if   (string::length_in_bytes directory_name == 0)
 			 winix__premicrothread::file::current_directory ();
 		    else
-			if (string::get   (directory_name, 0) != '/')
+			if (string::get_byte_as_char   (directory_name, 0) != '/')
 			    #
 			    cwd = winix__premicrothread::file::current_directory ();
 
@@ -171,12 +171,12 @@ herein
 	    =
 	    {   fun ignore_dot_initial_entries { path, directory_name, name, results }
 		    =
-		    if  (string::length name > 0
-		    and  string::get   (name, 0) == '.')
-
-			 results;
+		    if  (string::length_in_bytes name > 0
+		    and  string::get_byte_as_char (name, 0) == '.')
+			#
+			results;
 		    else
-			 path ! results;
+			path ! results;
 		    fi ;
 
 		my (_, results)
@@ -364,5 +364,5 @@ end;
 
 ## Author: Matthias Blume (blume@cs.princeton.edu)
 ## Copyright (c) 1999, 2000 by Lucent Bell Laboratories
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

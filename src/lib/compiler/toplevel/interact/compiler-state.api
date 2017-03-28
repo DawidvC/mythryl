@@ -19,7 +19,7 @@
 #
 # compiler_mapstack_set records are defined in
 #
-#     src/lib/compiler/toplevel/compiler-state/compiler-mapstack-set.sml
+#     src/lib/compiler/toplevel/compiler-state/compiler-mapstack-set.pkg
 #
 # and are composed of three principal parts:
 #
@@ -29,13 +29,19 @@
 
 
 stipulate
-    package cms =  compiler_mapstack_set;				# compiler_mapstack_set			is from   src/lib/compiler/toplevel/compiler-state/compiler-mapstack-set.pkg
-    package pl  =  property_list;					# property_list				is from   src/lib/src/property-list.pkg
-    package sy  =  symbol;						# symbol				is from   src/lib/compiler/front/basics/map/symbol.pkg
+    package cms =  compiler_mapstack_set;							# compiler_mapstack_set			is from   src/lib/compiler/toplevel/compiler-state/compiler-mapstack-set.pkg
+    package pl  =  property_list;								# property_list				is from   src/lib/src/property-list.pkg
+    package sy  =  symbol;									# symbol				is from   src/lib/compiler/front/basics/map/symbol.pkg
+    package pcs =  per_compile_stuff;								# per_compile_stuff			is from   src/lib/compiler/front/typer-stuff/main/per-compile-stuff.pkg
+    package ds  =  deep_syntax;									# deep_syntax				is from   src/lib/compiler/front/typer-stuff/deep-syntax/deep-syntax.pkg
 herein
 
+    # This api is implemented in:
+    #
+    #     src/lib/compiler/toplevel/interact/compiler-state.pkg
+    #
     api Compiler_State {
-
+	#
 	Compiler_Mapstack_Set
 	    =
 	    cms::Compiler_Mapstack_Set;
@@ -53,9 +59,11 @@ herein
 	    property_list:			pl::Property_List
 	  };
 
-	compiler_state:    Void -> Compiler_State;
+	make__compiler_state_stack:	Void -> (Compiler_State, List(Compiler_State));		# Generate a fresh toplevel compiler state, for packages which maintain their own compiler state like   src/lib/x-kit/widget/edit/eval-mill.pkg
+												# Added 2015-09-03 CrT.
+	compiler_state:			Void -> Compiler_State;
 
-	get_top_level_pkg_etc_defs_jar:	Void -> Compiler_Mapstack_Set_Jar;		#  Interactive top level dictionary 
+	get_top_level_pkg_etc_defs_jar:	Void -> Compiler_Mapstack_Set_Jar;			# Interactive top level dictionary 
 	get_baselevel_pkg_etc_defs_jar:	Void -> Compiler_Mapstack_Set_Jar;
 	pervasive_fun_etc_defs_jar:		Compiler_Mapstack_Set_Jar;
 
@@ -70,6 +78,13 @@ herein
 	run_thunk_in_compiler_state:  ((Void -> X), Compiler_State)   -> X;
 
 	list_bound_symbols:  Void -> List( sy::Symbol );
+
+	Compile_And_Eval_String_Option								# Does not particularly belong here, but a better place isn't obvious and I don't feel like creating a separate package just for it.
+	  #											# This gets used in  compile_raw_declaration_to_package_closure()  in   src/lib/compiler/toplevel/interact/read-eval-print-loop-g.pkg
+	  #											# which is not a convenient place from which to export a datatype widely -- needed in (e.g.)	src/lib/x-kit/widget/edit/eval-mode.pkg
+	  = COMPILER_VERBOSITY		pcs::Compiler_Verbosity					# Controls printing of intermediate code forms etc.
+	  | DEEP_SYNTAX_TRANSFORM	ds::Declaration -> ds::Declaration			# Allows arbitrary rewriting of the deep syntax tree.  Rarely used; potentially useful for profiling or instrumenting code or adding debug support.
+	  ;	
     };
 end;
 
@@ -95,5 +110,5 @@ end;
 
 
 ## COPYRIGHT (c) 1996 Bell Laboratories.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

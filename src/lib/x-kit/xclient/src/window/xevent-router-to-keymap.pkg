@@ -24,8 +24,8 @@ herein
 
     # This port is implemented in:
     #
-    #     src/lib/x-kit/xclient/src/wire/keymap-ximp.pkg
-    #
+    #     src/lib/x-kit/xclient/src/window/keymap-ximp.pkg
+    #     
     package xevent_router_to_keymap {
 	#
 	Xevent_Router_To_Keymap
@@ -83,5 +83,5 @@ end;
 
 
 ## COPYRIGHT (c) 1990, 1991 by John H. Reppy.  See SMLNJ-COPYRIGHT file for details.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

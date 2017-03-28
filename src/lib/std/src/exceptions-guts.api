@@ -30,7 +30,7 @@ api Exceptions_Guts {
     #
     #                     -- Rudyard Kipling
 
-    exception FAIL       String;
+    exception DIE       String;
 
     exception BIND;
     exception MATCH;				# Issued when a case statement (function def or pattern-match "assignment") fails to match the provided value.
@@ -56,5 +56,5 @@ api Exceptions_Guts {
 
 
 ## COPYRIGHT (c) 1995 AT&T Bell Laboratories.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

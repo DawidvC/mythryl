@@ -1,0 +1,150 @@
+## standard-prettyprinter.pkg
+#
+
+# Compiled by:
+#     src/lib/prettyprint/big/prettyprinter.lib
+
+
+stipulate
+    package fil =  file__premicrothread;					# file__premicrothread			is from   src/lib/std/src/posix/file--premicrothread.pkg
+    nb = log::note_on_stderr;							# log					is from   src/lib/std/src/log.pkg
+herein
+
+    package   standard_prettyprinter
+    : (weak)  Standard_Prettyprinter						# Standard_Prettyprinter		is from   src/lib/prettyprint/big/src/standard-prettyprinter.api
+    {
+	Prettyprint_Output_Stream
+	    =
+	    { consumer:   String -> Void,
+	      flush:      Void -> Void,
+	      close:      Void -> Void
+	    };
+
+	package out {
+	    #
+	    Prettyprint_Output_Stream = Prettyprint_Output_Stream;
+	    Texttraits = Void;
+
+	    fun same_texttraits _    = TRUE;
+	    fun push_texttraits _    = ();
+	    fun pop_texttraits _     = ();
+	    fun default_texttraits _ = ();
+
+	    fun put_string ( { consumer, flush, close }, s) =  consumer s;
+
+	    fun flush        { consumer, flush, close }     =  flush();
+	    fun close        { consumer, flush, close }     =  close();
+	};
+
+	package pp
+	    =
+	    standard_prettyprinter_g   (					# standard_prettyprinter_g		is from   src/lib/prettyprint/big/src/standard-prettyprinter-g.pkg
+	    #									# "tt" == "traitful text"
+		package tt  =  traitless_text;					# traitless_text			is from   src/lib/prettyprint/big/src/traitless-text.pkg
+		package out =  out;
+	    );
+
+	include package   pp;
+
+	# The following cannot go into standard_prettyprinter_g
+	# because they depend on our particular definition of
+	# Prettyprint_Output_Stream, which it is agnostic about:
+
+	fun make_standard_prettyprinter_into_file  prettyprint_filename  pp_args
+	    =
+	    {   text_stream =  fil::open_for_write  prettyprint_filename; 
+		#
+		consumer    =   (\\ string =  fil::write  (text_stream,  string));
+
+		flush       =   {. fil::flush        text_stream; };
+
+		close	    =   case  prettyprint_filename
+				    #
+				    "/dev/stdout"	=>  (\\ () = ());				# Trying to close stdout is probably not a good idea.
+				    "/dev/stderr"	=>  (\\ () = ());				# Trying to close stderr is probably not a good idea either.
+				    _			=>  {. fil::close_output text_stream; };
+				esac;
+
+		make_standard_prettyprinter   { consumer, flush, close }   pp_args;
+	    };
+
+	fun make_standard_prettyprinter_into_buffer  pp_args
+	    =
+	    {   l =   REF ([] : List( String ));
+		#
+#		fun attach s =    l :=  s ! *l;
+		fun attach s
+		    =
+		    {
+# nb {. sprintf "make_standard_prettyprinter_into_buffer/attach noting string '%s'" s; }; 
+			l :=  s ! *l;
+		    };
+
+		output_stream
+		    =
+		    { consumer => attach,
+		      flush =>  \\()=(),
+		      close =>  \\()=()
+		    };
+
+		pp	    = make_standard_prettyprinter  output_stream   pp_args;
+
+		fun get_buffer_contents_and_clear_buffer ()
+		    =
+		    {
+			result = string::cat (list::reverse *l);
+# printf "\nbleah:result s='%s'  --make_standard_prettyprinter_into_buffer/get_buffer_contents_and_clear_buffer\n" result;
+# nb {. sprintf "result = $$$ %s $$$  --make_standard_prettyprinter_into_buffer/get_buffer_contents_and_clear_buffer  in  src/lib/prettyprint/big/src/standard-prettyprinter.pkg" result; };
+			l     := [];
+			result;
+		    };	
+
+		{ pp, get_buffer_contents_and_clear_buffer };
+	    };
+
+	fun prettyprint_to_string   pp_args  prettyprint_fn
+	    =
+	    {   l =   REF ([] : List( String ));
+		#
+		fun attach s =    l :=  s ! *l;
+
+		output_stream
+		    =
+		    { consumer => attach,
+		      flush =>  \\()=(),
+		      close =>  \\()=()
+		    };
+
+		with_standard_prettyprinter
+		    output_stream  pp_args
+		    prettyprint_fn;
+
+		string::cat (list::reverse *l);
+	    };
+
+
+    };											# package standard_prettyprinter
+end;
+
+
+
+##########################################################################
+#   The following is support for outline-minor-mode in emacs.		 #
+#  ^C @ ^T hides all Text. (Leaves all headings.)			 #
+#  ^C @ ^A shows All of file.						 #
+#  ^C @ ^Q Quickfolds entire file. (Leaves only top-level headings.)	 #
+#  ^C @ ^I shows Immediate children of node.				 #
+#  ^C @ ^S Shows all of a node.						 #
+#  ^C @ ^D hiDes all of a node.						 #
+#  ^HFoutline-mode gives more details.					 #
+#  (Or do ^HI and read emacs:outline mode.)				 #
+#									 #
+# Local variables:							 #
+# mode: outline-minor							 #
+# outline-regexp: "[{ \t]*\\(fun \\)"			 		 #
+# End:									 #
+##########################################################################
+
+
+## Code by Jeff Prothero: Copyright (c) 2010-2015,
+## released per terms of SMLNJ-COPYRIGHT.

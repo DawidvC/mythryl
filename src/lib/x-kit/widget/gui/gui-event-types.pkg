@@ -11,8 +11,8 @@
 #
 # and then routed through the widget mail system by
 #
-#     src/lib/x-kit/xclient/src/window/xsocket-to-topwindow-router-old.pkg
-#     src/lib/x-kit/xclient/src/window/topwindow-to-widget-router-old.pkg
+#     src/lib/x-kit/xclient/src/window/xsocket-to-hostwindow-router-old.pkg
+#     src/lib/x-kit/xclient/src/window/hostwindow-to-widget-router-old.pkg
 #
 # and finally consumed by clients like
 #
@@ -344,6 +344,23 @@ herein
 								# The Super_L and Super_R keysyms correspond to the Win keys on your keyboard.
 								# More info available at:
 								#    http://www.emacswiki.org/emacs/MetaKeyProblems
+
+	fun modifier_keys_state__to__string (s:  Modifier_Keys_State)
+	    =
+	    {   shift = s.shift_key_was_down     ?? [ "shift" ]     :: [];
+		lock  = s.shiftlock_key_was_down ?? [ "shiftlock" ] :: [];
+		ctrl  = s.control_key_was_down   ?? [ "ctrl" ]      :: [];
+		mod1  = s.mod1_key_was_down      ?? [ "mod1" ]	    :: [];
+		mod2  = s.mod2_key_was_down      ?? [ "mod2" ]	    :: [];
+		mod3  = s.mod3_key_was_down      ?? [ "mod3" ]	    :: [];
+		mod4  = s.mod4_key_was_down      ?? [ "mod4" ]	    :: [];
+		mod5  = s.mod5_key_was_down      ?? [ "mod5" ]	    :: [];
+
+		string::join' "<" " " ">" (list::cat [ shift, lock, ctrl, mod1, mod2, mod3, mod4, mod5 ]);
+	    };
+
+
+
 	no_modifier_keys_were_down
 	  =
 	  { shift_key_was_down	    =>	FALSE,
@@ -842,7 +859,7 @@ herein
 	      ;
 	};
 
-	package xid_map =   unt_red_black_map;						# unt_red_black_map	is from    src/lib/src/unt-red-black-map.pkg
+	package xid_map =   unt_red_black_map;						# unt_red_black_map	is from   src/lib/src/unt-red-black-map.pkg
 	    #
 	    # Defining this here allows us to re-use the unt_red_black_map implementation.
 	    # Client code cannot do this because our Xid type is exported as opaque;
@@ -1252,5 +1269,5 @@ end;
 
 
 ## COPYRIGHT (c) 1990, 1991 by John H. Reppy.  See SMLNJ-COPYRIGHT file for details.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

@@ -40,7 +40,7 @@ herein
     #     src/lib/x-kit/xclient/src/window/xsession-junk.pkg
 
     package   window_watcher_ximp
-    : (weak)  Window_Watcher_Ximp							# Window_Watcher_Ximp		is from   src/lib/x-kit/xclient/src/window/window-watcher-ximp-old.api
+    : (weak)  Window_Watcher_Ximp							# Window_Watcher_Ximp		is from   src/lib/x-kit/xclient/src/window/window-watcher-ximp.api
     {
 	Exports	  = {									# Ports we export for use by other imps.
 		      client_to_window_watcher:		wpp::Client_To_Window_Watcher,	# Register or look up X atoms.
@@ -79,7 +79,7 @@ herein
 	Xevent_Q = Mailqueue( xet::x::Event );
 
 	Runstate =  {													# These values will be statically globally visible throughout the code body for the imp.
-		      me:				Window_Watcher_Ximp_State,					# State which is preserved across imp shutdown/restart cycles.
+		      me:				Window_Watcher_Ximp_State,					# 
 		      imports:				Imports,							# Ximps to which we send requests.
 		      to:				Replyqueue,							# The name makes   foo::pass_something(imp) to {. ... }   syntax read well.
 		      end_gun':				End_Gun,							# We shut down the microthread when this fires.
@@ -106,7 +106,7 @@ herein
 	#
 	fun make_prop_table () :  aht::Hashtable( List( Watched_Property_Info ) )
 	    =
-	    aht::make_hashtable  { size_hint => 16,  not_found_exception => FAIL "PropTable" };
+	    aht::make_hashtable  { size_hint => 16,  not_found_exception => DIE "PropTable" };
 
 
 	fun find_prop (table, window, name)
@@ -189,7 +189,7 @@ herein
 		  #
 		  runstate as
 		  {													# These values will be statically globally visible throughout the code body for the imp.
-		    me:					Window_Watcher_Ximp_State,					# State which is preserved across imp shutdown/restart cycles.
+		    me:					Window_Watcher_Ximp_State,					# 
 		    imports:				Imports,							# Ximps to which we send requests.
 		    to:					Replyqueue,							# The name makes   foo::pass_something(imp) to {. ... }   syntax read well.
 		    end_gun':				End_Gun,							# We shut down the microthread when this fires.
@@ -444,5 +444,5 @@ end;
 
 
 ## COPYRIGHT (c) 1994 by AT&T Bell Laboratories.  See SMLNJ-COPYRIGHT file for details.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

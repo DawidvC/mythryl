@@ -1,6 +1,6 @@
 ## translate-machcode-to-asmcode-pwrpc32-g.codemade.pkg
 #
-# This file generated at   2013-12-07:17:26:09   by
+# This file generated at   2015-12-06:07:55:22   by
 #
 #     src/lib/compiler/back/low/tools/arch/make-sourcecode-for-translate-machcode-to-asmcode-xxx-g-package.pkg
 #
@@ -10,6 +10,9 @@
 #
 # Edits to this file will be LOST on next system rebuild.
 
+# Compiled by:
+#     src/lib/compiler/back/low/pwrpc32/backend-pwrpc32.lib
+
 
 # We are invoked by:
 #
@@ -17,7 +20,7 @@
 #
 stipulate
     package lem =  lowhalf_error_message;						# lowhalf_error_message		is from   src/lib/compiler/back/low/control/lowhalf-error-message.pkg
-    package pp  =  standard_prettyprint_mill;						# standard_prettyprint_milll		is from   src/lib/prettyprint/big/src/standard-prettyprint-mill.pkg
+    package pp  =  standard_prettyprinter;						# standard_prettyprinter		is from   src/lib/prettyprint/big/src/standard-prettyprinter.pkg
     package rkj =  registerkinds_junk;						# registerkinds_junk		is from   src/lib/compiler/back/low/code/registerkinds-junk.pkg
 herein
 
@@ -145,7 +148,7 @@ herein
         
                 fun get_notes () =  error "get_notes";
                 fun do_nothing _ =  ();
-                fun fail _       =  raise exception FAIL "asmcode-emitter";
+                fun fail _       =  raise exception DIE "asmcode-emitter";
         
                 fun put_ramregion  ramregion
                     =
@@ -491,7 +494,7 @@ herein
 
 ###line 634.7 "src/lib/compiler/back/low/pwrpc32/pwrpc32.architecture-description"
 
-        fun emitx (s, mcf::REG_OP _) => if ((string::get (s, (size s) - 1)) == 'e')
+        fun emitx (s, mcf::REG_OP _) => if ((string::get_byte_as_char (s, (size s) - 1)) == 'e')
                                             #
                                             emit (string::substring (s, 0, 
                                                      (size s) - 1)); 

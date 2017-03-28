@@ -307,7 +307,7 @@ herein
 
 		root = case (methods.entries ())   
 			   [root] => root;
-			  _ => raise exception FAIL "guess_bblock_execution_frequencies_g: root";
+			  _ => raise exception DIE "guess_bblock_execution_frequencies_g: root";
 		       esac;
 
 
@@ -333,7 +333,7 @@ herein
 				#
 				UNKNOWN                =>   execution_frequency :=  0.0;
 				SUM { c, terms => [] } =>   execution_frequency :=  c;
-				_                      =>   raise exception FAIL (cat [ "block ", int::to_string id, " unresolved" ]);
+				_                      =>   raise exception DIE (cat [ "block ", int::to_string id, " unresolved" ]);
 			    esac
 		    );
 
@@ -382,5 +382,5 @@ herein
 end;
 
 ## COPYRIGHT (c) 2002 Bell Labs, Lucent Technologies.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

@@ -235,7 +235,7 @@ herein
 		end;
 	    end;
 
-	fun list_min [] =>   raise exception FAIL "Cannot do list_min on empty list";
+	fun list_min [] =>   raise exception DIE "Cannot do list_min on empty list";
 	    #
 	    list_min (i ! ints)
 		=>
@@ -247,7 +247,7 @@ herein
 		end;
 	end;
 
-	fun list_max [] =>   raise exception FAIL "Cannot do list_max on empty list";
+	fun list_max [] =>   raise exception DIE "Cannot do list_max on empty list";
 	    #
 	    list_max (i ! ints)
 		=>
@@ -327,5 +327,5 @@ end;
 
 ## Author: Matthias Blume (blume@tti-c.org)
 ## Copyright (c) 2004 by The Fellowship of SML/NJ
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

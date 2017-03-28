@@ -35,19 +35,19 @@
 
 stipulate
     #
-    package xt  =  xtypes;			# xtypes			is from   src/lib/x-kit/xclient/src/wire/xtypes.pkg
-    package sok =  socket__premicrothread;	# socket__premicrothread	is from   src/lib/std/socket--premicrothread.pkg
-    package dy  =  display;			# display			is from   src/lib/x-kit/xclient/src/wire/display.pkg
+    package xt  =  xtypes;							# xtypes			is from   src/lib/x-kit/xclient/src/wire/xtypes.pkg
+    package sok =  socket__premicrothread;					# socket__premicrothread	is from   src/lib/std/socket--premicrothread.pkg
+    package dy  =  display;							# display			is from   src/lib/x-kit/xclient/src/wire/display.pkg
 herein
 
 
     package font_base {
 	#
-	exception NO_CHAR_INFO;			# Raised by the char_info functions.
+	exception NO_CHAR_INFO;							# Raised by the char_info functions.
 
 	exception FONT_PROPERTY_NOT_FOUND;
 
-	Font_Info
+	Font_Info								# For background here see p38 in   http://mythryl.org/pub/exene/X-protocol-R7.pdf
 	    =
 	    FINFO8
 	      {
@@ -71,19 +71,19 @@ herein
 
 	  | FINFO16
 	      {
-		min_bounds:   xt::Char_Info,
-		max_bounds:   xt::Char_Info,
+		min_bounds:	  xt::Char_Info,
+		max_bounds:	  xt::Char_Info,
 		#	
 		min_char:         Int,
 		max_char:         Int,
 		#	
 		default_char:     Int,
+		#	
 		draw_dir:         xt::Font_Drawing_Direction,
+		all_chars_exist:  Bool,
 		#	
 		min_byte1:        Int,
 		max_byte1:        Int,
-		#	
-		all_chars_exist:  Bool,
 		#	
 		font_ascent:      Int,
 		font_descent:     Int,
@@ -204,11 +204,11 @@ herein
 		    =
 		    width_fn' (0, 0)
 		    where
-			len = string::length s;
+			len = string::length_in_bytes s;
 			#
 			fun width_fn' (width, i)
 			    =
-			    if (i < len)    width_fn' (width + char_width_fn (string::get (s, i)), i+1);
+			    if (i < len)    width_fn' (width + char_width_fn (string::get_byte_as_char (s, i)), i+1);
 			    else	    width;
 			    fi;
 		    end;
@@ -231,7 +231,7 @@ herein
 			#
 			fun width_fn' (width, i)
 			    =
-			    if (i < len)    width_fn' (width + char_width_fn (string::get (s, i)), i+1);
+			    if (i < len)    width_fn' (width + char_width_fn (string::get_byte_as_char (s, i)), i+1);
 			    else	    width;
 			    fi;
 		    end;
@@ -255,13 +255,13 @@ herein
 		    =
 		    width_fn ([0], 0, 0)
 		    where 
-			len = string::length s;
+			len = string::length_in_bytes s;
 			#
 			fun width_fn (l, width, i)
 			    =
 			    if (i < len)
 			        #
-				wide =   width + char_width_fn (string::get (s, i));
+				wide =   width + char_width_fn (string::get_byte_as_char (s, i));
 
 				width_fn (wide ! l, wide, i + 1);
 			    else
@@ -274,7 +274,7 @@ herein
 
 	# Return the extents of the given string in the given font, which is a record
 	# with the fields
-	#     dir:  font_draw_dir,
+	#     dir:	    font_draw_dir,
 	#     font_ascent:  Int,
 	#     font_descent:  Int,
 	#     overall_info:  char_info
@@ -302,12 +302,12 @@ herein
 			    (char_info, draw_dir, font_ascent, font_descent);
 		    esac;
 
-		len = string::length s;
+		len = string::length_in_bytes s;
 
 		fun min (a:  Int, b) =  (a < b)  ??  a  ::  b;
 		fun max (a:  Int, b) =  (a > b)  ??  a  ::  b;
 
-		fun ord_of   i =  char::to_int (string::get (s, i));
+		fun ord_of   i =  string::get_byte (s, i);
 		fun get_info i =  (THE (info_of (ord_of i))) except _ = NULL;
 
 		fun accum_none i
@@ -424,5 +424,5 @@ end;		# stipulate
 
 
 ## COPYRIGHT (c) 1990, 1991 by John H. Reppy.  See SMLNJ-COPYRIGHT file for details.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

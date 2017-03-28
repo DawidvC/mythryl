@@ -1,19 +1,15 @@
 # textpane.pkg
 #
-# This package manages one view onto a textbuffer,
+# This package manages one view onto a textmill,
 # consisting of a number of 
 #
-#     src/lib/x-kit/widget/edit/lineeditor.pkg
+#     src/lib/x-kit/widget/edit/screenline.pkg
 #
 # instances displaying (part of) the contents of
-# the textbuffer, plus one
+# the textmill, plus one displaying the dirtyflag,
+# filename etc associated with the textmill.
 #
-#     src/lib/x-kit/widget/edit/statusline.pkg
-#
-# instance displaying the dirtyflag, filename etc
-# associated with the textbuffer.
-#
-# In "Model/View/Controller" terms, textbuffer-imp.pkg
+# In "Model/View/Controller" terms, textmill.pkg
 # is the Model and textpane.pkg is the View+Controller.
 #
 # (textpane.pkg also draws the visible frame around
@@ -21,19 +17,16 @@
 # to its main function.)
 #
 # Per emacs tradition, we allow multiple textpanes
-# to be simultaneously open onto a single textbuffer;
+# to be simultaneously open onto a single textmill;
 # this heavily influences the design and implementation.
 #
 # See also:
-#     src/lib/x-kit/widget/edit/editboss-imp.pkg
-#     src/lib/x-kit/widget/edit/textbuffer-imp.pkg
-#     src/lib/x-kit/widget/edit/textedit.pkg
-#     src/lib/x-kit/widget/edit/lineeditor.pkg
-#     src/lib/x-kit/widget/edit/statusline.pkg
+#     src/lib/x-kit/widget/edit/millboss-imp.pkg
+#     src/lib/x-kit/widget/edit/textmill.pkg
+#     src/lib/x-kit/widget/edit/screenline.pkg
 
 # Compiled by:
 #     src/lib/x-kit/widget/xkit-widget.sublib
-
 
 
 
@@ -53,38 +46,45 @@ stipulate
     package gtj =  guiboss_types_junk;						# guiboss_types_junk		is from   src/lib/x-kit/widget/gui/guiboss-types-junk.pkg
     package wt  =  widget_theme;						# widget_theme			is from   src/lib/x-kit/widget/theme/widget/widget-theme.pkg
     package wti =  widget_theme_imp;						# widget_theme_imp		is from   src/lib/x-kit/widget/xkit/theme/widget/default/widget-theme-imp.pkg
+    package wit =  widget_imp_types;						# widget_imp_types		is from   src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp-types.pkg
     package r8  =  rgb8;							# rgb8				is from   src/lib/x-kit/xclient/src/color/rgb8.pkg
     package r64 =  rgb;								# rgb				is from   src/lib/x-kit/xclient/src/color/rgb.pkg
     package wi  =  widget_imp;							# widget_imp			is from   src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp.pkg
     package g2d =  geometry2d;							# geometry2d			is from   src/lib/std/2d/geometry2d.pkg
     package g2j =  geometry2d_junk;						# geometry2d_junk		is from   src/lib/std/2d/geometry2d-junk.pkg
     package mtx =  rw_matrix;							# rw_matrix			is from   src/lib/std/src/rw-matrix.pkg
-    package pp  =  standard_prettyprint_mill;					# standard_prettyprint_mill	is from   src/lib/prettyprint/big/src/standard-prettyprint-mill.pkg
+    package pp  =  standard_prettyprinter;					# standard_prettyprinter	is from   src/lib/prettyprint/big/src/standard-prettyprinter.pkg
     package gtg =  guiboss_to_guishim;						# guiboss_to_guishim		is from   src/lib/x-kit/widget/theme/guiboss-to-guishim.pkg
-    package le  =  lineeditor;							# lineeditor			is from   src/lib/x-kit/widget/edit/lineeditor.pkg
+    package sl  =  screenline;							# screenline			is from   src/lib/x-kit/widget/edit/screenline.pkg
+    package txm =  textmill;							# textmill			is from   src/lib/x-kit/widget/edit/textmill.pkg
+    package psx =  posixlib;							# posixlib			is from   src/lib/std/src/psx/posixlib.pkg
+
+    package frm =  frame;							# frame				is from   src/lib/x-kit/widget/leaf/frame.pkg
 
     package nl  =  red_black_numbered_list;					# red_black_numbered_list	is from   src/lib/src/red-black-numbered-list.pkg
     package im  =  int_red_black_map;						# int_red_black_map		is from   src/lib/src/int-red-black-map.pkg
+    package sj  =  string_junk;							# string_junk			is from   src/lib/std/src/string-junk.pkg
+    package idm =  id_map;							# id_map			is from   src/lib/src/id-map.pkg
+    package sm  =  string_map;							# string_map			is from   src/lib/src/string-map.pkg
 
-    package iuw =  issue_unique_widget_id;					# issue_unique_widget_id	is from   src/lib/x-kit/widget/gui/issue-unique-widget-id.pkg
-    package e2p =  textedit_to_textpane;					# textedit_to_textpane		is from   src/lib/x-kit/widget/edit/textedit-to-textpane.pkg
-    package l2p =  lineeditor_to_textpane;					# lineeditor_to_textpane	is from   src/lib/x-kit/widget/edit/lineeditor-to-textpane.pkg
-    package p2l =  textpane_to_lineeditor;					# textpane_to_lineeditor	is from   src/lib/x-kit/widget/edit/textpane-to-lineeditor.pkg
-    package s2p =  statusline_to_textpane;					# statusline_to_textpane	is from   src/lib/x-kit/widget/edit/statusline-to-textpane.pkg
-    package b2p =  editboss_to_textpane;					# editboss_to_textpane		is from   src/lib/x-kit/widget/edit/editboss-to-textpane.pkg
-    package p2e =  textpane_to_textedit;					# textpane_to_textedit		is from   src/lib/x-kit/widget/edit/textpane-to-textedit.pkg
-    package p2s =  textpane_to_statusline;					# textpane_to_statusline	is from   src/lib/x-kit/widget/edit/textpane-to-statusline.pkg
-    package t2t =  textpane_to_textbuffer;					# textpane_to_textbuffer	is from   src/lib/x-kit/widget/edit/textpane-to-textbuffer.pkg
+    package d2p =  drawpane_to_textpane;					# drawpane_to_textpane		is from   src/lib/x-kit/widget/edit/drawpane-to-textpane.pkg
+    package l2p =  screenline_to_textpane;					# screenline_to_textpane	is from   src/lib/x-kit/widget/edit/screenline-to-textpane.pkg
+    package p2l =  textpane_to_screenline;					# textpane_to_screenline	is from   src/lib/x-kit/widget/edit/textpane-to-screenline.pkg
+    package p2d =  textpane_to_drawpane;					# textpane_to_drawpane		is from   src/lib/x-kit/widget/edit/textpane-to-drawpane.pkg
+    package m2d =  mode_to_drawpane;						# mode_to_drawpane		is from   src/lib/x-kit/widget/edit/mode-to-drawpane.pkg
+
+    package b2p =  millboss_to_pane;						# millboss_to_pane		is from   src/lib/x-kit/widget/edit/millboss-to-pane.pkg
+
+    package tph =  textpane_hint;						# textpane_hint			is from   src/lib/x-kit/widget/edit/textpane-hint.pkg
     package tpt =  textpane_types;						# textpane_types		is from   src/lib/x-kit/widget/edit/textpane-types.pkg
-    package g2b =  gadget_to_editboss;						# gadget_to_editboss		is from   src/lib/x-kit/widget/edit/gadget-to-editboss.pkg
+    package mt  =  millboss_types;						# millboss_types		is from   src/lib/x-kit/widget/edit/millboss-types.pkg
+    package kmj =  keystroke_macro_junk;					# keystroke_macro_junk		is from   src/lib/x-kit/widget/edit/keystroke-macro-junk.pkg
+    package dp  =  drawpane;							# drawpane			is from   src/lib/x-kit/widget/edit/drawpane.pkg
 
     nb =  log::note_on_stderr;							# log				is from   src/lib/std/src/log.pkg
 
-Dummy1 = e2p::Textedit_To_Textpane; 	# XXX SUCKO DELETEME This is just to force compilation during initial development.
-Dummy2 = l2p::Lineeditor_To_Textpane; 	# XXX SUCKO DELETEME This is just to force compilation during initial development.
-Dummy3 = s2p::Statusline_To_Textpane; 	# XXX SUCKO DELETEME This is just to force compilation during initial development.
-Dummy4 = b2p::Editboss_To_Textpane; 	# XXX SUCKO DELETEME. This is a quick hack to make sure the package compiles during early development of it.
-Dummy5 =  le::Redraw_Fn_Arg;
+dummy1 = dp::with;		# XXX SUCKO FIXME Quick hack to force this to compile and load during early developent.
+Dummy2 = m2d::Mode_To_Drawpane;	# XXX SUCKO FIXME Quick hack to force this to compile and load during early developent.
 herein
 
     package textpane
@@ -92,7 +92,7 @@ herein
     {
 	App_To_Textpane
 	  =
-	  { id:					iuw::Id
+	  { id:					Id
 	  };
 
 
@@ -100,8 +100,8 @@ herein
 	    =
 	    REDRAW_FN_ARG
 	      {
-		id:				iuw::Id,			# Unique id.
-		doc:				String,
+		id:				Id,				# Unique Id for widget.
+		doc:				String,				# Human-readable description of this widget, for debug and inspection.
 		frame_number:			Int,				# 1,2,3,... Purely for convenience of widget, guiboss-imp makes no use of this.
 		frame_indent_hint:		gt::Frame_Indent_Hint,
 		site:				g2d::Box,			# Window rectangle in which to draw.
@@ -112,6 +112,8 @@ herein
 		gadget_mode:			gt::Gadget_Mode,
 		#
 		theme:				wt::Widget_Theme,
+		have_keyboard_focus:		Bool,
+		#
 		do:				(Void -> Void) -> Void,		# Used by widget subthreads to execute code in main widget microthread.
 		to:				Replyqueue,			# Used to call 'pass_*' methods in other imps.
 		palette:			wt::Gadget_Palette,
@@ -133,8 +135,9 @@ herein
 	Mouse_Click_Fn_Arg
 	    =
 	    MOUSE_CLICK_FN_ARG							# Needs to be a sumtype because of recursive reference in default_mouse_click_fn.
-	      { id:				iuw::Id,			# Unique id.
-		doc:				String,
+	      {
+		id:				Id,				# Unique Id for widget.
+		doc:				String,				# Human-readable description of this widget, for debug and inspection.
 		event:				gt::Mousebutton_Event,		# MOUSEBUTTON_PRESS or MOUSEBUTTON_RELEASE.
 		button:				evt::Mousebutton,		# Which mousebutton was pressed/released.
 		point:				g2d::Point,			# Where the mouse was.
@@ -161,8 +164,8 @@ herein
 	    =
 	    MOUSE_DRAG_FN_ARG
 	      {
-		id:				iuw::Id,			# Unique id.
-		doc:				String,
+		id:				Id,				# Unique Id for widget.
+		doc:				String,				# Human-readable description of this widget, for debug and inspection.
 		event_point:			g2d::Point,
 		start_point:			g2d::Point,
 		last_point:			g2d::Point,
@@ -191,8 +194,8 @@ herein
 	    =
 	    MOUSE_TRANSIT_FN_ARG
 	      {
-		id:				iuw::Id,			# Unique id.
-		doc:				String,
+		id:				Id,				# Unique Id for widget.
+		doc:				String,				# Human-readable description of this widget, for debug and inspection.
 		event_point:			g2d::Point,
 		widget_layout_hint:		gt::Widget_Layout_Hint,
 		frame_indent_hint:		gt::Frame_Indent_Hint,
@@ -217,20 +220,14 @@ herein
 	    =
 	    KEY_EVENT_FN_ARG
 	      {
-		id:				iuw::Id,			# Unique id.
-		doc:				String,
-		key_event:			gt::Key_Event,			# KEY_PRESS or KEY_RELEASE
-		keycode:			evt::Keycode,			# Keycode of the depressed key.
-		keysym:				evt::Keysym,			# Keysym  of the depressed key.  See Note[1] in src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp.api
-		string:				String,				# Ascii  for the depressed key.  See Note[1] in src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp.api
-		char:				Char,				# First char of 'string' ('\0' if string-length != 1).
-		event_point:			g2d::Point,
+		id:				Id,				# Unique Id for widget.
+		doc:				String,				# Human-readable description of this widget, for debug and inspection.
+		keystroke:			gt::Keystroke_Info,		# Keystring etc for event.
 		widget_layout_hint:		gt::Widget_Layout_Hint,
 		frame_indent_hint:		gt::Frame_Indent_Hint,
 		site:				g2d::Box,			# Widget's assigned area in window coordinates.
-		modifier_keys_state:	        evt::Modifier_Keys_State,	# State of the modifier keys (shift, ctrl...).
-		mousebuttons_state:		evt::Mousebuttons_State,	# State of mouse buttons as a bool record.
 		widget_to_guiboss:		gt::Widget_To_Guiboss,
+		guiboss_to_widget:		gt::Guiboss_To_Widget,		# Used by textpane.pkg keystroke-macro stuff to synthesize fake keystroke events to widget.
 		theme:				wt::Widget_Theme,
 		do:				(Void -> Void) -> Void,		# Used by widget subthreads to execute code in main widget microthread.
 		to:				Replyqueue,			# Used to call 'pass_*' methods in other imps.
@@ -244,12 +241,29 @@ herein
 
 
 
-	Option	= ID			iuw::Id
+	Modeline_Fn_Arg
+	    =
+	    MODELINE_FN_ARG
+	      {
+		point:					g2d::Point,		# (0,0)-origin 'point' (==cursor) screen coordinates, in rows and cols (we assume a fixed-width font).  (Remember to display these as (1,1)-origin when printing them out as numbers!)
+		mark:				Null_Or(g2d::Point),		# (0,0)-origin 'mark' if set, else NULL.  Same coordinate system as 'point'.
+		lastmark:			Null_Or(g2d::Point),		# (0,0)-origin last-valid-value-of-mark if set, else NULL.  We use this in exchange_point_and_mark() when 'mark' is not set -- see   src/lib/x-kit/widget/edit/fundamental-mode.pkg
+
+		dirty:				Bool,				# TRUE iff textmill contents have been modified since being loaded from file.
+		readonly:			Bool,
+		pane_tag:			Int,				# Unique-among-textpanes numeric tag in the dense range 1-N assigned by renumber_panes() in millboss-imp.pkg, displayed on modeline, and used by "C-x o" (other_pane) in   src/lib/x-kit/widget/edit/fundamental-mode.pkg
+		name:				String,				# Name of mill displayed in this pane. This is unique over all active mills, courtesy of uniquify_name() in   src/lib/x-kit/widget/edit/millboss-imp.pkg
+		panemode:			String,
+		message:			Null_Or(String)			# Normally NULL: Used to temporarily display a message in the modeline, like "New file" or "No files need saving" or such.
+	      }
+	withtype
+	Modeline_Fn =  Modeline_Fn_Arg -> String;
+
+
+	Option	= ID			Id
 		| DOC			String
 		#
 		| FRAME_INDENT_HINT	gt::Frame_Indent_Hint
-		#
-		| ASCII			String					# Initial textbuffer contents.
 		#
 		| REDRAW_FN		Redraw_Fn				# Application-specific handler for widget redraw.
 		| MOUSE_CLICK_FN	Mouse_Click_Fn				# Application-specific handler for mousebutton clicks.
@@ -257,8 +271,10 @@ herein
 		| MOUSE_TRANSIT_FN	Mouse_Transit_Fn			# Application-specific handler for mouse crossings.
 		| KEY_EVENT_FN		Key_Event_Fn				# Application-specific handler for keyboard input.
 		#
+		| MODELINE_FN		Modeline_Fn				# Application-specific fn to format modeline display.
+		#
 		| PORTWATCHER		(Null_Or(App_To_Textpane) -> Void)	# Widget's app port                   will be sent to these fns at widget startup.
-		| SITEWATCHER		(Null_Or((iuw::Id,g2d::Box)) -> Void)	# Widget's site in window coordinates will be sent to these fns each time it changes.
+		| SITEWATCHER		(Null_Or((Id,g2d::Box)) -> Void)	# Widget's site in window coordinates will be sent to these fns each time it changes.
 		;								# To help prevent deadlock, watcher fns should be fast and nonblocking, typically just setting a var or entering something into a mailqueue.
 		
 	fun process_options
@@ -268,13 +284,13 @@ herein
 		widget_doc,
 		#
 		frame_indent_hint,
-		text,
 		#
 		redraw_fn,
 		mouse_click_fn,
 		mouse_drag_fn,
 		mouse_transit_fn,
 		key_event_fn,
+		modeline_fn,
 		#
 		widget_options,
 	        #
@@ -287,13 +303,13 @@ herein
 		my_widget_doc		=  REF  widget_doc;
 		#
 		my_frame_indent_hint	=  REF  frame_indent_hint;
-		my_text			=  REF  text;
 		#
 		my_redraw_fn		=  REF  redraw_fn;
 		my_mouse_click_fn	=  REF  mouse_click_fn;
 		my_mouse_drag_fn	=  REF  mouse_drag_fn;
 		my_mouse_transit_fn	=  REF  mouse_transit_fn;
 		my_key_event_fn		=  REF  key_event_fn;
+		my_modeline_fn		=  REF  modeline_fn;
 		#
 		my_widget_options	=  REF  widget_options;
 		#
@@ -307,13 +323,13 @@ herein
 			do_option (DOC				d) =>   my_widget_doc		:=      d;
 			#
 			do_option (FRAME_INDENT_HINT		h) =>   my_frame_indent_hint	:=  THE h;
-			do_option (ASCII			h) =>   my_text			:=      h;
 			#
-			do_option (REDRAW_FN			f) =>   my_redraw_fn		:=  f;
-			do_option (MOUSE_CLICK_FN		f) =>   my_mouse_click_fn	:=  f;
+			do_option (REDRAW_FN			f) =>   my_redraw_fn		:=      f;
+			do_option (MOUSE_CLICK_FN		f) =>   my_mouse_click_fn	:=      f;
 			do_option (MOUSE_DRAG_FN		f) =>	my_mouse_drag_fn	:=  THE f;
 			do_option (MOUSE_TRANSIT_FN		f) =>	my_mouse_transit_fn	:=  THE f;
-			do_option (KEY_EVENT_FN			f) =>	my_key_event_fn		:=  THE f;
+			do_option (KEY_EVENT_FN			f) =>	my_key_event_fn		:=      f;
+			do_option (MODELINE_FN			f) =>	my_modeline_fn		:=      f;
 			#
 			do_option (PORTWATCHER			c) =>	my_portwatchers		:=  c ! *my_portwatchers;
 			do_option (SITEWATCHER			c) =>	my_sitewatchers		:=  c ! *my_sitewatchers;
@@ -324,13 +340,13 @@ herein
 		  widget_doc		=>  *my_widget_doc,
 		  #
 		  frame_indent_hint	=>  *my_frame_indent_hint,
-		  text			=>  *my_text,
 		  #
 		  redraw_fn		=>  *my_redraw_fn,
 		  mouse_click_fn	=>  *my_mouse_click_fn,
 		  mouse_drag_fn		=>  *my_mouse_drag_fn,
 		  mouse_transit_fn	=>  *my_mouse_transit_fn,
 		  key_event_fn		=>  *my_key_event_fn,
+		  modeline_fn		=>  *my_modeline_fn,
 		  #
 		  widget_options	=>  *my_widget_options,
 		  #
@@ -340,104 +356,388 @@ herein
 	    };
 
 
-	fun with														# PUBLIC
-	      {															# These ids are initially generated and assigned by 'with' in src/lib/x-kit/widget/edit/texteditor.pkg
-		textedit_id:		iuw::Id,										# We belong to this instance of src/lib/x-kit/widget/edit/textedit.pkg
-		textpane_id:		iuw::Id,										# Our own unique id.
-		lineeditors_mark:	Id,											# This MARK marks our COL of src/lib/x-kit/widget/edit/lineeditor.pkg instances in the guipith. This is set up by src/lib/x-kit/widget/edit/texteditor.pkg.
+	Panestate													# We have two panes -- our main textpane and the one-line minimill pane.  This type encapsulates per-pane state.
+	  =
+	  { textpane_to_textmill:	mt::Textpane_To_Textmill,							# (We) textpane are a GUI view onto this textmill model.
+	    textpane_to_drawpane:	Ref( Null_Or( p2d::Textpane_To_Drawpane   )),					# Optional area for random graphics scribbling by the mode in charge.
+	    mode_to_drawpane:		Ref( Null_Or( m2d::Mode_To_Drawpane 	  )),					# Optional area for random graphics scribbling by the mode in charge.
+	    screenlines:		Ref( im::Map( p2l::Textpane_To_Screenline )),					# Indexed by paneline.
+	    expected_screenlines:	Ref( Int ),									# So we can tell when ps.screenlines is fully populated (for example).
+	    #
+	    panemode:			mt::Panemode,									# Contains mode name and mode keymap.
+	    panemode_state:		mt::Panemode_State,								# Holds any required private state(s) for 'panemode'.  We deliberately do not even know the types (they are hidden in Crypts).
+	    #
+	    sitewatchers:		Ref( List(  Null_Or((Id, g2d::Box )) -> Void  )),
+	    last_known_site:		Ref (Null_Or( g2d::Box )),
+	    #
+	    point:			Ref(          g2d::Point	),						# (0,0)-origin 'point' (==cursor) screen coordinates, in rows and cols (we assume a fixed-width font).  (Remember to display these as (1,1)-origin when printing them out as numbers!)
+	    mark:			Ref( Null_Or( g2d::Point )	),						# (0,0)-origin 'mark' if set, else NULL.  Same coordinate system as 'point'.
+	    lastmark:			Ref( Null_Or( g2d::Point )	),						# (0,0)-origin last-valid-value-of-mark if set, else NULL.  We use this in exchange_point_and_mark() when 'mark' is not set -- see   src/lib/x-kit/widget/edit/fundamental-mode.pkg
+	    #
+	    readonly:			Ref(	      Bool		),						# TRUE iff textmill contents are read-only.  This is a local cache of the master textmill value.
+	    dirty:			Ref(	      Bool		),						# TRUE iff textmill contents are modified.   This is a local cache of the master textmill value.
+	    name:			Ref(	      String		),						# Name  of textmill.                         This is a local cache of the master textmill value.
+	    editfn_to_invoke:		Ref( Null_Or( mt::Keymap_Node ) ),						# Execute given editfn.  Supports (e.g.) query_replace -- this lets it read input from modeline and then continue.
+	    quote_next:			Ref( Null_Or( mt::Keymap_Node ) ),						# Dedicated support for C-q.
+	    #
+	    screen_origin:		Ref(	      g2d::Point	),						# Origin of pane-visible text relative to textmill contents:  (0,0) means we're showing top of buffer at top of textpane.
+	    #
+	    line_prefix:		Ref( String ),									# Prefix to show at start of each screenline.  Main motivation is to support minimill prompts.
+	    minimill_screenlines:	Null_Or( Ref( im::Map( p2l::Textpane_To_Screenline ) ) )
+	  };
+
+	bogus_site
+	   =
+	   { col => -1,  wide => -1,
+	     row => -1,  high => -1
+	   }:						g2d::Box;
+
+
+	fun find_freshest_invisible_mill										# Used to find a good default mill to switch to for switch_to_mill.
+	      (
+		widget_to_guiboss:	gt::Widget_To_Guiboss
+	      )
+	    :				Null_Or( mt::Mill_Info )
+	    =
+	    {
+		(mt::get__mill_to_millboss  "textpane::find_freshest_invisible_mill")					# Find our port to src/lib/x-kit/widget/edit/millboss-imp.pkg
+		    ->
+		    mt::MILL_TO_MILLBOSS mill_to_millboss;
+
+		all_mills_by_id   =  mill_to_millboss.get_mills_by_id   ();
+		all_panes_by_id   =  mill_to_millboss.get_panes_by_id   ();
+															# Seems like the following code should have a much more concise expression. :-)
+															# Maybe some sort of set ops support?
+		visible_mills
+		    =
+		    map do_pane (idm::vals_list all_panes_by_id)
+		    where
+			fun do_pane (pane_info: mt::Pane_Info)
+			    =
+			    pane_info.mill_id;
+		    end;
+
+		invisible_mills_by_id
+		    =
+		    drop_visible_mills (visible_mills, all_mills_by_id)
+		    where
+			fun drop_visible_mills ([], result)
+				=>
+				result;
+
+			    drop_visible_mills  (visible_mill_id ! rest,  mills_by_id)	
+				=>
+				drop_visible_mills
+				  ( rest,
+				    idm::drop  (mills_by_id,  visible_mill_id)
+				  );
+			end;
+		    end;	
+
+		invisible_mills_by_freshness
+		    =
+		    sort_by_freshness  (idm::vals_list invisible_mills_by_id,  im::empty)
+		    where
+			fun sort_by_freshness ([]: List(mt::Mill_Info), result)
+				=>
+				result;
+
+			    sort_by_freshness (mill_info ! rest,  result)
+				=>
+				sort_by_freshness
+				  ( rest,
+				    im::set (result, mill_info.freshness, mill_info)
+				  );  
+			end;
+		    end;
+
+		im::last_val_else_null  invisible_mills_by_freshness;
+	    };
+
+	fun process_panemode_initialization_options
+	      (
+		options:	List( mt::Panemode_Initialization_Option ),
+		#
+		{ point
+		}
+	      )
+	    =
+	    {   my_point		=  REF point;
+
+		apply  do_option  options
+		where
+		    fun do_option (mt::INITIAL_POINT	    p)  =  	my_point		  :=      p;
+		end;
+
+		{ point			=>  *my_point
+		};
+	    };
+
+	fun make_minimill (minipanemode: mt::Panemode): Panestate
+	    =
+	    {	panemode_state	=  { mode => minipanemode, data => sm::empty };						# Set up any required private state(s) for our textpane panemode.  We deliberately do not even know the types (they are hidden in Crypts).
+		minipanemode   -> mt::PANEMODE  mm;
+
+		(mm.initialize_panemode_state (minipanemode, panemode_state, NULL, []))					# Let minimill-mode.pkg or whatever set up its private state (currently none) and in principle return to us a requested textmill extension;
+		    ->
+		    (panemode_state, textmill_extension, panemode_initialization_options);
+
+		(process_panemode_initialization_options (panemode_initialization_options, { point => g2d::point::zero }))
+		    ->
+		    { point };
+
+		textmill_arg =  { name, textmill_options }
+				where
+				    name =  "*minimill*";
+
+				    textmill_options =  [ mt::UTF8 "\n",
+							  mt::ID   (issue_unique_id ())
+							]
+							@
+							case textmill_extension
+							    #
+							    THE textmill_extension								# minimill-mode doesn't currently request a textmill_extension so currently this is just futureproofing.
+								=>
+								[ mt::TEXTMILL_EXTENSION textmill_extension ];
+
+							    NULL => [];
+							esac;	
+				end;
+
+		egg =  txm::make_textmill_egg  textmill_arg;
+		#
+		(egg ())
+		    ->
+		    ( textmill_exports:	 txm::Exports,
+		      egg':		(txm::Imports, Run_Gun, End_Gun) -> Void
+		    );
+
+		textmill_imports
+		  =
+		  { };
+
+		(make_run_gun ()) ->   { run_gun', fire_run_gun };
+		(make_end_gun ()) ->   { end_gun', fire_end_gun };
+
+		egg' (textmill_imports, run_gun', end_gun');
+
+		fire_run_gun ();
+
+		textmill_exports -> { textpane_to_textmill,
+				      ...
+				    };
+
+		textpane_to_drawpane	=  REF (NULL:		Null_Or(p2d::Textpane_To_Drawpane  ));
+		mode_to_drawpane	=  REF (NULL:		Null_Or(m2d::Mode_To_Drawpane	   ));
+		screenlines		=  REF (im::empty:	im::Map(p2l::Textpane_To_Screenline));
+
+		expected_screenlines	=  REF 1;
+
+		panestate
+		  =
+		  { textpane_to_textmill,
+		    textpane_to_drawpane,
+		    mode_to_drawpane,
+		    screenlines,
+		    expected_screenlines,
+		    #
+		    panemode	     =>  minipanemode,
+		    panemode_state,
+		    #
+		    sitewatchers     =>  REF ([]:    List(  Null_Or((Id, g2d::Box )) -> Void  )),
+		    last_known_site  =>  REF NULL,
+		    #
+		    point	     =>  REF  point,									# Location of visible cursor in textmill.  Upperleft origin is { row => 0, col => 0 } (but is displayed to user as L1C1 to conform with standard text-editor practice).  This is in buffer (file) coordinates, not screen coordinates.
+		    mark	     =>  REF (NULL:		Null_Or(g2d::Point)),					# Location of the emacs-traditional buffer 'mark'.  If this is non-NULL, the 'mark' and 'point' delimit the current text selection in the buffer.
+		    lastmark	     =>  REF (NULL:		Null_Or(g2d::Point)),					# When we set 'mark' field to NULL we save its previous value in 'lastmark' field.  This gets used by exchange_point_and_mark in   src/lib/x-kit/widget/edit/fundamental-mode.pkg
+		    #													# For the minimill the following values will never be used, since the minimill doesn't have a modeline display:
+		    readonly	     =>  REF  FALSE,									# TRUE iff textmill contents are read-only.  This is a local cache of the master textmill value.
+		    dirty	     =>  REF  FALSE,									# TRUE iff textmill contents are modified.   This is a local cache of the master textmill value.
+		    name	     =>  REF  "<unknown>",								# Name  of textmill.                         This is a local cache of the master textmill value.
+		    quote_next	     =>  REF  NULL,									# Support for C-q.
+		    editfn_to_invoke =>  REF  NULL,									# Execute given editfn.  Supports (e.g.) query_replace -- this lets it read input from modeline and then continue.
+		    #
+		    screen_origin    =>	REF( g2d::point::zero ),							# Origin of screen relative to textmill contents:  (0,0) means we're showing top of buffer at top of textpane.
+		    #
+		    line_prefix	     =>  REF "",
+		    #
+		    minimill_screenlines => NULL
+		  };
+
+		panestate;
+	    };
+
+
+
+	fun with													# PUBLIC.  The point of the 'with' name is that GUI coders can write 'textpane::with { this => that, foo => bar, ... }.'
+	      {														# These ids are initially generated and assigned by 'with' in src/lib/x-kit/widget/edit/texteditor.pkg
+		textpane_id:		Id,										# Our own unique id.
+		screenlines_mark:	Id,										# This MARK marks our COL of src/lib/x-kit/widget/edit/screenline.pkg instances in the guipith. This is set up by src/lib/x-kit/widget/edit/texteditor.pkg.
+		textmill_spec:		mt::Textmill_Spec,								# 
+		minipanemode:		mt::Panemode,
+		mainpanemode:		mt::Panemode,
 
 		options:		List(Option)
 	      }
 	    =
-	    {	#######################################
+	    {
+		(mt::get__mill_to_millboss  "textpane::with")								# Find our port to src/lib/x-kit/widget/edit/millboss-imp.pkg
+		    ->
+		    mt::MILL_TO_MILLBOSS mill_to_millboss;
+
+ 		fun default_modeline_fn (MODELINE_FN_ARG a)
+		    =
+		    case a.message
+			#
+			THE message => message;
+
+			NULL =>
+			    {
+				dirty_readonly
+				    =
+				    case (a.dirty, a.readonly)
+					#
+					(FALSE, FALSE)	=> "  ";
+					(TRUE,  FALSE)	=> "**";
+					(FALSE, TRUE )	=> "%%";
+					(TRUE,  TRUE )	=> "%*";							# This can happen if user manually flips readonly flag after modifying buffer.
+				    esac;
+
+				sprintf  "%d. %s %s   L%d.%d   (%s)"
+					 a.pane_tag
+					 dirty_readonly
+					 a.name
+					(a.point.row+1)									# '+1's because lines and columns are internally numbered 0->(N-1), but user expects traditional numbering of 1->N.
+					(a.point.col+1)
+					 a.panemode
+				;
+			    };
+		    esac;
+
+
+		#######################################
 		# Top of per-imp state variable section
 		#
 
-		cursor__global			=  REF ({ row => 1, col => 0 }:	    g2d::Point);				# Location of visible cursor in textbuffer.  Upperleft origin is { row => 1, col => 0 } (but is displayed to user as L1C1 to conform with standard text-editor practice).  This is in buffer (file) coordinates, not screen coordinates.
+		widget_to_guiboss__global	=  REF (NULL:  Null_Or( { widget_to_guiboss: gt::Widget_To_Guiboss, textpane_id: Id }));
+		millboss_to_pane__global	=  REF (NULL:  Null_Or( b2p::Millboss_To_Pane ));   	
 
 		font_height__global		=  REF (NULL:  Null_Or( Int			    ));
-		textpane_to_textedit__global	=  REF (NULL:  Null_Or( p2e::Textpane_To_Textedit   ));
-		textpane_to_statusline__global	=  REF (NULL:  Null_Or( p2s::Textpane_To_Statusline ));
+		modeline_fn__global		=  REF default_modeline_fn;						# Generates string for modeline, typically via sprintf.
 
-		textpane_to_lineeditor__by_paneline
+		have_keyboard_focus__global	=  REF FALSE;
+
+		pane_tag__global		=  REF 0;								# A unique-among-textpanes number in the range 1-N assigned by renumber_panes() in   src/lib/x-kit/widget/edit/millboss-imp.pkg
+															# We display this on the modeline and it is used by "C-x o" (other_pane)	in   src/lib/x-kit/widget/edit/fundamental-mode.pkg
+
+		modeline_message__global	=  REF (NULL: Null_Or(String));						# Normally NULL: Used to temporarily display a message in the modeline, like "New file" or "No files need saving" or such.
+
+		subkeymap__global											# Normally NULL; Used to implement keys with prefixes by saving current subkeymap in it.
 		    =
-		    REF (im::empty:  im::Map(p2l::Textpane_To_Lineeditor));
-
-		widget_to_guiboss__global	=  REF (NULL:  Null_Or( { widget_to_guiboss: gt::Widget_To_Guiboss, textpane_id: iuw::Id }));
-	
-		sitewatchers_global		=  REF ([]:    List(  Null_Or((iuw::Id, g2d::Box )) -> Void  ));
+		    REF (NULL:  Null_Or( mt::Keymap ));
 
 
-		expected_lineeditors									# So we can tell when textpane_to_lineeditor__by_paneline is fully populated (for example).
-		    =
-		    REF 1;
+		minimill__global =  make_minimill  minipanemode								# The one-line minimill we use to interactively read in in arguments like filenames and search strings.  So far there doesn't seem to be any reason to make this a REF cell.
+				 :  Panestate;										# 
 
-		bogus_site
-		   =
-		   { col => -1,  wide => -1,
-		     row => -1,  high => -1
-		   }:						g2d::Box;
+		mainmill__global =  REF (minimill__global)								# This is a dummy initial value, overwritten by startup().
+				 :  Ref (Panestate);
 
-		last_known_site										# This should probably be Ref(Null_Or(g2d::Box)) -- forces client code to consider the NULL case. As it is, we could absentmindedly try using the bogus value somewhere. XXX SUCKO FIXME. (Ditto for the other widgets.)
-		    =
-		    REF (NULL:	Null_Or( g2d::Box ));
+		Editfn_Prompting_In_Progress
+		  =
+		  { promptingfor:	Ref(       mt::Promptfor      ),						# The editfn arg which we're currently prompting user to supply interactively via modeline minimill.
+		    to_promptfor:	Ref( List( mt::Promptfor    ) ),						# Remaining editfn args to prompt user for once above one is completely read.
+		    prompted_for:	Ref( List( mt::Prompted_Arg ) ),						# The editfn args which we've already read from user via modeline minimill.
+		    stage:		Ref(	   mt::Stage	      ),
+		    #
+		    editfn_node:		   mt::Editfn_Node,							# The editfn to call with the above args, once they are all read.
+		    valid_completions:	Null_Or( String -> List(String) ),						# If this is non-NULL then user is entering a commandname or filename or millname(=buffername) on the modeline, and given fn returns all valid completions of string-entered-so-far.
+		    default_choice:	Null_Or( String			)
+		  };
+		prompting__global											# This is normally NULL: we send keystrokes to mainmill__global to edit its contents.
+		    =													# When this is non-NULL  we send keystrokes to minimill__global to edit its contents -- a string being read interactively from user as an argument for an editfn.
+		    REF (NULL: Null_Or( Editfn_Prompting_In_Progress ));	
 
-		textpane_to_textbuffer__global
-		    =
-		    REF (NULL: Null_Or( t2t::Textpane_To_Textbuffer ));
+		Keystroke_Entry_State
+		  =
+		  { meta_is_set:	Ref( Bool ),									# TRUE after ESC has been hit.
+		    super_is_set:	Ref( Bool ),									# TRUE between press and release of windows/command key.
+		    doing_cntrlu:	Ref( Bool ),									# TRUE after user enters ^U (universal numeric prefix) until user enters something other than ^U or digits 0-9.
+		    done_cntrlu:	Ref( Bool ),									# 
+		    seen_digit:		Ref( Bool ),
+		    sign:		Ref( Int  ),
+		    numeric_prefix:	Ref( Int  )									# 
+		  };
+		keystroke_entry__global
+		  =
+		  { meta_is_set	    => REF FALSE,
+		    super_is_set    => REF FALSE,
+		    doing_cntrlu    => REF FALSE,
+		    done_cntrlu	    => REF FALSE,
+		    seen_digit	    => REF FALSE,
+		    sign	    => REF 1,
+		    numeric_prefix  => REF 0
+		  };	
+		  
+		
+		drawpane__global =  REF (NULL:  Null_Or( wit::Startup_Fn_Arg ));
 
-		fun get__textpane_to_textbuffer ()
-		    =
-		    case *textpane_to_textbuffer__global
-			#
-			THE textpane_to_textbuffer							# This is what we expect in practice.
-			 => textpane_to_textbuffer;
-
-			NULL => {   msg = "textpane_to_textbuffer__global not set?! -- textpane.pkg";	# This should be "impossible" because we set this global very early.
-				    log::fatal msg;
-				    raise exception FAIL msg;
-				}; 
-		    esac;
 
 		#
 		# End of state variable section
 		###############################
 
-		fun make_lineeditors_guipith
+
+
+		fun is_even (i: Int)
+		    =
+		    (i & 1) == 0;
+
+		fun make_screenlines_guipith
 		      (
-			lineeditor_count:	Int
+			screenline_count:	Int
 		      )
 		    =
-		    {	lineeditors =   make_lineeditors (lineeditor_count, [])				# NB: panelines run  1..lineeditor_count  not  0..lineeditor_count-1.
+		    {	screenlines =   make_screenlines  (screenline_count - 1,  [])					# NB: panelines run  0..screenline_count-1.
 					where
-					    fun make_lineeditors (0, result)
+					    fun make_screenlines (-1, result)
 						    =>
 						    result;
 
-						make_lineeditors (paneline, result_so_far)
+						make_screenlines (paneline, result_so_far)
 						    =>
-						    {   lineeditor
+						    {   screenline
 							    =
-							    lineeditor::with
+							    screenline::with
 							      {
 								paneline,
 								textpane_id,
-								textedit_id,
-								options	    =>  [ le::DOC   (sprintf "Lineeditor %d"  paneline),
-										  le::STATE { cursor => NULL, selected => NULL, text => sprintf "I am lineeditor %d"  paneline },
-										  le::PIXELS_HIGH_MIN 0
+								options	    =>  [ sl::DOC   (sprintf "Screenline %d"  paneline),
+										  sl::PIXELS_HIGH_MIN 0,
+										  #
+										  sl::STATE   { text	    =>  sprintf "I am screenline %d"  paneline,
+												selected    =>  NULL,
+												cursor_at   =>  p2l::NO_CURSOR,
+												prompt	    =>  "",
+												screencol0  =>  0,
+												background  =>  case (is_even paneline)						# Make background color of even-numbered screenlines white, but of odd-numbered ones just slightly bluish, to guide the eye across the screen.
+														    #
+														    TRUE  =>                                  rgb::white ;
+														    FALSE => rgb::rgb_mix01 (0.98, rgb::blue, rgb::white);
+														esac
+											      }
 										]
 							      };
 
-							make_lineeditors  (paneline - 1,  lineeditor ! result_so_far);
+							make_screenlines  (paneline - 1,  screenline ! result_so_far);
 						    };
 					    end;
 					end;
 
-			gt::XI_GUIPLAN  (gt::COL lineeditors);
+			gt::XI_GUIPLAN  (gt::COL screenlines);
 		    };
 
-		fun maybe_change_number_of_lineeditors ()
+		fun maybe_change_number_of_screenlines (ps: Panestate)
 		    =
 		    {   # We depend upon the state variables
 			#
@@ -452,131 +752,226 @@ herein
 			# coding.  Eventually it would be nice to
 			# have some methodology like CHR.						# CHR == Constraint Handling Rules, see https://dtai.cs.kuleuven.be/CHR/biblio.shtml  e.g. http://arxiv.org/abs/1406.2121
 			#
-			case (*font_height__global,  *last_known_site,  *widget_to_guiboss__global)
+			case (*font_height__global,  *ps.last_known_site,  *widget_to_guiboss__global)
 			    #
 			    (THE font_height, THE site, THE { widget_to_guiboss, textpane_id })
 				=>
-				{   # Decide how many lineeditors will fit comfortably.
+				{   # Decide how many screenlines will fit comfortably.
 				    #
 				    frame_pixels	 = 10;		# XXX SUCKO FIXME  We must have the actual number somewhere.
 				    pixels_between_lines =  2;
 
-				    number_of_statuslines = 1;
+				    number_of_modelines = 1;
 
 				    reasonable_line_count
 					=
 					(site.high - frame_pixels) / (font_height + pixels_between_lines);
 
-				    reasonable_lineeditor_count
+				    reasonable_screenline_count
 					=
-					reasonable_line_count - number_of_statuslines;
+					reasonable_line_count - number_of_modelines;
 
-				    if (reasonable_lineeditor_count != *expected_lineeditors)
+				    if (reasonable_screenline_count != *ps.expected_screenlines)
 					#
-					lineeditors_guipith_subtree
+					screenlines_guipith_subtree
 					    =
-					    make_lineeditors_guipith  reasonable_lineeditor_count;
+					    make_screenlines_guipith  reasonable_screenline_count;
 
-					full_guipith_tree
-					    =
-					    widget_to_guiboss.g.get_guipiths ();
-
-					revised_full_guipith_tree
-					    =
-					    gtj::guipith_map  (full_guipith_tree,  [ gtj::XI_MARK_MAP_FN do_mark ])
-						where
-						    fun do_mark (xi_mark:	gt::Xi_Mark)
-							=
-							if (same_id (xi_mark.id, lineeditors_mark))
-							    #
-							    xi_mark ->    { id:		Id, 
-									    doc:	String,
-									    widget:	gt::Xi_Widget_Type
-									  };
-							    xi_mark =	  { id,
-									    doc,
-									    widget =>	lineeditors_guipith_subtree
-									  };
-							    xi_mark;
-							else
-							    xi_mark;
-							fi;
-						end;
-
-					widget_to_guiboss.g.install_updated_guipiths
+					do_while_not {.
 					    #
-					    revised_full_guipith_tree;
+					    (widget_to_guiboss.g.get_guipiths ())
+						->
+						(gui_version, full_guipith_tree);
 
-					expected_lineeditors := reasonable_lineeditor_count;
+
+					    revised_full_guipith_tree
+						=
+						gtj::guipith_map  (full_guipith_tree,  [ gtj::XI_MARK_MAP_FN do_mark ])
+						    where
+							fun do_mark (xi_mark:	gt::Xi_Mark)
+							    =
+							    if (same_id (xi_mark.id, screenlines_mark))
+								#
+								xi_mark ->    { id:		Id, 
+										doc:		String,
+										widget:		gt::Xi_Widget_Type
+									      };
+								xi_mark =	  { id,
+										doc,
+										widget =>	screenlines_guipith_subtree
+									      };
+								xi_mark;
+							    else
+								xi_mark;
+							    fi;
+						    end;
+
+					    widget_to_guiboss.g.install_updated_guipiths
+						#
+						(gui_version, revised_full_guipith_tree);
+					};
+
+					ps.expected_screenlines := reasonable_screenline_count;
 				    fi;
 
 				};
 
 			    _ =>
-				{								# Insufficient information to reconfigure lineeditors so doing nothing.  (Eventually all required information will arrive.)
+				{								# Insufficient information to reconfigure screenlines so doing nothing.  (Eventually all required information will arrive.)
 				};	
 			esac;
 		    };
 
 
-		fun refresh_lineeditors ()
-		    =
-		    {   t2t = get__textpane_to_textbuffer ();
+		fun refresh_screenlines  (ps:  Panestate)					# Update screenline instances to reflect textmill contents.
+		    =										# "ps" == "panestate".
+		    {   ps.textpane_to_textmill
+			    ->
+			    mt::TEXTPANE_TO_TEXTMILL tb;					# "tb" == "textmill".
+
+			ts  = tb.get_textstate ();						# "ts" == "textstate".
 			#
-			ts  = t2t.get_textstate ();
+			ts -> { textlines:	mt::Textlines,					# Complete text contents of textmill.
+				editcount:	Int						# Count of edits applied.  Intended to allow clients to quickly detect whether any changes have been made since they last polled us.
+			      };								# By pro-actively fetching the entire textmill state we not only save inter-imp round trips, but more importantly guarantee that we do the complete redisplay on a single self-consistent state.
 
-			ts -> { textlines:	t2t::Textlines,					# Complete text contents of textbuffer.
-				editcount:	Int,						# Count of edits applied.  Intended to allow clients to quickly detect whether any changes have been made since they last polled us.
-				mark:		Null_Or(g2d::Point)				# Location of the emacs-traditional buffer 'mark'.  If this is non-NULL, the 'mark' and 'cursor' delimit the current text selection in the buffer.  NB: 'cursor' is per-textpane but 'mark' is per-textbuffer (=> shared between textpanes open on that textbuffer).
-			      };								# By pro-actively fetching the entire textbuffer state we not only save inter-imp round trips, but more importantly guarantee that we do the complete redisplay on a single self-consistent state.
+			point  =  *ps.point;
+			mark   =  *ps.mark;
 
-			cursor =  *cursor__global;
+			screen_origin	=  *ps.screen_origin;
 
-			apply do_line (1 .. *expected_lineeditors)
+			apply do_line (0 .. (*ps.expected_screenlines - 1))
 			    where
-				fun do_line (line_number: Int)
+				fun do_line (screen_line: Int)
 				    =
 				    {
-# nb {. sprintf "refresh_lineeditors: do_line/AAA (line_number=%d)" line_number; };
-					case (im::get (*textpane_to_lineeditor__by_paneline, line_number))
+					case (im::get (*ps.screenlines, screen_line))
 					    #
-					    THE textpane_to_lineeditor
+					    THE textpane_to_screenline
 						=>
-						{
-# nb {. sprintf "refresh_lineeditors: do_line/BBB: (line_number=%d) FOUND textpane_to_lineeditor" line_number; };
-						    line_key = line_number - 1;			# Because we number lines 1->N but numbered_lines numbers them 0->(N-1).
-
+						{   line_key = screen_line + screen_origin.row;		# Figure out which textlines entry should be displayed in this screenline.    NB: Internally lines are numbered 0->(N-1) (but we display them to user as 1-N).
+						    #
 						    line =  case (nl::find (textlines, line_key))
 								#
-								THE line => line;
-								NULL	 => "\n";
+								THE line =>  line;
+								NULL	 =>  mt::MONOLINE { string => "\n", prefix => NULL };										# We don't expect this; keeps compiler happy.
 							    esac;
-# nb {. sprintf "refresh_lineeditors: do_line/CCC: (line_number=%d) line='%s'" line_number line; };
+
+						    line_number = screen_line + screen_origin.row;
+
+						    my (selected, cursor_at)																# Figure out what part (if any) of line is part of the selected region, and if so which end (if either) the cursor is at.
+							=
+							if (not *have_keyboard_focus__global)
+							    #
+							    (NULL, p2l::NO_CURSOR);															# We do not have the keyboard focus, so display neither 'mark' nor 'point' (==cursor) in the textpane.
+							else
+							    case mark
+								#
+								THE mark
+								    =>
+								    if   (mark.row <  line_number  and  line_number <  point.row)   (THE (0, NULL),			p2l::NO_CURSOR		);	# Marked region starts before line and ends after it -- select entire line.
+								    elif (mark.row >  line_number  and  line_number >  point.row)   (THE (0, NULL),			p2l::NO_CURSOR		);	# Marked region starts before line and ends after it -- select entire line.
+								    #
+								    elif (mark.row <  line_number  and  line_number >  point.row)   (NULL,				p2l::NO_CURSOR		);	# Marked region is entirely before line -- select nothing.
+								    elif (mark.row >  line_number  and  line_number <  point.row)   (NULL,				p2l::NO_CURSOR		);	# Marked region is entirely after  line -- select nothing.
+								    #
+								    elif (mark.row <  line_number  and  line_number == point.row)   (THE (0, THE point.col),		p2l::CURSOR_AT_END	);	# Marked region starts before line and ends on it -- select leading part of line.
+								    elif (mark.row == line_number  and  line_number >  point.row)   (THE (0, THE mark.col ),		p2l::NO_CURSOR		);	# Marked region starts before line and ends on it -- select leading part of line.
+								    #
+								    elif (mark.row >  line_number  and  line_number == point.row)   (THE (point.col, NULL),		p2l::CURSOR_AT_START	);	# Marked region starts on line and ends after it -- select trailing part of line.
+								    elif (mark.row == line_number  and  line_number <  point.row)   (THE (mark.col,  NULL),		p2l::NO_CURSOR		);	# Marked region starts on line and ends after it -- select trailing part of line.
+								    #
+								    elif (mark.col < point.col)					    (THE (mark.col,  THE point.col),	p2l::CURSOR_AT_END	);	# Marked region starts and ends on line -- select middle part of line.
+								    else 							    (THE (point.col, THE mark.col ),	p2l::CURSOR_AT_START	);	# Marked region starts and ends on line -- select middle part of line.
+								    fi;
+
+								NULL =>																	# No mark set.
+								    if (point.row == line_number)				    (THE (point.col, THE point.col),	p2l::CURSOR_AT_END	);	# Display the cursor by itself.
+								    else							    (NULL,				p2l::NO_CURSOR		);	# Nothing to display in reverse video on this line.
+								    fi;
+							    esac;
+							fi;
 
 						    linestate
 						      =
-						      { cursor	  =>  cursor.row==line_number  ??  THE cursor.col  ::  NULL,
-							selected  =>  NULL,
-							text	  =>  string::chomp line	# Chomp it because lineeditor.com doesn't want the terminating newline (if any).
+						      { cursor_at,
+							selected,
+							text	    =>  string::chomp (mt::visible_line line),				# Chomp it because screenline.pkg doesn't want the terminating newline (if any).
+							prompt	    => *ps.line_prefix,
+							screencol0  =>  screen_origin.col,
+							background  =>  case (is_even screen_line)					# Make background color of even-numbered screenlines white, but of odd-numbered ones just slightly bluish, to guide the eye across the screen.
+									    #
+									    TRUE  =>                                  rgb::white ;
+									    FALSE => rgb::rgb_mix01 (0.98, rgb::blue, rgb::white);
+									esac
+
 						      };	
 
-						    textpane_to_lineeditor.set_state_to  linestate;
+						    textpane_to_screenline.set_state_to  linestate;
 						};
 
-					    NULL =>
+					    NULL =>						# Ignore this line because the relevant screenline.pkg instance has not yet registered with us (via millboss.pkg).
 						{
-# nb {. sprintf "refresh_lineeditors: do_line/MMM: (line_number=%d) found NO textpane_to_lineeditor" line_number; };
 						};
 					esac;
 				    };
 			    end;
-		    };
 
-#		    expected_lineeditors := reasonable_lineeditor_count;
-#
-#		textpane_to_lineeditor__by_paneline
-#		    =
-#		    REF (im::empty:  im::Map(p2l::Textpane_To_Lineeditor));
+
+			case (*prompting__global, ps.minimill_screenlines)			# Update modeline display appropriately, unless the minimill is active (which preempts the modeline screenline to display itself) or unless we *are* minimill.
+			    #
+			    (NULL, THE (REF minimill_screenlines))				# *prompting__global==NULL so minimill is not active and we can go ahead and update the modeline, which displays on the same screenline as the minimill.
+				=>
+				case (im::get (minimill_screenlines, 0))			# We expect a single screenline, stored under key 0 (albeit internally marked as paneline -1).
+				    #
+				    THE textpane_to_screenline
+					=>
+					{   ps.textpane_to_textmill				# Note that we're writing info *about* the main textpane *to* the modeline textpane.
+						->
+						mt::TEXTPANE_TO_TEXTMILL tb;
+
+					    tb.app_to_mill ->  mt::APP_TO_MILL am;
+					    ps.panemode    ->  mt::PANEMODE    mm;
+
+					    modeline_fn_arg
+						=
+						MODELINE_FN_ARG
+						  {
+						    point	=>  *ps.point,
+						    mark	=>  *ps.mark,
+						    lastmark	=>  *ps.lastmark,
+						    #
+						    dirty	=>  *ps.dirty,
+						    readonly	=>  *ps.readonly,
+						    pane_tag	=>  *pane_tag__global,
+						    name	=>   am.get_name (),
+						    panemode	=>   mm.name,
+						    message	=>  *modeline_message__global
+						  };
+
+					    modeline_fn   =  *modeline_fn__global;
+
+					    modeline_text =  modeline_fn  modeline_fn_arg;
+
+					    modeline_state
+					      =
+					      { cursor_at   =>  p2l::NO_CURSOR,
+						selected    =>  NULL,
+						text	    =>  modeline_text,
+						prompt	    =>  "",
+						screencol0  =>  0,
+						background  =>  rgb::white
+					      };	
+
+					    textpane_to_screenline.set_state_to  modeline_state;
+					};
+
+				    NULL => ();							# This case can happen if we haven't gotten our screenline notification yet.
+				esac;
+
+			    _ => ();								# Skip modeline update -- either the minimill is active or we *are* the minimill.
+			esac;
+		    };
 
 
 		fun needs_redraw_gadget_request ()
@@ -589,22 +984,25 @@ herein
 
 		fun note_site
 		      (
-			id:		iuw::Id,
+			id:		Id,
 			site:		g2d::Box
 		      )
 		    =
-		    if(*last_known_site != THE site)
-			last_known_site := THE site;
+		    {   ps  =  *mainmill__global;
 			#
-			maybe_change_number_of_lineeditors ();
+			if(*ps.last_known_site != THE site)
+			    ps.last_known_site := THE site;
 
-			apply tell_watcher *sitewatchers_global
-			    where
-				fun tell_watcher sitewatcher
-				    =
-				    sitewatcher (THE (id,site));
-			    end;
-		    fi;
+			    maybe_change_number_of_screenlines ps;
+
+			    apply  tell_watcher  *ps.sitewatchers
+				where
+				    fun tell_watcher sitewatcher
+					=
+					sitewatcher (THE (id,site));
+				end;
+			fi;
+		    };	
 
 		fun default_redraw_fn (REDRAW_FN_ARG a)
 		    =
@@ -617,6 +1015,7 @@ herein
 			frame_indent_hint	=  a.frame_indent_hint;
 			site			=  a.site;
 			theme			=  a.theme;
+			have_keyboard_focus	=  a.have_keyboard_focus;
 
 			note_site (id, site);
 
@@ -641,26 +1040,18 @@ herein
 				fontnames;
 			    };
 
-			fun get_text_dimensions (text: String)
-			    =
-			    {   g =  wti::get__guiboss_to_topwindow  theme;
-				#
-				font = g.get_font (get_fontnames ());
+			{   g =  wti::get__guiboss_to_hostwindow  theme;
+			    #
+			    font = g.get_font (get_fontnames ());
 
-				font_height__global
-				    :=
-				    THE (font.font_height.ascent + font.font_height.descent);
+			    font_height__global
+				:=
+				THE (font.font_height.ascent + font.font_height.descent);
 
-				maybe_change_number_of_lineeditors ();
+			    ps  =  *mainmill__global;
 
-				{ font_ascent      =>  font.font_height.ascent,
-				  font_descent     =>  font.font_height.descent,
-				  length_in_pixels =>  font.string_length_in_pixels text
-				};
-			    };
-
-# Currently just for side-effect:
-get_text_dimensions "foo";
+			    maybe_change_number_of_screenlines ps;
+			};
 
 			frame_indent_hint
 			  ->
@@ -683,15 +1074,15 @@ get_text_dimensions "foo";
 			    relief			=  wt::RIDGE;
 			    thick			=  5;
 
-			    stipulate												# then carefully work through the code here based on that.  XXX SUCKO FIXME.
+			    stipulate												# 
 				inset = 6;
 			    herein
 				fun frame_vertices ({ row, col, wide, high }: g2d::Box)						#
-					= 												#
-					[ { col=> col + inset - 1,        row=> row + inset		   },				# upper-left
-					  { col=> col + inset - 1,        row=> row + high - (inset+1) },				# lower-left
-					  { col=> col + wide - (inset+1), row=> row + high - (inset+1) },				# lower-right
-					  { col=> col + wide - (inset+1), row=> row + inset		   }				# upper-right
+					= 											#
+					[ { col=> col + inset - 1,        row=> row + inset		   },			# upper-left
+					  { col=> col + inset - 1,        row=> row + high - (inset+1) },			# lower-left
+					  { col=> col + wide - (inset+1), row=> row + high - (inset+1) },			# lower-right
+					  { col=> col + wide - (inset+1), row=> row + inset		   }			# upper-right
 					];
 			    end;
 
@@ -701,11 +1092,12 @@ get_text_dimensions "foo";
 
 			    foreground_box    =  g2d::box::make_nested_box (background_box, foreground_indent);			# This is the window area reserved for the widgets we're framing.
 
-			    background_displaylist 											# The 'background' for the frame is the part not covered by the 3d polygon.
-				=													# In particular, we do NOT want to draw over the inner rectangle reserved
-				[ gd::COLOR												# for the widgets within the frame.
+			    background_displaylist 										# The 'background' for the frame is the part not covered by the 3d polygon.
+				=												# In particular, we do NOT want to draw over the inner rectangle reserved
+				[ gd::COLOR											# for the widgets within the frame.
 				    (
-				      palette.surround_color,
+				      have_keyboard_focus ?? rgb::black								# To make keyboard focus really clear, we draw the surround dead black when we have it.
+							  :: palette.surround_color,
 				      #
 				      [ gd::FILLED_BOXES (g2d::box::subtract_box_b_from_box_a
 							   {
@@ -721,14 +1113,18 @@ get_text_dimensions "foo";
 
 			    foreground_displaylist
 				=
-				(*theme.polygon3d  palette
-				  {
-				    points,
-				    thick,
-				    relief
-				  }
-				);
-
+				if have_keyboard_focus
+				    #
+				    [];												# To make keyboard focus really clear, we draw the surround dead black when we have it, with no ridge/groove stuff.
+				else
+				    (*theme.polygon3d  palette
+				      {
+					points,
+					thick,
+					relief
+				      }
+				    );
+				fi;
 
 			    stipulate
 				frame_outer_limit =  g2d::box::make_nested_box (background_box, 3 );
@@ -736,8 +1132,13 @@ get_text_dimensions "foo";
 			    herein
 				fun point_in_gadget (point: g2d::Point)								# A fn which will return TRUE iff the point is on the 3d frame itself, not the surround -- much less the inner widgets.
 				    =
-				    (    (g2d::box::point_in_box (point, frame_outer_limit)))  and
-				    (not (g2d::box::point_in_box (point, frame_inner_limit)));
+				    if have_keyboard_focus
+					(    (g2d::box::point_in_box (point, background_box)))  and
+					(not (g2d::box::point_in_box (point, foreground_box)));
+				    else
+					(    (g2d::box::point_in_box (point, frame_outer_limit)))  and
+					(not (g2d::box::point_in_box (point, frame_inner_limit)));
+				    fi;
 			    end;
 
 			    point_in_gadget =  THE  point_in_gadget;
@@ -746,7 +1147,7 @@ get_text_dimensions "foo";
 			    { displaylist, point_in_gadget };
 
 			else
-			    # This branch of the 'if' handles all the frame_indent_hint
+			    # This branch of the 'if' handles all the frame_indent_hint						# XXX SUCKO FIXME we're not implementing the black-frame-when-keyboard-focus stuff here yet.
 			    # cases that the original code really wasn't set up to handle:
 			    #
 			    if (pixels_for_top_of_frame    == 0
@@ -802,15 +1203,1721 @@ get_text_dimensions "foo";
 				{ displaylist, point_in_gadget };
 			    fi;
 			fi;
+		    };												# fun default_redraw_fn
 
-
-		    };
-
-		fun default_mouse_click_fn (MOUSE_CLICK_FN_ARG a)
+		fun default_mouse_click_fn (MOUSE_CLICK_FN_ARG a)						# Process a mouseclick on the frame we draw around the textpane. (Vs the screenline.pkg instances within the textpane -- these come via screenline__mouse_click_fn.)
 		    =
 		    {
 			();
 		    };
+
+		fun merge_modifier_keys_info									# Make ESC look like normal meta (mod1) modifier key.  Ditto Windows/Command key as super (mod4) modifier key.
+		      {
+			modifier_keys_state:		evt::Modifier_Keys_State,
+			meta_is_set:			Bool,
+			super_is_set:			Bool
+		      }												# Using a record rather than tuple reduces the risk of caller getting meta and super args interchanged.
+		      :					evt::Modifier_Keys_State
+		    =
+		    {   modifier_keys_state
+			  ->
+			  { shift_key_was_down:		Bool,
+			    shiftlock_key_was_down:	Bool,
+			    control_key_was_down:	Bool,
+			    mod1_key_was_down:		Bool,							# ALT, which emacs traditionally interprets as META modifier key.
+			    mod2_key_was_down:		Bool,
+			    mod3_key_was_down:		Bool,
+			    mod4_key_was_down:		Bool,							# Windows/Command key, which emacs traditionally interprets as SUPER modifier key.
+			    mod5_key_was_down:		Bool
+			  };
+
+			modifier_keys_state
+			  =
+			  { shift_key_was_down,
+			    shiftlock_key_was_down,
+			    control_key_was_down,
+			    mod1_key_was_down	    =>	mod1_key_was_down or meta_is_set, 
+			    mod2_key_was_down,
+			    mod3_key_was_down,
+			    mod4_key_was_down	    =>	mod4_key_was_down or super_is_set, 
+			    mod5_key_was_down
+			  };
+
+			modifier_keys_state;
+		    };
+
+		Editfn_Out											# mt::Editfn_Out in a more convenient form.
+		  =
+		  { textlines_changed:		Bool,		textlines:	mt::Textlines,
+		    point_changed:		Bool,		point:			g2d::Point,
+		    mark_changed:		Bool,		mark:		Null_Or(g2d::Point),
+		    lastmark_changed:		Bool,		lastmark:	Null_Or(g2d::Point),
+		    screen_origin_changed:	Bool,		screen_origin:		g2d::Point,
+		    textmill_changed:		Bool,		textmill:	Null_Or( mt::Textpane_To_Textmill ),
+		    readonly_changed:		Bool,		readonly:	Bool,
+		    string_entry_complete:	Bool,		quit:		Bool,
+		    commence_kmacro:		Bool,
+		    conclude_kmacro:		Bool,
+		    activate_kmacro:		Null_Or(Int),							# Int is repeat_factor.
+		    editfn_failed:		Bool,		save:		Bool,
+		    message:			Null_Or(String),
+		    quote_next:			Null_Or( mt::Keymap_Node ),
+		    editfn_to_invoke:		Null_Or( mt::Keymap_Node ),
+		    execute_command:		Null_Or(String)
+		  };
+
+		fun parse_editfn_out (editfn_out: mt::Editfn_Out)
+		    =
+		    {   ps  =  *mainmill__global;
+			#
+			r = { textlines_changed		=> FALSE,	textlines     =>  nl::empty,
+			      point_changed		=> FALSE,	point	      => *ps.point,
+			      mark_changed		=> FALSE,	mark	      => *ps.mark,
+			      lastmark_changed		=> FALSE,	lastmark      => *ps.lastmark,
+			      screen_origin_changed	=> FALSE,	screen_origin => *ps.screen_origin,
+			      textmill_changed		=> FALSE,	textmill      =>  NULL,
+			      readonly_changed		=> FALSE,	readonly      =>  FALSE,
+			      string_entry_complete	=> FALSE,	quit	      =>  FALSE,
+			      commence_kmacro		=> FALSE,
+			      conclude_kmacro		=> FALSE,
+			      activate_kmacro		=> NULL,
+			      editfn_failed		=> TRUE,	save	      =>  FALSE,
+			      quote_next		=> NULL,
+			      editfn_to_invoke		=> NULL,
+			      execute_command		=> NULL,
+			      #	
+			      message			=> case editfn_out WORK _ =>  NULL;
+								           FAIL m =>  THE m;
+							   esac
+			    };
+
+			case editfn_out
+			    #
+			    FAIL _       =>                           r ;
+			    WORK options => process_editfn_options (options, r);
+			esac;
+		    }
+		    where
+			fun process_editfn_options
+			      (	
+				options:	List(mt::Editfn_Out_Option),
+				r:		Editfn_Out
+			      )	
+			    =
+			    {   my_textlines		    = REF r.textlines;
+				my_textlines_changed	    = REF r.textlines_changed;
+				#
+				my_point		    = REF r.point;
+				my_point_changed	    = REF r.point_changed;
+				#
+				my_mark			    = REF r.mark;
+				my_mark_changed		    = REF r.mark_changed;
+				#
+				my_lastmark		    = REF r.lastmark;
+				my_lastmark_changed	    = REF r.lastmark_changed;
+				#
+				my_screen_origin	    = REF r.screen_origin;
+				my_screen_origin_changed    = REF r.screen_origin_changed;
+				#
+				my_textmill		    = REF r.textmill;
+				my_textmill_changed	    = REF r.textmill_changed;
+				#
+				my_message		    = REF r.message;
+				#
+				my_readonly		    = REF r.readonly;
+				my_readonly_changed	    = REF r.readonly_changed;
+				#
+				my_quit			    = REF r.quit;
+				my_string_entry_complete    = REF r.string_entry_complete;
+				my_save			    = REF r.save;
+				my_quote_next		    = REF r.quote_next;
+				my_editfn_to_invoke	    = REF r.editfn_to_invoke;
+				my_execute_command	    = REF r.execute_command;
+				#
+				my_commence_kmacro	    = REF r.commence_kmacro;
+				my_conclude_kmacro	    = REF r.conclude_kmacro;
+				my_activate_kmacro	    = REF r.activate_kmacro;
+
+				apply do_option options
+				where
+				    fun do_option (mt::TEXTLINES textlines	) =>  { my_textlines        := textlines;	my_textlines_changed	    := TRUE;	};
+					do_option (mt::POINT     point    	) =>  { my_point            := point;		my_point_changed	    := TRUE;	};
+					do_option (mt::MARK      mark	  	) =>  { my_mark		    := mark;		my_mark_changed		    := TRUE;	};
+					do_option (mt::LASTMARK  lastmark 	) =>  { my_lastmark	    := lastmark;	my_lastmark_changed	    := TRUE;	};
+					do_option (mt::SCREEN_ORIGIN so		) =>  { my_screen_origin    := so;		my_screen_origin_changed    := TRUE;	};
+					do_option (mt::TEXTMILL      tb		) =>  { my_textmill         := THE tb;		my_textmill_changed	    := TRUE;	};
+					do_option (mt::READONLY      ro		) =>  { my_readonly         :=     ro;		my_readonly_changed	    := TRUE;	};
+					do_option (mt::EDIT_HISTORY  ro		) =>  { 										};	# This is handled entirely in   src/lib/x-kit/widget/edit/textmill.pkg
+					do_option (mt::MODELINE_MESSAGE  m	) =>  { my_message	    := THE  m;							};
+					do_option (mt::EXECUTE_COMMAND   command) =>  { my_execute_command  := THE  command;						};
+					do_option (mt::QUOTE_NEXT        editfn	) =>  { my_quote_next	    := THE  editfn;						};
+					do_option (mt::EDITFN_TO_INVOKE  editfn	) =>  { my_editfn_to_invoke := THE  editfn;						};
+					do_option (mt::QUIT		  	) =>  { my_quit		    := TRUE;							};
+					do_option (mt::STRING_ENTRY_COMPLETE	) =>  { 					my_string_entry_complete  := TRUE;	};
+					do_option (mt::SAVE			) =>  { my_save             := TRUE;							};
+					#
+					do_option (mt::COMMENCE_KMACRO		) =>  { my_commence_kmacro  := TRUE;							};
+					do_option (mt::CONCLUDE_KMACRO		) =>  { my_conclude_kmacro  := TRUE;							};
+					do_option (mt::ACTIVATE_KMACRO	       i) =>  { my_activate_kmacro  := THE i;							};
+				    end;	
+				end;
+
+				{ textlines		    => *my_textlines,
+				  textlines_changed	    => *my_textlines_changed,
+				  #
+				  point			    => *my_point,
+				  point_changed		    => *my_point_changed,
+				  #
+				  mark			    => *my_mark,
+				  mark_changed		    => *my_mark_changed,
+
+				  lastmark		    => *my_lastmark,
+				  lastmark_changed	    => *my_lastmark_changed,
+
+				  screen_origin		    => *my_screen_origin,
+				  screen_origin_changed	    => *my_screen_origin_changed,
+
+				  textmill		    => *my_textmill,
+				  textmill_changed	    => *my_textmill_changed,
+
+				  message		    => *my_message,
+				  execute_command	    => *my_execute_command,
+
+				  readonly		    => *my_readonly,
+				  readonly_changed	    => *my_readonly_changed,
+
+				  quit			    => *my_quit,
+				  string_entry_complete	    => *my_string_entry_complete,
+				  save			    => *my_save,
+				  quote_next		    => *my_quote_next,
+				  editfn_to_invoke	    => *my_editfn_to_invoke,
+
+				  commence_kmacro	    => *my_commence_kmacro,
+				  conclude_kmacro	    => *my_conclude_kmacro,
+				  activate_kmacro	    => *my_activate_kmacro,
+
+				  editfn_failed		    => FALSE
+				};
+			    };
+		    end;
+
+
+		fun set_up_to_read_interactive_arg_from_modeline
+		      (
+			editfn_node:		mt::Editfn_Node,						# This is the editfn for which we are interactively reading arguments from user.
+			this_arg:		mt::Promptfor,							# This is the editfn arg which we are interactively reading from user at the moment.
+			remaining_args:	  List(	mt::Promptfor ),						# These are the editfn args remaining to be interactively read from user.
+			read_so_far:	  List( mt::Prompted_Arg ),						# These are the editfn args already interactively read from user.
+			widget_to_guiboss:	gt::Widget_To_Guiboss						# This is our port to guiboss (and indirectly to millboss).
+		      )
+		    =
+		    {	my { prompt, minimill_seed, incremental, valid_completions, default_choice }		# Prompt to display (uneditable) and initial minimill contents (editable).
+			    =
+			    case this_arg
+				#
+				mt::STRING { prompt, doc }
+				    =>
+				    { prompt,
+				      minimill_seed	=>  "",
+				      incremental	=>  FALSE,
+				      valid_completions =>  NULL,
+				      default_choice    =>  NULL
+				    };
+
+				mt::COMMANDNAME { prompt, doc }
+				    =>
+				    {   fun valid_completions (s: String): List(String)				# 's' will contain a partial commandname being typed on the modeline.  We want to return a sorted list of all commandnames starting with 's'.
+					    =
+					    {   all_known_editfns_by_name					# Get the name->val map.
+						    =
+						    mt::get_all_known_editfns_by_name ();
+
+						all_commandnames						# Get just the names.
+						    =
+						    sm::keys_list  all_known_editfns_by_name;
+
+						relevant_commandnames						# Get just the names starting with 's'.
+						    =
+						    list::filter
+						        (string::is_prefix s)
+							all_commandnames;
+
+						relevant_commandnames;
+					    };
+ 
+					{ prompt,
+					  minimill_seed	    =>  "",
+					  incremental	    =>  FALSE,
+					  valid_completions =>  THE valid_completions,
+					  default_choice    =>  NULL
+					};
+				    };
+
+				mt::MILLNAME { prompt, doc }
+				    =>
+				    {
+					fun valid_completions (millname: String): List(String)			# 'millname' will contain a partial millname (emacs "buffername") being typed on the modeline.  We want to return a sorted list of all millnames starting with 'millname'.
+					    =
+					    {
+						all_mills_by_name
+						    =
+						    mill_to_millboss.get_mills_by_name ();
+
+					    	all_millnames
+						    =
+						    sm::keys_list  all_mills_by_name;
+
+						relevant_millnames						# Get just the millnames starting with 'millname'.
+						    =
+						    list::filter
+							(string::is_prefix millname)
+							all_millnames;
+
+						relevant_millnames;
+					    };
+
+					my (prompt, default_choice)
+					    =
+					    case (find_freshest_invisible_mill  widget_to_guiboss)
+						#
+						THE mill_info
+						    =>
+						    ( sprintf "%s (default %s): " prompt mill_info.name,
+						      THE mill_info.name
+						    );
+
+						NULL => (prompt + ": ", NULL);					# There must be no invisible mills.
+					    esac;
+
+					{ prompt,
+					  minimill_seed	    =>  "",
+					  incremental	    =>  FALSE,
+					  valid_completions =>  THE valid_completions,
+					  default_choice
+					};
+				    };
+
+				mt::FILENAME { prompt, doc }
+				    =>
+				    {	cwd = psx::current_directory ();					# Returns something like  "/mythryl7/mythryl7.110.58/mythryl7.110.58".
+					#
+					fun valid_completions (pathname: String): List(String)			# 'pathname' will contain a partial pathname being typed on the modeline.  We want to return a sorted list of all filepaths starting with 'pathname'.
+					    =
+					    {	dirname  =  sj::dirname  pathname;				# Directory part of path, with no trailing slash.
+						basename =  sj::basename pathname; 				# Filename  part of path, with no directory component.
+
+						filenames_in_dir =  dir::file_names'  dirname;			# Get all filenames (including dotfiles but not directory names) in directory 'dirname'.
+
+						relevant_filenames_in_dir					# Get just the filenames starting with 'basename'.
+						    =
+						    if (basename == "")
+							#
+							filenames_in_dir;
+						    else
+							list::filter
+							    (string::is_prefix basename)
+							    filenames_in_dir;
+						    fi;
+
+						relevant_filepaths_in_dir					# Expand the filenames into full filepaths by prepending 'dirname'.
+						    =
+						    map  do_filename  relevant_filenames_in_dir
+							where
+							    fun do_filename (filename: String)
+								=
+								dirname + "/" + filename;
+							end;
+
+						relevant_filepaths_in_dir;
+					    };
+
+					{ prompt,
+					  minimill_seed	    =>  cwd + "/",
+					  incremental	    =>  FALSE,
+					  valid_completions =>  THE valid_completions,
+					  default_choice    =>  NULL
+					};
+				    };
+
+				mt::INCREMENTAL_STRING { prompt, doc }
+				    =>
+				    { prompt,
+				      minimill_seed	=>  "",
+				      incremental	=>  TRUE,
+				      valid_completions =>  NULL,
+				      default_choice    =>  NULL
+				    };
+			    esac;
+
+			mm = minimill__global;
+
+			mm.line_prefix	:=  prompt;
+
+			mm.point										# Set minimill cursor at end of text seeded into minimill.
+			  :=
+			  { row =>  0,
+			    col =>  string::length_in_chars  minimill_seed
+			  };
+
+			mm.textpane_to_textmill
+			    ->
+			    mt::TEXTPANE_TO_TEXTMILL tb;
+
+			tb.set_lines
+			  [
+			    minimill_seed
+			  ];
+
+			editfn_prompting_in_progress
+			  =
+			  { promptingfor =>  REF  this_arg,
+			    to_promptfor =>  REF  remaining_args,
+			    prompted_for =>  REF  read_so_far,
+			    stage	 =>  REF  mt::INITIAL,
+			    editfn_node,
+			    valid_completions,
+			    default_choice
+			  };
+
+			prompting__global
+			    :=
+			    THE editfn_prompting_in_progress;
+
+			refresh_screenlines mm;
+		    };
+
+
+		fun invoke_editfn										# Now have editfn to execute for this keystroke. Go read any interactive args it needs from user and then call it.
+		      (
+			editfn:			    mt::Keymap_Node,						# Read any interactive args required by editfn, then execute it via do_edit
+			keystring:		    String,							# User keystroke that invoked this editfn.
+			ps:			    Panestate,
+			widget_to_guiboss:	    gt::Widget_To_Guiboss,
+			to:			    Replyqueue,							# Used to call 'pass_*' methods in other imps.
+			#	
+			note_textmill_statechange:  (mt::Outport, mt::Textmill_Statechange) -> Void 
+		      )
+		    :				    Void
+		    =
+		    case editfn
+			#
+			mt::EDITFN (editfn_node  as  mt::PLAIN_EDITFN node)
+			    =>
+			    if (node.args == [])								# No interactively-read args needed by this editfn so go ahead and call it.
+				#
+				numeric_prefix
+				    =
+				    if *keystroke_entry__global.done_cntrlu
+					#
+					 THE *keystroke_entry__global.numeric_prefix;
+				    else NULL;
+				    fi;
+
+				keystroke_entry__global.doing_cntrlu   := FALSE;				# This should not be needed.
+				keystroke_entry__global.done_cntrlu    := FALSE;
+				keystroke_entry__global.numeric_prefix := 0;
+
+				do_edit
+				  (
+				    editfn_node,
+				    keystring,
+				    ps,
+				    [],
+				    numeric_prefix,
+				    widget_to_guiboss,
+				    to,
+				    note_textmill_statechange
+				  );
+			    else										# This editfn wants some args entered interactively via modeline so set up to read them.
+
+				this_arg       =  head  node.args;
+				remaining_args =  tail  node.args;
+
+				set_up_to_read_interactive_arg_from_modeline
+				  (
+				    editfn_node,
+				    this_arg,
+				    remaining_args,
+				    [],
+				    widget_to_guiboss
+				  );
+			    fi;
+
+			mt::EDITFN (mt::FANCY_EDITFN  /* node */)
+			    =>
+			    nb {. "mt::FANCY_EDITFN unsupported  -- textpane.pkg"; };
+
+			mt::SUBKEYMAP subkeymap
+			    =>
+			    subkeymap__global := THE subkeymap;
+
+			mt::UNDEFINED										# This is used to undefine a keystroke sequence which is defined by an ancestor of the current keymap.  Possibly we should beep or post a modeline message or such.
+			    =>
+			    ();
+		    esac
+
+		also
+		fun do_edit											# Main fn to invoke an editfn in (e.g.) fundamental-mode.pkg once the keystrokes invoking it are processed and the corresponding editfn located and any required user arguments prompted for and entered interactively.
+		      (
+			editfn_node:		mt::Editfn_Node,
+			keystring:		String,								# User keystroke that invoked this editfn. To date we don't seem to need the full gt::Keystroke_Info record here, so we favor keeping life simple until forced to complicate.
+			ps:			Panestate,
+			prompted_args:		List( mt::Prompted_Arg ),
+			numeric_prefix:		Null_Or(Int),
+			widget_to_guiboss:	gt::Widget_To_Guiboss,
+			to:			Replyqueue,							# Used to call 'pass_*' methods in other imps.
+			#
+			note_textmill_statechange: (mt::Outport, mt::Textmill_Statechange) -> Void 
+		      )
+		    =
+		    {   ps.textpane_to_textmill
+			    ->
+			    mt::TEXTPANE_TO_TEXTMILL  tb;
+			#
+			point_and_mark      = { point => *ps.point,
+						mark  => *ps.mark
+					      };
+			lastmark	    = *ps.lastmark;
+			log_undo_info       = TRUE;
+
+			visible_lines	    = *ps.expected_screenlines;
+			screen_origin	    = *ps.screen_origin;
+
+			valid_completions   =   case *prompting__global
+						    #
+						    THE p =>  p.valid_completions;
+						    NULL  =>  NULL;
+						esac;
+
+			edit_arg  =   { keystring,
+					numeric_prefix,
+					prompted_args,
+					point_and_mark,
+					lastmark,
+					screen_origin,
+					visible_lines,
+					log_undo_info,
+					#
+					pane_tag	     => *pane_tag__global,
+					pane_id		     => textpane_id,
+					editfn_node,
+					widget_to_guiboss,
+					#
+					mainmill_modestate   =>  (*mainmill__global).panemode_state,
+					minimill_modestate   =>  ( minimill__global).panemode_state,
+
+					textpane_to_textmill =>  ps.textpane_to_textmill,
+					mode_to_drawpane     => *ps.mode_to_drawpane,
+					valid_completions
+				      };
+
+
+														# Originally we had here
+														#
+														#     tb.pass_edit_result  edit_arg
+														# 	    to
+														# 	    {.  (parse_editfn_out #editfn_out) ... }
+														#
+														# but it became obvious when running keystroke macros that
+														# this results in a bad race condition because we can fire
+														# off multiple editfn calls to textmill before processing the
+														# return values, meaning for example that 'point' would not
+														# get updated as expected between editfn calls.  So we switched
+														# to using synchronous 'tb.get_edit_result' calls instead.
+
+			editfn_out = tb.get_edit_result  edit_arg;						# NB:  Here we do the actual edit in the textmill microthread to guarantee proper mutual exclusion of concurrent edits on the textfuffer.
+
+			do_editfn_out
+			  {
+			    editfn_out,
+			    widget_to_guiboss,
+			    ps,
+			    note_textmill_statechange,
+			    to,
+			    keystring,
+			    numeric_prefix
+			  };
+		    }
+
+		also
+		fun do_editfn_out										# Main fn to invoke an editfn in (e.g.) fundamental-mode.pkg once the keystrokes invoking it are processed and the corresponding editfn located and any required user arguments prompted for and entered interactively.
+		      {
+			editfn_out:			mt::Editfn_Out,
+			widget_to_guiboss:		gt::Widget_To_Guiboss,
+			ps:				Panestate,
+			note_textmill_statechange:	(mt::Outport, mt::Textmill_Statechange) -> Void ,
+			to:				Replyqueue,						# Used to call 'pass_*' methods in other imps.
+			keystring:			String,								# User keystroke that invoked this editfn. To date we don't seem to need the full gt::Keystroke_Info record here, so we favor keeping life simple until forced to complicate.
+			numeric_prefix:			Null_Or(Int)
+		      }
+		    =	
+		    {
+			(parse_editfn_out  editfn_out)
+			    ->
+			    { textlines_changed,	textlines, 
+			      point_changed,		point,	 
+			      mark_changed,		mark,
+			      lastmark_changed,		lastmark,
+			      screen_origin_changed,	screen_origin,
+			      textmill_changed,		textmill,
+			      message,
+			      execute_command,
+			      readonly_changed,		readonly,
+			      #	
+			      string_entry_complete,	quit,
+			      editfn_failed,		save,
+			      quote_next,
+			      editfn_to_invoke,
+			      #	
+			      commence_kmacro,
+			      conclude_kmacro,
+			      activate_kmacro
+			    };
+
+			if editfn_failed									# Editfn was not able to run to completion.
+			    #
+			    modeline_message__global :=  message;						# 'message' will contain the FAIL diagnostic sstring.
+
+			    {   macro_state									# Clear all ephemeral keystroke-macro state.
+				    =										# keystroke macros are global to all textpanes, hence use of global storage here.
+				    kmj::get_or_make__global_keystroke_macro_state
+					#
+					widget_to_guiboss.g;
+				#
+				macro_state
+				  =
+				  { default_macro		=>  macro_state.default_macro,			# Preserve existing default macro definition.
+				    definition_in_progress	=>  NULL,					# Cancel any macro definition in progress.
+				    execution_in_progress	=>  NULL					# Cancel any macro execution  in progress. 
+				  };
+				#
+				kmj::update__global_keystroke_macro_state
+				  (
+				    widget_to_guiboss.g,
+				    macro_state
+				  );
+			    };
+
+			    refresh_screenlines ps;								# Display the FAIL diagnostic on the modeline.
+			else
+
+			    if commence_kmacro									# Handle a COMMENCE_KMACRO request from editfn.  ("C-x (".)
+				#
+				macro_state									# Get current macro state.
+				    =
+				    kmj::get_or_make__global_keystroke_macro_state
+					#
+					widget_to_guiboss.g;
+
+				macro_state									# Update one field.  Yes, functional record updates would be nice...
+				  =
+				  { definition_in_progress  =>  THE ([]: List( gt::Keystroke_Info )),		# Mark a keystroke macro definition as being in progress.
+				    #
+				    default_macro	    =>  macro_state.default_macro,
+				    execution_in_progress   =>	macro_state.execution_in_progress
+				  };
+
+				kmj::update__global_keystroke_macro_state					# Save state back.  Technically there's a race condition here with other microtheads; I'm not going to worry about it.
+				  (										# For an example of one way to eliminate this race condition see Gadget_To_Guiboss.get_guipiths + Gadget_To_Guiboss.install_updated_guipiths.
+				    widget_to_guiboss.g,
+				    macro_state
+				  );
+			    fi;
+
+			    if conclude_kmacro									# Handle a CONCLUDE_KMACRO request from editfn.  ("C-x )".)
+				#
+				macro_state									# Get current macro state.
+				    =
+				    kmj::get_or_make__global_keystroke_macro_state
+					#
+					widget_to_guiboss.g;
+
+				case macro_state.definition_in_progress						# If there's a kmacro definition in progress, mark it as complete and save it as new default kmacro.
+				    #
+				    THE keystrokes
+					=>
+					{    macro_state
+						=
+						case keystrokes
+						    #
+						    (_ ! _ ! keystrokes)					# This is pretty kludgey, but the terminating "C-x )" takes 2 keystrokes, so we drop them.  Feel free to code up a better solution.
+							=>
+							{ definition_in_progress  => NULL,			# We no longer have a macro definition in progress.
+							  default_macro	          => THE (reverse keystrokes),	# Remember new default macro definition.  Reverse to restore original keystroke order. (We accumulate definition by prepending keystrokes to list.)
+							  #
+							  execution_in_progress					# Leave this field unchanged.
+							      =>
+							      macro_state.execution_in_progress
+							};
+						    _ =>
+							{ definition_in_progress  => NULL,			# We no longer have a macro definition in progress.
+							  default_macro	          => macro_state.default_macro,	# Something bogus happened.  For now, punt by just ignoring it.
+							  #
+							  execution_in_progress					# Leave this field unchanged.
+							      =>
+							      macro_state.execution_in_progress
+							};
+						esac;	
+
+					    kmj::update__global_keystroke_macro_state				# Save state back.  Technically there's a race condition here with other microtheads; I'm not going to worry about it.
+					      (									# For an example of one way to eliminate this race condition see Gadget_To_Guiboss.get_guipiths + Gadget_To_Guiboss.install_updated_guipiths.
+						widget_to_guiboss.g,
+						macro_state
+					      );
+					};
+				    NULL => ();									# No definition in progress so no way to conclude it -- ignore the CONCLUDE_KMACRO request from editfn.
+				esac;
+			    fi;
+
+			    case activate_kmacro														# Handle an ACTIVATE_KMACRO request from editfn.  ("C-x e".)
+				#
+				THE repeat_factor
+				    =>
+				    {
+					macro_state
+					    =
+					    kmj::get_or_make__global_keystroke_macro_state
+						#
+						widget_to_guiboss.g;
+
+					macro_state
+					    =
+					    case macro_state.definition_in_progress										# If there's a kmacro definition in progress, mark it as complete and save it as new default kmacro.  This is identical to above conclude_kmacro case.
+						#
+						THE keystrokes
+						    =>
+						    {	macro_state
+							    =
+							    case keystrokes
+								#
+								(_ ! _ ! keystrokes)										# This is pretty kludgey, but the terminating "C-x )" takes 2 keystrokes, so we drop them.  Feel free to code up a better solution.
+								    =>
+								    { definition_in_progress  =>  NULL,								# We no longer have a macro definition in progress.
+								      default_macro	      =>  THE (reverse keystrokes),					# Remember new default macro definition.  Reverse to restore original keystroke order. (We accumulate definition by prepending strings to list.)
+								      #
+								      execution_in_progress									# Leave this field unchanged.
+									  =>
+									  macro_state.execution_in_progress
+								    };
+
+								_ =>
+								    { definition_in_progress  =>  NULL,								# We no longer have a macro definition in progress.
+								      default_macro	      =>  macro_state.default_macro,					# Something bogus happened.  For now, punt by just ignoring it.
+								      #
+								      execution_in_progress									# Leave this field unchanged.
+									  =>
+									  macro_state.execution_in_progress
+								    };
+							    esac;	
+
+							kmj::update__global_keystroke_macro_state								# Save state back.  Technically there's a race condition here with other microtheads; I'm not going to worry about it.
+							  (													# For an example of one way to eliminate this race condition see Gadget_To_Guiboss.get_guipiths + Gadget_To_Guiboss.install_updated_guipiths.
+							    widget_to_guiboss.g,
+							    macro_state
+							  );
+
+							macro_state;
+						    };
+						NULL => macro_state;												# No definition in progress.
+					    esac;
+
+					case macro_state.default_macro												# Start default kmacro definition executing.
+					    #
+					    THE keystrokes
+						=>
+						{   macro_state													# Update one field.
+						      =
+						      {	execution_in_progress	=>  THE (list::repeat (keystrokes, repeat_factor)),				# Remember we now have a keystroke macro in execution.
+							#
+							definition_in_progress  =>  NULL,									# Leave this field unchanged.  (Known to be NULL from above.)
+							default_macro	    	=>  macro_state.default_macro							# Leave this field unchanged.
+						      };
+
+						    kmj::update__global_keystroke_macro_state									# Save state back.  Technically there's a race condition here with other microtheads; I'm not going to worry about it.
+						      (														# For an example of one way to eliminate this race condition see Gadget_To_Guiboss.get_guipiths + Gadget_To_Guiboss.install_updated_guipiths.
+							widget_to_guiboss.g,
+							macro_state
+						      );
+						};
+					    NULL => ();														# No definition in progress so no way to conclude it -- ignore the CONCLUDE_KMACRO request from editfn.
+					esac;
+				    };
+
+				NULL => ();
+			    esac;
+
+			    my (textlines_changed, textlines)
+				=									# If we've been switched to display a different textmill/file, handle that.  At the moment this happens only via fundamental_mode::find_file(),
+				case textmill								# so we do not worry about incompatibility between mainpanemode and textmill.  As the system evolves we might need to revisit this.  --2015-08-20 CrT
+				    #
+				    NULL => (textlines_changed, textlines);				# Editfn did NOT switch us to a different textmill/file, so nothing to do here.
+
+				    THE textpane_to_textmill						# Editfn did indeed switch us to a different textmill.
+					=>
+					{   tb = *mainmill__global;
+					    #
+					    mainpanemode   -> mt::PANEMODE  mm;
+
+					    panemode		=  mainpanemode;
+					    panemode_state	=  { mode => panemode, data => sm::empty };							# Set up any required private state(s) for our textpane panemode.  We deliberately do not even know the types (they are hidden in Crypts).
+					    panemode           -> mt::PANEMODE  mm;
+
+					    (mm.initialize_panemode_state (panemode, panemode_state, NULL, []))							# Let fundamental-mode.pkg or whatever set up its private state (if any) and possibly return to us a requested textmill extension.
+						->
+						(panemode_state, textmill_extension, panemode_initialization_options);
+
+					    (process_panemode_initialization_options (panemode_initialization_options, { point => g2d::point::zero }))		# This is a newly loaded file so set cursor to topleft origin unless panemode overrides.
+						->
+						{ point };
+
+					    mainmill__global						# Remember the new textmill we're now displaying.
+					      := 
+					      { textpane_to_textmill,
+						textpane_to_drawpane =>  tb.textpane_to_drawpane,	# Don't know if this is right.  -- 2015-08-30 CrT
+						mode_to_drawpane     =>  tb.mode_to_drawpane,		# Don't know if this is right.  -- 2015-08-30 CrT
+						screenlines	     =>  tb.screenlines,		# We still have the same screen real estate in which to display.
+						expected_screenlines =>  tb.expected_screenlines,	# "							      ".
+						last_known_site	     =>  tb.last_known_site,		# "							      ".
+						minimill_screenlines =>  tb.minimill_screenlines,	# "							      ".
+						#
+						panemode	 =>      mainpanemode,
+						panemode_state,
+						#
+						sitewatchers	 =>  tb.sitewatchers,			# We still have the same set of clients watching us for state changes.
+						#
+						point		 =>  REF point,				# Initial location of visible cursor.
+						mark		 =>  REF NULL,				# No mark set in this new file.
+						lastmark	 =>  REF NULL,				# 
+						#
+						readonly	 =>  REF FALSE,				# TRUE iff textmill contents are read-only.  This is a local cache of the master textmill value.
+						dirty		 =>  REF FALSE,				# TRUE iff textmill contents are modified.   This is a local cache of the master textmill value.
+						name		 =>  REF  "<unknown>",			# Name  of textmill.                         This is a local cache of the master textmill value.
+						quote_next	 =>  REF NULL,				# Support for C-q.
+						editfn_to_invoke =>  REF NULL,				# Execute given editfn.  Supports (e.g.) query_replace -- this lets it read input from modeline and then continue.
+						#
+						screen_origin	 =>  REF g2d::point::zero,		# Origin of screen relative to textmill contents:  (0,0) means we're showing top of buffer at top of textpane.
+						#
+						line_prefix	 =>  REF ""
+					      };
+
+					    watcher = { mill_id => textpane_id, inport_name => "" }:  mt::Inport;
+
+					    {   tb.textpane_to_textmill -> mt::TEXTPANE_TO_TEXTMILL t2t;  t2t.drop__textmill_statechange__watcher  watcher;				       };	# Unsubscribe to statechanges from our old textmill.
+					    {      textpane_to_textmill -> mt::TEXTPANE_TO_TEXTMILL t2t;  t2t.note__textmill_statechange__watcher (watcher, NULL, note_textmill_statechange);  };	#   Subscribe to statechanges from our new textmill.
+
+#					    refresh_screenlines  *mainmill__global;			# Refresh main textpane -- this will redraw the modeline screenline, which currently contains the minimill display used to read our string, and also the main textpane, to show the new file.
+
+
+					    textpane_to_textmill
+						->
+						mt::TEXTPANE_TO_TEXTMILL p2m;
+
+					    case *millboss_to_pane__global
+						#
+						THE millboss_to_pane
+						    =>
+						    mill_to_millboss.note_pane				# Update millboss as to which mill we're displaying.
+						      { millboss_to_pane,
+							mill_id => p2m.id
+						      };
+						NULL => ();						 # Impossible.	
+					    esac;   
+
+					    (p2m.get_textstate ())
+						->
+						{ textlines, editcount };
+
+					    (TRUE, textlines);
+					};
+				esac;
+
+			    message_changed
+				=
+				message != *modeline_message__global;
+
+			    modeline_message__global :=  message;
+
+			    case quote_next
+				#
+				THE editfn =>	ps.quote_next := quote_next;
+				NULL	   =>   ();
+			    esac;
+
+			    if readonly_changed
+				#
+				ps.readonly := readonly;
+			    fi;
+
+			    if screen_origin_changed
+				#
+				screen_origin -> { row, col };						# Do some input sanity checking.
+
+				row = max (0, row);
+				col = max (0, col);
+
+				screen_origin = { row, col };
+
+				ps.screen_origin :=   screen_origin;
+			    fi;
+
+			    if point_changed
+				#
+				point -> { row, col };							# First, normalize the editfn-generated 'point' value to be sane:
+													#
+				row = max (0, row);							# Don't allow negative line   numbers.
+				col = max (0, col);							# Don't allow negative column numbers.
+													#
+				point =  { row, col };							#
+
+													# Now, if 'point' has moved out of view, scroll textpane contents to make it visible again/
+													#
+				screen_row0 = (*ps.screen_origin).row;					# What is the first file line visible in the textpane?
+
+				screenlines   = *ps.expected_screenlines;				# Number of lines displayable in textpane.
+				screenlines2  = screenlines / 2;					# Useful for centering cursor line within textpane.
+
+				if (row <  screen_row0							# If the cursor line is out of sight above textpane window or
+				or  row >= screen_row0 + screenlines)					# if the cursor line is out of sight below textpane window
+				    #									# then we need to change ps.screen_origin so cursor line is visible.
+				    #
+				    screen_row0'  = row - screenlines2;					# When possible we like to leave cursor line in middle of textpane.
+				    screen_row0'  = max (0, screen_row0');				# But do not let (*ps.screen_origin).row go negative.
+				    #
+				    ps.screen_origin :=   { row =>  screen_row0',
+							    col =>  (*ps.screen_origin).col
+							  };
+				fi;
+
+				ps.point := point;
+			    fi;
+
+			    if mark_changed
+				#
+				if (mark == NULL)
+				    ps.lastmark := *ps.mark;						# Save mark__global contents for possible use by   exchange_point_and_mark()	in   src/lib/x-kit/widget/edit/fundamental-mode.pkg
+				fi;
+
+				ps.mark := mark;
+			    fi;
+
+			    if lastmark_changed
+				#
+				ps.lastmark := lastmark;
+			    fi;
+
+			    if quit									# Implement keyboard_quit (usually bound to C-g) functionality.  This basically means "cancel everything currently happening".
+				#
+				keystroke_entry__global.meta_is_set    := FALSE;			# Reset keystroke entry.  (Although they should all be reset already...)
+				keystroke_entry__global.super_is_set   := FALSE;
+				keystroke_entry__global.doing_cntrlu   := FALSE;
+				keystroke_entry__global.done_cntrlu    := FALSE;
+				keystroke_entry__global.seen_digit     := FALSE;
+				keystroke_entry__global.sign           := 1;
+				keystroke_entry__global.numeric_prefix := 0;
+
+				ps  =  *mainmill__global;						# Return attention to mainmill if it was on minimill.
+
+				ps.mark	    := NULL;							# Clear region if a selection is in progress.  We leave *ps.lastmark unchanged on the grounds that 'quit' should change as little state as reasonable.
+
+				prompting__global := NULL;						# If we're reading stuff from the minimill, cancel that.
+
+
+				{   macro_state								# Clear all ephemeral keystroke-macro state.
+					=								# keystroke macros are global to all textpanes, hence use of global storage here.
+					kmj::get_or_make__global_keystroke_macro_state
+					    #
+					    widget_to_guiboss.g;
+				    #
+				    macro_state
+				      =
+				      { default_macro		=>  macro_state.default_macro,		# Preserve existing default macro definition.
+					definition_in_progress	=>  NULL,				# Cancel any macro definition in progress.
+					execution_in_progress	=>  NULL				# Cancel any macro execution  in progress. 
+				      };								# NB: Emacs supports named keystroke macros these days, possibly we should too.
+				    #
+				    kmj::update__global_keystroke_macro_state
+				      (
+					widget_to_guiboss.g,
+					macro_state
+				      );
+				};
+
+
+				refresh_screenlines  *mainmill__global;					# Refresh main textpane -- this will redraw the modeline screenline, clearing any minimill entry which was in progress.
+			    fi;
+
+			    if string_entry_complete							# Done reading a string from modeline (e.g., filename for find_file).
+				#
+				minimill__global.textpane_to_textmill					# Extract textmill port from its wrapper.
+				    ->
+				    mt::TEXTPANE_TO_TEXTMILL tb;
+
+				string_arg								# Extract filepath from minimill.
+				    =
+				    case (tb.get_line 0)
+					#
+					THE filepath => filepath;
+					NULL	     =>	"foo";						# Shouldn't happen.
+				    esac;
+
+				case *prompting__global							# Prompt for next arg, if any, else invoke editfn with accumulated args.
+				    #
+				    THE p =>
+					{   string_arg							# Handle defaulting on string_arg.
+						=
+						case (string_arg, p.default_choice)
+						    #
+						    ("", THE default_choice) =>  default_choice;	# User entered an empty string and we have a default, so use it.
+						    _			     =>	 string_arg;		# Stick with whatever user entered on the modeline.
+						esac;
+
+					    prompt =  mt::promptfor_prompt *p.promptingfor;
+					    doc    =  mt::promptfor_doc    *p.promptingfor;
+
+					    p.prompted_for						# Salt away arg just read via modeline.
+						:=
+						(mt::STRING_ARG
+						  { prompt,						# This helps editfns remember what 'arg' was for if they are prompting for multiple args.
+						    doc,						# Why not.
+						    arg    =>   string_arg
+						  }
+						)
+						!
+						*p.prompted_for;
+
+					    case *p.to_promptfor
+						#
+						[] =>							# No more args to prompt for -- time to pass accumulated prompted args to the editfn.
+						    {   prompting__global := NULL;			# Clear interactive-prompt state, returning us to normal text-edit mode in main textpane (vs minimill).
+							#
+							refresh_screenlines  *mainmill__global;		# Refresh main textpane -- this will redraw the modeline screenline, which currently contains the minimill display used to read our string.
+
+							prompted_args =  reverse  *p.prompted_for;
+
+							do_edit ( p.editfn_node,
+								  keystring,
+								  *mainmill__global,
+								  prompted_args,
+								  numeric_prefix,
+								  widget_to_guiboss,
+								  to,
+								  note_textmill_statechange
+								);
+						    };
+
+						this_arg ! remaining_args				# At least one more arg to read -- set up to read it interactively from user.
+						    =>
+						    set_up_to_read_interactive_arg_from_modeline
+						      (
+							p.editfn_node,
+							this_arg,
+							remaining_args,
+							*p.prompted_for,
+							widget_to_guiboss
+						      );
+					    esac;
+					};
+				    NULL => ();								# We're not expecting this to happen -- 'done' should only be set if we're reading prompted args from user by setting *prompting__global non-NULL.
+				esac;
+
+				refresh_screenlines  *mainmill__global;					# Refresh main textpane -- this will redraw the modeline screenline, which currently contains the minimill display used to read our string.
+			    else
+
+				if (mark_changed							# NB: Changing lastmark will have no visible effect on screenline display.
+				or  point_changed
+				or  textlines_changed
+				or  textmill_changed
+				or  screen_origin_changed
+				or  readonly_changed
+				or  message_changed)
+				    #
+				    refresh_screenlines ps;
+				fi;
+			    fi;
+
+			fi;										# editfn_failed 'else' clause.
+
+
+
+			if (ps.minimill_screenlines != NULL)						# If we're not in the minimill...          [ Yes, we should have a cleaner way of expressing this test. ]
+			    #										# Update our hint in the textmill.
+			    textpane_hint
+			      =
+			      {	point	    =>  *ps.point,
+				mark	    =>  *ps.mark,
+				lastmark    =>  *ps.lastmark,
+				panemode    =>   ps.panemode
+			      };
+
+			    textpane_hint
+				=
+				tph::encrypt__textpane_hint  textpane_hint;
+
+			    ps.textpane_to_textmill ->  mt::TEXTPANE_TO_TEXTMILL  tb;
+			    tb.app_to_mill          ->  mt::APP_TO_MILL           am;
+
+			    tb.set_textpane_hint  textpane_hint;
+
+			    if save									# Maybe save buffer contents to disk.
+				#
+				am.save_to_file ();
+			    fi;
+
+			else										# We ARE in the minimill
+
+			    if textlines_changed							# If the contents of the minimill changed
+				#									# ...
+				case *prompting__global							# AND
+				    #									# ...
+				    THE (p as { promptingfor => REF (mt::INCREMENTAL_STRING x), ... })	# if we're reading a mt::INCREMENTAL_STRING
+					=>								# THEN
+					{								# we need to call the editfn (typically isearch_forward) even though we're not done reading in the argument.
+
+					    minimill__global.textpane_to_textmill			# Extract textmill port from its wrapper.
+						->
+						mt::TEXTPANE_TO_TEXTMILL tb;
+
+					    string_arg							# Extract incremental string from minimill.
+						=
+						case (tb.get_line 0)
+						    #
+						    THE string
+							=>
+							mt::INCREMENTAL_STRING_ARG
+							  {
+							    prompt =>  x.prompt,
+							    doc    =>  x.doc,
+							    arg    =>  string,
+							    stage  => *p.stage
+							  };
+
+						    NULL =>						# Shouldn't happen. Should probably throw a fatal error here, really. XXX SUCKO FIXME. 
+							mt::INCREMENTAL_STRING_ARG
+							  {
+							    prompt =>  x.prompt,
+							    doc    =>  x.doc,
+							    arg    =>  "",
+							    stage  => *p.stage
+							  };
+						esac;
+
+					    p.stage := mt::MEDIAL;
+
+					    prompted_args						# The code duplication through here is pretty awful.  It would be nice to find a cleaner way of factoring this code.  The mainmill/minimill parallelism isn't working out very well. :-/ XXX SUCKO FIXME. 
+						=
+						reverse (string_arg ! *p.prompted_for);
+
+					    ps = *mainmill__global;
+
+					    point_and_mark  = { point => *ps.point,
+								mark  => *ps.mark
+							      };
+					    lastmark	= *ps.lastmark;
+					    log_undo_info   = TRUE;
+
+					    visible_lines	= *ps.expected_screenlines;
+					    screen_origin	= *ps.screen_origin;
+
+					    ps.textpane_to_textmill					# Extract mainmill's textmill port from its wrapper.
+						->
+						mt::TEXTPANE_TO_TEXTMILL tb;
+
+					    edit_arg   =  { editfn_node		    => p.editfn_node,
+							    prompted_args,
+							    point_and_mark,
+							    lastmark,
+							    pane_tag		    =>  *pane_tag__global,
+							    pane_id		    => textpane_id,
+							    widget_to_guiboss,
+							    screen_origin,
+							    visible_lines,
+							    log_undo_info,
+							    keystring		    => "",
+							    numeric_prefix	    => NULL,
+							    #	
+							    mainmill_modestate	    =>  (*mainmill__global).panemode_state,
+							    minimill_modestate	    =>  ( minimill__global).panemode_state,
+							    #	
+							    textpane_to_textmill    =>  ps.textpane_to_textmill,
+							    mode_to_drawpane	    => *ps.mode_to_drawpane,
+							    valid_completions	    =>  p.valid_completions
+							  };
+
+					    editfn_out = tb.get_edit_result  edit_arg;
+
+					    (parse_editfn_out  editfn_out)
+						->
+						{ textlines_changed,		textlines, 
+						  point_changed,		point,	 
+						  mark_changed,			mark,
+						  lastmark_changed,		lastmark,
+						  textmill_changed,		textmill,
+						  screen_origin_changed,	screen_origin,
+						  readonly_changed,		readonly, 	# At the moment at least we ignore this.
+						  message,					# This too.
+						  execute_command,				# This too.
+						  #	
+						  string_entry_complete,	quit,
+						  editfn_failed,		save,
+						  quote_next,
+						  editfn_to_invoke,
+						  #	
+						  commence_kmacro,
+						  conclude_kmacro,
+						  activate_kmacro
+						};
+
+					    case quote_next
+						#
+						THE editfn =>	ps.quote_next := quote_next;
+						NULL	   =>   ();
+					    esac;
+
+					    if point_changed					# At the moment this mt::INCREMENTAL_STRING stuff is dedicated support for isearch_forward(), which is only going to change 'point',
+						#						# so I'm not going to duplicate here the above code for other possible return flags.
+						ps.point := point;
+
+						refresh_screenlines  ps;			# 
+					    fi;
+
+					    if mark_changed
+						#
+						if (mark == NULL)
+						    ps.lastmark := *ps.mark;			# Save mark__global contents for possible use by   exchange_point_and_mark()	in   src/lib/x-kit/widget/edit/fundamental-mode.pkg
+						fi;
+
+						ps.mark := mark;
+
+						refresh_screenlines  ps;			# 
+					    fi;
+
+					    if lastmark_changed
+						#
+						ps.lastmark := lastmark;
+					    fi;
+															# XXX SUCKO FIXME The entire following section is duplicated from above -- should we convert it into a fn?
+					    if string_entry_complete							# Done reading a string from modeline (e.g., filename for find_file).
+						#
+						minimill__global.textpane_to_textmill					# Extract textmill port from its wrapper.
+						    ->
+						    mt::TEXTPANE_TO_TEXTMILL tb;
+
+						string_arg								# Extract filepath from minimill.
+						    =
+						    case (tb.get_line 0)
+							#
+							THE filepath => filepath;
+							NULL	     =>	"foo";						# Shouldn't happen.
+						    esac;
+
+						case *prompting__global							# Prompt for next arg, if any, else invoke editfn with accumulated args.
+						    #
+						    THE p =>
+							{   string_arg							# Handle defaulting on string_arg.
+								=
+								case (string_arg, p.default_choice)
+								    #
+								    ("", THE default_choice) =>  default_choice;	# User entered an empty string and we have a default, so use it.
+								    _			     =>	 string_arg;		# Stick with whatever user entered on the modeline.
+								esac;
+
+							    prompt =  mt::promptfor_prompt *p.promptingfor;
+							    doc    =  mt::promptfor_doc    *p.promptingfor;
+
+							    p.prompted_for						# Salt away arg just read via modeline.
+								:=
+								(mt::STRING_ARG
+								  { prompt,						# This helps editfns remember what 'arg' was for if they are prompting for multiple args.
+								    doc,						# Why not.
+								    arg    =>   string_arg
+								  }
+								)
+								!
+								*p.prompted_for;
+
+							    case *p.to_promptfor
+								#
+								[] =>							# No more args to prompt for -- time to pass accumulated prompted args to the editfn.
+								    {   prompting__global := NULL;			# Clear interactive-prompt state, returning us to normal text-edit mode in main textpane (vs minimill).
+									#
+									refresh_screenlines  *mainmill__global;		# Refresh main textpane -- this will redraw the modeline screenline, which currently contains the minimill display used to read our string.
+
+									prompted_args =  reverse  *p.prompted_for;
+
+									do_edit ( p.editfn_node,
+										  keystring,
+										  *mainmill__global,
+										  prompted_args,
+										  numeric_prefix,
+										  widget_to_guiboss,
+										  to,
+										  note_textmill_statechange
+										);
+								    };
+
+								this_arg ! remaining_args				# At least one more arg to read -- set up to read it interactively from user.
+								    =>
+								    set_up_to_read_interactive_arg_from_modeline
+								      (
+									p.editfn_node,
+									this_arg,
+									remaining_args,
+									*p.prompted_for,
+									widget_to_guiboss
+								      );
+							    esac;
+							};
+						    NULL => ();								# We're not expecting this to happen -- 'done' should only be set if we're reading prompted args from user by setting *prompting__global non-NULL.
+						esac;
+
+						refresh_screenlines  *mainmill__global;					# Refresh main textpane -- this will redraw the modeline screenline, which currently contains the minimill display used to read our string.
+					    fi;
+					};
+
+				    _ => ();								# We're not reading an mt::INCREMENTAL_STRING so we can skip all this fuss.
+				esac;
+			    fi;						    				# mt::INCREMENTAL_STRING handling.
+			fi;										# mainmill-vs-minimill wrapup stuff -- optional buffer-save, mt::INCREMENTAL_STRING handling etc.
+
+			case editfn_to_invoke								# Editfn_Out from last editfn requested that we invoke this editfn, so do it.
+			    #										# This is used by (e.g.) query_request to interactively read in user input via modeline and then continue:
+			    THE editfn_node								# The mt::Plain_Eeditfn.args  gives the args to read interactively and
+			        =>									# the mt::Plain_Editfn.editfn gives the ediitfn that will process them.
+				{
+case editfn_node
+    #
+    mt::EDITFN (mt::PLAIN_EDITFN r)
+	=>
+	{
+nb {. sprintf "editfn_to_invoke/THE(mt::EDITFN (mt::PLAIN_EDITFN { name=>\"%s\", doc=>\"%s\" args=>(%d items) })):   --textpane.pkg" r.name r.doc (list::length r.args); };
+	};
+    _   =>  nb {. sprintf "editfn_to_invoke/THE(?):   --textpane.pkg"; };
+esac;
+				   invoke_editfn							# 
+				      (
+					editfn_node,
+					keystring,
+					ps,
+					widget_to_guiboss,
+					to,
+					note_textmill_statechange
+				      );
+				
+				};
+			    NULL =>   ();
+			esac;
+
+			case execute_command								# This is structurally similar to above except we must look up the commandname to get the actual editfn.
+			    #										# This is dedicated support for  M-x commandname.
+			    THE commandname
+				=>
+				{   all_known_editfns_by_name						# Get the name->val map.
+					=
+					mt::get_all_known_editfns_by_name ();
+
+				    case (sm::get (all_known_editfns_by_name, commandname))
+					#
+					THE editfn_node							# There *is* a command by that name!
+					    =>
+					    invoke_editfn						# We now have the editfn to execute for this keystroke. Go read any interactive args it needs from user and then call it.
+					      (
+						mt::EDITFN  editfn_node,
+						keystring,
+						ps,
+						widget_to_guiboss,
+						to,
+						note_textmill_statechange
+					      );
+
+					NULL => ();							# No command by that name.  Just ignore for now. Should probably post a message.
+				    esac;
+				};
+
+			    NULL => ();
+			esac;
+		    };											# fun do_editfn_out
+
+
+		fun note_textmill_statechange'
+		      (
+			outport:	mt::Outport,
+			change:		mt::Textmill_Statechange
+		      )
+		    =
+		    {
+			minimill__global.textpane_to_textmill							# First job is to figure out which panestate is being updated -- minimill or mainmill.
+			    ->											#
+			    mt::TEXTPANE_TO_TEXTMILL  t2t;							#
+														#
+			ps = if (same_id (outport.mill_id, t2t.id))	 minimill__global;			#
+			     else	     				*mainmill__global;			#
+			     fi;	       									#
+
+			ps.textpane_to_textmill									# Don't leave stale value of 't2t' in-scope.
+			    ->
+			    mt::TEXTPANE_TO_TEXTMILL  t2t;
+
+			case change										# 
+			    #
+			    mt::TEXTSTATE_CHANGED	{ was, now } =>	{				refresh_screenlines  ps;	};
+			    mt::UNDO			{ was, now } => {				refresh_screenlines  ps;	};
+			    mt::FILEPATH_CHANGED	{ was, now } =>	{				refresh_screenlines  ps;	};
+			    mt::NAME_CHANGED		{ was, now } =>	{   ps.name	:= now;		refresh_screenlines  ps;	};
+			    mt::READONLY_CHANGED	{ was, now } =>	{   ps.readonly := now;		refresh_screenlines  ps;	};
+			    mt::DIRTY_CHANGED		{ was, now } =>	{   ps.dirty    := now;		refresh_screenlines  ps;	};
+			esac;
+		    };
+
+		fun default_key_event_fn (KEY_EVENT_FN_ARG a)							# Process a user keystroke sent to us via guiboss-imp.pkg -> guiboss-event-dispatch.pkg -> widget-imp.pkg.
+		    =												# We also process keystrokes played back via the keystroke-macro (kmacro) mechanism.
+		    {
+			a ->  { id:			Id,							# Unique Id for widget.
+				doc:			String,							# Human-readable description of this widget, for debug and inspection.
+				keystroke
+				  as
+				  {
+				    key_event:		gt::Key_Event,						# KEY_PRESS or KEY_RELEASE
+				    keycode:		evt::Keycode,						# Keycode of the depressed key.
+				    keysym:		evt::Keysym,						# Keysym  of the depressed key.  See Note[1] in src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp.api
+				    keystring:		String,							# Ascii  for the depressed key.  See Note[1] in src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp.api
+				    keychar:		Char,							# First char of 'keystring' ('\0' if string-length != 1).
+				    modifier_keys_state:evt::Modifier_Keys_State,				# State of the modifier keys (shift, ctrl...).
+				    mousebuttons_state:	evt::Mousebuttons_State					# State of mouse buttons as a bool record.
+				  }:			gt::Keystroke_Info,
+				widget_layout_hint:	gt::Widget_Layout_Hint,
+				frame_indent_hint:	gt::Frame_Indent_Hint,
+				site:			g2d::Box,						# Widget's assigned area in window coordinates.
+				widget_to_guiboss:	gt::Widget_To_Guiboss,
+				guiboss_to_widget:	gt::Guiboss_To_Widget,					# Used by textpane.pkg keystroke-macro stuff to synthesize fake keystroke events to widget.
+				theme:			wt::Widget_Theme,
+				do:			(Void -> Void) -> Void,					# Used by widget subthreads to execute code in main widget microthread.
+				to:			Replyqueue,						# Used to call 'pass_*' methods in other imps.
+				#
+				default_key_event_fn => _:	Key_Event_Fn,					# We don't use this field, but we need it not to shadow the function itself for recursive calls.
+				#
+				needs_redraw_gadget_request:	Void -> Void					# Notify guiboss-imp that this button needs to be redrawn (i.e., sent a redraw_gadget_request()).
+			      };
+# keycode -> evt::KEYCODE kc;
+# nb {. sprintf "default_key_event_fn/AAA: keycode=%d key_event=%s keystring='%s' modkeys=%s  -- textpane.pkg" kc case key_event gt::KEY_PRESS=>"KEY_PRESS"; _ => "KEY_RELEASE"; esac  keystring  (evt::modifier_keys_state__to__string  modifier_keys_state); };
+
+
+			fun note_textmill_statechange arg
+			    =
+			    do {.										# The 'do' switches us from executing in microthread of textmill caller to our own textpane microthread -- ensuring proper mutual exclusion while updating our state.
+				note_textmill_statechange' arg;
+			    };				
+
+			case key_event
+			    #
+			    gt::KEY_RELEASE									# 
+				=>
+				if (keystring == "<cmd>")							# This is the Windows/Command key, which following emacs we use as the 'super' key.
+				    #
+				    keystroke_entry__global.super_is_set := FALSE;
+				fi;
+
+			    gt::KEY_PRESS									# 
+			    #
+				=>
+				{
+				    macro_state									# Get current keystroke-macros global state.
+					=
+					kmj::get_or_make__global_keystroke_macro_state
+					    #
+					    widget_to_guiboss.g;
+
+				    case macro_state.definition_in_progress					# If there's a kmacro definition in progress, add current keystring to it.
+					#
+					THE keystrokes
+					    =>
+					    case keystring
+						#
+						"<leftShift>"	=>  ();						# We ignore these because the information they carry is already present
+						"<rightShift>"	=>  ();						# in our  modifier_keys_state,  and because we want the final "C-x )"
+						"<leftCtrl>"	=>  ();						# sequence in our macro definitions to be easy to remove.
+						"<rightCtrl>"	=>  ();						#
+						"<capsLock>"	=>  ();						#
+						"<leftMeta>"	=>  ();						#
+						"<rightMeta>"	=>  ();						#
+						"<leftAlt>"	=>  ();						#
+						"<rightAlt>"	=>  ();						#
+						"<numLock>"	=>  ();	    					#
+
+    					       _ => {	macro_state							# Update one field.
+							  =
+							  { definition_in_progress =>  THE (keystroke ! keystrokes),	# 
+							    #
+							    default_macro	  => macro_state.default_macro,		# Leave this field unchanged.
+							    execution_in_progress => macro_state.execution_in_progress	# Leave this field unchanged.
+							  };
+
+							kmj::update__global_keystroke_macro_state			# Save state back.  Technically there's a race condition here with other microtheads; I'm not going to worry about it.
+							  (								# For an example of one way to eliminate this race condition see Gadget_To_Guiboss.get_guipiths + Gadget_To_Guiboss.install_updated_guipiths.
+							    widget_to_guiboss.g,
+							    macro_state
+							  );
+						    };	  
+					    esac;
+					NULL => ();								# No definition in progress.
+				    esac;
+
+
+				    keystring									# Some keystrings we process pre-emptively without invoking editfns, mainly the numeric prefix keys and ESC-as-meta key.
+					=									# In those cases we'll return keystring "" here to signal that no further processing is needed.
+					if (keystring == "\^[")
+					    #
+					    keystroke_entry__global.meta_is_set := TRUE;
+
+					    "";									# No further processing needed.
+
+					elif (keystring == "<cmd>")						# This is the Windows/Command key, which following emacs we use as the 'super' key.
+					    #
+					    keystroke_entry__global.super_is_set := TRUE;
+
+					    "";									# No further processing needed.
+
+					elif (keystring == "<leftShift>" )    "";				# Don't do normal processing on this keystroke because it would clear our numeric-prefix state (and also meta_is_set/super_is_set).
+					elif (keystring == "<rightShift>")    "";				# Don't do normal processing on this keystroke because it would clear our numeric-prefix state (and also meta_is_set/super_is_set).
+					elif (keystring == "<leftMeta>"	 )    "";				# Don't do normal processing on this keystroke because it would clear our numeric-prefix state (and also meta_is_set/super_is_set).
+					elif (keystring == "<rightMeta>" )    "";				# Don't do normal processing on this keystroke because it would clear our numeric-prefix state (and also meta_is_set/super_is_set).
+					elif (keystring == "<leftCtrl>"	 )    "";				# Don't do normal processing on this keystroke because it would clear our numeric-prefix state (and also meta_is_set/super_is_set).
+					elif (keystring == "<rightCtrl>" )    "";				# Don't do normal processing on this keystroke because it would clear our numeric-prefix state (and also meta_is_set/super_is_set).
+					elif (keystring == "<leftAlt>"	 )    "";				# Don't do normal processing on this keystroke because it would clear our numeric-prefix state (and also meta_is_set/super_is_set).
+					elif (keystring == "<rightAlt>"  )    "";				# Don't do normal processing on this keystroke because it would clear our numeric-prefix state (and also meta_is_set/super_is_set).
+					elif (keystring == "<capsLock>"  )    "";				# Don't do normal processing on this keystroke because it would clear our numeric-prefix state (and also meta_is_set/super_is_set).
+					elif (keystring == "<numLock>"   )    "";				# Don't do normal processing on this keystroke because it would clear our numeric-prefix state (and also meta_is_set/super_is_set).
+
+					elif (keystring == "\^U")
+
+					    if (not *keystroke_entry__global.doing_cntrlu)
+						#
+						keystroke_entry__global.doing_cntrlu   := TRUE;
+						keystroke_entry__global.seen_digit     := FALSE;
+						keystroke_entry__global.numeric_prefix := 4;
+
+					    elif (*keystroke_entry__global.seen_digit)
+						#
+						keystroke_entry__global.seen_digit     := FALSE;
+						keystroke_entry__global.numeric_prefix := 4;
+					    else
+						keystroke_entry__global.numeric_prefix := *keystroke_entry__global.numeric_prefix * 4;
+					    fi;
+
+					    "";									# No further processing needed.
+
+					elif (*keystroke_entry__global.doing_cntrlu)
+
+					    case keystring
+						#
+						"-" =>	{						keystroke_entry__global.sign           := *keystroke_entry__global.sign * -1;									""; };	# No further processing needed.
+
+						"0" =>	if (*keystroke_entry__global.seen_digit)	keystroke_entry__global.numeric_prefix := *keystroke_entry__global.numeric_prefix * 10 + 0;							"";	# No further processing needed.
+							else						keystroke_entry__global.numeric_prefix := 						 0;	keystroke_entry__global.seen_digit := TRUE;	"";	# No further processing needed.
+							fi;
+
+						"1" =>	if (*keystroke_entry__global.seen_digit)	keystroke_entry__global.numeric_prefix := *keystroke_entry__global.numeric_prefix * 10 + 1;							"";	# No further processing needed.
+							else						keystroke_entry__global.numeric_prefix := 						 1;	keystroke_entry__global.seen_digit := TRUE;	"";	# No further processing needed.
+							fi;
+
+						"2" =>	if (*keystroke_entry__global.seen_digit)	keystroke_entry__global.numeric_prefix := *keystroke_entry__global.numeric_prefix * 10 + 2;							"";	# No further processing needed.
+							else						keystroke_entry__global.numeric_prefix := 						 2;	keystroke_entry__global.seen_digit := TRUE;	"";	# No further processing needed.
+							fi;
+
+						"3" =>	if (*keystroke_entry__global.seen_digit)	keystroke_entry__global.numeric_prefix := *keystroke_entry__global.numeric_prefix * 10 + 3;							"";	# No further processing needed.
+							else						keystroke_entry__global.numeric_prefix := 						 3;	keystroke_entry__global.seen_digit := TRUE;	"";	# No further processing needed.
+							fi;
+
+						"4" =>	if (*keystroke_entry__global.seen_digit)	keystroke_entry__global.numeric_prefix := *keystroke_entry__global.numeric_prefix * 10 + 4;							"";	# No further processing needed.
+							else						keystroke_entry__global.numeric_prefix := 						 4;	keystroke_entry__global.seen_digit := TRUE;	"";	# No further processing needed.
+							fi;
+
+						"5" =>	if (*keystroke_entry__global.seen_digit)	keystroke_entry__global.numeric_prefix := *keystroke_entry__global.numeric_prefix * 10 + 5;							"";	# No further processing needed.
+							else						keystroke_entry__global.numeric_prefix := 						 5;	keystroke_entry__global.seen_digit := TRUE;	"";	# No further processing needed.
+							fi;
+
+						"6" =>	if (*keystroke_entry__global.seen_digit)	keystroke_entry__global.numeric_prefix := *keystroke_entry__global.numeric_prefix * 10 + 6;							"";	# No further processing needed.
+							else						keystroke_entry__global.numeric_prefix := 						 6;	keystroke_entry__global.seen_digit := TRUE;	"";	# No further processing needed.
+							fi;
+
+						"7" =>	if (*keystroke_entry__global.seen_digit)	keystroke_entry__global.numeric_prefix := *keystroke_entry__global.numeric_prefix * 10 + 7;							"";	# No further processing needed.
+							else						keystroke_entry__global.numeric_prefix := 						 7;	keystroke_entry__global.seen_digit := TRUE;	"";	# No further processing needed.
+							fi;
+
+						"8" =>	if (*keystroke_entry__global.seen_digit)	keystroke_entry__global.numeric_prefix := *keystroke_entry__global.numeric_prefix * 10 + 8;							"";	# No further processing needed.
+							else						keystroke_entry__global.numeric_prefix := 						 8;	keystroke_entry__global.seen_digit := TRUE;	"";	# No further processing needed.
+							fi;
+
+						"9" =>	if (*keystroke_entry__global.seen_digit)	keystroke_entry__global.numeric_prefix := *keystroke_entry__global.numeric_prefix * 10 + 9;							"";	# No further processing needed.
+							else						keystroke_entry__global.numeric_prefix := 						 9;	keystroke_entry__global.seen_digit := TRUE;	"";	# No further processing needed.
+							fi;
+
+						_   =>  {   keystroke_entry__global.numeric_prefix := *keystroke_entry__global.numeric_prefix * *keystroke_entry__global.sign;
+						    	    keystroke_entry__global.sign           := 1;
+						    	    keystroke_entry__global.doing_cntrlu   := FALSE;
+							    keystroke_entry__global.seen_digit     := FALSE;
+							    keystroke_entry__global.done_cntrlu    := TRUE;
+
+							    keystring;					# Do normal processing on keystring.
+							};
+					    esac;
+					else
+					    keystring;							# Do normal processing on keystring.
+					fi;
+
+				    if (keystring != "")
+					#
+					# Start by making local copies of the global modifier-key and
+					# numeric-prefix stuff and then clearing global state so it
+					# will be ready to process next keystroke:
+					#
+					super_is_set   =     *keystroke_entry__global.super_is_set;	keystroke_entry__global.super_is_set := FALSE;
+					meta_is_set    =     *keystroke_entry__global.meta_is_set;	keystroke_entry__global.meta_is_set  := FALSE;
+					#
+					ps  =   case *prompting__global									# Which textmill is keystroke addressed to?
+						    #
+						    NULL => *mainmill__global;								# Normal   input case -- keystrokes are editing the main textmill in the main textpane.
+						    _    =>  minimill__global;								# Prompted input case -- keystrokes are editing the minimill in the modeline screenline. 
+						esac;
+
+
+					modifier_keys_state										# Make ESC look like normal meta (mod1) modifier key.  Ditto Windows/Command key as super (mod4) modifier key.
+					    =
+					    merge_modifier_keys_info { modifier_keys_state, meta_is_set, super_is_set };
+
+					canonical_keystring										# Expand one-byte "^G" into "C-g", " " into "SPC" etc.
+					    =
+					    mt::keystring_to_modemap_key  (keystring, modifier_keys_state);
+
+					editfn =    case *ps.quote_next									# Support for C-q.
+							#
+							THE editfn
+							    =>
+							    {   ps.quote_next :=  NULL;
+								#
+								THE editfn;
+							    };
+
+							NULL =>
+							    case *subkeymap__global
+								#
+								THE keymap
+								    =>
+								    {   subkeymap__global := NULL;					# We're partway through a multi-key sequence, so continue down it.
+									#
+									sm::get (keymap, canonical_keystring);
+								    };
+
+								NULL =>
+								    find_keymap ps.panemode						# Check keymap in current panemode, then (if necessary) search up its parent-panemode chain.
+								    where
+									fun find_keymap  panemode
+									    = 
+									    {   panemode ->  mt::PANEMODE { keymap, parent, ... };
+										#
+										case (sm::get (*keymap, canonical_keystring))
+										    #
+										    THE editfn => THE editfn;				# Found a binding for the keystroke in current keymap -- return it.
+
+										    NULL => case parent					# No binding for keystroke in this keymap -- search parent keymaps.
+												#
+												THE panemode				# We do have a current keymap, so ...
+												    =>
+												    find_keymap  panemode;		# ... go search it.
+
+												NULL =>  NULL;				# No parent keymap so give up -- this keystroke does nothing.
+										    esac;
+										esac;
+									    };
+								    end;
+							    esac;
+
+						    esac;
+
+					case editfn
+					    #
+					    THE editfn => invoke_editfn									# Found editfn to execute for this keystroke. Go read any interactive args it needs from user and then call it.
+							    (
+							      editfn,
+							      keystring,
+							      ps,
+							      widget_to_guiboss,
+							      to,
+							      note_textmill_statechange
+							    );
+					    NULL       => ();										# This keystroke unimplemented in keymap.  Should probably beep here or something. Don't know how to beep yet. Maybe a MESSAGE.
+					esac;												# invoke_editfn
+
+				    fi;													# keystring != ""
+				};													# gt::KEY_PRESS
+			esac;														# case key_event
+
+
+			macro_state													# Get current keystroke-macros global state.
+			    =
+			    kmj::get_or_make__global_keystroke_macro_state
+				#
+				widget_to_guiboss.g;
+
+																	# XXX BUGGO FIXME: There's currently a problem with this mechanism in that
+																	# if the keystroke sequence originally recorded involved switching keyboard
+																	# focus between panes, this mechanism won't catch that, and will instead
+																	# send all keystrokes to our current textpane.
+																	#
+																	# I very rarely want such functionality, so for now I'm ignoring that.
+																	#
+																	# It may be that we can insert hacks driven by hooks keying on
+																	# change-of-keyboard-focus that will solve this problem.
+
+			case macro_state.execution_in_progress										# If there's a kmacro execution in progress, execute next keystring in it.
+			    #
+			    THE []													# No more keystrings to execute -- we're done.
+				=>
+				{   macro_state												# Update one field.
+				      =
+				      { execution_in_progress  =>  NULL,								# Remember no execution in progress.
+					#
+					definition_in_progress =>  macro_state.definition_in_progress,					# Leave this field unchanged.
+					default_macro	       =>  macro_state.default_macro						# Leave this field unchanged.
+					
+				      };
+
+				    kmj::update__global_keystroke_macro_state								# Save state back.  Technically there's a race condition here with other microtheads; I'm not going to worry about it.
+				      (													# For an example of one way to eliminate this race condition see Gadget_To_Guiboss.get_guipiths + Gadget_To_Guiboss.install_updated_guipiths.
+					widget_to_guiboss.g,
+					macro_state
+				      );
+				};
+
+			    THE (keystroke ! rest)											# At least one more keystring left to execute.
+				=>
+				{   macro_state												# Update one field.
+				      =
+				      { execution_in_progress  =>  THE rest,								# Remove 'keystring' from list of keystrings left to be executed.
+					#
+					definition_in_progress =>  macro_state.definition_in_progress,					# Leave this field unchanged.
+					default_macro	       =>  macro_state.default_macro						# Leave this field unchanged.
+				      };
+
+				    kmj::update__global_keystroke_macro_state								# Save state back.  Technically there's a race condition here with other microtheads; I'm not going to worry about it.
+				      (													# For an example of one way to eliminate this race condition see Gadget_To_Guiboss.get_guipiths + Gadget_To_Guiboss.install_updated_guipiths.
+					widget_to_guiboss.g,
+					macro_state
+				      );
+
+				    guiboss_to_widget.g.note_key_event  note_key_event_arg						# Execute next keystroke in keystroke macro (kmacro).
+					where												# NB: The point of doing this via
+					    note_key_event_arg										#        guiboss_to_widget.g.note_key_event
+					      =												# (vs, say, just a recursive call to  default_key_event_fn)
+					      {	keystroke,										# is that going through note_key_event lets an interactive C-g
+						site,											# (i.e., keyboard_quit) get through to manually abort a long macro.
+						theme											# This still won't help us if a single editfn takes too long; to
+					      }:			gt::Note_Key_Event_Arg;						# handle that we likely need to do something like run the computation
+					end;  												# in a separate microthread that C-g can kill via microthread::kill_thread.			# microthread	is from   src/lib/src/lib/thread-kit/src/core-thread-kit/microthread.pkg
+				};													# I'm inclined to wait until that becomes an actual problem before coding that up. 
+
+			    NULL => ();													# No execution in progress.
+			esac;
+		    };															# fun default_key_event_fn
 
 	        (process_options
 		  (
@@ -820,13 +2927,13 @@ get_text_dimensions "foo";
 		      widget_doc	=>  "<textpane>",
 		      #	
 		      frame_indent_hint	=>  NULL,
-		      text		=>  "",
 		      #	
 		      redraw_fn		=>  default_redraw_fn,
 		      mouse_click_fn	=>  default_mouse_click_fn,
+		      key_event_fn	=>  default_key_event_fn,
 		      mouse_drag_fn	=>  NULL,
 		      mouse_transit_fn	=>  NULL,
-		      key_event_fn	=>  NULL,
+		      modeline_fn	=> *modeline_fn__global,
 		      #
 		      widget_options	=>  [],
 		      #
@@ -835,18 +2942,18 @@ get_text_dimensions "foo";
 		    }
 		) )
 		    ->
-		    {												# These values are globally visible to the subsequenc fns, which can lock them in as needed.
+		    {														# These values are globally visible to the subsequent fns, which can lock them in as needed.
 		      widget_id,
 		      widget_doc,
 		      #
 		      frame_indent_hint,
-		      text,
 		      #
 		      redraw_fn,
 		      mouse_click_fn,
 		      mouse_drag_fn,
 		      mouse_transit_fn,
 		      key_event_fn,
+		      modeline_fn,
 		      #
 		      widget_options,
 		      #
@@ -854,7 +2961,7 @@ get_text_dimensions "foo";
 		      sitewatchers
 		    };
 
-		sitewatchers_global := sitewatchers;
+		modeline_fn__global	:= modeline_fn;
 
 
 
@@ -871,238 +2978,932 @@ get_text_dimensions "foo";
 		###############################
 		# Top of widget hook fn section
 		#
-		# These fns get called by widget_imp logic, ultimately						# widget_imp		is from   src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp.pkg
+		# These fns get called by widget_imp logic, ultimately								# widget_imp		is from   src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp.pkg
 		# in response to user mouseclicks and keypresses etc:
 
 		fun startup_fn
 		    { 
-		      id:				iuw::Id,						# Unique id.
-		      doc:				String,
+		      id:				Id,									# Unique Id for widget.
+		      doc:				String,									# Human-readable description of this widget, for debug and inspection.
 		      widget_to_guiboss:		gt::Widget_To_Guiboss,
-		      do:				(Void -> Void) -> Void					# Used by widget subthreads to execute code in main widget microthread.
+		      do:				(Void -> Void) -> Void,							# Used by widget subthreads to execute code in main widget microthread.
+		      to:				Replyqueue
 		    }
 		    =
 		    {	widget_to_guiboss__global
 			    :=  
-			    THE { widget_to_guiboss, textpane_id => id };
-
-			maybe_change_number_of_lineeditors ();
+/* */			    THE { widget_to_guiboss, textpane_id => id };
 
 			app_to_textpane
 			  =
-			  { id
+/* */			  { id
 			  }
 			  : App_To_Textpane
 			  ;
 
-			gadget_to_editboss
-			    =
-			    g2b::find__gadget_to_editboss  (widget_to_guiboss.g,  "textpane::startup_fn");
 
-
-			textpane_to_textbuffer__global
+			mainmill__global
 			    :=
-			    THE textpane_to_textbuffer
+			    { textpane_to_textmill,
+			      textpane_to_drawpane	=>  REF (NULL:		Null_Or(p2d::Textpane_To_Drawpane  )),
+			      mode_to_drawpane		=>  REF (NULL:		Null_Or(m2d::Mode_To_Drawpane	   )),
+			      screenlines		=>  REF (im::empty:	im::Map(p2l::Textpane_To_Screenline)),
+			      expected_screenlines	=>  REF 1,
+			      #
+			      #
+			      panemode			=>  mainpanemode,
+			      panemode_state,
+			      #
+			      sitewatchers		=>  REF sitewatchers,
+			      last_known_site		=>  REF NULL,
+			      #
+			      point			=>  REF point,								# Location of visible cursor in textmill.  Upperleft origin is { row => 0, col => 0 } (but is displayed to user as L1C1 to conform with standard text-editor practice).  This is in buffer (file) coordinates, not screen coordinates.
+			      mark			=>  REF (NULL:			 Null_Or(g2d::Point)),			# Location of the emacs-traditional buffer 'mark'.  If this is non-NULL, the 'mark' and 'point' delimit the current text selection in the buffer.
+			      lastmark			=>  REF (NULL:			 Null_Or(g2d::Point)),			# When we set mark__global to NULL we save its previous value in lastmark__global.  This gets used by exchange_point_and_mark in   src/lib/x-kit/widget/edit/fundamental-mode.pkg
+			      #
+			      readonly			=>  REF FALSE,								# TRUE iff textmill contents are read-only.  This is a local cache of the master textmill value.
+			      dirty			=>  REF FALSE,								# TRUE iff textmill contents are modified.   This is a local cache of the master textmill value.
+			      name			=>  REF  "<unknown>",							# Name  of textmill.                         This is a local cache of the master textmill value.
+			      quote_next		=>  REF  NULL,								# Support for C-q.
+			      editfn_to_invoke		=>  REF  NULL,								# Execute given editfn.  Supports (e.g.) query_replace -- this lets it read input from modeline and then continue.
+			      #
+			      screen_origin		=>  REF g2d::point::zero,						# Origin of screen relative to textmill contents:  (0,0) means we're showing top of buffer at top of textpane.
+			      #	
+			      line_prefix		=>  REF "",
+			      minimill_screenlines	=>  THE minimill__global.screenlines					# Note that we're sharing the minimill__global.screenlines refcell here.
+			    }
 			    where
-				textpane_to_textbuffer
+				panemode	=  mainpanemode;
+				panemode_state	=  { mode => panemode, data => sm::empty };					# Set up any required private state(s) for our textpane panemode.  We deliberately do not even know the types (they are hidden in Crypts).
+				panemode       -> mt::PANEMODE  mm;
+
+				(mm.initialize_panemode_state (panemode, panemode_state, NULL, []))				# Let fundamental-mode.pkg or whatever set up its private state (if any) and possibly return to us a requested textmill extension.
+				    ->
+				    (panemode_state, textmill_extension, panemode_initialization_options);
+
+				(process_panemode_initialization_options (panemode_initialization_options, { point => g2d::point::zero }))
+				    ->
+				    { point };
+
+				textpane_to_textmill
 				    =
-				    gadget_to_editboss.get_or_make_textbuffer
+				    case textmill_spec
 					#
-					("mybuffer", [t2t::ASCII text]);
-			    end;	
+					mt::NEW_TEXTMILL  textmill_arg								# Have the textpane Display a newly made textmill, created via mt::Mill_To_Millboss.make_textmill.
+					    =>
+					    {   textmill_arg -> { name, textmill_options };
+						#
+						textmill_options
+						    =
+						    case textmill_extension
+							#
+							THE textmill_extension
+							    =>
+							    textmill_options @ [ mt::TEXTMILL_EXTENSION	textmill_extension ];	# Set up to create a textmill extended per request of mainpanemode.  Putting it last ensures it will override any previous textmill extension in textmill_options.
 
-			gadget_to_editboss.note_textpane
-			  (
-			    editboss_to_textpane:			b2p::Editboss_To_Textpane,
-			    textedit_to_textpane:			e2p::Textedit_To_Textpane,
-			    statusline_to_textpane:			s2p::Statusline_To_Textpane,
-			    lineeditor_to_textpane:			l2p::Lineeditor_To_Textpane
-			  )
-			    where
-				fun note__textpane_to_textedit   (textpane_to_textedit:   p2e::Textpane_To_Textedit  ) =  textpane_to_textedit__global   := THE textpane_to_textedit;
-				fun note__textpane_to_statusline (textpane_to_statusline: p2s::Textpane_To_Statusline) =  textpane_to_statusline__global := THE textpane_to_statusline;
+							NULL => textmill_options;						# mainpanemode did not request a textmill extension.
+						    esac;
 
-				fun note__textpane_to_lineeditor (textpane_to_lineeditor: p2l::Textpane_To_Lineeditor)
-				    =
-				    {
-					textpane_to_lineeditor__by_paneline
-					    :=
-					    im::set   (*textpane_to_lineeditor__by_paneline,
-							textpane_to_lineeditor.paneline,
-							textpane_to_lineeditor
-						      );
+						textmill_arg = { name, textmill_options };
 
-					refresh_lineeditors ();
-				    };
+						mill_to_millboss.make_textmill  textmill_arg;					# 
+					    };
+
+					mt::OLD_TEXTMILL_BY_NAME	name							# Have the textpane display pre-existing textmill with this name, fetched via mt::Mill_To_Millboss.get_textmill 
+					    =>
+					    mill_to_millboss.get_or_make_textmill						# If we do not have text supplied, we're ok with just finding a pre-existing textmill.
+						#
+						{ name,
+						  textmill_options =>  [ ]
+						};
+
+					mt::OLD_TEXTMILL_BY_PORT textpane_to_textmill					 	# Display a pre-existing textmill, specified by given port to it.
+					    =>
+					    textpane_to_textmill;
+				    esac;
 
 
-#	 				fun lineeditor__mouse_click_fn
-#	 				      {
-#	 					id:				iuw::Id,						# Unique id.
-#	 					event:				gt::Mousebutton_Event,					# MOUSEBUTTON_PRESS or MOUSEBUTTON_RELEASE.
-#	 					button:				evt::Mousebutton,
-#	 					point:				g2d::Point,
-#	 					widget_layout_hint:		gt::Widget_Layout_Hint,
-#	 					frame_indent_hint:		gt::Frame_Indent_Hint,
-#	 					site:				g2d::Box,						# Widget's assigned area in window coordinates.
-#	 					modifier_keys_state:	        evt::Modifier_Keys_State,				# State of the modifier keys (shift, ctrl...).
-#	 					mousebuttons_state:		evt::Mousebuttons_State,				# State of mouse buttons as a bool record.
-#	 					widget_to_guiboss:		gt::Widget_To_Guiboss,
-#	 					theme:				wt::Widget_Theme,
-#	 					do:				(Void -> Void) -> Void,					# Used by widget subthreads to run code in main widget microthread.
-#	 					to:				Replyqueue						# Used to call 'pass_*' methods in other imps.
-#	 				      }
-#	 				    =
-#	 				    {
-#	 				    };
-
-				fun lineeditor__key_event_fn							# Process a user keystroke forwarded to us by one of our lineeditor.pkg instances.
-				      (
-					a:				tpt::Key_Event_Fn_Arg
-				      )
-				    =
-				    {   a ->  {  id:			iuw::Id,				# Unique id.
-						 doc:			String,
-						 key_event:		gt::Key_Event,				# KEY_PRESS or KEY_RELEASE
-						 keycode:		evt::Keycode,				# Keycode of the depressed key.
-						 keysym:		evt::Keysym,				# Keysym  of the depressed key.  See Note[1] in src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp.api
-						 string:		String,					# Ascii  for the depressed key.  See Note[1] in src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp.api
-						 char:			Char,					# First char of 'string' ('\0' if string-length != 1).
-						 event_point:		g2d::Point,
-						 widget_layout_hint:	gt::Widget_Layout_Hint,
-						 frame_indent_hint:	gt::Frame_Indent_Hint,
-						 site:			g2d::Box,				# Widget's assigned area in window coordinates.
-						 modifier_keys_state:	evt::Modifier_Keys_State,		# State of the modifier keys (shift, ctrl...).
-						 mousebuttons_state:	evt::Mousebuttons_State,		# State of mouse buttons as a bool record.
-						 widget_to_guiboss:	gt::Widget_To_Guiboss,
-						 theme:			wt::Widget_Theme
-					       };
-
-# 						key_event			=  a.key_event;
-# 						char				=  a.char;
-# 						string				=  a.string;
-# 						state				=  a.state;
-# 						needs_redraw_gadget_request	=  a.needs_redraw_gadget_request;
-# 						notify_string_outs		=  a.notify_string_outs;
-# 
-# 						if (key_event == gt::KEY_PRESS)								# Currently we ignore KEY_RELEASE.
-# 						    #
-# 						    if (char::is_print char)
-# 							#
-# 							state := *state + string;
-# 							needs_redraw_gadget_request ();
-# 						    else
-# 							if (char == chr::ctrl_h
-# 							or  char == chr::del)
-# 							    #
-# 							    if (string::length *state > 0)
-# 								#
-# 								state := string::substring (*state, 0, string::length *state - 1);
-# 								needs_redraw_gadget_request ();
-# 							    fi;
-# 
-# 							elif (char == chr::ctrl_u)
-# 							    #
-# 							    if (string::length *state > 0)
-# 								#
-# 								state := "";
-# 								needs_redraw_gadget_request ();
-# 							    fi;
-# 
-# 							elif (char == chr::return)
-# 							    #
-# 							    notify_string_outs ();
-# 
-# 							elif (char == chr::nul)
-# 							    #
-# 							    case string
-# 								#
-# 								("<Clear>" | "<Home>")
-# 								    =>
-# 								    if (string::length *state > 0)
-# 									#
-# 									state := "";
-# 									needs_redraw_gadget_request ();
-# 								    fi;
-# 
-# 								"<Left>"
-# 								    =>
-# 								    if (string::length *state > 0)
-# 									#
-# 									state := string::substring (*state, 0, string::length *state - 1);
-# 									needs_redraw_gadget_request ();
-# 								    fi;
-# 
-# 								_   =>  ();
-# 							    esac;
-# 							fi;
-# 						    fi;
-# 						fi;
-				    };
-
-				fun statusline__key_event_fn							# User typed some text into one of the lineeditors in the textpane. 
-				      (
-					key_event_fn_arg:		tpt::Key_Event_Fn_Arg
-				      )
-				    =
-				    {   key_event_fn_arg
-					  ->
-					  {  id:			iuw::Id,				# Unique id.
-					     doc:			String,
-					     key_event:			gt::Key_Event,				# KEY_PRESS or KEY_RELEASE
-					     keycode:			evt::Keycode,				# Keycode of the depressed key.
-					     keysym:			evt::Keysym,				# Keysym  of the depressed key.  See Note[1] in src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp.api
-					     string:			String,					# Ascii  for the depressed key.  See Note[1] in src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp.api
-					     char:			Char,					# First char of 'string' ('\0' if string-length != 1).
-					     event_point:		g2d::Point,
-					     widget_layout_hint:	gt::Widget_Layout_Hint,
-					     frame_indent_hint:		gt::Frame_Indent_Hint,
-					     site:			g2d::Box,				# Widget's assigned area in window coordinates.
-					     modifier_keys_state:	evt::Modifier_Keys_State,		# State of the modifier keys (shift, ctrl...).
-					     mousebuttons_state:	evt::Mousebuttons_State,		# State of mouse buttons as a bool record.
-					     widget_to_guiboss:		gt::Widget_To_Guiboss,
-					     theme:			wt::Widget_Theme
-					   };
-				    };
-
-				editboss_to_textpane
-				  =
-				  { textpane_id => id,								# Unique id to facilitate storing editboss_to_textpane instances in indexed datastructures like red-black trees.
-				    textedit_id,								# We belong to this textpane group.,
-				    #
-				    note__textpane_to_textedit,
-				    note__textpane_to_statusline,
-				    note__textpane_to_lineeditor
-				  }:					b2p::Editboss_To_Textpane;
-
-				textedit_to_textpane
-				  =
-				  { textpane_id => id,
-				    textedit_id									# We belong to this textpane group.
-				  }:					e2p::Textedit_To_Textpane;
-
-				statusline_to_textpane
-				  =
-				  { textpane_id => id,
-				    textedit_id,								# We belong to this Textedit instance.
-				    #
-				    key_event_fn   =>  statusline__key_event_fn
-				  }:					s2p::Statusline_To_Textpane;
-
-				lineeditor_to_textpane
-				  =
-				  { textpane_id => id,
-				    textedit_id,								# We belong to this Textedit instance.
-				    #
-#				    mouse_click_fn =>  lineeditor__mouse_click_fn,
-				    key_event_fn   =>  lineeditor__key_event_fn
-
-				  }:					l2p::Lineeditor_To_Textpane;
 			    end;
 
-			refresh_lineeditors ();
 
-			apply   tell_watcher  portwatchers							# We do this here rather than (say) above this fn because we don't want the port in circulation until we're running.
+			mill_id
+			    =
+			    {	ps = *mainmill__global;										# Subscribe to mainmill textmill updates, so this textpane can update correctly when changes are made via another textpane.
+				#
+				ps.textpane_to_textmill
+				    ->
+				    mt::TEXTPANE_TO_TEXTMILL  t2t;
+
+				fun note_textmill_statechange arg
+				    =
+				    do {.											# The 'do' switches us from executing in microthread of textmill caller to our own textpane microthread -- ensuring proper mutual exclusion while updating our state.
+					note_textmill_statechange' arg;
+				    };				
+
+				watcher = { mill_id => textpane_id, inport_name => "" }:  mt::Inport;
+
+				t2t.note__textmill_statechange__watcher (watcher, NULL, note_textmill_statechange);
+
+				t2t.id;
+			    };
+
+			maybe_change_number_of_screenlines *mainmill__global;
+
+			mill_to_millboss.note_pane
+			  {
+			    millboss_to_pane,
+			    mill_id
+			  }
+			    where
+
+				fun note_crypt (crypt: Crypt)									# note_crypt() is a mechanism for gadgets to send us messages by our textpane_id via millboss-imp.pkg without (for improved modularity) the latter having to know all the types involved.
+				    =												# 
+				    do {.											# The 'do' switches us from executing in microthread of screenline caller to our own textpane microthread -- ensuring proper mutual exclusion while updating our state.
+					case crypt.data
+					    #
+					    mt::TEXTPANE_TO_SCREENLINE__CRYPT  textpane_to_screenline				# A screenline.pkg instance registering with us via millboss-imp.pkg.
+						=>
+						{
+						    fun screenline__mouse_click_fn								# Process a user mouseclick forwarded to us by one of our screenline.pkg instances (including the modeline one).
+							  (
+							    a:				tpt::Mouse_Click_Fn_Arg
+							  )
+							=
+							do {.											# The 'do' switches us from executing in microthread of screenline caller to our own textpane microthread.
+							    a ->  { 
+								    id => _:		Id,							# Unique Id for widget. (screenline.pkg widget.)  We avoid shadowing our own 'id'.
+								    doc:		String,							# Human-readable description of this widget, for debug and inspection.
+								    event:		gt::Mousebutton_Event,					# MOUSEBUTTON_PRESS or MOUSEBUTTON_RELEASE.
+								    button:		evt::Mousebutton,
+								    point:		g2d::Point,
+								    widget_layout_hint:	gt::Widget_Layout_Hint,
+								    frame_indent_hint:	gt::Frame_Indent_Hint,
+								    site:		g2d::Box,						# Widget's assigned area in window coordinates.
+								    modifier_keys_state:evt::Modifier_Keys_State,				# State of the modifier keys (shift, ctrl...).
+								    mousebuttons_state:	evt::Mousebuttons_State,				# State of mouse buttons as a bool record.
+								    widget_to_guiboss:	gt::Widget_To_Guiboss,
+								    theme:		wt::Widget_Theme
+								  };
+
+							    case event
+								#
+								gt::MOUSEBUTTON_PRESS
+								    =>
+								    {
+/* */									widget_to_guiboss.g.request_keyboard_focus id;
+								    };
+
+								gt::MOUSEBUTTON_RELEASE
+								    =>
+								    {
+								    };
+							    esac;
+							};
+
+						    fun screenline__cursor_offscreen								# Scroll horizontally in response to screenline notification that cursor is offscreen to left or right.
+							  {
+							    out_by_in_cols:		Int,							# If 'out_by_in_cols' is 10, cursor is 10 columns beyond right margin.  If arg0 is -10, cursor is 10 columns to left of left margin.
+							    panewidth_in_cols:	Int,								# Width of textpane in screencols.
+							    screencol0:		Int								# Using (*ps.screen_origin).col here directly led to weird oscillations due to messages getting stacked up in mailqueues between screenline.pkg and textpane.pkg instances.
+							  }
+							=
+							do {.											# The 'do' switches us from executing in microthread of screenline caller to our own textpane microthread.
+							    ps =	case *prompting__global
+									#
+									NULL =>	    *mainmill__global;
+									_    =>	     minimill__global;	
+								    esac;
+
+							    panewidth2 = panewidth_in_cols / 2;
+
+							    screen_origin =  *ps.screen_origin;
+
+
+							    screencol0'
+								=
+								if (out_by_in_cols < 0)
+								    #
+								    screencol0' = screencol0 + out_by_in_cols - panewidth2;
+
+								    max (0, screencol0');							# Don't let screen origin column go negative.
+
+								else
+								    screencol0 + out_by_in_cols + panewidth2;
+								fi;
+
+							    ps.screen_origin
+							      :=
+							      { row =>  screen_origin.row,
+								col =>  screencol0'
+							      };
+
+							    refresh_screenlines  ps;
+							};
+
+						    screenline_to_textpane
+						      =
+						      { textpane_id => id,
+							#
+							mouse_click_fn	 =>  screenline__mouse_click_fn,
+							cursor_offscreen =>  screenline__cursor_offscreen
+
+						      }:					l2p::Screenline_To_Textpane;
+
+						    textpane_to_screenline.note__screenline_to_textpane
+							#
+							screenline_to_textpane;
+ 
+						    if (textpane_to_screenline.paneline != -1)					# This '-1' kludge to distinguish the minimill/modeline screenline is pretty ugly.  Feel free to dream up something nicer.
+							#
+							ps  =  *mainmill__global;						# Normal case -- we're registering a screenline in the main textpane.
+							#
+							ps.screenlines
+							    :=
+							    im::set   (*ps.screenlines,
+									textpane_to_screenline.paneline,
+									textpane_to_screenline
+								      );
+
+							refresh_screenlines ps;
+						    else
+							ps  =  minimill__global;						# We're registering the screenline for the minimill/modeline textpane.
+							#
+							ps.screenlines
+							    :=
+							    im::set   (*ps.screenlines,
+									0,							# Ignore the bogus '-1' paneline value, so as to have the screenlines numbering be 0-based as usual.
+									textpane_to_screenline
+								      );
+						    fi;
+						};
+
+					    mt::MODE_AND_TEXTPANE_TO_DRAWPANE__CRYPT  (textpane_to_drawpane, mode_to_drawpane)	# A drawpane.pkg instance registering with us via millboss-imp.pkg.
+						=>
+						{   fun get_valid_completions ()
+							=
+							case *prompting__global
+							    #
+							    THE p =>  p.valid_completions;
+							    NULL  =>  NULL;
+							esac;
+
+						    fun drawpane__startup_fn					 		# Process a guiboss start-up-gadget event forwarded to us by our drawpane.pkg instance.
+							  (
+							    a:				wit::Startup_Fn_Arg
+							  )
+							=
+							do {.											# The 'do' switches us from executing in microthread of drawpane caller to our own textpane microthread.
+							    drawpane__global :=  THE a;
+							    #
+							    a ->  { id => drawpane_id:		Id,						# Unique id of this widget.
+								    doc:			String,						# Text description of this widget for debug/display purposes.
+								    widget_to_guiboss:		gt::Widget_To_Guiboss,
+								    do:				(Void -> Void) -> Void,				# Used by widget subthreads to run code in main widget microthread.
+								    to:				Replyqueue
+								  };
+
+							    ps = *mainmill__global;
+
+							    point_and_mark  = { point => *ps.point,
+										mark  => *ps.mark
+									      };
+							    lastmark	    = *ps.lastmark;
+							    log_undo_info   = TRUE;
+
+							    visible_lines	= *ps.expected_screenlines;
+							    screen_origin	= *ps.screen_origin;
+							    valid_completions	=  get_valid_completions ();
+
+							    arg = {
+								    drawpane_id,
+								    doc,
+								    widget_to_guiboss,
+								    point_and_mark,
+								    lastmark,
+								    screen_origin,
+								    visible_lines,
+								    log_undo_info,
+								    pane_tag		    =>  *pane_tag__global,
+								    pane_id		    =>  textpane_id,
+								    #
+								    mainmill_modestate	    =>  (*mainmill__global).panemode_state,
+								    minimill_modestate	    =>  ( minimill__global).panemode_state,
+								    #
+								    textpane_to_textmill    => ps.textpane_to_textmill,
+								    mode_to_drawpane,
+								    valid_completions,
+								    #
+								    do,
+								    to
+								  };
+
+							    (*mainmill__global).textpane_to_textmill
+								->
+								mt::TEXTPANE_TO_TEXTMILL  t2t;
+
+							    editfn_out =  t2t.get_drawpane_startup_result  arg;
+
+							    fun note_textmill_statechange arg
+								=
+								do {.											# The 'do' switches us from executing in microthread of textmill caller to our own textpane microthread -- ensuring proper mutual exclusion while updating our state.
+								    note_textmill_statechange' arg;
+								};				
+
+
+							    do_editfn_out
+							      {
+								editfn_out,
+								widget_to_guiboss,
+								ps,
+								note_textmill_statechange,
+								to,
+								keystring	=> "",
+								numeric_prefix	=> NULL
+							      };
+							};
+
+						    fun drawpane__shutdown_fn ()							 	# Process a guiboss shut-down-gadget event forwarded to us by our drawpane.pkg instance.
+							=
+							do {.											# The 'do' switches us from executing in microthread of drawpane caller to our own textpane microthread.
+
+							    ps = *mainmill__global;
+
+							    point_and_mark  = { point => *ps.point,
+										mark  => *ps.mark
+									      };
+							    lastmark	    = *ps.lastmark;
+							    log_undo_info   = TRUE;
+
+							    visible_lines	= *ps.expected_screenlines;
+							    screen_origin	= *ps.screen_origin;
+							    valid_completions	=  get_valid_completions ();
+
+							    arg = {
+								    point_and_mark,
+								    lastmark,
+								    screen_origin,
+								    visible_lines,
+								    log_undo_info,
+								    pane_tag		    =>  *pane_tag__global,
+								    pane_id		    =>  textpane_id,
+								    #
+								    mainmill_modestate	    =>  (*mainmill__global).panemode_state,
+								    minimill_modestate	    =>  ( minimill__global).panemode_state,
+								    #
+								    textpane_to_textmill    => ps.textpane_to_textmill,
+								    mode_to_drawpane,
+								    valid_completions
+								  };
+
+							    (*mainmill__global).textpane_to_textmill
+								->
+								mt::TEXTPANE_TO_TEXTMILL  t2t;
+
+							    editfn_out =  t2t.get_drawpane_shutdown_result  arg;
+
+							    fun note_textmill_statechange arg
+								=
+								do {.											# The 'do' switches us from executing in microthread of textmill caller to our own textpane microthread -- ensuring proper mutual exclusion while updating our state.
+								    note_textmill_statechange' arg;
+								};				
+
+
+							    do_editfn_out
+							      {
+								editfn_out,
+								widget_to_guiboss,
+								ps,
+								note_textmill_statechange,
+								to,
+								keystring	=> "",
+								numeric_prefix	=> NULL
+							      };
+							};
+
+						    fun drawpane__initialize_gadget_fn								# Process a guiboss initialize-gadget event forwarded to us by our drawpane.pkg instance.
+							  (
+							    a:				wit::Initialize_Gadget_Fn_Arg
+							  )
+							=
+							do {.											# The 'do' switches us from executing in microthread of drawpane caller to our own textpane microthread.
+							    a ->  { 
+								    id => drawpane_id:			Id,							# Unique Id for widget. (drawpane.pkg widget.)  We avoid shadowing our own 'id'.
+								    doc:				String,
+								    pass_font:				List(String) -> Replyqueue
+														     -> (evt::Font -> Void) -> Void,		# Nonblocking version of next, for use in imps.
+								     get_font:				List(String) ->	 evt::Font,				# Accepts a list of font names which are tried in order.
+								    make_rw_pixmap:			g2d::Size -> g2p::Gadget_To_Rw_Pixmap,			# Make an Xserver-side rw_pixmap for scratch use by widget.  In general there is no need for the widget to explicitly free these -- guiboss_imp will do this automatically when the gui is killed.
+								    site:				g2d::Box,						# Widget's assigned area in window coordinates.
+
+								    widget_to_guiboss:			gt::Widget_To_Guiboss,
+								    theme:				wt::Widget_Theme,
+								    do:					(Void -> Void) -> Void,					# Used by widget subthreads to run code in main widget microthread.
+								    to:					Replyqueue						# Used to call 'pass_*' methods in other imps.
+								  };
+
+							    ps = *mainmill__global;
+
+							    point_and_mark  = { point => *ps.point,
+										mark  => *ps.mark
+									      };
+							    lastmark	    = *ps.lastmark;
+							    log_undo_info   = TRUE;
+
+							    visible_lines	= *ps.expected_screenlines;
+							    screen_origin	= *ps.screen_origin;
+							    valid_completions	=  get_valid_completions ();
+
+							    arg = {
+								    drawpane_id,
+								    doc,
+								    site,
+								    pass_font,
+								     get_font,
+								    make_rw_pixmap,
+								    #
+								    point_and_mark,
+								    lastmark,
+								    screen_origin,
+								    visible_lines,
+								    log_undo_info,
+								    pane_tag		    =>  *pane_tag__global,
+								    pane_id		    =>  textpane_id,
+								    widget_to_guiboss,
+								    theme,
+								    #
+								    mainmill_modestate	    =>  (*mainmill__global).panemode_state,
+								    minimill_modestate	    =>  ( minimill__global).panemode_state,
+								    #
+								    textpane_to_textmill    => ps.textpane_to_textmill,
+								    mode_to_drawpane,
+								    valid_completions,
+								    #
+								    do,
+								    to
+								  };
+
+							    (*mainmill__global).textpane_to_textmill
+								->
+								mt::TEXTPANE_TO_TEXTMILL  t2t;
+
+							    editfn_out =  t2t.get_drawpane_initialize_gadget_result  arg;
+
+							    fun note_textmill_statechange arg
+								=
+								do {.											# The 'do' switches us from executing in microthread of textmill caller to our own textpane microthread -- ensuring proper mutual exclusion while updating our state.
+								    note_textmill_statechange' arg;
+								};				
+
+
+							    do_editfn_out
+							      {
+								editfn_out,
+								widget_to_guiboss,
+								ps,
+								note_textmill_statechange,
+								to,
+								keystring	=> "",
+								numeric_prefix	=> NULL
+							      };
+							};
+
+						    fun drawpane__redraw_request_fn								# Process a guiboss redraw request forwarded to us by our drawpane.pkg instance.
+							  (
+							    a:				wit::Redraw_Request_Fn_Arg
+							  )
+							=
+							do {.											# The 'do' switches us from executing in microthread of drawpane caller to our own textpane microthread.
+							    a ->  { 
+								    id => drawpane_id:			Id,							# Unique Id for widget. (drawpane.pkg widget.)  We avoid shadowing our own 'id'.
+								    doc:				String,
+								    frame_number:			Int,							# 1,2,3,... Purely for convenience of widget, guiboss-imp makes no use of this.
+								    site:				g2d::Box,						# Widget's assigned area in window coordinates.
+								    frame_indent_hint:			gt::Frame_Indent_Hint,
+								    duration_in_seconds:		Float,							# If state has changed look-imp should call note_changed_gadget_foreground() before this time is up. Also useful for motionblur.
+								    widget_to_guiboss:			gt::Widget_To_Guiboss,
+								    gadget_mode:			gt::Gadget_Mode,
+								    theme:				wt::Widget_Theme,
+								    do:					(Void -> Void) -> Void,					# Used by widget subthreads to run code in main widget microthread.
+								    to:					Replyqueue,						# Used to call 'pass_*' methods in other imps.
+								    popup_nesting_depth:		Int							# 0 for gadgets on basewindow, 1 for gadgets on popup on basewindow, 2 for gadgets on popup on popup, etc.
+								  };
+
+							    ps = *mainmill__global;
+
+							    point_and_mark  = { point => *ps.point,
+										mark  => *ps.mark
+									      };
+							    lastmark	    = *ps.lastmark;
+							    log_undo_info   = TRUE;
+
+							    visible_lines	= *ps.expected_screenlines;
+							    screen_origin	= *ps.screen_origin;
+							    valid_completions	=  get_valid_completions ();
+
+							    arg = {
+								    drawpane_id,
+								    doc,
+								    frame_number,	
+								    site,
+								    duration_in_seconds,
+								    gadget_mode,
+								    popup_nesting_depth,
+								    #
+								    point_and_mark,
+								    lastmark,
+								    screen_origin,
+								    visible_lines,
+								    log_undo_info,
+								    pane_tag		    =>  *pane_tag__global,
+								    pane_id		    =>  textpane_id,
+								    widget_to_guiboss,
+								    theme,
+								    #
+								    mainmill_modestate	    =>  (*mainmill__global).panemode_state,
+								    minimill_modestate	    =>  ( minimill__global).panemode_state,
+								    #
+								    textpane_to_textmill    => ps.textpane_to_textmill,
+								    mode_to_drawpane,
+								    valid_completions,
+								    #
+								    do,
+								    to
+								  };
+
+							    (*mainmill__global).textpane_to_textmill
+								->
+								mt::TEXTPANE_TO_TEXTMILL  t2t;
+
+							    editfn_out =  t2t.get_drawpane_redraw_request_result  arg;
+
+							    fun note_textmill_statechange arg
+								=
+								do {.											# The 'do' switches us from executing in microthread of textmill caller to our own textpane microthread -- ensuring proper mutual exclusion while updating our state.
+								    note_textmill_statechange' arg;
+								};				
+
+
+							    do_editfn_out
+							      {
+								editfn_out,
+								widget_to_guiboss,
+								ps,
+								note_textmill_statechange,
+								to,
+								keystring	=> "",
+								numeric_prefix	=> NULL
+							      };
+							};
+
+						    fun drawpane__mouse_click_fn								# Process a user mouseclick forwarded to us by our drawpane.pkg instance.
+							  (
+							    a:				wit::Mouse_Click_Fn_Arg
+							  )
+							=
+							do {.											# The 'do' switches us from executing in microthread of drawpane caller to our own textpane microthread.
+							    a ->  { 
+								    id => drawpane_id:			Id,							# Unique Id for widget. (drawpane.pkg widget.)  We avoid shadowing our own 'id'.
+								    doc:				String,
+								    event:				gt::Mousebutton_Event,					# MOUSEBUTTON_PRESS or MOUSEBUTTON_RELEASE.
+								    button:				evt::Mousebutton,
+								    point:				g2d::Point,
+								    widget_layout_hint:			gt::Widget_Layout_Hint,
+								    frame_indent_hint:			gt::Frame_Indent_Hint,
+								    site:				g2d::Box,						# Widget's assigned area in window coordinates.
+								    modifier_keys_state:	        evt::Modifier_Keys_State,				# State of the modifier keys (shift, ctrl...).
+								    mousebuttons_state:		        evt::Mousebuttons_State,				# State of mouse buttons as a bool record.
+								    widget_to_guiboss:			gt::Widget_To_Guiboss,
+								    theme:				wt::Widget_Theme,
+								    do:					(Void -> Void) -> Void,					# Used by widget subthreads to run code in main widget microthread.
+								    to:					Replyqueue						# Used to call 'pass_*' methods in other imps.
+								  };
+
+							    ps = *mainmill__global;
+
+							    point_and_mark  = { point => *ps.point,
+										mark  => *ps.mark
+									      };
+							    lastmark	    = *ps.lastmark;
+							    log_undo_info   = TRUE;
+
+							    visible_lines	= *ps.expected_screenlines;
+							    screen_origin	= *ps.screen_origin;
+							    valid_completions	=  get_valid_completions ();
+
+							    arg = {
+								    drawpane_id,
+								    doc,
+								    button,
+								    event,
+								    point,
+								    widget_layout_hint,
+								    frame_indent_hint,
+								    site,
+								    modifier_keys_state,
+								    mousebuttons_state,
+								    point_and_mark,
+								    lastmark,
+								    screen_origin,
+								    visible_lines,
+								    log_undo_info,
+								    pane_tag		    =>  *pane_tag__global,
+								    pane_id		    =>  textpane_id,
+								    widget_to_guiboss,
+								    theme,
+								    #
+								    mainmill_modestate	    =>  (*mainmill__global).panemode_state,
+								    minimill_modestate	    =>  ( minimill__global).panemode_state,
+								    #
+								    textpane_to_textmill    => ps.textpane_to_textmill,
+								    mode_to_drawpane,
+								    valid_completions,
+								    #
+								    do,
+								    to
+								  };
+
+							    (*mainmill__global).textpane_to_textmill
+								->
+								mt::TEXTPANE_TO_TEXTMILL  t2t;
+
+							    editfn_out =  t2t.get_drawpane_mouse_click_result  arg;
+
+							    fun note_textmill_statechange arg
+								=
+								do {.											# The 'do' switches us from executing in microthread of textmill caller to our own textpane microthread -- ensuring proper mutual exclusion while updating our state.
+								    note_textmill_statechange' arg;
+								};				
+
+
+							    do_editfn_out
+							      {
+								editfn_out,
+								widget_to_guiboss,
+								ps,
+								note_textmill_statechange,
+								to,
+								keystring	=> "",
+								numeric_prefix	=> NULL
+							      };
+							};
+
+						    fun drawpane__mouse_drag_fn										# Process a user mousedrag forwarded to us by our drawpane.pkg instance.
+							  (
+							    a:				wit::Mouse_Drag_Fn_Arg
+							  )
+							=
+							do {.											# The 'do' switches us from executing in microthread of drawpane caller to our own textpane microthread.
+							    a ->  { 
+								    id => drawpane_id:			Id,							# Unique Id for widget. (drawpane.pkg widget.)  We avoid shadowing our own 'id'.
+								    doc:				String,
+								    button:				evt::Mousebutton,
+								    event_point:			g2d::Point,
+								    start_point:			g2d::Point,
+								    last_point:				g2d::Point,
+								    phase:				gt::Drag_Phase,	
+								    widget_layout_hint:			gt::Widget_Layout_Hint,
+								    frame_indent_hint:			gt::Frame_Indent_Hint,
+								    site:				g2d::Box,						# Widget's assigned area in window coordinates.
+								    modifier_keys_state:	        evt::Modifier_Keys_State,				# State of the modifier keys (shift, ctrl...).
+								    mousebuttons_state:		        evt::Mousebuttons_State,				# State of mouse buttons as a bool record.
+								    widget_to_guiboss:			gt::Widget_To_Guiboss,
+								    theme:				wt::Widget_Theme,
+								    do:					(Void -> Void) -> Void,					# Used by widget subthreads to run code in main widget microthread.
+								    to:					Replyqueue						# Used to call 'pass_*' methods in other imps.
+								  };
+
+							    ps = *mainmill__global;
+
+							    point_and_mark  = { point => *ps.point,
+										mark  => *ps.mark
+									      };
+							    lastmark	    = *ps.lastmark;
+							    log_undo_info   = TRUE;
+
+							    visible_lines	= *ps.expected_screenlines;
+							    screen_origin	= *ps.screen_origin;
+							    valid_completions	=  get_valid_completions ();
+
+							    arg = {
+								    drawpane_id,
+								    doc,
+								    button,
+								    event_point,
+								    start_point,
+								    last_point,
+								    phase,
+								    widget_layout_hint,
+								    frame_indent_hint,
+								    site,
+								    modifier_keys_state,
+								    mousebuttons_state,
+								    point_and_mark,
+								    lastmark,
+								    screen_origin,
+								    visible_lines,
+								    log_undo_info,
+								    pane_tag		    =>  *pane_tag__global,
+								    pane_id		    =>  textpane_id,
+								    widget_to_guiboss,
+								    theme,
+								    #
+								    mainmill_modestate	    =>  (*mainmill__global).panemode_state,
+								    minimill_modestate	    =>  ( minimill__global).panemode_state,
+								    #
+								    textpane_to_textmill    => ps.textpane_to_textmill,
+								    mode_to_drawpane,
+								    valid_completions,
+								    #
+								    do,
+								    to
+								  };
+
+							    (*mainmill__global).textpane_to_textmill
+								->
+								mt::TEXTPANE_TO_TEXTMILL  t2t;
+
+							    editfn_out =  t2t.get_drawpane_mouse_drag_result  arg;
+
+							    fun note_textmill_statechange arg
+								=
+								do {.											# The 'do' switches us from executing in microthread of textmill caller to our own textpane microthread -- ensuring proper mutual exclusion while updating our state.
+								    note_textmill_statechange' arg;
+								};				
+
+
+							    do_editfn_out
+							      {
+								editfn_out,
+								widget_to_guiboss,
+								ps,
+								note_textmill_statechange,
+								to,
+								keystring	=> "",
+								numeric_prefix	=> NULL
+							      };
+							};
+
+						    fun drawpane__mouse_transit_fn										# Process a user mousedrag forwarded to us by our drawpane.pkg instance.
+							  (
+							    a:				wit::Mouse_Transit_Fn_Arg
+							  )
+							=
+							do {.													# The 'do' switches us from executing in microthread of drawpane caller to our own textpane microthread.
+							    a ->  { 
+								    id => drawpane_id:			Id,							# Unique Id for widget. (drawpane.pkg widget.)  We avoid shadowing our own 'id'.
+								    doc:				String,
+								    transit:				gt::Gadget_Transit,					# Mouse is entering (CAME) or leaving (LEFT) widget, or moving (MOVE) across it.
+								    event_point:			g2d::Point,
+								    widget_layout_hint:			gt::Widget_Layout_Hint,
+								    frame_indent_hint:			gt::Frame_Indent_Hint,
+								    site:				g2d::Box,						# Widget's assigned area in window coordinates.
+								    modifier_keys_state:	        evt::Modifier_Keys_State,				# State of the modifier keys (shift, ctrl...).
+								    widget_to_guiboss:			gt::Widget_To_Guiboss,
+								    theme:				wt::Widget_Theme,
+								    do:					(Void -> Void) -> Void,					# Used by widget subthreads to run code in main widget microthread.
+								    to:					Replyqueue						# Used to call 'pass_*' methods in other imps.
+								  };
+
+							    ps = *mainmill__global;
+
+							    point_and_mark  = { point => *ps.point,
+										mark  => *ps.mark
+									      };
+							    lastmark	    = *ps.lastmark;
+							    log_undo_info   = TRUE;
+
+							    visible_lines	= *ps.expected_screenlines;
+							    screen_origin	= *ps.screen_origin;
+							    valid_completions	=  get_valid_completions ();
+
+							    arg = {
+								    drawpane_id,
+								    doc,
+								    transit,
+								    event_point,
+								    widget_layout_hint,
+								    frame_indent_hint,
+								    site,
+								    modifier_keys_state,
+								    point_and_mark,
+								    lastmark,
+								    screen_origin,
+								    visible_lines,
+								    log_undo_info,
+								    pane_tag		    =>  *pane_tag__global,
+								    pane_id		    =>  textpane_id,
+								    widget_to_guiboss,
+								    theme,
+								    #
+								    mainmill_modestate	    =>  (*mainmill__global).panemode_state,
+								    minimill_modestate	    =>  ( minimill__global).panemode_state,
+								    #
+								    textpane_to_textmill    => ps.textpane_to_textmill,
+								    mode_to_drawpane,
+								    valid_completions,
+								    #
+								    do,
+								    to
+								  };
+
+							    (*mainmill__global).textpane_to_textmill
+								->
+								mt::TEXTPANE_TO_TEXTMILL  t2t;
+
+							    editfn_out =  t2t.get_drawpane_mouse_transit_result  arg;
+
+							    fun note_textmill_statechange arg
+								=
+								do {.											# The 'do' switches us from executing in microthread of textmill caller to our own textpane microthread -- ensuring proper mutual exclusion while updating our state.
+								    note_textmill_statechange' arg;
+								};				
+
+
+							    do_editfn_out
+							      {
+								editfn_out,
+								widget_to_guiboss,
+								ps,
+								note_textmill_statechange,
+								to,
+								keystring	=> "",
+								numeric_prefix	=> NULL
+							      };
+							};
+
+
+
+						    drawpane_relays										# Calls relayed unchanged from drawport to textport. (Textpane will forward these events via textmill to the selected foo-mode.pkg for actual processing.)
+						      =	
+						      {												# We omit Key_Event_Fn and Note_Keyboard_Focus_Fn because we expect all keystroke stuff to go directly to textpane.pkg, bypassing drawpane.pkg. (We similarly bypass screenline.pkg.)
+							startup_fn		=>  drawpane__startup_fn,
+							shutdown_fn		=>  drawpane__shutdown_fn,
+							initialize_gadget_fn	=>  drawpane__initialize_gadget_fn,
+							redraw_request_fn	=>  drawpane__redraw_request_fn,
+							mouse_click_fn		=>  drawpane__mouse_click_fn,
+							mouse_drag_fn		=>  drawpane__mouse_drag_fn,
+							mouse_transit_fn	=>  drawpane__mouse_transit_fn
+						      };
+
+						    drawpane_to_textpane
+						      =
+/* */						      { textpane_id => id,
+							#
+#							mouse_click_fn	 =>  drawpane__mouse_click_fn,
+							drawpane_relays
+						      }:					d2p::Drawpane_To_Textpane;
+
+						    textpane_to_drawpane.note__drawpane_to_textpane
+							#
+							drawpane_to_textpane;
+ 
+						    ps  =  *mainmill__global;							# Register drawpane in the main textpane.
+						    #
+						    ps.textpane_to_drawpane :=  THE textpane_to_drawpane;
+						    ps.mode_to_drawpane	    :=  THE mode_to_drawpane;
+
+# There ain't no 'refresh_drawpane'. Should there be?
+#						    refresh_drawpane ps;
+						};
+
+					    _   =>  {   msg =   sprintf "note_crypt:  Unknown Crypt value, type='%s' info='%s'  --textpane.pkg"
+								    crypt.type
+								    crypt.info
+								;
+							log::fatal msg;								# Shouldn't return.
+							raise exception DIE msg;						# Mainly to keep the compiler happy.
+						    };
+					esac;
+				    };
+
+				fun note_tag (tag: Int)										# millboss numbers textpanes 1-N. The tag is displayed on modeline, allowing user to compactly designate a textpane when switching between them via "C-x o".
+				    =												# This tag may be changed at any time -- millboss renumbers all textpanes every time a textpane is un/registered with it.
+				    do {.											# The 'do' switches us from executing in microthread of screenline caller to our own textpane microthread -- ensuring proper mutual exclusion while updating our state.
+					if(*pane_tag__global != tag)
+					    pane_tag__global := tag;
+
+					    ps  =  *mainmill__global;								# 
+
+					    refresh_screenlines ps;								# Update the modeline.
+					fi;
+				    };
+
+				millboss_to_pane
+				  =
+/* */				  { pane_id => id,										# Unique id to facilitate storing millboss_to_pane instances in indexed datastructures like red-black trees.
+				    #
+				    note_crypt,
+				    note_tag
+				  }:					b2p::Millboss_To_Pane;
+
+				millboss_to_pane__global :=  THE millboss_to_pane;
+			    end;
+
+/* */			widget_to_guiboss.g.request_keyboard_focus  id;
+
+			refresh_screenlines *mainmill__global;
+
+			apply   tell_watcher  portwatchers									# We do this here rather than (say) above this fn because we don't want the port in circulation until we're running.
 				where
 				    fun tell_watcher  portwatcher
 					=
@@ -1111,30 +3912,57 @@ get_text_dimensions "foo";
 			();
 		    };
 
-		fun shutdown_fn ()										# Return to widget_imp an exception packaging up our state; this will be returned to guiboss_imp, saved in the
-		    =												# Paused_Gui tree, and passed to our startup_fn when/if gui is restarted. This exception will never be raised;
+		fun shutdown_fn ()												# 
+		    =														# 
 		    {	case *widget_to_guiboss__global
 			    #
 			    THE { widget_to_guiboss, textpane_id }
 				=>
-				{   gadget_to_editboss
-					=
-					g2b::find__gadget_to_editboss  (widget_to_guiboss.g,  "textpane::shutdown_fn");
+				{   if *have_keyboard_focus__global
+					#
+					widget_to_guiboss.g.release_keyboard_focus  textpane_id;
+				    fi;
 
-				    gadget_to_editboss.drop_textpane  { textpane_id, textedit_id };
+				    mill_to_millboss.drop_pane  { pane_id => textpane_id };
 				};
 
 			    NULL => ();
 			esac;
 
-			apply   tell_watcher  portwatchers							# 
+			ps  =  *mainmill__global;
+
+
+			{   ps.textpane_to_textmill
+				->
+				mt::TEXTPANE_TO_TEXTMILL  t2t;
+
+			    watcher = { mill_id => textpane_id, inport_name => "" }:  mt::Inport;
+
+			    t2t.drop__textmill_statechange__watcher  watcher;
+			};
+
+			{   ps    = *mainmill__global;										# Do any required state shutdown for our mainmill Panemode.
+			    state = ps.panemode_state;										#
+			    mode  = state.mode;											#
+			    mode ->  mt::PANEMODE  mm;										#
+			    mm.finalize_state (mode, state);									#
+			};
+			{   ps    =  minimill__global;										# Do any required state shutdown for our minimill Panemode.
+			    state = ps.panemode_state;										#
+			    mode  = state.mode;											#
+			    mode ->  mt::PANEMODE  mm;										#
+			    mm.finalize_state (mode, state);									#
+			};
+
+
+			apply   tell_watcher  portwatchers									# 
 				where
 				    fun tell_watcher  portwatcher
 					=
 					portwatcher  NULL;
 				end;
 
-			apply tell_watcher *sitewatchers_global
+			apply  tell_watcher  *ps.sitewatchers
 			    where
 				fun tell_watcher sitewatcher
 				    =
@@ -1144,18 +3972,18 @@ get_text_dimensions "foo";
 
 		fun initialize_gadget_fn
 		    {
-		      id:				iuw::Id,						# Unique id.
-		      doc:				String,
-		      site:				g2d::Box,						# Window rectangle in which to draw.
+		      id:				Id,									# Unique Id for widget.
+		      doc:				String,									# Human-readable description of this widget, for debug and inspection.
+		      site:				g2d::Box,								# Window rectangle in which to draw.
 		      widget_to_guiboss:		gt::Widget_To_Guiboss,
 		      theme:				wt::Widget_Theme,
 		      pass_font:			List(String) -> Replyqueue
-								     -> (evt::Font -> Void) -> Void,		# Nonblocking version of next, for use in imps.
-		       get_font:			List(String) ->	 evt::Font,				# Accepts a list of font names which are tried in order.
+								     -> (evt::Font -> Void) -> Void,				# Nonblocking version of next, for use in imps.
+		       get_font:			List(String) ->	 evt::Font,						# Accepts a list of font names which are tried in order.
 		      make_rw_pixmap:			g2d::Size -> g2p::Gadget_To_Rw_Pixmap,
 		      #
-		      do:				(Void -> Void) -> Void,					# Used by widget subthreads to execute code in main widget microthread.
-		      to:				Replyqueue						# Used to call 'pass_*' methods in other imps.
+		      do:				(Void -> Void) -> Void,							# Used by widget subthreads to execute code in main widget microthread.
+		      to:				Replyqueue								# Used to call 'pass_*' methods in other imps.
 		    }
 		    =
 		    {	note_site (id,site);
@@ -1165,20 +3993,20 @@ get_text_dimensions "foo";
 
 		fun redraw_request_fn_wrapper
 		    {
-		      id:				iuw::Id,						# Unique id.
-		      doc:				String,
-		      frame_number:			Int,							# 1,2,3,... Purely for convenience of widget-imp, guiboss-imp makes no use of this.
+		      id:				Id,									# Unique Id for widget.
+		      doc:				String,									# Human-readable description of this widget, for debug and inspection.
+		      frame_number:			Int,									# 1,2,3,... Purely for convenience of widget-imp, guiboss-imp makes no use of this.
 		      frame_indent_hint:		gt::Frame_Indent_Hint,
-		      site:				g2d::Box,						# Window rectangle in which to draw.
-		      popup_nesting_depth:		Int,							# 0 for gadgets on basewindow, 1 for gadgets on popup on basewindow, 2 for gadgets on popup on popup, etc.
+		      site:				g2d::Box,								# Window rectangle in which to draw.
+		      popup_nesting_depth:		Int,									# 0 for gadgets on basewindow, 1 for gadgets on popup on basewindow, 2 for gadgets on popup on popup, etc.
 		      #
-		      duration_in_seconds:		Float,							# If state has changed widget-imp should call redraw_gadget() before this time is up. Also useful for motionblur.
+		      duration_in_seconds:		Float,									# If state has changed widget-imp should call redraw_gadget() before this time is up. Also useful for motionblur.
 		      widget_to_guiboss:		gt::Widget_To_Guiboss,
 		      gadget_mode:			gt::Gadget_Mode,
 		      #
 		      theme:				wt::Widget_Theme,
 		      do:				(Void -> Void) -> Void,
-		      to:				Replyqueue						# Used to call 'pass_*' methods in other imps.
+		      to:				Replyqueue								# Used to call 'pass_*' methods in other imps.
 		    }
 		    =
 		    {	note_site (id,site);
@@ -1196,6 +4024,8 @@ get_text_dimensions "foo";
 			    ->
 			    (palette: wt::Gadget_Palette);
 
+			have_keyboard_focus = *have_keyboard_focus__global;
+
 			redraw_fn_arg
 			    =
 			    REDRAW_FN_ARG
@@ -1209,6 +4039,7 @@ get_text_dimensions "foo";
 				widget_to_guiboss,
 				gadget_mode,
 				theme,
+				have_keyboard_focus,
 				do,
 				to,
 				palette,
@@ -1224,22 +4055,22 @@ get_text_dimensions "foo";
 		    };
 
 
-		fun mouse_click_fn_wrapper									# This a callback we hand to   src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp.pkg
+		fun mouse_click_fn_wrapper											# This a callback we hand to   src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp.pkg
 		      {
-			id:				iuw::Id,						# Unique id.
-			doc:				String,
-			event:				gt::Mousebutton_Event,					# MOUSEBUTTON_PRESS or MOUSEBUTTON_RELEASE.
+			id:				Id,									# Unique Id for widget.
+			doc:				String,									# Human-readable description of this widget, for debug and inspection.
+			event:				gt::Mousebutton_Event,							# MOUSEBUTTON_PRESS or MOUSEBUTTON_RELEASE.
 			button:				evt::Mousebutton,
 			point:				g2d::Point,
 			widget_layout_hint:		gt::Widget_Layout_Hint,
 			frame_indent_hint:		gt::Frame_Indent_Hint,
-			site:		 		g2d::Box,						# Widget's assigned area in window coordinates.
-			modifier_keys_state:	        evt::Modifier_Keys_State,				# State of the modifier keys (shift, ctrl...).
-			mousebuttons_state:		evt::Mousebuttons_State,				# State of mouse buttons as a bool record.
+			site:		 		g2d::Box,								# Widget's assigned area in window coordinates.
+			modifier_keys_state:	        evt::Modifier_Keys_State,						# State of the modifier keys (shift, ctrl...).
+			mousebuttons_state:		evt::Mousebuttons_State,						# State of mouse buttons as a bool record.
 			widget_to_guiboss:		gt::Widget_To_Guiboss,
 			theme:				wt::Widget_Theme,
-			do:				(Void -> Void) -> Void,					# Used by widget subthreads to execute code in main widget microthread.
-			to:				Replyqueue						# Used to call 'pass_*' methods in other imps.
+			do:				(Void -> Void) -> Void,							# Used by widget subthreads to execute code in main widget microthread.
+			to:				Replyqueue								# Used to call 'pass_*' methods in other imps.
 		      }
 		    = 
 		    {	note_site  (id,site);
@@ -1271,24 +4102,24 @@ get_text_dimensions "foo";
 			mouse_click_fn  mouse_click_fn_arg;
 		    };
 
-		fun mouse_drag_fn_wrapper									# This a callback we hand to   src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp.pkg
+		fun mouse_drag_fn_wrapper											# This a callback we hand to   src/lib/x-kit/widget/xkit/theme/widget/default/look/widget-imp.pkg
 		    (
-		      {	id:				iuw::Id,						# Unique id.
-			doc:				String,
+		      {	id:				Id,									# Unique Id for widget.
+			doc:				String,									# Human-readable description of this widget, for debug and inspection.
 			event_point:			g2d::Point,
 			start_point:			g2d::Point,
 			last_point:			g2d::Point,
 			widget_layout_hint:		gt::Widget_Layout_Hint,
 			frame_indent_hint:		gt::Frame_Indent_Hint,
-			site:				g2d::Box,						# Widget's assigned area in window coordinates.
+			site:				g2d::Box,								# Widget's assigned area in window coordinates.
 			phase:				gt::Drag_Phase,	
 			button:				evt::Mousebutton,
-			modifier_keys_state:	        evt::Modifier_Keys_State,				# State of the modifier keys (shift, ctrl...).
-			mousebuttons_state:		evt::Mousebuttons_State,				# State of mouse buttons as a bool record.
+			modifier_keys_state:	        evt::Modifier_Keys_State,						# State of the modifier keys (shift, ctrl...).
+			mousebuttons_state:		evt::Mousebuttons_State,						# State of mouse buttons as a bool record.
 			widget_to_guiboss:		gt::Widget_To_Guiboss,
 			theme:				wt::Widget_Theme,
-			do:				(Void -> Void) -> Void,					# Used by widget subthreads to execute code in main widget microthread.
-			to:				Replyqueue						# Used to call 'pass_*' methods in other imps.
+			do:				(Void -> Void) -> Void,							# Used by widget subthreads to execute code in main widget microthread.
+			to:				Replyqueue								# Used to call 'pass_*' methods in other imps.
 		      }
 		    )
 		    = 
@@ -1315,7 +4146,7 @@ get_text_dimensions "foo";
 				do,
 				to,
 				#
-				default_mouse_drag_fn =>  \\ _ = (),						# Default drag behavior for buttons is to do absolutely nothing.
+				default_mouse_drag_fn =>  \\ _ = (),								# Default drag behavior for buttons is to do absolutely nothing.
 				#
 				needs_redraw_gadget_request
 			      };
@@ -1323,7 +4154,7 @@ get_text_dimensions "foo";
 			case mouse_drag_fn
 			    #
 			    THE mouse_drag_fn =>   mouse_drag_fn  mouse_drag_fn_arg;
-			    NULL	      =>   ();								# We do not expect this case to happen: If mouse_drag_fn is NULL mouse_drag_fn_wrapper should not have been registered with widget-imp so we should never get called.
+			    NULL	      =>   ();										# We do not expect this case to happen: If mouse_drag_fn is NULL mouse_drag_fn_wrapper should not have been registered with widget-imp so we should never get called.
 			esac;
 		    };
 
@@ -1331,18 +4162,18 @@ get_text_dimensions "foo";
 		      #
 		      ( arg as
 			{
-			  id:				iuw::Id,						# Unique id.
-			  doc:				String,
+			  id:				Id,									# Unique Id for widget.
+			  doc:				String,									# Human-readable description of this widget, for debug and inspection.
 			  event_point:			g2d::Point,
 			  widget_layout_hint:		gt::Widget_Layout_Hint,
 			  frame_indent_hint:		gt::Frame_Indent_Hint,
-			  site:		 		g2d::Box,						# Widget's assigned area in window coordinates.
-			  transit:			gt::Gadget_Transit,					# Mouse is entering (CAME) or leaving (LEFT) widget, or moving (MOVE) across it.
-			  modifier_keys_state:	        evt::Modifier_Keys_State,				# State of the modifier keys (shift, ctrl...).
+			  site:		 		g2d::Box,								# Widget's assigned area in window coordinates.
+			  transit:			gt::Gadget_Transit,							# Mouse is entering (CAME) or leaving (LEFT) widget, or moving (MOVE) across it.
+			  modifier_keys_state:	        evt::Modifier_Keys_State,						# State of the modifier keys (shift, ctrl...).
 			  widget_to_guiboss:		gt::Widget_To_Guiboss,
 			  theme:			wt::Widget_Theme,
-			  do:				(Void -> Void) -> Void,					# Used by widget subthreads to execute code in main widget microthread.
-			  to:				Replyqueue						# Used to call 'pass_*' methods in other imps.
+			  do:				(Void -> Void) -> Void,							# Used by widget subthreads to execute code in main widget microthread.
+			  to:				Replyqueue								# Used to call 'pass_*' methods in other imps.
 			}
 		      )	
 		    = 
@@ -1365,7 +4196,7 @@ get_text_dimensions "foo";
 				do,
 				to,
 				#
-				default_mouse_transit_fn =>  \\ _ = (),						# Default transit behavior for buttons is to do absolutely nothing.
+				default_mouse_transit_fn =>  \\ _ = (),								# Default transit behavior for buttons is to do absolutely nothing.
 				#
 				needs_redraw_gadget_request
 			      };
@@ -1373,7 +4204,7 @@ get_text_dimensions "foo";
 			case mouse_transit_fn
 			    #
 			    THE mouse_transit_fn =>   mouse_transit_fn  mouse_transit_fn_arg;
-			    NULL	         =>   ();							# We do not expect this case to happen: If mouse_transit_fn is NULL mouse_transit_fn_wrapper should not have been registered with widget-imp so we should never get called.
+			    NULL	         =>   ();									# We do not expect this case to happen: If mouse_transit_fn is NULL mouse_transit_fn_wrapper should not have been registered with widget-imp so we should never get called.
 			esac;
 
 			();
@@ -1381,23 +4212,17 @@ get_text_dimensions "foo";
 
 		fun key_event_fn_wrapper
 		      {
-			id:				iuw::Id,						# Unique id.
-			doc:				String,
-			key_event:			gt::Key_Event,						# KEY_PRESS or KEY_RELEASE.
-			keycode:			evt::Keycode,						# Keycode of the depressed key.
-			keysym:				evt::Keysym,						# Keysym  of the depressed key.
-			string:				String,							# Ascii  for the depressed key.
-			char:				Char,							# First char of 'string' ('\0' if string-length != 1).
-			event_point:			g2d::Point,
+			id:				Id,									# Unique Id for widget.
+			doc:				String,									# Human-readable description of this widget, for debug and inspection.
+			keystroke:			gt::Keystroke_Info,							# Keystring etc for event.
 			widget_layout_hint:		gt::Widget_Layout_Hint,
 			frame_indent_hint:		gt::Frame_Indent_Hint,
-			site:		 		g2d::Box,						# Widget's assigned area in window coordinates.
-			modifier_keys_state:	        evt::Modifier_Keys_State,				# State of the modifier keys (shift, ctrl...).
-			mousebuttons_state:		evt::Mousebuttons_State,				# State of mouse buttons as a bool record.
+			site:		 		g2d::Box,								# Widget's assigned area in window coordinates.
 			widget_to_guiboss:		gt::Widget_To_Guiboss,
+			guiboss_to_widget:		gt::Guiboss_To_Widget,							# Used by textpane.pkg keystroke-macro stuff to synthesize fake keystroke events to widget.
 			theme:				wt::Widget_Theme,
-			do:				(Void -> Void) -> Void,					# Used by widget subthreads to execute code in main widget microthread.
-			to:				Replyqueue						# Used to call 'pass_*' methods in other imps.
+			do:				(Void -> Void) -> Void,							# Used by widget subthreads to execute code in main widget microthread.
+			to:				Replyqueue								# Used to call 'pass_*' methods in other imps.
 		      }
 		    = 
 		    {	note_site (id,site);
@@ -1408,34 +4233,50 @@ get_text_dimensions "foo";
 			      {
 				id,
 				doc,
-				key_event,
-				keycode,
-				keysym,
-				string,
-				char,
-				event_point,
+				keystroke,
 				widget_layout_hint,
 				frame_indent_hint,
 				site,
-				modifier_keys_state,
-				mousebuttons_state,
 				widget_to_guiboss,
+				guiboss_to_widget,
 				theme,
 				do,
 				to,
 				#
-				default_key_event_fn =>  \\ _ = (),						# Default key event behavior for frame is to do absolutely nothing.
+				default_key_event_fn =>  \\ _ = (),								# Default key event behavior for frame is to do absolutely nothing.
 				#
 				needs_redraw_gadget_request
 			      };
 
-			case key_event_fn
-			    #
-			    THE key_event_fn =>   key_event_fn  key_event_fn_arg;
-			    NULL	     =>   ();								# We do not expect this case to happen: If key_event_fn is NULL key_event_fn_wrapper should not have been registered with widget-imp so we should never get called.
-			esac;
+			key_event_fn  key_event_fn_arg;
+		    };
 
-		       ();
+		fun note_keyboard_focus_fn_wrapper										# Not really a wrapper because we don't currently allow clients to replace it, but it is structurally parallel with our other wrapper fns in that it gets handed to widget-imp.pkg.
+		      {
+			id:				Id,									# Unique Id for widget.
+			doc:				String,									# Human-readable description of this widget, for debug and inspection.
+			have_keyboard_focus:		Bool,
+			widget_to_guiboss:		gt::Widget_To_Guiboss,
+			theme:				wt::Widget_Theme,
+			do:				(Void -> Void) -> Void,							# Used by widget subthreads to execute code in main widget microthread.
+			to:				Replyqueue								# Used to call 'pass_*' methods in other imps.
+		      }
+		    = 
+		    {
+			have_keyboard_focus__global
+			    :=
+			    have_keyboard_focus;
+
+			needs_redraw_gadget_request ();
+
+			refresh_screenlines ps											# Refresh textpane so mark+cursor will dis/appear to reflect keyboard focus.
+			    where
+				ps  =   case *prompting__global									# Which textmill are keystrokes being sent to?
+					    #
+					    NULL => *mainmill__global;							# Normal   input case -- keystrokes are editing the main textmill in the main textpane.
+					    _    =>  minimill__global;							# Prompted input case -- keystrokes are editing the minimill in the modeline screenline. 
+					esac;
+			    end;
 		    };
 
 
@@ -1447,7 +4288,7 @@ get_text_dimensions "foo";
 		    =
 		    case mouse_drag_fn
 			#
-			THE _ =>  (wi::MOUSE_DRAG_FN mouse_drag_fn_wrapper)       ! widget_options;		# Register for drag events only if we are going to use them.
+			THE _ =>  (wi::MOUSE_DRAG_FN mouse_drag_fn_wrapper)       ! widget_options;				# Register for drag events only if we are going to use them.
 			NULL  =>					            widget_options;
 		    esac;
 
@@ -1455,15 +4296,7 @@ get_text_dimensions "foo";
 		    =
 		    case mouse_transit_fn
 			#
-			THE _ =>  (wi::MOUSE_TRANSIT_FN mouse_transit_fn_wrapper) ! widget_options;		# Register for transit events only if we are going to use them.
-			NULL  =>						    widget_options;
-		    esac;
-
-		widget_options
-		    =
-		    case key_event_fn
-			#
-			THE _ =>  (wi::KEY_EVENT_FN key_event_fn_wrapper)	  ! widget_options;		# Register for key events only if we are going to use them.
+			THE _ =>  (wi::MOUSE_TRANSIT_FN mouse_transit_fn_wrapper) ! widget_options;				# Register for transit events only if we are going to use them.
 			NULL  =>						    widget_options;
 		    esac;
 
@@ -1471,7 +4304,7 @@ get_text_dimensions "foo";
 		    =
 		    case widget_id
 			#
-			THE id =>  (wi::ID id)					  ! widget_options;		# 
+			THE id =>  (wi::ID id)					  ! widget_options;				# 
 			NULL   =>						    widget_options;
 		    esac;
 
@@ -1479,17 +4312,19 @@ get_text_dimensions "foo";
 		    =
 		    case frame_indent_hint
 			#
-			THE h  =>  (wi::FRAME_INDENT_HINT h)			  ! widget_options;		# 
+			THE h  =>  (wi::FRAME_INDENT_HINT h)			  ! widget_options;				# 
 			NULL   =>						    widget_options;
 		    esac;
 
 		widget_options
 		  =
-		  [ wi::STARTUP_FN			startup_fn,						# We always register for these five because our base behavior depends on them.
+		  [ wi::STARTUP_FN			startup_fn,								# We always register for these five because our base behavior depends on them.
 		    wi::SHUTDOWN_FN			shutdown_fn,
 		    wi::INITIALIZE_GADGET_FN		initialize_gadget_fn,
 		    wi::REDRAW_REQUEST_FN		redraw_request_fn_wrapper,
 		    wi::MOUSE_CLICK_FN			mouse_click_fn_wrapper,
+		    wi::KEY_EVENT_FN			key_event_fn_wrapper,
+		    wi::NOTE_KEYBOARD_FOCUS_FN		note_keyboard_focus_fn_wrapper,
 		    wi::DOC				widget_doc
 		  ]
 		  @
@@ -1498,8 +4333,8 @@ get_text_dimensions "foo";
 
 		make_widget_fn =  wi::make_widget_start_fn  widget_options;
 
-		gt::WIDGET  make_widget_fn;									# So caller can write   guiplan = gt::ROW [ frame::with [...], frame::with [...], ... ];
-	    };													# PUBLIC
+		gt::WIDGET  make_widget_fn;											# So caller can write   guiplan = gt::ROW [ frame::with [...], frame::with [...], ... ];
+	    };															# PUBLIC
     };
 end;
 
@@ -1525,5 +4360,5 @@ end;
 
 
 ## COPYRIGHT (c) 1994 by AT&T Bell Laboratories  See SMLNJ-COPYRIGHT file for details.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

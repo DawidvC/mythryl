@@ -1,7 +1,7 @@
 ## html.lex
 ## COPYRIGHT (c) 1995 AT&T Bell Laboratories.
 ## COPYRIGHT (c) 1996 AT&T Research.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.
 
 
@@ -144,7 +144,7 @@ ws = [\ \t];
 	=> (t::pcdata (yytext, *yylineno, *yylineno));
 <initial>.
 	=> (error_fn (cat [
-		"bogus character #\"", char::to_string (string::get (yytext, 0)),
+		"bogus character #\"", char::to_string (string::get_byte_as_char (yytext, 0)),
 		"\" in PCDATA\n"
 	      ], *yylineno, *yylineno+1);
 	    continue());

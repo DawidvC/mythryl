@@ -59,14 +59,16 @@ stipulate
     package evt =  gui_event_types;				# gui_event_types			is from   src/lib/x-kit/widget/gui/gui-event-types.pkg
     package gts =  gui_event_to_string;				# gui_event_to_string			is from   src/lib/x-kit/widget/gui/gui-event-to-string.pkg
     package gt  =  guiboss_types;				# guiboss_types				is from   src/lib/x-kit/widget/gui/guiboss-types.pkg
-    package gtj =  guiboss_types_junk;				# guiboss_types_junk			is from   src/lib/x-kit/widget/gui/guiboss-types_junk.pkg
+    package gtj =  guiboss_types_junk;				# guiboss_types_junk			is from   src/lib/x-kit/widget/gui/guiboss-types-junk.pkg
 
     package a2r =  windowsystem_to_xevent_router;		# windowsystem_to_xevent_router		is from   src/lib/x-kit/xclient/src/window/windowsystem-to-xevent-router.pkg
 
     package gd  =  gui_displaylist;				# gui_displaylist			is from   src/lib/x-kit/widget/theme/gui-displaylist.pkg
 
-    package pp  =  standard_prettyprint_mill;			# standard_prettyprint_mill		is from   src/lib/prettyprint/big/src/standard-prettyprint-mill.pkg
-    package err =  error_message;				# error_message				is from   src/lib/compiler/front/basics/errormsg/error-message.pkg
+    package pp  =  standard_prettyprinter;			# standard_prettyprinter		is from   src/lib/prettyprint/big/src/standard-prettyprinter.pkg
+
+    package err =  compiler::error_message;			# compiler				is from   src/lib/core/compiler/compiler.pkg
+								# error_message				is from   src/lib/compiler/front/basics/errormsg/error-message.pkg
 
     package bt  =  gui_to_sprite_theme;				# gui_to_sprite_theme			is from   src/lib/x-kit/widget/theme/sprite/gui-to-sprite-theme.pkg
     package ct  =  gui_to_object_theme;				# gui_to_object_theme			is from   src/lib/x-kit/widget/theme/object/gui-to-object-theme.pkg
@@ -89,8 +91,7 @@ stipulate
 
 #   package frm =  frame;					# frame					is from   src/lib/x-kit/widget/leaf/frame.pkg
 
-    package iuw =  issue_unique_widget_id;			# issue_unique_widget_id		is from   src/lib/x-kit/widget/gui/issue-unique-widget-id.pkg
-
+    package idm =  id_map;					# id_map				is from   src/lib/src/id-map.pkg
     package im  =  int_red_black_map;				# int_red_black_map			is from   src/lib/src/int-red-black-map.pkg
 #   package is  =  int_red_black_set;				# int_red_black_set			is from   src/lib/src/int-red-black-set.pkg
 
@@ -99,17 +100,14 @@ stipulate
     package g2d =  geometry2d;					# geometry2d				is from   src/lib/std/2d/geometry2d.pkg
     package g2j =  geometry2d_junk;				# geometry2d_junk			is from   src/lib/std/2d/geometry2d-junk.pkg
 
-    package ebi =  editboss_imp;				# editboss_imp				is from   src/lib/x-kit/widget/edit/editboss-imp.pkg
-    package e2g =  editboss_to_guiboss;				# editboss_to_guiboss			is from   src/lib/x-kit/widget/edit/editboss-to-guiboss.pkg
-
-    package t2t =  textpane_to_textbuffer;			# textpane_to_textbuffer		is from   src/lib/x-kit/widget/edit/textpane-to-textbuffer.pkg
-#   package tbi =  textbuffer_imp;				# textbuffer_imp			is from   src/lib/x-kit/widget/edit/textbuffer-imp.pkg
+    package ebi =  millboss_imp;				# millboss_imp				is from   src/lib/x-kit/widget/edit/millboss-imp.pkg
+    package e2g =  millboss_to_guiboss;				# millboss_to_guiboss			is from   src/lib/x-kit/widget/edit/millboss-to-guiboss.pkg
 
     tracefile   =  "widget-unit-test.trace.log";
 
     nb = log::note_on_stderr;					# log					is from   src/lib/std/src/log.pkg
 
-Dummy1 = ebi::Editboss_Option;				# XXX SUCKO DELETEME. This is a quick hack to make sure the package compiles during early development of it.
+Dummy1 = ebi::Millboss_Option;				# XXX SUCKO DELETEME. This is a quick hack to make sure the package compiles during early development of it.
 
 herein
 
@@ -131,8 +129,8 @@ herein
 
 	    fun find_appropriate_gadget_imp_info										# Which widget did the user click on?  This is usually easy but it might be in a scrollable view in a tabbed view in another scrollable view, say.
 		  (
-		    me:				gt::Guiboss_State,								# State which is preserved across imp shutdown/restart cycles.
-		    topwindow_info:		gt::Topwindow_Info,
+		    me:				gt::Guiboss_State,								# 
+		    hostwindow_info:		gt::Hostwindow_Info,
 		    event_point
 		  )
 		=
@@ -141,7 +139,7 @@ herein
 			=
 			gtj::return_all_subwindow_infos_in_descending_stacking_order
 			    #
-			    *topwindow_info.subwindow_info;
+			    *hostwindow_info.subwindow_info;
 
 		    search_subwindow_infos_in_descending_stacking_order  subwindow_infos
 		    where
@@ -166,7 +164,7 @@ herein
 		where
 		    fun find_appropriate_gadget_imp_info_for_guipane								# Which widget did the user click on?  This is usually easy but it might be in a scrollable view in a tabbed view in another scrollable view, say.
 			  (
-			    subwindow_info:		gt::Subwindow_Info							# This will be the subwindow_info for either the topllevel running gui on the topwindow, or else the running gui for one of its popups.
+			    subwindow_info:		gt::Subwindow_Info							# This will be the subwindow_info for either the topllevel running gui on the hostwindow, or else the running gui for one of its popups.
 			  )
 			=
 			case (*subwindow_info.guipane)
@@ -252,9 +250,9 @@ herein
 						    =>
 						    {   imps = *me.gadget_imps;
 							#
-							id   = iuw::id_to_int guiboss_to_widget.id;
+							id   = guiboss_to_widget.id;
 
-							case (im::get (imps, id))
+							case (idm::get (imps, id))
 							    #
 							    NULL =>  NO_APPROPRIATE_GADGET point ;
 							    #
@@ -296,7 +294,7 @@ herein
 		  (
 		    me:				gt::Guiboss_State,
 		    theme:			wt::Widget_Theme,
-		    topwindow_info:		gt::Topwindow_Info,
+		    hostwindow_info:		gt::Hostwindow_Info,
 		    motion_xevtinfo:		evt::Motion_Xevtinfo
 		  )
 		=
@@ -306,7 +304,7 @@ herein
 			#
 			gt::CROSSING_NONGADGET											# Here the mouse is crossing from non-gadget pixels into gadget pixels.
 			    =>
-			    case (find_appropriate_gadget_imp_info (me, topwindow_info, motion_xevtinfo.event_point))
+			    case (find_appropriate_gadget_imp_info (me, hostwindow_info, motion_xevtinfo.event_point))
 				#
 				APPROPRIATE_GADGET (gadget_imp_info, event_point)						# 'event_point' is button_xevtinfo.event_point transformed into correct coordinate system for gadget (null transform if no scrollports or popups are involved).
 				    =>
@@ -348,7 +346,7 @@ herein
 
 			gt::CROSSING_GADGET  { gadget_imp_info => (last_gadget_imp_info as { guiboss_to_gadget => last_guiboss_to_gadget, ... }) }
 			    =>
-			    case (find_appropriate_gadget_imp_info (me, topwindow_info, motion_xevtinfo.event_point))
+			    case (find_appropriate_gadget_imp_info (me, hostwindow_info, motion_xevtinfo.event_point))
 				#
 				APPROPRIATE_GADGET (gadget_imp_info, event_point)						# 'event_point' is button_xevtinfo.event_point transformed into correct coordinate system for gadget (null transform if no scrollports or popups are involved).
 				    =>
@@ -361,10 +359,10 @@ herein
 					    #											# Here mouse is continuing to move on same gadget it was on at last report.
 					    guiboss_to_gadget.note_mouse_transit						# Notify gadget that mouse has entered its space.
 					      {
-						transit		=> gt::MOVE,							# 
+						transit			=> gt::MOVE,						# 
 						modifier_keys_state	=> motion_xevtinfo.modifier_keys_state,
 						event_point,
-						site		=> *gadget_imp_info.site,
+						site			=> *gadget_imp_info.site,
 						theme
 					      };
 
@@ -383,10 +381,10 @@ herein
 
 					    last_guiboss_to_gadget.note_mouse_transit						# Notify last gadget that mouse has left its space.
 					      {
-						transit		=> gt::LEFT,
+						transit			=> gt::LEFT,
 						modifier_keys_state	=> motion_xevtinfo.modifier_keys_state,
 						event_point,
-						site		=> *last_gadget_imp_info.site,
+						site			=> *last_gadget_imp_info.site,
 						theme
 					      };
 
@@ -394,18 +392,18 @@ herein
 					    #
 					    guiboss_to_gadget.note_mouse_transit						# Notify new gadget that mouse has entered its space.
 					      {
-						transit		=> gt::CAME,
+						transit			=> gt::CAME,
 						modifier_keys_state	=> motion_xevtinfo.modifier_keys_state,
 						event_point,
-						site		=> *gadget_imp_info.site,
+						site			=> *gadget_imp_info.site,
 						theme
 					      };
 					    guiboss_to_gadget.note_mouse_transit						# Notify gadget that mouse has entered its space.
 					      {
-						transit		=> gt::MOVE,							# We send a MOVE after every CAME, for the convenience of handlers interested only in coordinates -- they can process all MOVE events and ignore CAME and LEFT events.
+						transit			=> gt::MOVE,						# We send a MOVE after every CAME, for the convenience of handlers interested only in coordinates -- they can process all MOVE events and ignore CAME and LEFT events.
 						modifier_keys_state	=> motion_xevtinfo.modifier_keys_state,
 						event_point,
-						site		=> *gadget_imp_info.site,
+						site			=> *gadget_imp_info.site,
 						theme
 					      };
 					fi;
@@ -479,7 +477,7 @@ herein
 # is within the gadget in which the drag started.  I'm keeping it for now
 # in case we turn out to have a need for it.
 #
-#			    case (find_appropriate_gadget_imp_info (me, topwindow_info, motion_xevtinfo.event_point))
+#			    case (find_appropriate_gadget_imp_info (me, hostwindow_info, motion_xevtinfo.event_point))
 #				#
 #				APPROPRIATE_GADGET (gadget_imp_info, event_point)						# 'event_point' is button_xevtinfo.event_point transformed into correct coordinate system for gadget (null transform if no scrollports or popups are involved).
 #				    =>
@@ -526,14 +524,13 @@ herein
 		  (
 		    me:				gt::Guiboss_State,
 		    theme:			wt::Widget_Theme,
-		    topwindow_info:		gt::Topwindow_Info,
+		    hostwindow_info:		gt::Hostwindow_Info,
 		    button_xevtinfo:		evt::Button_Xevtinfo
 		  )
 		=
-		{
-		    me.last_button_changed  := button_xevtinfo.mouse_button;							# Remember this for drag_fn client functions.
-
-		    case (find_appropriate_gadget_imp_info (me, topwindow_info, button_xevtinfo.event_point))
+		{   me.last_button_changed  := button_xevtinfo.mouse_button;							# Remember this for drag_fn client functions.
+		    #
+		    case (find_appropriate_gadget_imp_info (me, hostwindow_info, button_xevtinfo.event_point))
 			#
 			APPROPRIATE_GADGET (gadget_imp_info, event_point)							# 'event_point' is button_xevtinfo.event_point transformed into correct coordinate system for gadget (null transform if no scrollports or popups are involved).
 			    =>
@@ -770,13 +767,13 @@ herein
 		  (
 		    me:				gt::Guiboss_State,
 		    theme:			wt::Widget_Theme,
-		    topwindow_info:		gt::Topwindow_Info,
+		    hostwindow_info:		gt::Hostwindow_Info,
 		    button_xevtinfo:		evt::Button_Xevtinfo
 		  )
 		=
 		{   me.last_button_changed		:= button_xevtinfo.mouse_button;					# Remember this for drag_fn client functions.
 		    #
-		    case (find_appropriate_gadget_imp_info (me, topwindow_info, button_xevtinfo.event_point))
+		    case (find_appropriate_gadget_imp_info (me, hostwindow_info, button_xevtinfo.event_point))
 			#
 			APPROPRIATE_GADGET (gadget_imp_info, event_point)							# 'event_point' is button_xevtinfo.event_point transformed into correct coordinate system for gadget (null transform if no scrollports or popups are involved).
 			    =>
@@ -1041,76 +1038,154 @@ herein
 		  (
 		    me:				gt::Guiboss_State,
 		    theme:			wt::Widget_Theme,
-		    topwindow_info:		gt::Topwindow_Info,
+		    hostwindow_info:		gt::Hostwindow_Info,
 		    key_xevtinfo:		evt::Key_Xevtinfo
 		  )
 		=
 		{
-		    case (find_appropriate_gadget_imp_info (me, topwindow_info, key_xevtinfo.event_point))
-			#
-			APPROPRIATE_GADGET (gadget_imp_info, event_point)							# 'event_point' is button_xevtinfo.event_point transformed into correct coordinate system for gadget (null transform if no scrollports or popups are involved).
-			    =>
-			    {
-				gadget_imp_info -> { guiboss_to_gadget, ... };
-				#
-				guiboss_to_gadget.note_key_event
-				  {
-				    key_event		=> gt::KEY_PRESS,
-				    keycode		=> key_xevtinfo.keycode,
-				    keysym		=> key_xevtinfo.keysym,
-				    string		=> key_xevtinfo.ascii,
-				    modifier_keys_state	=> key_xevtinfo.modifier_keys_state,
-				    mousebuttons_state	=> key_xevtinfo.mousebuttons_state,
-				    event_point,
-				    site		=> *gadget_imp_info.site,
-				    theme
-				  };	
-			    };
+		    if TRUE
+			case *me.keyboard_focus											# This code implements click-to-type keystroke handling.  Click-to-type works much better with the emacs tradition of using 'C-x o' etc to move keyboard focus around,
+			    #													# since it removes the presumption that keystrokes always go to the widget under the mouse cursor.
+			    THE gadget_imp_info
+				=>
+				{
+				    gadget_imp_info -> { guiboss_to_gadget, ... };
+				    #
+				    keychar = (string::length_in_bytes key_xevtinfo.ascii == 1)
+						?? string::get_byte_as_char(key_xevtinfo.ascii, 0)
+						:: '\0';
 
-			NO_APPROPRIATE_GADGET _
-			    =>
-			    {
-			    };
-		    esac;
+				    guiboss_to_gadget.note_key_event
+				      {
+					keystroke
+					  =>
+					  { key_event		=> gt::KEY_PRESS,
+					    keycode		=> key_xevtinfo.keycode,
+					    keysym		=> key_xevtinfo.keysym,
+					    keystring		=> key_xevtinfo.ascii,
+					    keychar,
+					    modifier_keys_state	=> key_xevtinfo.modifier_keys_state,
+					    mousebuttons_state	=> key_xevtinfo.mousebuttons_state
+					},
+					site			=> *gadget_imp_info.site,
+					theme
+				      };	
+				};
+
+			    NULL => ();
+			esac;
+		    else													# Using 'if TRUE' is better than commenting the following out because it helps prevent bitrot -- the below code gets typechecked before being removed as dead code.
+			case (find_appropriate_gadget_imp_info (me, hostwindow_info, key_xevtinfo.event_point))			# This code implements keyboard-focus-follows-mouse keystroke handling, which was phased out in favor of the above.
+			    #													# I'm leaving this code in place because we may want to make this optionally selectable behavior at some point.
+			    APPROPRIATE_GADGET (gadget_imp_info, event_point)							# 'event_point' is button_xevtinfo.event_point transformed into correct coordinate system for gadget (null transform if no scrollports or popups are involved).
+				=>
+				{
+				    gadget_imp_info -> { guiboss_to_gadget, ... };
+				    #
+				    keychar = (string::length_in_bytes key_xevtinfo.ascii == 1)
+						?? string::get_byte_as_char(key_xevtinfo.ascii, 0)
+						:: '\0';
+
+				    guiboss_to_gadget.note_key_event
+				      {
+					keystroke
+					  =>
+					  { key_event		=> gt::KEY_PRESS,
+					    keycode		=> key_xevtinfo.keycode,
+					    keysym		=> key_xevtinfo.keysym,
+					    keystring		=> key_xevtinfo.ascii,
+					    keychar,
+					    modifier_keys_state	=> key_xevtinfo.modifier_keys_state,
+					    mousebuttons_state	=> key_xevtinfo.mousebuttons_state
+					 },
+					site			=> *gadget_imp_info.site,
+					theme
+				      };	
+				};
+
+			    NO_APPROPRIATE_GADGET _
+				=>
+				{
+				};
+			esac;
+		    fi;
 		};
 
 	    fun do_key_release													# Private.
 		  (
 		    me:				gt::Guiboss_State,
 		    theme:			wt::Widget_Theme,
-		    topwindow_info:		gt::Topwindow_Info,
+		    hostwindow_info:		gt::Hostwindow_Info,
 		    key_xevtinfo:		evt::Key_Xevtinfo
 		  )
 		=
 		{
-		    case (find_appropriate_gadget_imp_info (me, topwindow_info, key_xevtinfo.event_point))
-			#
-			APPROPRIATE_GADGET (gadget_imp_info, event_point)							# 'event_point' is button_xevtinfo.event_point transformed into correct coordinate system for gadget (null transform if no scrollports or popups are involved).
-			    =>
-			    {	gadget_imp_info -> { guiboss_to_gadget, ... };
-				#
-				guiboss_to_gadget.note_key_event
-				  {
-				    key_event		=> gt::KEY_RELEASE,
-				    keycode		=> key_xevtinfo.keycode,
-				    keysym		=> key_xevtinfo.keysym,
-				    string		=> key_xevtinfo.ascii,
-				    modifier_keys_state	=> key_xevtinfo.modifier_keys_state,
-				    mousebuttons_state	=> key_xevtinfo.mousebuttons_state,
-				    event_point,
-				    site		=> *gadget_imp_info.site,
-				    theme
-				  };	
-			    };
+		    if TRUE
+			case *me.keyboard_focus											# This code implements click-to-type keystroke handling.  Click-to-type works much better with the emacs tradition of using 'C-x o' etc to move keyboard focus around,
+			    #													# since it removes the presumption that keystrokes always go to the widget under the mouse cursor.
+			    THE gadget_imp_info											# I'm leaving this code in place because we may want to make this optionally selectable behavior at some point.
+				=>
+				{
+				    gadget_imp_info -> { guiboss_to_gadget, ... };
+				    #
+				    keychar = (string::length_in_bytes key_xevtinfo.ascii == 1)
+						?? string::get_byte_as_char(key_xevtinfo.ascii, 0)
+						:: '\0';
 
-			NO_APPROPRIATE_GADGET _
-			    =>
-			    {
-			    };
-		    esac;
+				    guiboss_to_gadget.note_key_event
+				      {
+					keystroke
+					  =>
+					  { key_event		=> gt::KEY_RELEASE,
+					    keycode		=> key_xevtinfo.keycode,
+					    keysym		=> key_xevtinfo.keysym,
+					    keystring		=> key_xevtinfo.ascii,
+					    keychar,
+					    modifier_keys_state	=> key_xevtinfo.modifier_keys_state,
+					    mousebuttons_state	=> key_xevtinfo.mousebuttons_state
+					},
+					site			=> *gadget_imp_info.site,
+					theme
+				      };	
+				};
+
+			    NULL => ();
+			esac;
+		    else													# Using 'if TRUE' is better than commenting the following out because it helps prevent bitrot -- the below code gets typechecked before being removed as dead code.
+			case (find_appropriate_gadget_imp_info (me, hostwindow_info, key_xevtinfo.event_point))			# This code implements keyboard-focus-follows-mouse keystroke handling, which was phased out in favor of the above.
+			    #
+			    APPROPRIATE_GADGET (gadget_imp_info, event_point)							# 'event_point' is button_xevtinfo.event_point transformed into correct coordinate system for gadget (null transform if no scrollports or popups are involved).
+				=>
+				{   gadget_imp_info -> { guiboss_to_gadget, ... };
+				    #
+				    keychar = (string::length_in_bytes key_xevtinfo.ascii == 1)
+						?? string::get_byte_as_char(key_xevtinfo.ascii, 0)
+						:: '\0';
+
+				    guiboss_to_gadget.note_key_event
+				      {
+					keystroke
+					  =>
+					  { key_event		=> gt::KEY_RELEASE,
+					    keycode		=> key_xevtinfo.keycode,
+					    keysym		=> key_xevtinfo.keysym,
+					    keystring		=> key_xevtinfo.ascii,
+					    keychar,
+					    modifier_keys_state	=> key_xevtinfo.modifier_keys_state,
+					    mousebuttons_state	=> key_xevtinfo.mousebuttons_state
+					},
+					site			=> *gadget_imp_info.site,
+					theme
+				      };	
+				};
+
+			    NO_APPROPRIATE_GADGET _
+				=>
+				{
+				};
+			esac;
+		    fi;
 		};
-
-
 	end;
 
 
@@ -1124,16 +1199,16 @@ herein
 		  ),
 		me:			gt::Guiboss_State,
 		theme:			wt::Widget_Theme,
-		topwindow_info:		gt::Topwindow_Info
+		hostwindow_info:		gt::Hostwindow_Info
 	      )
 	    =
 	    case event
 		#
-		evt::x::KEY_PRESS       (key_xevtinfo:    evt::Key_Xevtinfo   ) =>  do_key_press      (me, theme, topwindow_info, key_xevtinfo   );
-		evt::x::KEY_RELEASE     (key_xevtinfo:    evt::Key_Xevtinfo   ) =>  do_key_release    (me, theme, topwindow_info, key_xevtinfo   );
-		evt::x::BUTTON_PRESS    (button_xevtinfo: evt::Button_Xevtinfo) =>  do_button_press   (me, theme, topwindow_info, button_xevtinfo);
-		evt::x::BUTTON_RELEASE  (button_xevtinfo: evt::Button_Xevtinfo) =>  do_button_release (me, theme, topwindow_info, button_xevtinfo);
-		evt::x::MOTION_NOTIFY   (motion_xevtinfo: evt::Motion_Xevtinfo) =>  do_motion_notify  (me, theme, topwindow_info, motion_xevtinfo);
+		evt::x::KEY_PRESS       (key_xevtinfo:    evt::Key_Xevtinfo   ) =>  do_key_press      (me, theme, hostwindow_info, key_xevtinfo   );
+		evt::x::KEY_RELEASE     (key_xevtinfo:    evt::Key_Xevtinfo   ) =>  do_key_release    (me, theme, hostwindow_info, key_xevtinfo   );
+		evt::x::BUTTON_PRESS    (button_xevtinfo: evt::Button_Xevtinfo) =>  do_button_press   (me, theme, hostwindow_info, button_xevtinfo);
+		evt::x::BUTTON_RELEASE  (button_xevtinfo: evt::Button_Xevtinfo) =>  do_button_release (me, theme, hostwindow_info, button_xevtinfo);
+		evt::x::MOTION_NOTIFY   (motion_xevtinfo: evt::Motion_Xevtinfo) =>  do_motion_notify  (me, theme, hostwindow_info, motion_xevtinfo);
 
 		evt::x::ENTER_NOTIFY    (inout_xevtinfo: evt::Inout_Xevtinfo  )
 		    =>
@@ -1398,5 +1473,5 @@ end;
 ##########################################################################
 
 
-## Original code by Jeff Prothero Copyright (c) 2014-2014,
+## Original code by Jeff Prothero Copyright (c) 2014-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

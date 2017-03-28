@@ -1,4 +1,8 @@
 ## int-binary-map.pkg
+#
+# Normally
+#     src/lib/src/int-red-black-map.pkg
+# is preferred.
 
 # Compiled by:
 #     src/lib/std/standard.lib
@@ -364,6 +368,56 @@ package {
 			fi;
 		  end;
 	    end;
+	fun preceding_key (set, x)
+	    =
+	    mem (set, NULL)
+	    where
+		fun maxkey (EMPTY, result)
+			=>
+			result;
+
+		    maxkey (TREE_NODE { key, left, right, ... }, result)
+			=>
+			maxkey (right, THE key);
+		end;
+
+		fun mem (EMPTY, result)
+			=>
+			result;
+
+		    mem (TREE_NODE (n as { key, left, right, ... } ), result)
+			=>
+			if   (x > key)   mem   (right, THE key);
+			elif (x < key)   mem   (left,  result );
+			else             maxkey(left,  result );
+			fi;
+		  end;
+	    end;
+	fun following_key (set, x)
+	    =
+	    mem (set, NULL)
+	    where
+		fun minkey (EMPTY, result)
+			=>
+			result;
+
+		    minkey (TREE_NODE { key, left, right, ... }, result)
+			=>
+			minkey (left, THE key);
+		end;
+
+		fun mem (EMPTY, result)
+			=>
+			result;
+
+		    mem (TREE_NODE (n as { key, left, right, ... } ), result)
+			=>
+			if   (x > key)   mem   (right, result );
+			elif (x < key)   mem   (left,  THE key);
+			else             minkey(right, result );
+			fi;
+		  end;
+	    end;
 
 	# Search on a key, return value if found,
 	# else raise lib_base::NOT_FOUND
@@ -631,6 +685,41 @@ package {
     end;			# stipulate
 
 
+    fun difference_with (m1, m2)
+        =
+	{   keys_to_remove =  keys_list  m2;
+	    #
+	    remove (m1, keys_to_remove)
+	    where
+		fun remove (m1, [])
+			=>
+			m1;
+
+		    remove (m1, key ! rest)
+		        =>
+			remove (drop (m1, key), rest);
+		end;
+	    end;
+	};
+
+    fun from_list (pairs: List((key::Key, X)))
+        =
+	{   tree = empty;
+	    #
+	    add (tree, pairs)
+	    where
+		fun add (tree, [])
+			=>
+			tree;
+
+		    add (tree, (key,val) ! rest)
+		        =>
+			add (set (tree, key, val), rest);
+		end;
+	    end;
+	};
+
+
     # The following are generic implementations
     # of the union_with, intersect_with, and
     # merge_with operetions.  These should be
@@ -840,5 +929,5 @@ package {
 
 
 ## COPYRIGHT (c) 1993 by AT&T Bell Laboratories.  See SMLNJ-COPYRIGHT file for details.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

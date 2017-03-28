@@ -19,7 +19,7 @@ herein
 
 	fun make_control_set ()
 	    =
-	    qht::make_hashtable  { size_hint => 16,  not_found_exception => FAIL "control set" };
+	    qht::make_hashtable  { size_hint => 16,  not_found_exception => DIE "control set" };
 
 	fun member (cset, name)
 	    =
@@ -115,5 +115,5 @@ end;
 
 
 ## COPYRIGHT (c) 2002 Bell Labs, Lucent Technologies
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

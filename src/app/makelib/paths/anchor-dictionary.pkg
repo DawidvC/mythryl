@@ -28,7 +28,7 @@ herein
 
 	fun impossible s
 	    =
-	    raise exception FAIL ("impossible error in anchor_dictionary: " + s);
+	    raise exception DIE ("impossible error in anchor_dictionary: " + s);
 
 	Anchor = String;
 
@@ -952,7 +952,7 @@ herein
 
 		if (string::is_prefix  root  full_pathname)
 		    #
-		    "$ROOT"   +   string::extract (full_pathname, string::length root, NULL);
+		    "$ROOT"   +   string::extract (full_pathname, string::length_in_bytes root, NULL);
 		else
 		    full_pathname;
 		fi;
@@ -1008,8 +1008,8 @@ herein
 
 		    arcs as (arc1 ! arcn)
 			=>
-			if (string::get (arc1, 0) != '$')   RELATIVE arcs;
-			else                                ANCHORED (string::extract (arc1, 1, NULL), arcn);
+			if (string::get_byte_as_char (arc1, 0) != '$')   RELATIVE arcs;
+			else                                             ANCHORED (string::extract (arc1, 1, NULL), arcn);
                         fi;
 		esac;
 	    };
@@ -1215,7 +1215,7 @@ herein
 
 		fun file (c, l)
 		    =
-		    file0 (basename (c, l, \\ s =  raise exception FAIL ("anchor_dictionary::decode: " + s)));
+		    file0 (basename (c, l, \\ s =  raise exception DIE ("anchor_dictionary::decode: " + s)));
 
 		fun add_segment (segment, path)
 		    =
@@ -1243,7 +1243,7 @@ herein
 				    #
 				    file (ROOT "", arcs); 
 				else
-				    case (string::get (arc0, 0))
+				    case (string::get_byte_as_char (arc0, 0))
 					#
 					'%' => file (ROOT (extract ()), arcs);
 					#
@@ -1268,7 +1268,7 @@ herein
 	#
 	fun encoding_is_absolute  string
 	    =
-	    case (string::get (string, 0))
+	    case (string::get_byte_as_char (string, 0))
 		#
 		('/' | '%') =>  TRUE;
 		_           =>  FALSE;
@@ -1285,7 +1285,7 @@ herein
 		#
 		from_standard'
 		    #
-		    { plaint_sink   =>   \\ string =  raise exception FAIL string,
+		    { plaint_sink   =>   \\ string =  raise exception DIE string,
 		      anchor_dictionary
 		    }
 		    #
@@ -1319,5 +1319,5 @@ end;
 
 ## Author: Matthias Blume
 ## Copyright (c) 2000 by Lucent Technologies, Bell Laboratories
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

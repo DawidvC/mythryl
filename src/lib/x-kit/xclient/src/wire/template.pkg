@@ -12,7 +12,7 @@ herein
 
     # This port is implemented in:
     #
-    #     src/lib/x-kit/xclient/src/wire/template-egg.pkg
+    #     src/lib/x-kit/xclient/src/wire/template-imp.pkg
     #
     package template {
 	#
@@ -46,5 +46,5 @@ end;
 
 
 ## COPYRIGHT (c) 1990, 1991 by John H. Reppy.  See SMLNJ-COPYRIGHT file for details.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

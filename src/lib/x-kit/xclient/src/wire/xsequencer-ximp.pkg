@@ -153,7 +153,7 @@ herein
 	Xsequencer_Egg =  Void -> (Exports,   (Imports, Run_Gun, End_Gun) -> Void);		# PUBLIC.
 
 	Runstate =  {														# These values will be statically globally visible throughout the code body for the imp.
-		      me:					Xsequencer_Ximp_State,						# State which is preserved across imp shutdown/restart cycles.
+		      me:					Xsequencer_Ximp_State,						# 
 		      imports:					Imports,							# Ximps to which we send requests.
 		      to:					Replyqueue,							# The name makes   foo::pass_something(imp) to {. ... }   syntax read well.
 		      end_gun':					End_Gun,							# We shut down the microthread when this fires.
@@ -467,7 +467,7 @@ herein
 		  #
 		  runstate as
 		  {													# These values will be statically globally visible throughout the code body for the imp.
-		    me:					Xsequencer_Ximp_State,						# State which is preserved across imp shutdown/restart cycles.
+		    me:					Xsequencer_Ximp_State,						# 
 		    imports:				Imports,							# Ximps to which we send requests.
 		    to:					Replyqueue,							# The name makes   foo::pass_something(imp) to {. ... }   syntax read well.
 		    end_gun':				End_Gun,							# We shut down the microthread when this fires.
@@ -645,7 +645,7 @@ herein
 						        case (w2v::decode_graphics_expose  packet)
 							    #
 						    	    xet::x::GRAPHICS_EXPOSE  graphics_expose_record   =>  graphics_expose_record;
-							    _						     =>  raise exception FAIL "Impossible case";		
+							    _						     =>  raise exception DIE "Impossible case";		
 							esac;
 
 						    case *graphics_expose_event_accumulator
@@ -747,8 +747,8 @@ herein
 		# needs to be raised in the context of the
 		# calling client thread.  That is our job here:
 		#
-		fun unwrap_reply  x2s::REPLY_LOST     =>  { log::fatal   "xsequencer-ximp.pkg: Lost X-server reply"; 	  						raise exception FAIL "LOST REPLY";  };
-		    unwrap_reply (x2s::REPLY_ERROR s) =>  { log::fatal ( "xsequencer-ximp.pkg: X-server error: " + (e2s::xerror_to_string (w2v::decode_error s))); 	raise exception FAIL "ERROR_REPLY"; };
+		fun unwrap_reply  x2s::REPLY_LOST     =>  { log::fatal   "xsequencer-ximp.pkg: Lost X-server reply"; 	  						raise exception DIE "LOST REPLY";  };
+		    unwrap_reply (x2s::REPLY_ERROR s) =>  { log::fatal ( "xsequencer-ximp.pkg: X-server error: " + (e2s::xerror_to_string (w2v::decode_error s))); 	raise exception DIE "ERROR_REPLY"; };
 		    unwrap_reply (x2s::REPLY s)       =>  s;														# NB log::fatal should never return;
 		end;																		# above 'raises' keep typechecker happy.
 		fun unwrap_flag r
@@ -1042,5 +1042,5 @@ end;
 
 
 ## COPYRIGHT (c) 1990, 1991 by John H. Reppy.  See SMLNJ-COPYRIGHT file for details.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

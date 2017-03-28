@@ -1,0 +1,111 @@
+## bools-millout.pkg
+#
+
+# Compiled by:
+#     src/lib/x-kit/widget/xkit-widget.sublib
+
+
+stipulate
+    include package   threadkit;								# threadkit			is from   src/lib/src/lib/thread-kit/src/core-thread-kit/threadkit.pkg
+    #
+    package mt  =  millboss_types;								# millboss_types		is from   src/lib/x-kit/widget/edit/millboss-types.pkg
+
+#   package im  =  int_red_black_map;								# int_red_black_map		is from   src/lib/src/int-red-black-map.pkg
+#   package is  =  int_red_black_set;								# int_red_black_set		is from   src/lib/src/int-red-black-set.pkg
+    package sm  =  string_map;									# string_map			is from   src/lib/src/string-map.pkg
+
+    nb = log::note_on_stderr;									# log				is from   src/lib/std/src/log.pkg
+herein
+
+    package bools_millout									# 
+    {
+	Bools =  sm::Map(Bool);
+	#
+	Bools_Millout
+	  =	
+	  { note_watcher:	(mt::Inport, Null_Or(mt::Millin), (mt::Outport, Bools) -> Void) -> Void, 	# Second arg will be NULL if watcher is not another mill (e.g. a pane).
+	    drop_watcher:	 mt::Inport -> Void								# The mt::Inport must match that given to note_watcher.
+	  };				 
+
+	exception  BOOLS_MILLOUT  Bools_Millout;						# We'll never 'raise' this exception:  It is purely a datastructure to hide the Bools_Millout type from millboss-imp.pkg, in the interests of good modularity.
+	#
+	#
+	fun maybe_unwrap__bools_millout  (watchable:  mt::Millout):  Fail_Or( Bools_Millout )
+	    =
+	    case watchable.crypt
+		#
+		BOOLS_MILLOUT
+		bools_millout
+		    =>
+		    WORK bools_millout;
+
+		_   =>  FAIL (sprintf "maybe_unwrap__bools_millout:  Unknown Millout value, port_type='%s', data_type='%s' info='%s'  --bools-millout.pkg"
+					watchable.port_type 
+					watchable.data_type 
+					watchable.info
+			     );
+	    esac;	
+
+	fun unwrap__bools_millout  (watchable:  mt::Millout):   Bools_Millout
+	    =
+	    case watchable.crypt
+		#
+		BOOLS_MILLOUT
+		bools_millout
+		    =>
+		    bools_millout;
+
+		_   =>	{   msg = (sprintf "maybe_unwrap__bools_millout:  Unknown Millout value, port_type='%s', data_type='%s' info='%s'  --bools-millout.pkg"
+					watchable.port_type 
+					watchable.data_type 
+					watchable.info
+			          );
+			    log::fatal msg;							# Won't return.
+			    raise exception DIE msg;						# Just to keep compiler happy.
+			};
+	    esac;	
+
+
+	port_type =  "bools_millout::Bools_Millout";						# Export so clients can use this value by reference instead of duplication (with attendant maintenance issues).
+
+	fun wrap__bools_millout
+	      (
+		outport:	mt::Outport,
+		bools_millout:  Bools_Millout
+	      ):		mt::Millout
+	    =
+	    { outport,
+	      port_type,
+	      data_type	=>  "bools_millout::Bools",
+	      info	=>  "Wrapped by bools_millout::wrap__bools_millout.",
+	      crypt	=>  BOOLS_MILLOUT bools_millout,
+	      counter	=>  REF 0	
+	    };		 
+    };
+
+end;
+
+
+
+
+
+##########################################################################
+#   The following is support for outline-minor-mode in emacs.		 #
+#  ^C @ ^T hides all Text. (Leaves all headings.)			 #
+#  ^C @ ^A shows All of file.						 #
+#  ^C @ ^Q Quickfolds entire file. (Leaves only top-level headings.)	 #
+#  ^C @ ^I shows Immediate children of node.				 #
+#  ^C @ ^S Shows all of a node.						 #
+#  ^C @ ^D hiDes all of a node.						 #
+#  ^HFoutline-mode gives more details.					 #
+#  (Or do ^HI and read emacs:outline mode.)				 #
+#									 #
+# Local variables:							 #
+# mode: outline-minor							 #
+# outline-regexp: "[{ \t]*\\(fun \\)"			 		 #
+# End:									 #
+##########################################################################
+
+
+## Original code by Jeff Prothero Copyright (c) 2014-2015,
+## released per terms of SMLNJ-COPYRIGHT.

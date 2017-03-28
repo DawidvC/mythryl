@@ -45,7 +45,7 @@ package   winix_process__premicrothread
 
     fun atExit _
         =
-        raise exception FAIL "winix__premicrothread::process::atExit unimplemented"
+        raise exception DIE "winix__premicrothread::process::atExit unimplemented"
 
     fun exit status
         =
@@ -61,5 +61,5 @@ package   winix_process__premicrothread
 
 
 ## COPYRIGHT (c) 1998 Bell Labs, Lucent Technologies.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

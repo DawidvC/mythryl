@@ -118,7 +118,7 @@ herein
 	#
 	fun clip_string (TEXT_SIZE { cols, ... }, col, s)
 	    =
-	    {   len = string::length s;
+	    {   len = string::length_in_bytes s;
 		#
 		col + len  <=  cols   ??   s
 				      ::   substring (s, 0, cols-col);
@@ -382,7 +382,8 @@ herein
 			=
 			{   fun cpy (i, j)
 				=
-				{   rw_vector_of_chars::set (ba, i, string::get (str, j));
+				{   rw_vector_of_chars::set (ba, i, string::get_byte_as_char (str, j));
+				    #
 				    cpy (i+1, j+1);
 				};
 
@@ -418,17 +419,17 @@ herein
 				    };
 			    end;
 
-			    if   (delta > 0)
-
-				 copy_string (nchars, fromcol+nchars - 1, -1);
-				 rw_vector::set (arr, row, TEXT_LINE (ba, right_shift (fromcol, wide, delta, format)));
+			    if (delta > 0)
+				#
+				copy_string (nchars, fromcol+nchars - 1, -1);
+				rw_vector::set (arr, row, TEXT_LINE (ba, right_shift (fromcol, wide, delta, format)));
 			    else
-				 copy_string (nchars, fromcol, 1);
-				 rw_vector::set (arr, row, TEXT_LINE (ba, left_shift (tocol, -delta, format)));
+				copy_string (nchars, fromcol, 1);
+				rw_vector::set (arr, row, TEXT_LINE (ba, left_shift (tocol, -delta, format)));
 			    fi;
 			};
 
-		herein  /* reverse_and_prepend */
+		herein  # reverse_and_prepend
 
 		    # Create a text buffer of the specified size:
 		    #
@@ -450,7 +451,7 @@ herein
 				  TEXT_LINE (ba, format);
 
 			    write_string (ba, col, str);
-			    rw_vector::set (arr, row, TEXT_LINE (ba, ins_n (col, string::length str, format)));
+			    rw_vector::set (arr, row, TEXT_LINE (ba, ins_n (col, string::length_in_bytes str, format)));
 			};
 
 		    # Write a string in highlighted mode into a text rw_vector:
@@ -460,7 +461,7 @@ herein
 			{   my TEXT_LINE (ba, format) = rw_vector::get (arr, row);
 
 			    write_string (ba, col, str);
-			    rw_vector::set (arr, row, TEXT_LINE (ba, ins_h (col, string::length str, format)));
+			    rw_vector::set (arr, row, TEXT_LINE (ba, ins_h (col, string::length_in_bytes str, format)));
 			};
 
 		    # Insert a string into a text rw_vector, shifting chars to the right:
@@ -918,7 +919,7 @@ herein
 			    =
 			    {   my { x, y } = cc_to_pt { row, col };
 
-				clear (  { col=>x, row=>y, wide=>char_wide*(string::length s), high=>char_high } );
+				clear (  { col=>x, row=>y, wide=>char_wide*(string::length_in_bytes s), high=>char_high } );
 				draw  ({ col=>x, row=>y+ascent }, s);
 			    };
 
@@ -1257,7 +1258,7 @@ herein
 					draw_n (i, s ! r)
 					    =>
 					    {   draw_ntext { window=>txt_window, row, col=>i, text=>s };
-						draw_h (i + string::length s, r);
+						draw_h (i + string::length_in_bytes s, r);
 					    };
 				    end 
 
@@ -1269,7 +1270,7 @@ herein
 					draw_h (i, s ! r)
 					    =>
 					    {   draw_htext { window=>txt_window, row, col=>i, text=>s };
-						draw_n (i + string::length s, r);
+						draw_n (i + string::length_in_bytes s, r);
 					    };
 				    end;
 
@@ -1511,7 +1512,7 @@ herein
 		    #
 		    if  (cr == row
 		    and  cc >= col
-		    and  cc <  col + string::length str
+		    and  cc <  col + string::length_in_bytes str
 		    )
 			 draw_cursor txt;
 		    fi;
@@ -2002,5 +2003,5 @@ end;
 
 
 ## COPYRIGHT (c) 1991 by AT&T Bell Laboratories.  See SMLNJ-COPYRIGHT file for details.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

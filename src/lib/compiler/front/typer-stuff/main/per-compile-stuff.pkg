@@ -1,0 +1,140 @@
+## per-compile-stuff.pkg
+#
+# Here we track information relating to
+# one compile of one source file, such as
+# the name of the sourcefile and whether
+# the compile was successful.
+
+# Compiled by:
+#     src/lib/compiler/front/typer-stuff/typecheckdata.sublib
+
+
+stipulate
+    package cpu =  cpu_timer;					# cpu_timer			is from   src/lib/std/src/cpu-timer.pkg
+    package err =  error_message;				# error_message			is from   src/lib/compiler/front/basics/errormsg/error-message.pkg
+    package tmp =  highcode_codetemp;				# highcode_codetemp		is from   src/lib/compiler/back/top/highcode/highcode-codetemp.pkg
+    package lnd =  line_number_db;				# line_number_db		is from   src/lib/compiler/front/basics/source/line-number-db.pkg
+    package pp  =  standard_prettyprinter;			# standard_prettyprinter	is from   src/lib/prettyprint/big/src/standard-prettyprinter.pkg
+    package sta =  stamp;					# stamp				is from   src/lib/compiler/front/typer-stuff/basics/stamp.pkg
+    package sy  =  symbol;					# symbol			is from   src/lib/compiler/front/basics/map/symbol.pkg
+    package cv  =  compiler_verbosity;				# compiler_verbosity		is from   src/lib/compiler/front/basics/main/compiler-verbosity.pkg
+#   package vh  =  varhome;					# varhome			is from   src/lib/compiler/front/typer-stuff/basics/varhome.pkg
+herein
+
+    package per_compile_stuff {
+	#
+	#
+	Compiler_Verbosity		= cv::Compiler_Verbosity;
+	print_nothing			= cv::print_nothing;
+	print_expression_value		= cv::print_expression_value;
+	print_expression_value_and_type	= cv::print_expression_value_and_type;
+	print_everything		= cv::print_everything;
+
+	Per_Compile_Stuff( A_deep_syntax_tree )
+	  =
+	  { make_fresh_stamp:		Void -> sta::Stamp,
+	    issue_highcode_codetemp:	Null_Or( sy::Symbol ) -> tmp::Codetemp,
+	    saw_errors:			Ref( Bool ),
+	    error_fn:			err::Error_Function,
+	    error_match:		lnd::Source_Code_Region -> String,
+	    source_name:		String,
+	    prettyprinter_or_null:	Null_Or pp::Prettyprinter,
+	    cpu_timer:			cpu::Cpu_Timer,
+	    compiler_verbosity:		Compiler_Verbosity,
+	    deep_syntax_transform:	A_deep_syntax_tree -> A_deep_syntax_tree		# Can be used to profile or instrument code or add debug support --
+												# See for example                  src/lib/compiler/debugging-and-profiling/profiling/tdp-instrument.pkg
+												# This transform gets applied in   src/lib/compiler/front/typer/main/type-package-language-g.pkg
+	  };
+
+	    #
+	    # 2010-09-07 CrT:   XXX BUGGO FIXME
+	    #
+	    # I think
+	    #
+	    #     prettyprinter_or_null:   Null_Or pp::Prettyprinter
+	    #
+	    # above should be changed to
+	    #
+	    #     compile_log: Null_Or( file::Output_Stream ),
+	    #
+	    # per "simple things should be simple; complex things should be possible":
+	    # Most of the time we'll just want to write a line of text, so that should
+	    # be the favored case.
+	    #
+	    # (I'd like to treat the prettyprint stuff not as an opaque output stream,
+	    # but rather as a buffer/datastructure that a client uses to produce a string
+	    # which is then written to an output stream.)
+	    #
+	    # Over time, I'd like to evolve the .compile.log
+	    # support stuff in the direction of
+	    #
+	    #     src/lib/src/lib/thread-kit/src/lib/logger.pkg
+	    #
+	    # This cannot be done immediately because logger.pkg depends on having
+	    # threadkit running, and the compiler doesn't currently run threadkit.
+	    #
+	    # Also, we probably don't want trace.logs to interfere with compile.log
+	    # generation or vice versa, even if user apps invoke the compiler internally,
+	    # so we probably don't want to do a simple-minded merge of the two facilities.
+	    # (Maybe they can wind up being two calls to a single generic package?)
+
+	fun make_per_compile_stuff
+	      {
+		sourcecode_info,
+		deep_syntax_transform:  X -> X,
+		make_fresh_stamp_maker,
+		prettyprinter_or_null,
+		compiler_verbosity
+	      }
+	    =
+	    (	{ make_fresh_stamp,
+		  issue_highcode_codetemp,
+		  source_name            =>  sourcecode_info.file_opened,
+		  saw_errors,
+		  error_fn,
+		  error_match,
+		  deep_syntax_transform,
+		  prettyprinter_or_null,
+		  cpu_timer,
+		  compiler_verbosity
+		}
+		: Per_Compile_Stuff(X)
+	    )
+	    where
+	        # We get called from the tops of
+                # 
+		#     compile_one_sourcefile ()     in    src/app/makelib/compile/compile-in-dependency-order-g.pkg
+                #     read_eval_print_loop   ()     in    src/lib/compiler/toplevel/interact/read-eval-print-loop-g.pkg
+
+		(err::errors  sourcecode_info)
+		    ->
+		    { error_fn, error_match, saw_errors };
+
+		tmp::clear ();
+
+		make_fresh_stamp =  make_fresh_stamp_maker   ();
+
+		cpu_timer =  cpu::make_cpu_timer ();
+
+
+		fun issue_highcode_codetemp  NULL
+			=>
+			tmp::issue_highcode_codetemp ();
+
+		    issue_highcode_codetemp (THE symbol)
+			=>
+			tmp::issue_named_highcode_codetemp symbol;
+		end;
+	    end;
+
+	fun saw_errors (per_compile_stuff: Per_Compile_Stuff(X))
+	    =
+	    *per_compile_stuff.saw_errors;
+
+    };										# package per_compile_stuff 
+end;										# stipulate
+
+
+## (C) 2001 Lucent Technologies, Bell Labs
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
+## released per terms of SMLNJ-COPYRIGHT.

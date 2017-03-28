@@ -96,7 +96,7 @@ herein
 	    where
 		err   =   err::error  sourcecode_info;
 
-       #	complain_match   =   err::match_error_string  sourcecode_info;
+#		complain_match   =   err::match_error_string  sourcecode_info;
 		#
 		fun parse_error (s, p1, p2)
 		    =
@@ -158,7 +158,7 @@ herein
 
 			do_prompt
 			    :=
-			    ((str::get (s, size s - 1) == '\n')
+			    ((str::get_byte_as_char (s, size s - 1) == '\n')
 			    except
 				_ = FALSE);
 			s;
@@ -181,7 +181,7 @@ herein
 		fun prompt_read_parse_and_return_one_toplevel_mythryl_expression' ()
 		    =
 		    {   prompt :=  *myp::primary_prompt;
-
+			#
 			(lrp::stream::get  *lexer')
 			    ->
 			    (next_token, rest);
@@ -238,7 +238,7 @@ herein
 end;
 
 ## (C) 2001 Lucent Technologies, Bell Labs
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.
 
 

@@ -52,12 +52,11 @@ stipulate
     package gtg =  guiboss_to_guishim;				# guiboss_to_guishim		is from   src/lib/x-kit/widget/theme/guiboss-to-guishim.pkg
 
     package gt  =  guiboss_types;				# guiboss_types			is from   src/lib/x-kit/widget/gui/guiboss-types.pkg
-#    package cs  =  guiboss_to_objectspace;			# guiboss_to_objectspace	is from   src/lib/x-kit/widget/space/object/guiboss-to-objectspace.pkg
     #
     package csi =  objectspace_imp;				# objectspace_imp		is from   src/lib/x-kit/widget/space/object/objectspace-imp.pkg
 
     #
-    package o2c =  object_to_objectspace;			# object_to_objectspace		is from   src/lib/x-kit/widget/space/object/object-to-objectspace.pkg	
+    package o2c =  object_to_objectspace;			# object_to_objectspace		is from   src/lib/x-kit/widget/space/object/object-to-objectspace.pkg
     #
     package g2d =  geometry2d;					# geometry2d			is from   src/lib/std/2d/geometry2d.pkg
     #
@@ -65,7 +64,7 @@ stipulate
 herein
 
     package object_theme_imp
-    :       Object_Theme_Imp												# Object_Theme_Imp	is from   src/lib/x-kit/widget/theme/object-theme-imp.api
+    :       Object_Theme_Imp												# Object_Theme_Imp	is from   src/lib/x-kit/widget/theme/object/object-theme-imp.api
     {
 	#
 	include package   gui_to_object_theme;										# gui_to_object_theme	is from   src/lib/x-kit/widget/theme/object/gui-to-object-theme.pkg
@@ -93,7 +92,7 @@ herein
 	Object_Theme_Egg =  Void -> (Exports,   (Imports, Run_Gun, End_Gun) -> Void);
 
 	Runstate =  {													# These values will be statically globally visible throughout the code body for the imp.
-		      me:		Theme_State,									# State which is preserved across imp shutdown/restart cycles.
+		      me:		Theme_State,									# 
 		      imports:		Imports,									# Imps to which we send requests.
 		      to:		Replyqueue,									# The name makes   foo::pass_something(imp) to {. ... }   syntax read well.
 		      end_gun':		End_Gun										# We shut down the microthread when this fires.
@@ -105,7 +104,7 @@ herein
 		  #
 		  runstate as
 		  {													# These values will be statically globally visible throughout the code body for the imp.
-		    me:			Theme_State,									# State which is preserved across imp shutdown/restart cycles.
+		    me:			Theme_State,									# 
 		    imports:		Imports,									# Imps to which we send requests.
 		    to:			Replyqueue,									# The name makes   foo::pass_something(imp) to {. ... }   syntax read well.
 		    end_gun':		End_Gun										# We shut down the microthread when this fires.

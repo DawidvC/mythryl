@@ -1,0 +1,133 @@
+# prettyprinter.lib
+#
+# The main sourcefiles for the prettyprint library.
+
+# Compiled by:
+#     src/app/c-glue-maker/c-glue-maker.lib
+#     src/app/future-lex/src/lexgen.lib
+#     src/app/makelib/makelib.sublib
+#     src/lib/c-kit/src/ast/ast.sublib
+#     src/lib/c-kit/src/parser/c-parser.sublib
+#     src/lib/compiler/back/low/intel32/backend-intel32.lib
+#     src/lib/compiler/back/low/lib/lowhalf.lib
+#     src/lib/compiler/back/low/lib/register-spilling.lib
+#     src/lib/compiler/back/low/lib/visual.lib
+#     src/lib/compiler/back/low/pwrpc32/backend-pwrpc32.lib
+#     src/lib/compiler/back/low/sparc32/backend-sparc32.lib
+#     src/lib/compiler/core.sublib
+#     src/lib/compiler/execution/execute.sublib
+#     src/lib/compiler/front/basics/basics.sublib
+#     src/lib/compiler/front/typer-stuff/typecheckdata.sublib
+#     src/lib/compiler/front/typer/typer.sublib
+#     src/lib/compiler/mythryl-compiler-support-for-intel32.lib
+#     src/lib/compiler/mythryl-compiler-support-for-pwrpc32.lib
+#     src/lib/compiler/mythryl-compiler-support-for-sparc32.lib
+#     src/lib/core/compiler/mythryl-compiler-for-intel32.lib
+#     src/lib/core/compiler/mythryl-compiler-for-pwrpc32.lib
+#     src/lib/core/compiler/mythryl-compiler-for-sparc32.lib
+#     src/lib/x-kit/widget/xkit-widget.sublib
+#     src/lib/x-kit/xclient/xclient-internals.sublib
+
+LIBRARY_EXPORTS
+
+	api Traitful_Text
+	pkg traitless_text
+
+	api     Standard_Prettyprinter
+	generic standard_prettyprinter_g
+	pkg     standard_prettyprinter				# Primary external interface to package.
+
+	api     Base_Prettyprinter
+	generic base_prettyprinter_g
+	pkg     base_prettyprinter
+
+	api     Core_Prettyprinter
+	generic core_prettyprinter_g
+
+	api     Core_Prettyprinter_Types
+	generic core_prettyprinter_types_g
+
+	generic core_prettyprinter_box_formatting_policies_g
+
+	api	Core_Prettyprinter_Debug
+	generic core_prettyprinter_debug_g
+
+	api Old_Prettyprinter
+	pkg old_prettyprinter
+
+	generic prettyprinter_debug_g
+	generic prettyprint_tree_g
+
+	pkg prettyprint_tree
+
+	pkg plain_file_prettyprinter_avoiding_pointless_file_rewrites
+	pkg plain_file_prettyprint_output_stream_avoiding_pointless_file_rewrites
+
+	pkg plain_file_prettyprinter
+
+	api Prettyprint_Output_Stream					# Root prettyprint-output-stream.api, specialized by Plain_Prettyprint_Output_Stream, Html_Prettyprint_Output_Stream and Ansi_Terminal_Prettyprint_Output_Stream
+
+	api Plain_Prettyprint_Output_Stream
+	pkg plain_prettyprint_output_stream
+
+	api Ansi_Terminal_Prettyprint_Output_Stream
+	pkg ansi_terminal_prettyprint_output_stream
+
+	api Ansi_Terminal_Prettyprinter
+	pkg ansi_terminal_prettyprinter
+
+	api Html_Prettyprint_Output_Stream
+	pkg html_prettyprint_output_stream
+
+
+
+LIBRARY_COMPONENTS
+	src/ansi-terminal-prettyprinter.pkg
+
+	src/core-prettyprinter.api
+	src/core-prettyprinter-g.pkg
+
+	src/core-prettyprinter-types.api
+	src/core-prettyprinter-types-g.pkg
+	src/core-prettyprinter-box-formatting-policies-g.pkg
+
+	src/core-prettyprinter-debug.api
+	src/core-prettyprinter-debug-g.pkg
+
+	src/prettyprinter-debug-g.pkg
+
+	src/prettyprint-tree-g.pkg
+	src/prettyprint-tree.pkg
+
+
+	src/standard-prettyprinter.api
+	src/standard-prettyprinter-g.pkg
+	src/standard-prettyprinter.pkg
+
+	src/base-prettyprinter.api
+	src/base-prettyprinter.pkg
+	src/base-prettyprinter-g.pkg
+
+	src/old-prettyprinter.pkg
+
+	src/traitful-text.api
+	src/plain-file-prettyprinter.pkg
+	src/traitless-text.pkg
+
+	src/plain-file-prettyprinter-avoiding-pointless-file-rewrites.pkg
+	src/out/plain-file-prettyprint-output-stream-avoiding-pointless-file-rewrites.pkg
+
+
+	src/out/prettyprint-output-stream.api
+	src/out/ansi-terminal-prettyprint-output-stream.pkg
+	src/out/html-prettyprint-output-stream.pkg
+	src/out/plain-prettyprint-output-stream.pkg
+
+	$ROOT/src/lib/html/html.lib
+        $ROOT/src/lib/std/standard.lib
+
+
+
+# COPYRIGHT (c) 1997 Bell Labs, Lucent Technologies.
+# Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
+# released per terms of SMLNJ-COPYRIGHT.

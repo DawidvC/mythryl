@@ -93,8 +93,10 @@ stipulate
 
     package gd  =  gui_displaylist;				# gui_displaylist			is from   src/lib/x-kit/widget/theme/gui-displaylist.pkg
 
-    package pp  =  standard_prettyprint_mill;			# standard_prettyprint_mill		is from   src/lib/prettyprint/big/src/standard-prettyprint-mill.pkg
-    package err =  error_message;				# error_message				is from   src/lib/compiler/front/basics/errormsg/error-message.pkg
+    package pp  =  standard_prettyprinter;			# standard_prettyprinter		is from   src/lib/prettyprint/big/src/standard-prettyprinter.pkg
+
+    package err =  compiler::error_message;			# compiler				is from   src/lib/core/compiler/compiler.pkg
+								# error_message				is from   src/lib/compiler/front/basics/errormsg/error-message.pkg
 
     package bt  =  gui_to_sprite_theme;				# gui_to_sprite_theme			is from   src/lib/x-kit/widget/theme/sprite/gui-to-sprite-theme.pkg
     package ct  =  gui_to_object_theme;				# gui_to_object_theme			is from   src/lib/x-kit/widget/theme/object/gui-to-object-theme.pkg
@@ -117,8 +119,7 @@ stipulate
 
     package frm =  frame;					# frame					is from   src/lib/x-kit/widget/leaf/frame.pkg
 
-    package iuw =  issue_unique_widget_id;			# issue_unique_widget_id		is from   src/lib/x-kit/widget/gui/issue-unique-widget-id.pkg
-
+    package idm =  id_map;					# id_map				is from   src/lib/src/id-map.pkg
     package im  =  int_red_black_map;				# int_red_black_map			is from   src/lib/src/int-red-black-map.pkg
 #   package is  =  int_red_black_set;				# int_red_black_set			is from   src/lib/src/int-red-black-set.pkg
 
@@ -127,11 +128,8 @@ stipulate
     package g2d =  geometry2d;					# geometry2d				is from   src/lib/std/2d/geometry2d.pkg
     package g2j =  geometry2d_junk;				# geometry2d_junk			is from   src/lib/std/2d/geometry2d-junk.pkg
 
-    package ebi =  editboss_imp;				# editboss_imp				is from   src/lib/x-kit/widget/edit/editboss-imp.pkg
-    package e2g =  editboss_to_guiboss;				# editboss_to_guiboss			is from   src/lib/x-kit/widget/edit/editboss-to-guiboss.pkg
-
-    package t2t =  textpane_to_textbuffer;			# textpane_to_textbuffer		is from   src/lib/x-kit/widget/edit/textpane-to-textbuffer.pkg
-#   package tbi =  textbuffer_imp;				# textbuffer_imp			is from   src/lib/x-kit/widget/edit/textbuffer-imp.pkg
+    package ebi =  millboss_imp;				# millboss_imp				is from   src/lib/x-kit/widget/edit/millboss-imp.pkg
+    package e2g =  millboss_to_guiboss;				# millboss_to_guiboss			is from   src/lib/x-kit/widget/edit/millboss-to-guiboss.pkg
 
     tracefile   =  "widget-unit-test.trace.log";
 
@@ -153,7 +151,7 @@ herein
 		widget_to_guiboss:		gt::Widget_To_Guiboss,
 		gadget_to_guiboss:		gt::Gadget_To_Guiboss,
 		guiboss_to_guishim:		gtg::Guiboss_To_Guishim,
-		topwindow_for_gui:		gtg::Guiboss_To_Topwindow,
+		hostwindow_for_gui:		gtg::Guiboss_To_Hostwindow,
 		space_to_gui:			gt::Space_To_Gui,
 		#
 		clear_box_in_pixmap												# Clear a box to black, mostly to avoid undefined values etc.
@@ -163,11 +161,11 @@ herein
 		  )
 		  -> Void,
 
-		update_offscreen_parent_pixmaps_and_then_topwindow
+		update_offscreen_parent_pixmaps_and_then_hostwindow
 		  :
 		  ( gt::Subwindow_Or_View,
 		    g2d::Box,													# From-box in source pixmap coordinates.
-		    gtg::Guiboss_To_Topwindow
+		    gtg::Guiboss_To_Hostwindow
 		  )
 		  -> Void
 	      }
@@ -185,7 +183,7 @@ herein
 
 		widgetspace_id   =  guiboss_to_widgetspace.id;
 
-		me.widgetspace_imps :=  im::set (*me.widgetspace_imps, (id_to_int widgetspace_id), stuff);
+		me.widgetspace_imps :=  idm::set (*me.widgetspace_imps, widgetspace_id, stuff);
 
 
 		subwindow_info -> gt::SUBWINDOW_DATA subwindow_info;
@@ -236,7 +234,7 @@ herein
 
 			exports ->  { guiboss_to_widgetspace };
 
-			me.widgetspace_imps       :=  im::set (*me.widgetspace_imps,         (id_to_int guiboss_to_widgetspace.id), { guiboss_to_widgetspace, shutdown_oneshot });
+			me.widgetspace_imps       :=  idm::set (*me.widgetspace_imps, guiboss_to_widgetspace.id,  { guiboss_to_widgetspace, shutdown_oneshot });
 
 # NOT VERY SOON add gadget_to_guiboss to imports:
 			widgetspace_imports =  { int_sink => \\ (i: Int) = (), space_to_gui };
@@ -261,7 +259,7 @@ herein
 
 			exports -> { guiboss_to_spritespace, sprite_to_spritespace };
 
-			me.spritespace_imps         :=  im::set (*me.spritespace_imps,          id_to_int guiboss_to_spritespace.id,  { guiboss_to_spritespace, sprite_to_spritespace, shutdown_oneshot });
+			me.spritespace_imps         :=  idm::set (*me.spritespace_imps,          guiboss_to_spritespace.id,  { guiboss_to_spritespace, sprite_to_spritespace, shutdown_oneshot });
 # NOT VERY SOON add gadget_to_guiboss to imports:
 			spritespace_imports =  { int_sink => \\ (i: Int) = () };
 
@@ -285,7 +283,7 @@ herein
 
 			exports -> { guiboss_to_objectspace, object_to_objectspace };
 
-			me.objectspace_imps         :=  im::set (*me.objectspace_imps,          id_to_int guiboss_to_objectspace.id,  { guiboss_to_objectspace, object_to_objectspace, shutdown_oneshot });
+			me.objectspace_imps         :=  idm::set (*me.objectspace_imps,          guiboss_to_objectspace.id,  { guiboss_to_objectspace, object_to_objectspace, shutdown_oneshot });
 
 # NOT VERY SOON add gadget_to_guiboss to imports:
 			objectspace_imports =  { int_sink => \\ (i: Int) = () };
@@ -326,7 +324,7 @@ herein
 				    =
 				    make_gadget_imp_info  (guiboss_to_gadget, current_subwindow_or_view);
 
-				me.gadget_imps         :=  im::set (*me.gadget_imps,         iuw::id_to_int guiboss_to_gadget.id,  gadget_imp_info );
+				me.gadget_imps         :=  idm::set (*me.gadget_imps,         guiboss_to_gadget.id,  gadget_imp_info );
 
 				gt::RG_SPRITE { spritespace_to_sprite, guiboss_to_gadget, shutdown_oneshot };
 			    };
@@ -351,7 +349,7 @@ herein
 				    ->
 				    stuff as { guiboss_to_widgetspace, shutdown_oneshot };
 
-				me.widgetspace_imps         :=  im::set (*me.widgetspace_imps,         (id_to_int guiboss_to_widgetspace.id), stuff);
+				me.widgetspace_imps         :=  idm::set  (*me.widgetspace_imps,  guiboss_to_widgetspace.id,  stuff);
 
 				(do_gp_widget (gp_widget, current_subwindow_or_view))
 				    ->
@@ -379,7 +377,7 @@ herein
 
 				gadget_imp_info  =  make_gadget_imp_info  (guiboss_to_gadget, current_subwindow_or_view);
 
-				me.gadget_imps         :=  im::set (*me.gadget_imps,         iuw::id_to_int guiboss_to_gadget.id,  gadget_imp_info );
+				me.gadget_imps         :=  idm::set (*me.gadget_imps,         guiboss_to_gadget.id,  gadget_imp_info );
 
 				gt::RG_OBJECT { objectspace_to_object, guiboss_to_gadget, shutdown_oneshot };
 			    };
@@ -493,7 +491,8 @@ herein
 				    gt::RG_ROW  { id,
 						  widgets,
 						  widget_layout_hint,
-						  site =>  REF  g2d::box::zero
+						  site	    =>  REF  g2d::box::zero,
+						  first_cut =>  NULL
 						};
 				};
 
@@ -514,7 +513,8 @@ herein
 				    gt::RG_ROW  { id,
 						  widgets,
 						  widget_layout_hint,
-						  site =>  REF  g2d::box::zero
+						  site	    =>  REF  g2d::box::zero,
+						  first_cut =>  NULL
 						};
 				};
 
@@ -539,7 +539,8 @@ herein
 				    gt::RG_COL  { id,
 						  widgets,
 						  widget_layout_hint,
-						  site
+						  site,
+						  first_cut => NULL
 						};
 				};
 
@@ -562,7 +563,8 @@ herein
 				    gt::RG_COL  { id,
 						  widgets,
 						  widget_layout_hint,
-						  site
+						  site,
+						  first_cut => NULL
 						};
 				};
 
@@ -744,11 +746,11 @@ herein
 									    #
 									    (rg_scrollport.parent_subwindow_or_view, box);		# <== From environment
 									#
-									update_offscreen_parent_pixmaps_and_then_topwindow		# ... copy that blackness all the way up the scrollport chain to visible topwindow.
+									update_offscreen_parent_pixmaps_and_then_hostwindow		# ... copy that blackness all the way up the scrollport chain to visible hostwindow.
 									    #
 									    ( rg_scrollport.parent_subwindow_or_view,			# <== From environment
 									      box,	
-									      topwindow_for_gui						# <== From environment
+									      hostwindow_for_gui						# <== From environment
 									    );
 								    };
 							    end;
@@ -764,11 +766,11 @@ herein
 							#
 							NULL         => ();								# No intersection means nothing to draw. Pixmap must be scrolled completely out of sight...
 							#
-							THE from_box => update_offscreen_parent_pixmaps_and_then_topwindow		# Draw visible part pixmap on parent.
+							THE from_box => update_offscreen_parent_pixmaps_and_then_hostwindow		# Draw visible part pixmap on parent.
 									    #
 									    ( subwindow_or_view,					# <== From environment
 									      from_box,
-									      topwindow_for_gui						# <== From environment
+									      hostwindow_for_gui						# <== From environment
 									    );
 						    esac;
 						};											# fun set_scrollport_upperleft
@@ -917,11 +919,11 @@ herein
 									  this_tab.pixmap.size
 									);
 
-							update_offscreen_parent_pixmaps_and_then_topwindow				# Draw pixmap on parent.
+							update_offscreen_parent_pixmaps_and_then_hostwindow				# Draw pixmap on parent.
 							    #
 							    ( gt::TABBABLE_INFO this_tab,
 							      from_box,
-							      topwindow_for_gui
+							      hostwindow_for_gui
 							    );
 
 						    fi;
@@ -952,7 +954,7 @@ herein
 
 					    _				  =>    {   msg = "Unsupported List(Frame_Option) arg in paused_gui__to__guipane/gt::GP_FRAME -- guiboss-imp.pkg";
 											log::fatal msg;
-											raise exception FAIL msg;
+											raise exception DIE msg;
 										    };
 					esac;
 
@@ -995,7 +997,7 @@ herein
 
 				    gadget_imp_info  =  make_gadget_imp_info  (guiboss_to_widget.g, current_subwindow_or_view);
 
-				    me.gadget_imps         :=  im::set (*me.gadget_imps,         iuw::id_to_int guiboss_to_widget.g.id,  gadget_imp_info );
+				    me.gadget_imps         :=  idm::set (*me.gadget_imps,         guiboss_to_widget.g.id,  gadget_imp_info );
 
 				    site =  REF  g2d::box::zero;
 
@@ -1015,7 +1017,7 @@ herein
 
 				    objectspace_id =  guiboss_to_objectspace.id;
 
-				    me.objectspace_imps         :=  im::set (*me.objectspace_imps,         (id_to_int objectspace_id), stuff);
+				    me.objectspace_imps         :=  idm::set (*me.objectspace_imps,         objectspace_id, stuff);
 
 				    #
 				    objects	=   map  do_object  gp_objects
@@ -1040,7 +1042,7 @@ herein
 					->
 					stuff as { guiboss_to_spritespace, sprite_to_spritespace, shutdown_oneshot };
 
-				    me.spritespace_imps         :=  im::set (*me.spritespace_imps,         (id_to_int guiboss_to_spritespace.id), stuff);
+				    me.spritespace_imps         :=  idm::set (*me.spritespace_imps,         guiboss_to_spritespace.id, stuff);
 
 				    #
 				    sprites	=   map  do_sprite  gp_sprites
@@ -1073,7 +1075,7 @@ herein
 		widget_to_guiboss:	gt::Widget_To_Guiboss,
 		gadget_to_guiboss:	gt::Gadget_To_Guiboss,
 		guiboss_to_guishim:	gtg::Guiboss_To_Guishim,
-		topwindow_for_gui:	gtg::Guiboss_To_Topwindow,
+		hostwindow_for_gui:	gtg::Guiboss_To_Hostwindow,
 		space_to_gui:		gt::Space_To_Gui,
 		#
 		clear_box_in_pixmap													# Clear a box to black, mostly to avoid undefined values etc.
@@ -1083,11 +1085,11 @@ herein
 		  )
 		  -> Void,
 
-		update_offscreen_parent_pixmaps_and_then_topwindow
+		update_offscreen_parent_pixmaps_and_then_hostwindow
 		  :
 		  ( gt::Subwindow_Or_View,
 		    g2d::Box,													# From-box in source pixmap coordinates.
-		    gtg::Guiboss_To_Topwindow
+		    gtg::Guiboss_To_Hostwindow
 		  )
 		  -> Void
 	      }
@@ -1110,10 +1112,10 @@ herein
 		    widget_to_guiboss,
 		    gadget_to_guiboss,
 		    guiboss_to_guishim,
-		    topwindow_for_gui,
+		    hostwindow_for_gui,
 		    space_to_gui,
 		    clear_box_in_pixmap 				=>  gpj::clear_box_in_pixmap,
-		    update_offscreen_parent_pixmaps_and_then_topwindow	=>  gpj::update_offscreen_parent_pixmaps_and_then_topwindow
+		    update_offscreen_parent_pixmaps_and_then_hostwindow	=>  gpj::update_offscreen_parent_pixmaps_and_then_hostwindow
 		  }
 		)
 		 -> ( rg_widget,
@@ -1129,7 +1131,7 @@ herein
 		  widget_to_guiboss,
 		  space_to_gui,
 		  subwindow_info,
-		  topwindow		  =>  topwindow_for_gui,
+		  hostwindow		  =>  hostwindow_for_gui,
 		  needs_layout_and_redraw =>  REF FALSE
 		};
 	    };
@@ -1160,5 +1162,5 @@ end;
 ##########################################################################
 
 
-## Original code by Jeff Prothero Copyright (c) 2014-2014,
+## Original code by Jeff Prothero Copyright (c) 2014-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

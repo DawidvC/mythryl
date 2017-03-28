@@ -6,7 +6,7 @@
 
 # Compiled by:
 #     src/lib/core/internal/interactive-system.lib
-#     src/lib/prettyprint/big/prettyprint-mill.lib
+#     src/lib/prettyprint/big/prettyprinter.lib
 
 LIBRARY_EXPORTS
 
@@ -45,5 +45,5 @@ LIBRARY_COMPONENTS
 
 
 # COPYRIGHT (c) 1996 AT&T Research.
-# Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+# Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 # released per terms of SMLNJ-COPYRIGHT.

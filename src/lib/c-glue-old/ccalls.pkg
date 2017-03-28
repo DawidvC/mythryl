@@ -23,7 +23,7 @@ generic package ccalls (package cc_info:  Cc_Info) : Ccalls  {
 	           (C::intSzB > maxWordSzB) or
 		   (C::ptrSzB > maxWordSzB) 
 		then 
-		    raise exception exceptions::FAIL "size of C word too big for LIB7-C"
+		    raise exception exceptions::DIE "size of C word too big for LIB7-C"
 		
 
 	NArgs = 15  #  must agree with ccalls.h & ccalls.c 
@@ -161,7 +161,7 @@ generic package ccalls (package cc_info:  Cc_Info) : Ccalls  {
         fun dataSz (Cint _) = c::intSzB
 	  | dataSz (Cshort _) = c::shortSzB
 	  | dataSz (Clong _) = c::longSzB
-          | dataSz (Cstring s) = (string::length s)*c::charSzB + 1
+          | dataSz (Cstring s) = (string::length_in_bytes s)*c::charSzB + 1
           | dataSz (Cchar _) = c::charSzB
           | dataSz (Cdouble _) = c::doubleSzB
           | dataSz (Cfloat _) = c::floatSzB
@@ -572,5 +572,5 @@ generic package ccalls (package cc_info:  Cc_Info) : Ccalls  {
 
 
 ## COPYRIGHT (c) 1995 AT&T Bell Laboratories.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

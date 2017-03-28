@@ -26,12 +26,12 @@ api Char_Map {
 	#  map the given character 
 
      map_string_char:  Char_Map(X)  -> ((String, Int)) -> X;
-	#  (mapStrChr c (s, i)) is equivalent to (mapChr c (string::get (s, i))) 
+	#  (mapStrChr c (s, i)) is equivalent to (mapChr c (string::get_byte_as_char (s, i))) 
 
   }; #  CHAR_MAP 
 
 
 
 ## COPYRIGHT (c) 1994 by AT&T Bell Laboratories.  See SMLNJ-COPYRIGHT file for details.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

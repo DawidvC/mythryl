@@ -79,7 +79,7 @@ herein
 			    =
 			    if (i != slen)
 
-				 c = string::get (s, i);
+				 c = string::get_byte_as_char (s, i);
 
 				 #  NOTE: 0xa0 = (ord ' ' + 128) 
 
@@ -114,7 +114,7 @@ herein
 			    =>
 			    {   do_chars (to_ascii key)
 				except
-				    FAIL _ = ();
+				    DIE _ = ();
 
 				loop ();
 			    };
@@ -594,5 +594,5 @@ end;
 
 
 ## COPYRIGHT (c) 1991 by AT&T Bell Laboratories  See SMLNJ-COPYRIGHT file for details.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

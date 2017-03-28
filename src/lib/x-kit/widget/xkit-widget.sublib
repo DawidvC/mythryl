@@ -7,7 +7,7 @@
 
 SUBLIBRARY_EXPORTS
 
-	api Topwindow
+	api Hostwindow
 	api Widget
 	api Xevent_Mail_Router
 	api Three_D
@@ -58,6 +58,18 @@ SUBLIBRARY_EXPORTS
 	pkg gadget_to_pixmap
 	pkg gui_displaylist
 	pkg exercise_x_appwindow
+
+	pkg boolfloatintstrings_millout
+	pkg bool_millout
+	pkg bools_millout
+	pkg float_millout
+	pkg floats_millout
+	pkg int_millout
+	pkg ints_millout
+	pkg millgraph_millout
+	pkg string_millout
+	pkg strings_millout
+	pkg textmill_statechange_millout
 
 	api Xevent_To_Gui_Event 
 	pkg xevent_to_gui_event
@@ -124,6 +136,7 @@ SUBLIBRARY_EXPORTS
 	api Guiboss_Imp
 	pkg guiboss_imp
 
+	pkg run_guiplan_on_x
 
 	api Root_Window
 	pkg root_window
@@ -132,7 +145,7 @@ SUBLIBRARY_EXPORTS
 	pkg root_window_old
 
 	pkg xevent_mail_router
-	pkg topwindow
+	pkg hostwindow
 	pkg widget
 	pkg three_d
 
@@ -219,53 +232,67 @@ SUBLIBRARY_EXPORTS
 	api Texteditor
 	pkg texteditor
 
-	api Textedit
-	pkg textedit
-
 	api Textpane
 	pkg textpane
 	pkg textpane_types
+	pkg make_textpane
+	pkg textpane_hint
 
-	api Lineeditor
-	pkg lineeditor
+	api Drawpane
+	pkg drawpane
+	pkg drawpane_types
 
-	api Statusline
-	pkg statusline
+	api Screenline
+	pkg screenline
+	pkg screenline_types
 
-	api Minibuffer
-	pkg minibuffer
+	api Compile_Imp
+	pkg compile_imp
+	pkg guiboss_to_compileimp
+	pkg app_to_compileimp
 
-	api Editboss_Imp
-	pkg editboss_imp
-	pkg editboss_types
+	api Millboss_Imp
+	pkg millboss_imp
+	pkg millboss_types
+	pkg millboss_to_guiboss
 
-	pkg gadget_to_editboss
-	pkg editboss_to_guiboss
+	pkg modes_to_preload
 
-	api Textbuffer_Imp
-	pkg textbuffer_imp
+	api Textmill
+	pkg textmill
+	pkg textmill_crypts
 
-	pkg editboss_to_textbuffer
-	pkg textbuffer_to_editboss
-	pkg textpane_to_textbuffer
+	pkg textpane_to_screenline
+	pkg textpane_to_drawpane
+	pkg mode_to_drawpane
 
-	pkg textpane_to_lineeditor
-	pkg textpane_to_statusline
+	pkg screenline_to_textpane
+	pkg   drawpane_to_textpane
 
-	pkg textedit_to_minibuffer
-	pkg textedit_to_textpane
-	pkg lineeditor_to_textpane
-	pkg statusline_to_textpane
 
-	pkg editboss_to_minibuffer
-	pkg editboss_to_statusline
-	pkg editboss_to_lineeditor
-	#
-	pkg editboss_to_textedit
-	pkg editboss_to_textpane
 
-	pkg minibuffer_to_textedit
-	pkg textpane_to_textedit
+
+
+	pkg keystroke_macro_junk
+	pkg fundamental_mode
+	pkg minimill_mode
+	pkg cutbuffer_types
+	pkg textlines_junk
+
+	pkg dazzle_mode
+	pkg dazzle_mill
+
+	pkg dired_mode
+	pkg dired_mill
+
+	pkg eval_mode
+	pkg eval_mill
+
+	pkg millgraph_mill
+	pkg millgraph_mode
+
+	pkg shell_mode
+	pkg shell_mill
 
 	pkg quark
 	pkg scrollable_string_editor
@@ -326,8 +353,8 @@ SUBLIBRARY_COMPONENTS
 
 	$ROOT/src/lib/std/standard.lib
 	$ROOT/src/lib/core/makelib/makelib.lib
-	$ROOT/src/lib/prettyprint/big/prettyprint-mill.lib
-	$ROOT/src/lib/core/viscomp/basics.lib				# For error-message.pkg
+	$ROOT/src/lib/prettyprint/big/prettyprinter.lib
+	$ROOT/src/lib/core/internal/interactive-system.lib		# For compiler::error_message, compiler::compiler_state etc.
 
 	../xclient/xclient.sublib
 	../draw/xkit-draw.sublib
@@ -348,8 +375,8 @@ SUBLIBRARY_COMPONENTS
 
 	old/basic/widget.api
 	old/basic/widget.pkg
-	old/basic/topwindow.api
-	old/basic/topwindow.pkg
+	old/basic/hostwindow.api
+	old/basic/hostwindow.pkg
 	old/basic/widget-attributes.api
 	old/basic/widget-attributes.pkg
 
@@ -395,56 +422,81 @@ SUBLIBRARY_COMPONENTS
 	edit/texteditor.api
 	edit/texteditor.pkg
 
-	edit/textedit.api
-	edit/textedit.pkg
-
 	edit/textpane.api
 	edit/textpane.pkg
 	edit/textpane-types.pkg
+	edit/make-textpane.pkg
+	edit/textpane-hint.pkg
 
-	edit/lineeditor.api
-	edit/lineeditor.pkg
+	edit/drawpane.api
+	edit/drawpane.pkg
+	edit/drawpane-types.pkg
 
-	edit/statusline.api
-	edit/statusline.pkg
+	edit/screenline.api
+	edit/screenline.pkg
+	edit/screenline-types.pkg
 
-	edit/minibuffer.api
-	edit/minibuffer.pkg
+	edit/compile-imp.api
+	edit/compile-imp.pkg
+	edit/guiboss-to-compileimp.pkg
+	edit/app-to-compileimp.pkg
 
-	edit/editboss-imp.api
-	edit/editboss-imp.pkg
-	edit/editboss-types.pkg
+	edit/millboss-imp.api
+	edit/millboss-imp.pkg
+	edit/millboss-types.pkg
+	edit/millboss-to-guiboss.pkg
 
-	edit/gadget-to-editboss.pkg
-	edit/editboss-to-guiboss.pkg
 
-	edit/textbuffer-imp.api
-	edit/textbuffer-imp.pkg
+	edit/modes-to-preload.pkg
 
-	edit/editboss-to-textbuffer.pkg
-	edit/textbuffer-to-editboss.pkg
+	edit/textmill.api
+	edit/textmill.pkg
 
-	edit/textpane-to-textbuffer.pkg
+	edit/drawpane-to-textpane.pkg
+	edit/textpane-to-drawpane.pkg
+	edit/mode-to-drawpane.pkg
 
-	edit/textpane-to-lineeditor.pkg
-	edit/textpane-to-statusline.pkg
+	edit/textpane-to-screenline.pkg
+	edit/screenline-to-textpane.pkg
 
-	edit/textedit-to-minibuffer.pkg
-	edit/textedit-to-textpane.pkg
+	edit/millboss-to-pane.pkg
 
-	edit/lineeditor-to-textpane.pkg
-	edit/statusline-to-textpane.pkg
+	edit/boolfloatintstrings-millout.pkg
+	edit/bool-millout.pkg
+	edit/bools-millout.pkg
+	edit/float-millout.pkg
+	edit/floats-millout.pkg
+	edit/int-millout.pkg
+	edit/ints-millout.pkg
+	edit/millgraph-millout.pkg
+	edit/string-millout.pkg
+	edit/strings-millout.pkg
+	edit/textmill-statechange-millout.pkg
 
-	edit/editboss-to-minibuffer.pkg
-	edit/editboss-to-statusline.pkg
-	edit/editboss-to-lineeditor.pkg
+	edit/textmill-crypts.pkg
 
-	edit/editboss-to-textedit.pkg
-	edit/editboss-to-textpane.pkg
 
-	edit/minibuffer-to-textedit.pkg
-	edit/textpane-to-textedit.pkg
-	
+
+	edit/keystroke-macro-junk.pkg
+	edit/fundamental-mode.pkg
+	edit/minimill-mode.pkg
+	edit/cutbuffer-types.pkg
+	edit/textlines-junk.pkg
+
+	edit/dazzle-mode.pkg
+	edit/dazzle-mill.pkg
+
+	edit/dired-mode.pkg
+	edit/dired-mill.pkg
+
+	edit/eval-mode.pkg
+	edit/eval-mill.pkg
+
+	edit/millgraph-mill.pkg
+	edit/millgraph-mode.pkg
+
+	edit/shell-mode.pkg
+	edit/shell-mill.pkg
 
 	old/leaf/arrowbutton-drawfn-and-sizefn.pkg
 	old/leaf/arrowbutton-look.pkg
@@ -660,6 +712,7 @@ SUBLIBRARY_COMPONENTS
 	gui/guiboss-imp.api
 	gui/guiboss-imp.pkg
 	gui/issue-unique-widget-id.pkg
+	gui/run-guiplan-on-x.pkg
 
 	gui/guiboss-types.pkg
 	gui/guiboss-types-junk.pkg
@@ -685,5 +738,5 @@ SUBLIBRARY_COMPONENTS
 	widget-unit-test.pkg
 
 # COPYRIGHT (c) 1995 AT&T Bell Laboratories.
-# Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+# Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 # released per terms of SMLNJ-COPYRIGHT.

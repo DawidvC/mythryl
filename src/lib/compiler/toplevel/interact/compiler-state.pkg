@@ -1,4 +1,15 @@
 ## compiler-state.pkg
+#
+# Core symbol table state refcell (etc) for Mythryl compiles.
+#
+# This package is referenced in:
+#
+#     src/app/makelib/main/makelib-g.pkg
+#     src/app/makelib/compile/compile-in-dependency-order-g.pkg
+#     src/lib/core/compiler/compiler.pkg
+#     src/lib/compiler/toplevel/interact/read-eval-print-loop-g.pkg
+#     src/lib/compiler/toplevel/interact/read-eval-print-loops-g.pkg
+#     src/lib/compiler/toplevel/compiler/mythryl-compiler-g.pkg
 
 # Compiled by:
 #     src/lib/compiler/core.sublib
@@ -20,6 +31,8 @@ stipulate
     package cms =  compiler_mapstack_set;						# compiler_mapstack_set		is from   src/lib/compiler/toplevel/compiler-state/compiler-mapstack-set.pkg
     package pl  =  property_list;							# property_list			is from   src/lib/src/property-list.pkg
     package syx =  symbolmapstack;							# symbolmapstack		is from   src/lib/compiler/front/typer-stuff/symbolmapstack/symbolmapstack.pkg
+    package pcs =  per_compile_stuff;							# per_compile_stuff		is from   src/lib/compiler/front/typer-stuff/main/per-compile-stuff.pkg
+    package ds  =  deep_syntax;								# deep_syntax			is from   src/lib/compiler/front/typer-stuff/deep-syntax/deep-syntax.pkg
 herein
 
     package   compiler_state
@@ -45,7 +58,8 @@ herein
 
 	fun make_compiler_mapstack_set_jar
 		#
-		table_set
+	      ( table_set:	Compiler_Mapstack_Set)
+	    :			Compiler_Mapstack_Set_Jar
 	    =
 	    {   table_set_ref      =  REF  table_set;
 		#
@@ -64,11 +78,10 @@ herein
 		cms::null_compiler_mapstack_set;
 
 
-	my compiler_state_stack 							# More icky thread-hostile global mutable state.
-	    :
-	    Ref ((Compiler_State, List(Compiler_State)))
-	    =
-	    {   top_level_pkg_etc_defs_jar
+	fun make__compiler_state_stack ()						# Added 2015-09-04 CrT with the idea of supporting multiple compiler states in (e.g.)   src/lib/x-kit/widget/edit/eval-mill.pkg
+	    = 										# Since SML/NJ is single-threaded and never did anything like this, there may be hidden pitfalls in doing so, e.g. involving having multiple linking_mapstacks in one process.
+	    {										# However, I'm guessing this will most likely Just Work, give or take doing only one compile at a time due to the compiler's prolifigate use of global variables. (  :-( :-( :-(  )
+		top_level_pkg_etc_defs_jar
 		    =
 		    make_compiler_mapstack_set_jar
 			#
@@ -78,13 +91,20 @@ herein
 		    =
 		    pl::make_property_list ();
 
-		REF ( { top_level_pkg_etc_defs_jar,
-			baselevel_pkg_etc_defs_jar =>  pervasive_fun_etc_defs_jar,
-			property_list
-		      },
-		      []
-		    );
+		( { top_level_pkg_etc_defs_jar,
+		    baselevel_pkg_etc_defs_jar =>  pervasive_fun_etc_defs_jar,
+		    property_list
+		  },
+		  []
+		);
 	    };
+
+	compiler_state_stack 								# More icky thread-hostile global mutable state.
+	    =
+	    REF (make__compiler_state_stack ())
+	    :
+	    Ref ((Compiler_State, List(Compiler_State)));
+
 
 	fun compiler_state ()
 	    =
@@ -103,13 +123,16 @@ herein
 	      );
 
 	fun run_thunk_in_compiler_state
-		(thunk, compiler_state)
+	      (
+		thunk,
+		compiler_state
+	      )
 	    =
 	    {   old_stack =  *compiler_state_stack;
-
+		#
 		compiler_state_stack
 		    :=
-		    (compiler_state, (!) old_stack);
+		    (compiler_state, (!) old_stack);					# NB: 'oldstack' has the form (Element, List(Element), so '(!) old_stack'  is equivalent to   'element ! list'   where 'element'==(#1 oldstack)) and 'list'==(#2 oldstack).
 
 		thunk ()
 		then
@@ -124,6 +147,13 @@ herein
 		     ((get_baselevel_pkg_etc_defs_jar ()).get_mapstack_set ()).symbolmapstack
 		)
 	    );
+
+	Compile_And_Eval_String_Option							# Does not particularly belong here, but a better place isn't obvious and I don't feel like creating a separate package just for it.
+	  #										# This gets used in  compile_raw_declaration_to_package_closure()  in   src/lib/compiler/toplevel/interact/read-eval-print-loop-g.pkg
+	  #										# which is not a convenient place from which to export a datatype widely -- needed in (e.g.)	src/lib/x-kit/widget/edit/eval-mode.pkg
+	  = COMPILER_VERBOSITY		pcs::Compiler_Verbosity				# Controls printing of intermediate code forms etc.
+	  | DEEP_SYNTAX_TRANSFORM	ds::Declaration -> ds::Declaration		# Allows arbitrary rewriting of the deep syntax tree.  Rarely used; potentially useful for profiling or instrumenting code or adding debug support.
+	  ;	
     };
 end;
 
@@ -149,5 +179,5 @@ end;
 
 
 ## COPYRIGHT (c) 1996 Bell Laboratories.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

@@ -127,7 +127,7 @@ herein
 		esac;
 
 	    convert_case  xt::NO_SYMBOL =>  {   msg = "Bug: Unsupported case in convert_case -- keymap-ximp.pkg";   	# This will be caught below in translate_keycode_to_keysym
-						raise exception FAIL   msg;
+						raise exception DIE   msg;
 					    };
 	end;
 
@@ -392,5 +392,5 @@ end;
 
 
 ## COPYRIGHT (c) 1990, 1991 by John H. Reppy.  See SMLNJ-COPYRIGHT file for details.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

@@ -25,7 +25,7 @@ stipulate
     package vu8 =  vector_of_one_byte_unts;							# vector_of_one_byte_unts			is from   src/lib/std/src/vector-of-one-byte-unts.pkg
     package fb  =  font_base;									# font_base					is from   src/lib/x-kit/xclient/src/window/font-base.pkg
     package x2s =  xclient_to_sequencer;							# xclient_to_sequencer				is from   src/lib/x-kit/xclient/src/wire/xclient-to-sequencer.pkg
-    package pp  =  standard_prettyprint_mill;							# standard_prettyprint_mill			is from   src/lib/prettyprint/big/src/standard-prettyprint-mill.pkg
+    package pp  =  standard_prettyprinter;							# standard_prettyprinter			is from   src/lib/prettyprint/big/src/standard-prettyprinter.pkg
 herein
 
 
@@ -38,8 +38,8 @@ herein
 	package s {
 	    #
 	    Mapped_State
-	      = TOPWINDOW_IS_NOW_UNMAPPED
-	      | TOPWINDOW_IS_NOW_MAPPED
+	      = HOSTWINDOW_IS_NOW_UNMAPPED
+	      | HOSTWINDOW_IS_NOW_MAPPED
 	      | FIRST_EXPOSE
 	      ;
 	};
@@ -85,6 +85,7 @@ herein
 	     #											# the list makes it easy for low-level logic to transparently break one request up into multiple requests.
 	     #											# E.g. copy_from_clientside_pixmat_to_pixmap_request() in   src/lib/x-kit/xclient/src/window/cs-pixmat.pkg
 	     | POLY_TEXT8   (xt::Font_Id, g2d::Point, List(t::Poly_Text))
+	     | POLY_TEXT16  (xt::Font_Id, g2d::Point, List(t::Poly_Text))
 	     | IMAGE_TEXT8  (xt::Font_Id, g2d::Point, String)
 	     ;
 	};
@@ -137,7 +138,7 @@ herein
 	#
 	fun prettyprint_drawop_list
 	      #	
-	      (pp:  pp::Prettyprint_Mill)
+	      (pp:  pp::Prettyprinter)
 	      (ops: List(x::Op))
 	    =
 	    pp::listx pp do_op "" ops
@@ -164,6 +165,7 @@ herein
 		    do_op (x::COPY_PLANE          a ) =>  pp.lit                                              "COPY_PLANE"      ;
 		    do_op (x::PUT_IMAGE           a ) =>  pp.lit                                              "PUT_IMAGE"       ;
 		    do_op (x::POLY_TEXT8          a ) =>  pp.lit                                              "POLY_TEXT8"      ;
+		    do_op (x::POLY_TEXT16         a ) =>  pp.lit                                              "POLY_TEXT16"     ;
 		    do_op (x::IMAGE_TEXT8         a ) =>  pp.lit                                              "IMAGE_TEXT8"     ;
 		end;
 	    end;
@@ -193,5 +195,5 @@ end;
 
 
 ## COPYRIGHT (c) 1990, 1991 by John H. Reppy.  See SMLNJ-COPYRIGHT file for details.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

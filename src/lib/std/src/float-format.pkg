@@ -59,7 +59,7 @@ herein
 
 	implode =  sg::implode;
 	cat     =  sg::cat;
-	length  =  sg::length;
+	length  =  sg::length_in_bytes;
 
 
 	fun inc i =  di::(+) (i, 1);
@@ -77,7 +77,7 @@ herein
 
 	fun make_digit d
 	    =
-	    it::vector_of_chars::get ("0123456789abcdef", d);
+	    it::vector_of_chars::get_byte_as_char ("0123456789abcdef", d);
 
 
 	# Decompose a non-zero real into a list of at most maxPrec significant digits
@@ -429,7 +429,7 @@ herein
 
 	    format_float ns::EXACT
 		=>
-		raise exception FAIL "RealFormat: format_float: EXACT not supported";
+		raise exception DIE "RealFormat: format_float: EXACT not supported";
 	end;
     };
 end;
@@ -454,5 +454,5 @@ end;
 
 
 ## COPYRIGHT (c) 1995 AT&T Bell Laboratories.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.

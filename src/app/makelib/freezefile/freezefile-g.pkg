@@ -79,7 +79,7 @@ stipulate
     package mvi =  makelib_version_intlist;					# makelib_version_intlist			is from   src/app/makelib/stuff/makelib-version-intlist.pkg
     package ph  =  picklehash;							# picklehash					is from   src/lib/compiler/front/basics/map/picklehash.pkg
     package pkj =  pickler_junk;						# pickler_junk					is from   src/lib/compiler/front/semantic/pickle/pickler-junk.pkg
-    package pp  =  standard_prettyprint_mill;					# standard_prettyprint_mill			is from   src/lib/prettyprint/big/src/standard-prettyprint-mill.pkg
+    package pp  =  standard_prettyprinter;					# standard_prettyprinter			is from   src/lib/prettyprint/big/src/standard-prettyprinter.pkg
     package psp =  symbol_and_picklehash_pickling;				# symbol_and_picklehash_pickling		is from   src/lib/compiler/front/semantic/pickle/symbol-and-picklehash-pickling.pkg
     package pkr =  pickler;							# pickler					is from   src/lib/compiler/src/library/pickler.pkg
     package s2m =  collect_all_modtrees_in_symbolmapstack;			# collect_all_modtrees_in_symbolmapstack	is from   src/lib/compiler/front/typer-stuff/symbolmapstack/collect-all-modtrees-in-symbolmapstack.pkg
@@ -1545,7 +1545,7 @@ herein
 
                                     if (string::is_prefix  root  full_pathname)
 					#                                        
-                                        string::extract (full_pathname, string::length root + 1, NULL);
+                                        string::extract (full_pathname, string::length_in_bytes root + 1, NULL);
                                     else
                                         full_pathname;
                                     fi;
@@ -2274,7 +2274,7 @@ end;									# stipulate
 
 ## (C) 1999 Lucent Technologies, Bell Laboratories
 ## Author: Matthias Blume (blume@kurims.kyoto-u.ac.jp)
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.
 
 

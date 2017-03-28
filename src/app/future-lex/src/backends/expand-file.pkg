@@ -94,7 +94,7 @@ herein
 				 THE id =>  case (list::find  (\\ (id', h) =  id == id')  hooks)
 
 						 THE (_, h) =>  h out_strm;
-						 NULL       =>  raise exception FAIL "bogus placeholder";
+						 NULL       =>  raise exception DIE "bogus placeholder";
 					    esac;
 			    esac;
 
@@ -159,5 +159,5 @@ end;
 
 
 ## COPYRIGHT (c) 1999 Bell Labs, Lucent Technologies.
-## Subsequent changes by Jeff Prothero Copyright (c) 2010-2014,
+## Subsequent changes by Jeff Prothero Copyright (c) 2010-2015,
 ## released per terms of SMLNJ-COPYRIGHT.
